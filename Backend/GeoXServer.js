@@ -18,7 +18,7 @@ class GeoXServer{
                 break
             default:
                 this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
-                Socket.emit("PlayerError", `Api GeoXServer error, Action ${Data.Action} not found`)
+                Socket.emit("GeoXError", `Api GeoXServer error, Action ${Data.Action} not found`)
             break
         }
     }
@@ -31,7 +31,9 @@ class GeoXServer{
     * @param {String} UserId Id du user
     */
     Start(Value, Socket, User, UserId){
-        Socket.emit("GeoXError", `ToDo Start action on server`)
+        // Get all GeoJson data from db
+        let ListOfGeoJsonData = null
+        Socket.emit("StartGeoXApp", ListOfGeoJsonData)
     }
   }
   
