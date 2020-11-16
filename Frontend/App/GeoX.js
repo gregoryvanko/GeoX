@@ -2,7 +2,7 @@ class GeoX{
     constructor(HtmlId){
         this._DivApp = document.getElementById(HtmlId)
         // var googlescript = document.createElement('script')
-        // googlescript.setAttribute('src','https://maps.googleapis.com/maps/api/js?key=AIzaSyDYp7rr3kDNklPcvGIdAJzjddZmI85uVs4&libraries=&v=weekly')
+        // googlescript.setAttribute('src','https://maps.googleapis.com/maps/api/&libraries=&v=weekly')
         // document.head.appendChild(googlescript)
         var link  = document.createElement('link');
         link.rel  = 'stylesheet';
