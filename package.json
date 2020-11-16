@@ -1,0 +1,27 @@
+{
+  "name": "@gregvanko/geox",
+  "version": "1.0.0",
+  "description": "geolocalisation",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon —inspect exemple.js",
+    "npmup": "npm version minor && npm publish && git push"
+  },
+  "nodemonConfig": {
+    "ext": "css, js",
+    "delay": "5000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoryvanko/GeoX.git"
+  },
+  "author": "gregvanko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gregoryvanko/GeoX/issues"
+  },
+  "homepage": "https://github.com/gregoryvanko/GeoX#readme",
+  "dependencies": {
+    "@gregvanko/corex": "^4.55.0"
+  }
+}
