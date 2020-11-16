@@ -10,8 +10,8 @@ class GeoX {
        }
        this._MyApp = new corex(this._OptionApplication)
        this._Debug = Debug
-       //let AppTheClientR = require('./Backend/AppTheClient').AppTheClient
-       //this._AppTheClient = new AppTheClientR(this._MyApp)
+       let GeoXServerR = require('./Backend/GeoXServer').GeoXServer
+       this._GeoXServer = new GeoXServerR(this._MyApp)
     }
  
     /* Start de l'application */
@@ -56,7 +56,7 @@ class GeoX {
        // Set Tag name du serveur video
        //this._MyServeurApp.VideoTagName = "name"
        // SocketIo
-       //this._MyApp.AddSocketIoFct("TheClientApp", this._AppTheClient.Api.bind(this._AppTheClient))
+       this._MyApp.AddSocketIoFct("GeoX", this._GeoXServer.Api.bind(this._GeoXServer))
        // Start
        this._MyApp.Start()
        }

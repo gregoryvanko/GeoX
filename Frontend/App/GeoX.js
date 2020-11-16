@@ -15,7 +15,7 @@ class GeoX{
     this._DivApp.appendChild(CoreXBuild.DivTexte("","ErrorZone","Text","color:red; text-align: center;"))
     // SocketIo Listener
     let SocketIo = GlobalGetSocketIo()
-    SocketIo.on('AppError', (Value) => {this.Error(Value)})
+    SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
   
     // Send status to serveur
     GlobalSendSocketIo("GeoX", "Start", "")
@@ -30,7 +30,7 @@ class GeoX{
     this._DivApp.innerHTML=""
     // Clear socket
     let SocketIo = GlobalGetSocketIo()
-    if(SocketIo.hasListeners('AppError')){SocketIo.off('AppError')}
+    if(SocketIo.hasListeners('GeoXError')){SocketIo.off('GeoXError')}
   }
   
   /**

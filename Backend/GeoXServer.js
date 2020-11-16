@@ -14,7 +14,7 @@ class GeoXServer{
         this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
         switch (Data.Action) {
             case "Start":
-                his.Start(Data.Value, Socket, User, UserId)
+                this.Start(Data.Value, Socket, User, UserId)
                 break
             default:
                 this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
@@ -31,7 +31,7 @@ class GeoXServer{
     * @param {String} UserId Id du user
     */
     Start(Value, Socket, User, UserId){
-        Socket.emit("AppError", `ToDo Start action on server`)
+        Socket.emit("GeoXError", `ToDo Start action on server`)
     }
   }
   
