@@ -5,141 +5,83 @@ class GeoX{
         this._DivApp.style.width = "99%"
         this._DivApp.style.padding = "0%"
         this._DivApp.style.margin = "0.5%"
-        // Add css and js for maps
-        var link  = document.createElement('link');
-        link.rel  = 'stylesheet';
-        link.type = 'text/css';
-        link.href = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css';
-        link.integrity='sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=='
-        link.crossOrigin =""
-        document.head.appendChild(link)
-        var Leafletjs = document.createElement('script')
-        Leafletjs.setAttribute('src','https://unpkg.com/leaflet@1.7.1/dist/leaflet.js')
-        Leafletjs.setAttribute('integrity','sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==')
-        Leafletjs.setAttribute('crossorigin','')
-        document.head.appendChild(Leafletjs)
+        // Variable
+        this._MyMap = null
     }
-  
-  /** Start de l'application */
-  Start(){
-    // Clear view
-    this.ClearView()
-    // Contener
-    let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
-    this._DivApp.appendChild(Conteneur)
-    // Titre de l'application
-    Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
-    // on construit le texte d'attente
-    Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center;"))
-    // SocketIo Listener
-    let SocketIo = GlobalGetSocketIo()
-    SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
-    SocketIo.on('StartGeoXApp', (Value) => {this.StartGeoXApp(Value)})
-  
-    // Send status to serveur
-    GlobalSendSocketIo("GeoX", "Start", "")
-  }
-  
-  /** Clear view */
-  ClearView(){
-    // Clear Global action
-    GlobalClearActionList()
-    GlobalAddActionInList("Refresh", this.Start.bind(this))
-    // Clear view
-    this._DivApp.innerHTML=""
-    // Clear socket
-    let SocketIo = GlobalGetSocketIo()
-    if(SocketIo.hasListeners('GeoXError')){SocketIo.off('GeoXError')}
-    if(SocketIo.hasListeners('StartGeoXApp')){SocketIo.off('StartGeoXApp')}
-  }
-  
-  /**
-  * Affichage du message d'erreur venant du serveur
-  * @param {String} ErrorMsg Message d'erreur envoyé du serveur
-  */
-  Error(ErrorMsg){
-    this.ClearView()
-    let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
-    this._DivApp.appendChild(Conteneur)
-    Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
-  }
 
-  StartGeoXApp(ListOfGeoJsonData){
-    // Get Conteneur
-    let Conteneur = document.getElementById("Conteneur")
-    Conteneur.innerHTML = ""
-    Conteneur.appendChild(CoreXBuild.Div("mapid", "", "height: 98vh; width: 100%"))
-    // Coordonne du centre de la belgique
-    let lat = 50.709446
-    let long = 4.543413
-    let zoom = 10
-    // If receive data from server
-    if (ListOfGeoJsonData != null){
-      console.log("Start with data");
+    /** Start de l'application */
+    Start(){
+        // Create map une fois (attention au refresh)
+        this._MyMap = new GeoXMap()
+        this.LoadData()
     }
-    var geojson = {
-      "type": "FeatureCollection",
-      "name": "routes",
-      "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-      "features": [
-      { "type": "Feature", "properties": { "name": "Chateau de la Hulpe", "type": "Route", "gpx_style_line": "<gpx_style:color>0000ff<\/gpx_style:color>" }, "geometry": { "type": "LineString", "coordinates": [ [ 4.543312, 50.709529 ], [ 4.543202, 50.709554 ], [ 4.543145, 50.709266 ], [ 4.542521, 50.709138 ], [ 4.541694, 50.709124 ], [ 4.540902, 50.708812 ], [ 4.539258, 50.709388 ], [ 4.539305, 50.709485 ], [ 4.539954, 50.709828 ], [ 4.539894, 50.709928 ], [ 4.539598, 50.71014 ], [ 4.538838, 50.711027 ], [ 4.538507, 50.711632 ], [ 4.537731, 50.711619 ], [ 4.537425, 50.711678 ], [ 4.53684, 50.712723 ], [ 4.536083, 50.713405 ], [ 4.535911, 50.713801 ], [ 4.535877, 50.714439 ], [ 4.534965, 50.714796 ], [ 4.534177, 50.714858 ], [ 4.533084, 50.714834 ], [ 4.53323, 50.715222 ], [ 4.533097, 50.715599 ], [ 4.532165, 50.716433 ], [ 4.53161, 50.717183 ], [ 4.531371, 50.717346 ], [ 4.531058, 50.717427 ], [ 4.531027, 50.718256 ], [ 4.531465, 50.720992 ], [ 4.530103, 50.720716 ], [ 4.52996, 50.720784 ], [ 4.529296, 50.721674 ], [ 4.529057, 50.722171 ], [ 4.529008, 50.722597 ], [ 4.528827, 50.722769 ], [ 4.527822, 50.723293 ], [ 4.527524, 50.72385 ], [ 4.525783, 50.72609 ], [ 4.524191, 50.727113 ], [ 4.524043, 50.727151 ], [ 4.523763, 50.727062 ], [ 4.523012, 50.726656 ], [ 4.521776, 50.726864 ], [ 4.520631, 50.727496 ], [ 4.518537, 50.728441 ], [ 4.516546, 50.729071 ], [ 4.514528, 50.729305 ], [ 4.514233, 50.729253 ], [ 4.51405, 50.729088 ], [ 4.513008, 50.729269 ], [ 4.512529, 50.729436 ], [ 4.512365, 50.72943 ], [ 4.511965, 50.729095 ], [ 4.511788, 50.729118 ], [ 4.509839, 50.730085 ], [ 4.508921, 50.73031 ], [ 4.508639, 50.730249 ], [ 4.508293, 50.730007 ], [ 4.507981, 50.730074 ], [ 4.506039, 50.731217 ], [ 4.503404, 50.731775 ], [ 4.501868, 50.731741 ], [ 4.501257, 50.731597 ], [ 4.496919, 50.731045 ], [ 4.494995, 50.730867 ], [ 4.491996, 50.729778 ], [ 4.490037, 50.729369 ], [ 4.489121, 50.729577 ], [ 4.488512, 50.729636 ], [ 4.485964, 50.72974 ], [ 4.485344, 50.729693 ], [ 4.48448, 50.729512 ], [ 4.483991, 50.729528 ], [ 4.4836, 50.7294 ], [ 4.482806, 50.729315 ], [ 4.482653, 50.729357 ], [ 4.482167, 50.729917 ], [ 4.482229, 50.730429 ], [ 4.482077, 50.730741 ], [ 4.481497, 50.731247 ], [ 4.480512, 50.73234 ], [ 4.479939, 50.732696 ], [ 4.478199, 50.733482 ], [ 4.476302, 50.734919 ], [ 4.474798, 50.735884 ], [ 4.473161, 50.73708 ], [ 4.472863, 50.737167 ], [ 4.472512, 50.737393 ], [ 4.472016, 50.737899 ], [ 4.471638, 50.737738 ], [ 4.469186, 50.735959 ], [ 4.467854, 50.735659 ], [ 4.466899, 50.734717 ], [ 4.466185, 50.734398 ], [ 4.465291, 50.734141 ], [ 4.463309, 50.733393 ], [ 4.461831, 50.733221 ], [ 4.460765, 50.733395 ], [ 4.460061, 50.73365 ], [ 4.459908, 50.733821 ], [ 4.459863, 50.734732 ], [ 4.459858, 50.73381 ], [ 4.460428, 50.733453 ], [ 4.461226, 50.733303 ], [ 4.462206, 50.733301 ], [ 4.46397, 50.733676 ], [ 4.466954, 50.734799 ], [ 4.467659, 50.735588 ], [ 4.468223, 50.735818 ], [ 4.469048, 50.735998 ], [ 4.469839, 50.736421 ], [ 4.47188, 50.737957 ], [ 4.471765, 50.738556 ], [ 4.472043, 50.738925 ], [ 4.473532, 50.739246 ], [ 4.474363, 50.739293 ], [ 4.474897, 50.739519 ], [ 4.47695, 50.740019 ], [ 4.477582, 50.740076 ], [ 4.479352, 50.740588 ], [ 4.480177, 50.740649 ], [ 4.481601, 50.740975 ], [ 4.482101, 50.740994 ], [ 4.482907, 50.740799 ], [ 4.484357, 50.739758 ], [ 4.484656, 50.739672 ], [ 4.485281, 50.7398 ], [ 4.485984, 50.73982 ], [ 4.486514, 50.740016 ], [ 4.488456, 50.740229 ], [ 4.489263, 50.740129 ], [ 4.491539, 50.739572 ], [ 4.491881, 50.739553 ], [ 4.493849, 50.739924 ], [ 4.49435, 50.739904 ], [ 4.494634, 50.739793 ], [ 4.496387, 50.738303 ], [ 4.49684, 50.738022 ], [ 4.497326, 50.738083 ], [ 4.497486, 50.738246 ], [ 4.497269, 50.738515 ], [ 4.497678, 50.738318 ], [ 4.499445, 50.736738 ], [ 4.500217, 50.736792 ], [ 4.500499, 50.736701 ], [ 4.508589, 50.733256 ], [ 4.509661, 50.733483 ], [ 4.5123, 50.732262 ], [ 4.513917, 50.731955 ], [ 4.514216, 50.731708 ], [ 4.513854, 50.730765 ], [ 4.515122, 50.730559 ], [ 4.518161, 50.730519 ], [ 4.519337, 50.7304 ], [ 4.521308, 50.729943 ], [ 4.522325, 50.729608 ], [ 4.524504, 50.729229 ], [ 4.524783, 50.729103 ], [ 4.52507, 50.72873 ], [ 4.524836, 50.728336 ], [ 4.524167, 50.727827 ], [ 4.523, 50.727398 ], [ 4.522598, 50.726945 ], [ 4.522659, 50.726761 ], [ 4.522905, 50.726658 ], [ 4.523475, 50.727027 ], [ 4.524096, 50.727194 ], [ 4.524343, 50.727113 ], [ 4.526061, 50.726061 ], [ 4.527121, 50.726466 ], [ 4.529642, 50.725843 ], [ 4.529719, 50.72575 ], [ 4.528879, 50.72466 ], [ 4.52849, 50.723811 ], [ 4.527858, 50.723107 ], [ 4.529378, 50.722554 ], [ 4.532204, 50.721311 ], [ 4.534013, 50.721652 ], [ 4.538848, 50.722765 ], [ 4.543059, 50.723624 ], [ 4.543788, 50.723836 ], [ 4.54409, 50.723842 ], [ 4.544006, 50.723553 ], [ 4.543347, 50.722721 ], [ 4.541583, 50.720989 ], [ 4.538807, 50.717964 ], [ 4.538332, 50.716888 ], [ 4.537752, 50.714727 ], [ 4.537846, 50.714441 ], [ 4.537757, 50.71407 ], [ 4.538331, 50.713616 ], [ 4.538923, 50.712361 ], [ 4.539606, 50.711959 ], [ 4.539214, 50.711813 ], [ 4.538877, 50.711873 ], [ 4.538782, 50.7118 ], [ 4.538864, 50.711531 ], [ 4.539331, 50.711288 ], [ 4.539736, 50.711205 ], [ 4.54069, 50.710837 ], [ 4.541316, 50.710798 ], [ 4.54222, 50.710937 ], [ 4.542517, 50.710707 ] ] } }
-      ]
-      }
-    var myStyle1 = {
-        "color": "Red",
-        "weight": 3
-    };
-    var myStyle2 = {
-      "color": "Blue",
-      "weight": 3
-  };
-    
-    var geojson2 = {
-      "type": "FeatureCollection",
-      "name": "routes",
-      "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-      "features": [
-      { "type": "Feature", "properties": { "name": "2020-09-20 Rixensart", "type": "Route", "gpx_style_line": "<gpx_style:color>0000ff<\/gpx_style:color>" }, "geometry": { "type": "LineString", "coordinates": [ [ 4.543382, 50.709461 ], [ 4.543291, 50.70961 ], [ 4.543209, 50.709322 ], [ 4.5431, 50.709278 ], [ 4.541991, 50.709156 ], [ 4.541214, 50.708865 ], [ 4.540809, 50.70868 ], [ 4.540672, 50.708474 ], [ 4.540637, 50.707957 ], [ 4.539735, 50.707838 ], [ 4.539715, 50.707277 ], [ 4.540021, 50.706748 ], [ 4.541272, 50.705593 ], [ 4.542026, 50.705059 ], [ 4.542563, 50.704455 ], [ 4.542988, 50.704116 ], [ 4.543216, 50.704038 ], [ 4.543314, 50.703767 ], [ 4.54329, 50.703382 ], [ 4.543072, 50.703199 ], [ 4.541413, 50.702776 ], [ 4.541259, 50.702619 ], [ 4.541843, 50.702116 ], [ 4.543229, 50.701682 ], [ 4.543769, 50.701352 ], [ 4.544309, 50.70038 ], [ 4.545488, 50.698642 ], [ 4.545898, 50.698442 ], [ 4.54652, 50.697942 ], [ 4.546903, 50.697309 ], [ 4.547118, 50.697144 ], [ 4.547561, 50.696358 ], [ 4.548041, 50.695795 ], [ 4.548768, 50.694289 ], [ 4.548512, 50.693992 ], [ 4.548213, 50.694013 ], [ 4.547162, 50.693741 ], [ 4.546802, 50.692711 ], [ 4.546787, 50.692278 ], [ 4.546479, 50.691682 ], [ 4.5462, 50.689989 ], [ 4.545878, 50.68948 ], [ 4.544415, 50.688804 ], [ 4.543584, 50.688784 ], [ 4.542883, 50.688634 ], [ 4.541834, 50.688734 ], [ 4.541979, 50.688656 ], [ 4.541601, 50.68821 ], [ 4.541635, 50.688106 ], [ 4.541862, 50.687749 ], [ 4.542509, 50.687371 ], [ 4.542153, 50.68712 ], [ 4.542357, 50.686832 ], [ 4.542219, 50.686541 ], [ 4.54247, 50.685877 ], [ 4.54214, 50.684768 ], [ 4.54115, 50.684531 ], [ 4.540585, 50.68428 ], [ 4.539141, 50.68383 ], [ 4.537559, 50.683455 ], [ 4.536768, 50.683416 ], [ 4.534903, 50.683519 ], [ 4.532997, 50.683417 ], [ 4.531792, 50.68351 ], [ 4.530982, 50.683698 ], [ 4.529894, 50.683991 ], [ 4.528702, 50.684445 ], [ 4.527886, 50.684606 ], [ 4.523716, 50.685028 ], [ 4.523236, 50.685027 ], [ 4.522427, 50.684871 ], [ 4.521754, 50.684907 ], [ 4.520206, 50.685331 ], [ 4.51714, 50.686539 ], [ 4.509386, 50.688698 ], [ 4.508522, 50.688637 ], [ 4.507607, 50.688365 ], [ 4.506495, 50.688786 ], [ 4.505902, 50.68911 ], [ 4.502709, 50.691253 ], [ 4.500778, 50.69345 ], [ 4.49996, 50.694882 ], [ 4.499731, 50.695645 ], [ 4.499952, 50.695758 ], [ 4.500577, 50.695845 ], [ 4.500708, 50.695926 ], [ 4.500912, 50.697023 ], [ 4.501362, 50.697135 ], [ 4.501757, 50.697437 ], [ 4.501823, 50.698025 ], [ 4.50216, 50.698402 ], [ 4.502305, 50.698866 ], [ 4.502169, 50.69907 ], [ 4.500993, 50.699666 ], [ 4.501268, 50.699558 ], [ 4.501174, 50.699499 ], [ 4.500643, 50.699559 ], [ 4.499709, 50.699395 ], [ 4.499579, 50.699475 ], [ 4.499208, 50.699938 ], [ 4.499236, 50.700147 ], [ 4.499703, 50.700909 ], [ 4.500706, 50.701821 ], [ 4.500794, 50.702145 ], [ 4.500695, 50.702228 ], [ 4.500364, 50.702267 ], [ 4.498833, 50.702351 ], [ 4.499738, 50.702288 ], [ 4.500147, 50.702647 ], [ 4.500472, 50.703273 ], [ 4.500469, 50.703035 ], [ 4.499901, 50.702311 ], [ 4.500661, 50.702227 ], [ 4.501115, 50.702262 ], [ 4.50166, 50.70245 ], [ 4.502963, 50.703179 ], [ 4.504207, 50.70347 ], [ 4.504951, 50.703556 ], [ 4.505863, 50.703859 ], [ 4.505288, 50.705207 ], [ 4.505319, 50.705529 ], [ 4.505509, 50.705808 ], [ 4.505854, 50.706113 ], [ 4.50824, 50.707187 ], [ 4.509477, 50.708121 ], [ 4.509916, 50.708291 ], [ 4.511526, 50.70856 ], [ 4.513237, 50.708156 ], [ 4.513748, 50.708104 ], [ 4.514402, 50.70823 ], [ 4.514784, 50.708447 ], [ 4.516506, 50.709923 ], [ 4.517894, 50.710794 ], [ 4.519365, 50.711384 ], [ 4.520146, 50.71155 ], [ 4.520551, 50.711725 ], [ 4.520697, 50.711736 ], [ 4.520789, 50.711654 ], [ 4.521751, 50.711743 ], [ 4.521936, 50.712837 ], [ 4.521721, 50.713122 ], [ 4.52181, 50.713425 ], [ 4.522349, 50.713733 ], [ 4.522854, 50.714293 ], [ 4.524054, 50.715147 ], [ 4.524443, 50.715303 ], [ 4.525826, 50.716466 ], [ 4.526026, 50.71677 ], [ 4.526268, 50.716913 ], [ 4.526261, 50.717023 ], [ 4.526041, 50.717153 ], [ 4.52621, 50.71734 ], [ 4.526867, 50.717134 ], [ 4.527978, 50.717089 ], [ 4.528775, 50.716724 ], [ 4.528876, 50.716806 ], [ 4.528848, 50.71731 ], [ 4.529191, 50.717655 ], [ 4.529571, 50.717592 ], [ 4.530155, 50.717669 ], [ 4.53011, 50.717876 ], [ 4.529843, 50.718069 ], [ 4.529954, 50.717827 ], [ 4.530693, 50.717837 ], [ 4.530988, 50.717762 ], [ 4.531414, 50.720828 ], [ 4.531579, 50.721113 ], [ 4.536077, 50.722056 ], [ 4.538674, 50.722655 ], [ 4.538956, 50.722776 ], [ 4.543012, 50.723576 ], [ 4.543902, 50.723859 ], [ 4.544061, 50.723844 ], [ 4.544109, 50.723692 ], [ 4.54382, 50.723327 ], [ 4.53856, 50.717754 ], [ 4.537839, 50.715068 ], [ 4.537768, 50.714657 ], [ 4.537924, 50.714362 ], [ 4.537852, 50.714191 ], [ 4.538495, 50.713725 ], [ 4.538628, 50.71323 ], [ 4.539065, 50.712478 ], [ 4.539258, 50.712297 ], [ 4.540102, 50.711998 ], [ 4.541105, 50.712022 ], [ 4.541547, 50.712098 ], [ 4.541544, 50.712312 ], [ 4.541318, 50.712693 ], [ 4.540868, 50.712972 ], [ 4.54054, 50.713468 ], [ 4.540589, 50.713778 ], [ 4.540765, 50.713971 ], [ 4.541122, 50.714174 ], [ 4.541622, 50.714254 ], [ 4.543123, 50.714331 ], [ 4.543445, 50.714285 ], [ 4.544392, 50.713817 ], [ 4.544874, 50.713836 ], [ 4.545823, 50.714109 ], [ 4.546128, 50.714108 ], [ 4.547872, 50.713789 ], [ 4.54863, 50.713869 ], [ 4.549742, 50.713794 ], [ 4.550599, 50.713479 ], [ 4.551006, 50.713133 ], [ 4.551086, 50.712919 ], [ 4.550254, 50.712589 ], [ 4.550052, 50.712316 ], [ 4.550044, 50.712206 ], [ 4.550526, 50.711686 ], [ 4.548811, 50.710765 ], [ 4.548494, 50.710719 ], [ 4.547772, 50.710803 ], [ 4.545275, 50.711225 ], [ 4.542636, 50.711058 ], [ 4.541351, 50.710839 ], [ 4.540703, 50.710885 ], [ 4.540774, 50.710803 ], [ 4.541075, 50.710777 ], [ 4.542197, 50.710976 ], [ 4.542543, 50.710556 ] ] } }
-      ]
-      }
-    
-    // Creation de la carte
-    var mymap = L.map('mapid').setView([lat, long], zoom);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-    }).addTo(mymap);
 
-    // Creation du groupe de layer
-    var layerGroup = new L.LayerGroup();
-    layerGroup.addTo(mymap);
+    LoadData(){
+        // Clear view
+        this.ClearView()
+        // Contener
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Titre de l'application
+        Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
+        // on construit le texte d'attente
+        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center;"))
+        // SocketIo Listener
+        let SocketIo = GlobalGetSocketIo()
+        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
+        SocketIo.on('StartGeoXApp', (Value) => {this.StartGeoXApp(Value)})
 
-    // Creation des track
-    var layerTrack1=L.geoJSON(geojson, {style: myStyle1}).addTo(layerGroup)
-    layerTrack1.id="Track1"
-    var layerTrack2=L.geoJSON(geojson2, {style: myStyle2}).addTo(layerGroup)
-    layerTrack2.id="Track2"
+        // Send status to serveur
+        GlobalSendSocketIo("GeoX", "Start", "")
+    }
+    /** Clear view */
+    ClearView(){
+        // Clear Global action
+        GlobalClearActionList()
+        GlobalAddActionInList("Refresh", this.LoadData.bind(this))
+        // Clear view
+        this._DivApp.innerHTML=""
+        // Clear socket
+        let SocketIo = GlobalGetSocketIo()
+        if(SocketIo.hasListeners('GeoXError')){SocketIo.off('GeoXError')}
+        if(SocketIo.hasListeners('StartGeoXApp')){SocketIo.off('StartGeoXApp')}
+    }
+    /**
+     * Affichage du message d'erreur venant du serveur
+     * @param {String} ErrorMsg Message d'erreur envoyé du serveur
+     */
+    Error(ErrorMsg){
+        this.ClearView()
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
+    }
 
-    layerGroup.eachLayer(function (layer) {
-      if (layer.id == 'Track2'){
-        layerGroup.removeLayer(layer);
-      }
-    })
+    StartGeoXApp(Data){
+        // Get Conteneur
+        let Conteneur = document.getElementById("Conteneur")
+        Conteneur.innerHTML = ""
+        // Ajout du div qui va contenir la map
+        Conteneur.appendChild(CoreXBuild.Div("mapid", "", "height: 98vh; width: 100%"))
+        this._MyMap.MapId = "mapid"
+        // If receive no data from server
+        if (Data.ListOfTracks.length == 0){
+            this._MyMap.CreateMap()
+        } else {
+            this._MyMap.CreateMap(Data.Lat, Data.Long, Data.Zoom)
+            Data.ListOfTracks.forEach(Track => {
+                this._MyMap.AddTrack(Track.Id, Track.GeoJsonData)
+            });
+        }
+    }
 
-  }
-  
-
-
-
-
-  /** Get Titre de l'application */
-  GetTitre(){return "GeoX"}
-  /** Get Img Src de l'application */
-  GetImgSrc(){
-  return "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNjQwLjAwMDAwMHB0IiBoZWlnaHQ9IjEyODAuMDAwMDAwcHQiIHZpZXdCb3g9IjAgMCA2NDAuMDAwMDAwIDEyODAuMDAwMDAwIgogcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQgbWVldCI+CjxtZXRhZGF0YT4KQ3JlYXRlZCBieSBwb3RyYWNlIDEuMTUsIHdyaXR0ZW4gYnkgUGV0ZXIgU2VsaW5nZXIgMjAwMS0yMDE3CjwvbWV0YWRhdGE+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAuMDAwMDAwLDEyODAuMDAwMDAwKSBzY2FsZSgwLjEwMDAwMCwtMC4xMDAwMDApIgpmaWxsPSIjMDAwMDAwIiBzdHJva2U9Im5vbmUiPgo8cGF0aCBkPSJNMzA3MyAxMDk1NyBsLTI5MTIgLTE4NDIgLTEgLTgwIDAgLTgwIDM3MSAtNjQ1IGMyMDMgLTM1NSA0NTQgLTc5MAo1NTYgLTk2OCBsMTg1IC0zMjMgNDQyIDIyNSBjMzc2IDE5MSAxMzE1IDY2NCAxMzM5IDY3NCA0IDIgNyAtMTc3OSA3IC0zOTU3CmwwIC0zOTYxIDEwMyAwIGM2NCAwIDE5NiAxMyAzNDggMzUgMjQzIDM0IDcwOCAxMDAgMTUxOSAyMTQgMjM0IDMzIDU4NyA4Mwo3ODUgMTExIDE5OCAyNyAzNzUgNTIgMzkzIDU1IGwzMiA2IDAgNjE4OSAwIDYxOTAgLTEyNyAtMSAtMTI4IC0xIC0yOTEyCi0xODQxeiIvPgo8L2c+Cjwvc3ZnPgo="
-  }
+    /** Get Titre de l'application */
+    GetTitre(){return "GeoX"}
+    /** Get Img Src de l'application */
+    GetImgSrc(){
+    return "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNjQwLjAwMDAwMHB0IiBoZWlnaHQ9IjEyODAuMDAwMDAwcHQiIHZpZXdCb3g9IjAgMCA2NDAuMDAwMDAwIDEyODAuMDAwMDAwIgogcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQgbWVldCI+CjxtZXRhZGF0YT4KQ3JlYXRlZCBieSBwb3RyYWNlIDEuMTUsIHdyaXR0ZW4gYnkgUGV0ZXIgU2VsaW5nZXIgMjAwMS0yMDE3CjwvbWV0YWRhdGE+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAuMDAwMDAwLDEyODAuMDAwMDAwKSBzY2FsZSgwLjEwMDAwMCwtMC4xMDAwMDApIgpmaWxsPSIjMDAwMDAwIiBzdHJva2U9Im5vbmUiPgo8cGF0aCBkPSJNMzA3MyAxMDk1NyBsLTI5MTIgLTE4NDIgLTEgLTgwIDAgLTgwIDM3MSAtNjQ1IGMyMDMgLTM1NSA0NTQgLTc5MAo1NTYgLTk2OCBsMTg1IC0zMjMgNDQyIDIyNSBjMzc2IDE5MSAxMzE1IDY2NCAxMzM5IDY3NCA0IDIgNyAtMTc3OSA3IC0zOTU3CmwwIC0zOTYxIDEwMyAwIGM2NCAwIDE5NiAxMyAzNDggMzUgMjQzIDM0IDcwOCAxMDAgMTUxOSAyMTQgMjM0IDMzIDU4NyA4Mwo3ODUgMTExIDE5OCAyNyAzNzUgNTIgMzkzIDU1IGwzMiA2IDAgNjE4OSAwIDYxOTAgLTEyNyAtMSAtMTI4IC0xIC0yOTEyCi0xODQxeiIvPgo8L2c+Cjwvc3ZnPgo="
+    }
 }
-  
 // Creation de l'application
 let MyClientApp = new GeoX(GlobalCoreXGetAppContentId())
 // Ajout de l'application
