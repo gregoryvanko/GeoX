@@ -57,6 +57,7 @@ class GeoX{
         Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
     }
 
+    /** Load de la carte, des track et des bouttons de commandes */
     StartGeoXApp(Data){
         // Get Conteneur
         let Conteneur = document.getElementById("Conteneur")
@@ -73,6 +74,11 @@ class GeoX{
                 this._MyMap.AddTrack(Track.Id, Track.GeoJsonData)
             });
         }
+        this.BuildCommandButton()
+    }
+
+    BuildCommandButton(){
+        console.log("ToDo")
     }
 
     /** Get Titre de l'application */

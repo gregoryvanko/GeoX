@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/gregoryvanko/GeoX#readme",
   "dependencies": {
-    "@gregvanko/corex": "^4.55.0"
+    "@gregvanko/corex": "^4.56.0"
   }
 }
