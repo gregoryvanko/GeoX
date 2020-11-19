@@ -19,6 +19,9 @@ class GeoX{
     LoadData(){
         // Clear view
         this.ClearView()
+        // Show Action Button
+        debugger
+        GlobalDisplayAction('On')
         // Contener
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
         this._DivApp.appendChild(Conteneur)
