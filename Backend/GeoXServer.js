@@ -36,7 +36,7 @@ class GeoXServer{
         Data.ListOfTracks = []
         Data.Lat = 50.709446
         Data.Long = 4.543413
-        Data.Zoom = 11
+        Data.Zoom = 8
 
         var geojson1 = {
             "type": "FeatureCollection",
@@ -95,8 +95,8 @@ class GeoXServer{
         let MaxLat2 = null
         let MinLong2 = null
         let MaxLong2 = null
-        let listofcoordonate = geojson2.features[0].geometry.coordinates
-        listofcoordonate.forEach(element => {
+        let listofcoordonate2 = geojson2.features[0].geometry.coordinates
+        listofcoordonate2.forEach(element => {
             if(MinLat2 == null){
                 MinLat2 = element[0]
             } else {
@@ -137,23 +137,73 @@ class GeoXServer{
         track2.GeoJsonData = geojson2
         Data.ListOfTracks.push(track2)
 
-        if (Data.ListOfTracks.length != 0){
-            let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
-            Data.Lat = (MinMax.MinLat + MinMax.MaxLat)/2
-            Data.Long = (MinMax.MinLong + MinMax.MaxLong)/2
-        }
         
 
+        let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
+        if (Data.ListOfTracks.length != 0){
+            //let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
+            Data.Long = (MinMax.MinLat + MinMax.MaxLat)/2
+            Data.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
+            Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
+        }
+
+        var geojson3 = {
+            "type": "FeatureCollection",
+            "name": "routes",
+            "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+            "features": [{ 
+                "type": "Feature", 
+                "properties": { 
+                    "name": "Chateau de la Hulpe", 
+                    "type": "Route", 
+                    "gpx_style_line": "<gpx_style:color>0000ff<\/gpx_style:color>" 
+                }, 
+                "geometry": { 
+                    "type": "LineString", 
+                    "coordinates": [ [ MinMax.MinLat, MinMax.MaxLong], [ MinMax.MaxLat, MinMax.MaxLong], [ MinMax.MaxLat, MinMax.MinLong ], [ MinMax.MinLat, MinMax.MinLong], [ MinMax.MinLat, MinMax.MaxLong]] 
+                } 
+            }]
+        }
+        let track3 = new Object()
+        track3.Id = "global"
+        track3.MinLat = null
+        track3.MaxLat = null
+        track3.MinLong = null
+        track3.MaxLong = null
+        track3.GeoJsonData = geojson3
+        Data.ListOfTracks.push(track3)
+        
         Socket.emit("StartGeoXApp", Data)
     }
 
-    MinMaxOfTracks(Data){
+    MinMaxOfTracks(ListOfTracks){
         let reponse = new Object()
         reponse.MinLat = null
         reponse.MaxLat = null
         reponse.MinLong = null
         reponse.MaxLong = null
-        // ToDo
+        ListOfTracks.forEach(element => {
+            if(reponse.MinLat == null){
+                reponse.MinLat = element.MinLat
+            } else {
+                if(element.MinLat < reponse.MinLat){reponse.MinLat = element.MinLat}
+            }
+            if(reponse.MaxLat == null){
+                reponse.MaxLat = element.MaxLat
+            } else {
+                if(element.MaxLat > reponse.MaxLat){reponse.MaxLat = element.MaxLat}
+            }
+            if(reponse.MinLong == null){
+                reponse.MinLong = element.MinLong
+            } else {
+                if(element.MinLong < reponse.MinLong){reponse.MinLong = element.MinLong}
+            }
+            if(reponse.MaxLong == null){
+                reponse.MaxLong = element.MaxLong
+            } else {
+                if(element.MaxLong > reponse.MaxLong){reponse.MaxLong = element.MaxLong}
+            }
+        });
         return reponse
     }
   }

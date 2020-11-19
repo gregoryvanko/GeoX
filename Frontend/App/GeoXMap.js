@@ -21,13 +21,16 @@ class GeoXMap {
     }
     set MapId(val){this._MapId = val;}
 
-    CreateMap(lat= 50.709446, long= 4.543413, zoom= 10){
+    CreateMap(lat= 50.709446, long= 4.543413, zoom= 10, FitBounds=null){
         // Creation de la carte
         this._Map = L.map(this._MapId).setView([lat, long], zoom);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
         }).addTo(this._Map)
+        if (FitBounds != null){
+            this._Map.fitBounds(FitBounds)
+        }
 
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
