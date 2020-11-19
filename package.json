@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon —inspect exemple.js",
-    "npmup": "npm version minor && npm publish && git push"
+    "up": "npm version minor && npm publish && git push"
   },
   "nodemonConfig": {
     "ext": "css, js",
