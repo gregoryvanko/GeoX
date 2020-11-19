@@ -69,9 +69,9 @@ class GeoX{
         if (Data.ListOfTracks.length == 0){
             this._MyMap.CreateMap()
         } else {
-            this._MyMap.CreateMap(Data.Lat, Data.Long, Data.Zoom, Data.FitBounds)
+            this._MyMap.CreateMap(Data.CenterPoint, Data.Zoom, Data.FitBounds)
             Data.ListOfTracks.forEach(Track => {
-                this._MyMap.AddTrack(Track.Id, Track.GeoJsonData)
+                this._MyMap.AddTrack(Track.Name, Track.GeoJsonData)
             });
         }
         this.BuildCommandButton()

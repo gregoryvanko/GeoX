@@ -21,9 +21,9 @@ class GeoXMap {
     }
     set MapId(val){this._MapId = val;}
 
-    CreateMap(lat= 50.709446, long= 4.543413, zoom= 10, FitBounds=null){
+    CreateMap(CenterPoint = {Lat: 50.709446, Long: 4.543413}, zoom= 10, FitBounds=null){
         // Creation de la carte
-        this._Map = L.map(this._MapId).setView([lat, long], zoom);
+        this._Map = L.map(this._MapId).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
