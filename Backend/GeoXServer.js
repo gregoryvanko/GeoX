@@ -6,7 +6,6 @@ class GeoXServer{
         this._Mongo = new MongoR(this._MyApp.MongoUrl ,this._MyApp.AppName)
         let MongoConfig = require("./MongoConfig.json")
         this._MongoTracksCollection = MongoConfig.TracksCollection
-        console.log(this._MongoTracksCollection)
     }
   
     /**
@@ -50,12 +49,12 @@ class GeoXServer{
         //Data.ListOfTracks = this.GetTracksStatic()
 
         // Get Tracks
-        let ReponseListOfTracks = await this.PromiseGetTracksDb()
+        let ReponseListOfTracks = await this.PromiseGetTracksFromDb()
         if(!ReponseListOfTracks.Error){
             Data.ListOfTracks = ReponseListOfTracks.Data
         } else {
             this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksDb error")
+            Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksFromDb error")
         }
 
         // Calcul des point extérieur et du centre de toutes les tracks
@@ -67,6 +66,8 @@ class GeoXServer{
         }
         // Send tracks
         Socket.emit("LoadViewMap", Data)
+        // Log socket action
+        this._MyApp.LogAppliInfo("SoApi send LoadViewMap", User, UserId)
     }
 
     /**
@@ -154,7 +155,8 @@ class GeoXServer{
         TrackData.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
         TrackData.GeoJsonData = GeoJson
 
-        let DataToMongo = { [this._MongoTracksCollection.Track]: TrackData}
+        //let DataToMongo = { [this._MongoTracksCollection.Track]: TrackData}
+        let DataToMongo = TrackData
         this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
             // ToDo Delete temp file
         },(erreur)=>{
@@ -179,14 +181,14 @@ class GeoXServer{
     /**
      * Get Tracks from DB
      */
-    PromiseGetTracksDb(){
+    PromiseGetTracksFromDb(){
         return new Promise(resolve => {
             let ReponseTracks = new Object()
             ReponseTracks.Error = true
             ReponseTracks.ErrorMsg = ""
             ReponseTracks.Data = null
             const Querry = {}
-            const Projection = { projection:{_id: 0, [this._MongoTracksCollection.Track]: 1}}
+            const Projection = { projection:{}}
             this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
                     ReponseTracks.Error = false
@@ -195,20 +197,20 @@ class GeoXServer{
                 } else {
                     ReponseTracks.Error = false
                     ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = []
-                    reponse.forEach(element => {
-                        ReponseTracks.Data.push(element[this._MongoTracksCollection.Track])
-                    });
+                    ReponseTracks.Data = reponse
                 }
                 resolve(ReponseTracks)
             },(erreur)=>{
                 ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksDb error: " + erreur
+                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksFromDb error: " + erreur
                 ReponseTracks.Data = []
                 resolve(ReponseTracks)
             })
         })
     }
+
+
+
 
     // Test
     // GetTracksStatic(){

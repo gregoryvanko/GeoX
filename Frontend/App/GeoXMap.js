@@ -32,12 +32,12 @@ class GeoXMap {
         } else {
             this.CreateMap(Data.CenterPoint, Data.Zoom, Data.FitBounds)
             Data.ListOfTracks.forEach(Track => {
-                this.AddTrack(Track.Name, Track.GeoJsonData)
+                this.AddTrack(Track._id, Track.Name, Track.GeoJsonData)
             });
         }
     }
 
-    CreateMap(CenterPoint = {Lat: 50.709446, Long: 4.543413}, zoom= 10, FitBounds=null){
+    CreateMap(CenterPoint = {Lat: 50.709446, Long: 4.543413}, zoom= 8, FitBounds=null){
         // Creation de la carte
         this._Map = L.map(this._MapId , {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
         L.control.zoom({position: 'bottomright'}).addTo(this._Map);
@@ -53,12 +53,12 @@ class GeoXMap {
         this._LayerGroup.addTo(this._Map)
     }
 
-    AddTrack(TrackId, GeoJsonData, TrackColor="Blue"){
+    AddTrack(TrackId, TrackName, GeoJsonData, TrackColor="Blue"){
         var TrackStyle = {
             "color": TrackColor,
             "weight": 3
         };
-        var layerTrack1=L.geoJSON(GeoJsonData, {style: TrackStyle}).addTo(this._LayerGroup).bindPopup(TrackId)
+        var layerTrack1=L.geoJSON(GeoJsonData, {style: TrackStyle}).addTo(this._LayerGroup).bindPopup(TrackName)
         layerTrack1.id = TrackId
     }
 
