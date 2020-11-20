@@ -26,7 +26,6 @@ class GeoXMap {
         DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         DivApp.appendChild(CoreXBuild.Div("mapid", "", "height: 98vh; width: 100%"))
-        //this._MyMap.MapId = "mapid"
         // If receive no data from server
         if (Data.ListOfTracks.length == 0){
             this.CreateMap()
@@ -40,7 +39,6 @@ class GeoXMap {
 
     CreateMap(CenterPoint = {Lat: 50.709446, Long: 4.543413}, zoom= 10, FitBounds=null){
         // Creation de la carte
-        
         this._Map = L.map(this._MapId , {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
         L.control.zoom({position: 'bottomright'}).addTo(this._Map);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -50,7 +48,6 @@ class GeoXMap {
         if (FitBounds != null){
             this._Map.fitBounds(FitBounds)
         }
-
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
