@@ -154,6 +154,7 @@ class GeoXServer{
         TrackData.Name = TrackName
         TrackData.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
         TrackData.GeoJsonData = GeoJson
+        
 
         //let DataToMongo = { [this._MongoTracksCollection.Track]: TrackData}
         let DataToMongo = TrackData
