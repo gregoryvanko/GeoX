@@ -18,8 +18,11 @@ class GeoXServer{
     Api(Data, Socket, User, UserId){
         this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
         switch (Data.Action) {
-            case "Start":
-                this.Start(Data.Value, Socket, User, UserId)
+            case "BuildViewMap":
+                this.BuildViewMap(Data.Value, Socket, User, UserId)
+                break
+            case "BuildViewManageTracks":
+                this.BuildViewManageTracks(Data.Value, Socket, User, UserId)
                 break
             default:
                 this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
@@ -35,7 +38,7 @@ class GeoXServer{
     * @param {String} User nom du user
     * @param {String} UserId Id du user
     */
-    async Start(Value, Socket, User, UserId){
+    async BuildViewMap(Value, Socket, User, UserId){
         // Build Tracks Data
         let Data = new Object()
         Data.ListOfTracks = []
@@ -43,7 +46,7 @@ class GeoXServer{
         Data.Zoom = 8
 
         // Test save track in db
-        //this.SaveTrackInDb("Rix",__dirname + '/Temp/2020-09-20-Rixensart.gpx',Socket, User, UserId)
+        //this.SaveTrackInDb("Rixensart",__dirname + '/Temp/2020-09-20-Rixensart.gpx',Socket, User, UserId)
 
         // Test Get Tracks
         //Data.ListOfTracks = this.GetTracksStatic()
@@ -154,7 +157,7 @@ class GeoXServer{
         TrackData.Name = TrackName
         TrackData.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
         TrackData.GeoJsonData = GeoJson
-        // ToDo add date
+        TrackData.Date = new Date()
 
         //let DataToMongo = { [this._MongoTracksCollection.Track]: TrackData}
         let DataToMongo = TrackData
@@ -210,8 +213,21 @@ class GeoXServer{
         })
     }
 
-
-
+    async BuildViewManageTracks(Value, Socket, User, UserId){
+        let ListOfTracks = []
+        // Get Tracks
+        let ReponseListOfTracks = await this.PromiseGetTracksFromDb()
+        if(!ReponseListOfTracks.Error){
+            ListOfTracks = ReponseListOfTracks.Data
+        } else {
+            this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
+            Socket.emit("GeoXError", "GeoXServerApi BuildViewMap PromiseGetTracksFromDb error")
+        }
+        // Send tracks
+        Socket.emit("LoadViewManageTracks", ListOfTracks)
+        // Log socket action
+        this._MyApp.LogAppliInfo("SoApi send LoadViewManageTracks", User, UserId)
+    }
 
     // Test
     // GetTracksStatic(){

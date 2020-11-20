@@ -5,57 +5,70 @@ class GeoX{
         this._DivApp.style.width = "99%"
         this._DivApp.style.padding = "0%"
         this._DivApp.style.margin = "0.4%"
+        // Map
+        this._MyGeoXMap = null
+        this._MyGeoXManageTracks = null
     }
 
     /** Start de l'application */
     Start(){
         // Create map une seul fois (attention au refresh)
-        var MyGeoXMap = new GeoXMap()
+        this._MyGeoXMap = new GeoXMap(this._DivApp)
+        // Create ManageTracks
+        this._MyGeoXManageTracks = new GeoXManageTracks(this._DivApp)
         // SocketIo Listener
         let SocketIo = GlobalGetSocketIo()
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
-        SocketIo.on('LoadViewMap', (Value) => {MyGeoXMap.LoadViewMap(Value, this._DivApp)})
-        // Load data
-        this.LoadData()
+        SocketIo.on('LoadViewMap', (Value) => {this._MyGeoXMap.LoadViewMap(Value)})
+        SocketIo.on('LoadViewManageTracks', (Value) => {this._MyGeoXManageTracks.LoadViewManageTracks(Value)})
+        // Build view map
+        this.BuildViewMap()
     }
-
-    LoadData(){
-        // Clear view
-        this.ClearView()
-        // Show Action Button
-        debugger
-        GlobalDisplayAction('On')
-        // Contener
-        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
-        this._DivApp.appendChild(Conteneur)
-        // Titre de l'application
-        Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
-        // on construit le texte d'attente
-        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center;"))
-        // Send status to serveur
-        GlobalSendSocketIo("GeoX", "Start", "")
-    }
+    
     /** Clear view */
     ClearView(){
         // Clear Global action
         GlobalClearActionList()
-        GlobalAddActionInList("Refresh", this.LoadData.bind(this))
+        GlobalAddActionInList("View Map", this.BuildViewMap.bind(this))
+        // Show Action Button
+        GlobalDisplayAction('On')
         // Clear view
         this._DivApp.innerHTML=""
-        // Clear socket
-        //let SocketIo = GlobalGetSocketIo()
-        //if(SocketIo.hasListeners('GeoXError')){SocketIo.off('GeoXError')}
-        //if(SocketIo.hasListeners('LoadViewMap')){SocketIo.off('LoadViewMap')}
     }
     /**
      * Affichage du message d'erreur venant du serveur
      * @param {String} ErrorMsg Message d'erreur envoyé du serveur
      */
     Error(ErrorMsg){
+        // Delete map if existe
+        if (this._MyGeoXMap){
+            this._MyGeoXMap.DeleteMap()
+        }
+        // Clear view
         this.ClearView()
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
         this._DivApp.appendChild(Conteneur)
         Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
+    }
+
+    BuildViewMap(){
+        // Clear view
+        this.ClearView()
+        // Add Global Action
+        GlobalAddActionInList("Manage Tracks", this.ClickOnManageTracks.bind(this))
+        // Build view waiting data of Map
+        this._MyGeoXMap.BuildViewWatingData()
+    }
+
+    ClickOnManageTracks(){
+        // Delete map if existe
+        if (this._MyGeoXMap){
+            this._MyGeoXMap.DeleteMap()
+        }
+        // Clear view
+        this.ClearView()
+        // Build view waiting data of manage track
+        this._MyGeoXManageTracks.BuildViewWatingData()
     }
 
     /** Get Titre de l'application */

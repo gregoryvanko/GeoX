@@ -1,9 +1,17 @@
 class GeoXMap {
-    constructor(){
+    constructor(DivApp){
+        this._DivApp = DivApp
         this._MapId = "mapid"
         this._Map = null
         this._LayerGroup = null
 
+        // Add Leaflet Links
+        this.AddLeafletLinks()
+        
+    }
+    set MapId(val){this._MapId = val;}
+
+    AddLeafletLinks(){
         // Add css for maps
         var link  = document.createElement('link');
         link.rel  = 'stylesheet';
@@ -19,13 +27,24 @@ class GeoXMap {
         Leafletjs.setAttribute('crossorigin','')
         document.head.appendChild(Leafletjs)
     }
-    set MapId(val){this._MapId = val;}
 
-    LoadViewMap(Data, DivApp){
+    BuildViewWatingData(){
+        // Contener
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Titre de l'application
+        Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
+        // on construit le texte d'attente
+        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center;"))
+        // Send status to serveur
+        GlobalSendSocketIo("GeoX", "BuildViewMap", "")
+    }
+
+    LoadViewMap(Data){
         // Clear Conteneur
-        DivApp.innerHTML = ""
+        this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
-        DivApp.appendChild(CoreXBuild.Div("mapid", "", "height: 98vh; width: 100%"))
+        this._DivApp.appendChild(CoreXBuild.Div("mapid", "", "height: 98vh; width: 100%"))
         // If receive no data from server
         if (Data.ListOfTracks.length == 0){
             this.CreateMap()
@@ -51,6 +70,16 @@ class GeoXMap {
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
+    }
+
+    DeleteMap(){
+        if (this._Map && this._Map.remove) {
+            this._Map.off();
+            this._Map.remove();
+            this._Map = null
+            let mapDiv = document.getElementById('mapid')
+            if(mapDiv) mapDiv.parentNode.removeChild(mapDiv)
+        }
     }
 
     AddTrack(TrackId, TrackName, GeoJsonData, TrackColor="Blue"){
