@@ -66,7 +66,7 @@ class GeoXServer{
             Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
         }
         // Send tracks
-        Socket.emit("StartGeoXApp", Data)
+        Socket.emit("LoadViewMap", Data)
     }
 
     /**

@@ -21,6 +21,23 @@ class GeoXMap {
     }
     set MapId(val){this._MapId = val;}
 
+    LoadViewMap(Data, DivApp){
+        // Clear Conteneur
+        DivApp.innerHTML = ""
+        // Ajout du div qui va contenir la map
+        DivApp.appendChild(CoreXBuild.Div("mapid", "", "height: 98vh; width: 100%"))
+        //this._MyMap.MapId = "mapid"
+        // If receive no data from server
+        if (Data.ListOfTracks.length == 0){
+            this.CreateMap()
+        } else {
+            this.CreateMap(Data.CenterPoint, Data.Zoom, Data.FitBounds)
+            Data.ListOfTracks.forEach(Track => {
+                this.AddTrack(Track.Name, Track.GeoJsonData)
+            });
+        }
+    }
+
     CreateMap(CenterPoint = {Lat: 50.709446, Long: 4.543413}, zoom= 10, FitBounds=null){
         // Creation de la carte
         

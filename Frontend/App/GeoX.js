@@ -4,15 +4,18 @@ class GeoX{
         // App en full screen 
         this._DivApp.style.width = "99%"
         this._DivApp.style.padding = "0%"
-        this._DivApp.style.margin = "0.5%"
-        // Variable
-        this._MyMap = null
+        this._DivApp.style.margin = "0.4%"
     }
 
     /** Start de l'application */
     Start(){
-        // Create map une fois (attention au refresh)
-        this._MyMap = new GeoXMap()
+        // Create map une seul fois (attention au refresh)
+        var MyGeoXMap = new GeoXMap()
+        // SocketIo Listener
+        let SocketIo = GlobalGetSocketIo()
+        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
+        SocketIo.on('LoadViewMap', (Value) => {MyGeoXMap.LoadViewMap(Value, this._DivApp)})
+        // Load data
         this.LoadData()
     }
 
@@ -29,11 +32,6 @@ class GeoX{
         Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
         // on construit le texte d'attente
         Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center;"))
-        // SocketIo Listener
-        let SocketIo = GlobalGetSocketIo()
-        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
-        SocketIo.on('StartGeoXApp', (Value) => {this.StartGeoXApp(Value)})
-
         // Send status to serveur
         GlobalSendSocketIo("GeoX", "Start", "")
     }
@@ -45,9 +43,9 @@ class GeoX{
         // Clear view
         this._DivApp.innerHTML=""
         // Clear socket
-        let SocketIo = GlobalGetSocketIo()
-        if(SocketIo.hasListeners('GeoXError')){SocketIo.off('GeoXError')}
-        if(SocketIo.hasListeners('StartGeoXApp')){SocketIo.off('StartGeoXApp')}
+        //let SocketIo = GlobalGetSocketIo()
+        //if(SocketIo.hasListeners('GeoXError')){SocketIo.off('GeoXError')}
+        //if(SocketIo.hasListeners('LoadViewMap')){SocketIo.off('LoadViewMap')}
     }
     /**
      * Affichage du message d'erreur venant du serveur
@@ -58,30 +56,6 @@ class GeoX{
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
         this._DivApp.appendChild(Conteneur)
         Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
-    }
-
-    /** Load de la carte, des track et des bouttons de commandes */
-    StartGeoXApp(Data){
-        // Get Conteneur
-        let Conteneur = document.getElementById("Conteneur")
-        Conteneur.innerHTML = ""
-        // Ajout du div qui va contenir la map
-        Conteneur.appendChild(CoreXBuild.Div("mapid", "", "height: 98vh; width: 100%"))
-        this._MyMap.MapId = "mapid"
-        // If receive no data from server
-        if (Data.ListOfTracks.length == 0){
-            this._MyMap.CreateMap()
-        } else {
-            this._MyMap.CreateMap(Data.CenterPoint, Data.Zoom, Data.FitBounds)
-            Data.ListOfTracks.forEach(Track => {
-                this._MyMap.AddTrack(Track.Name, Track.GeoJsonData)
-            });
-        }
-        this.BuildCommandButton()
-    }
-
-    BuildCommandButton(){
-        console.log("ToDo")
     }
 
     /** Get Titre de l'application */
