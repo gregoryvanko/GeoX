@@ -26,7 +26,12 @@ class GeoX{
             this._GeoXData = Value
             this.LoadViewMap()
         })
-        SocketIo.on('LoadViewManageTracks', (Value) => {this._MyGeoXManageTracks.LoadViewManageTracks(Value)})
+        SocketIo.on('UpdateData', (Value) => {
+            this._GeoXData = Value.NewData
+            if (Value.View == "GeoXManageTracks"){
+                this.LoadViewManageTracks()
+            }
+        })
         // Build view map
         this.LoadData()
     }
@@ -71,11 +76,12 @@ class GeoX{
         // Titre de l'application
         Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
         // on construit le texte d'attente
-        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 30vh;"))
+        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 15vh;"))
         // Send status to serveur
         GlobalSendSocketIo("GeoX", "LoadData", "")
     }
 
+    /** Ouvre la vue Map */
     LoadViewMap(){
         // Clear view
         this.ClearView()
@@ -83,6 +89,7 @@ class GeoX{
         this._MyGeoXMap.LoadViewMap(this._GeoXData)
     }
 
+    /** Ouvre la vie Manage track */
     LoadViewManageTracks(){
         // Clear view
         this.ClearView()

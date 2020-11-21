@@ -21,6 +21,9 @@ class GeoXServer{
             case "LoadData":
                 this.LoadData(Data.Value, Socket, User, UserId)
                 break
+            case "DeleteTrack":
+                this.DeleteTrack(Data.Value, Socket, User, UserId)
+                break
             default:
                 this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
                 Socket.emit("GeoXError", `Api GeoXServer error, Action ${Data.Action} not found`)
@@ -29,14 +32,14 @@ class GeoXServer{
     }
 
     async LoadData(Value, Socket, User, UserId){
+        // Test save track in db
+        //this.SaveTrackInDb("Rixensart",__dirname + '/Temp/2020-09-20-Rixensart.gpx',Socket, User, UserId)
+
         // Build Tracks Data
         let Data = new Object()
         Data.ListOfTracks = []
         Data.CenterPoint = {Lat:50.709446, Long:4.543413}
         Data.Zoom = 8
-
-        // Test save track in db
-        //this.SaveTrackInDb("Rixensart",__dirname + '/Temp/2020-09-20-Rixensart.gpx',Socket, User, UserId)
 
         // Test Get Tracks
         //Data.ListOfTracks = this.GetTracksStatic()
@@ -131,6 +134,45 @@ class GeoXServer{
             }
         });
         return {MinLat:MinLat1, MaxLat:MaxLat1, MinLong:MinLong1, MaxLong:MaxLong1}
+    }
+
+    DeleteTrack(Value, Socket, User, UserId){
+        this._Mongo.DeleteByIdPromise(Value, this._MongoTracksCollection.Collection).then((reponse)=>{
+            // Send Data
+            let UpdateData = new Object()
+            UpdateData.NewData = null
+            UpdateData.View = "GeoXManageTracks"
+
+            const Querry = {}
+            const Projection = { projection:{}}
+            this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
+                // Build Tracks Data
+                let Data = new Object()
+                Data.ListOfTracks = []
+                Data.CenterPoint = {Lat:50.709446, Long:4.543413}
+                Data.Zoom = 8
+                if(reponse.length == 0){
+                    Data.ListOfTracks = []
+                } else {
+                    Data.ListOfTracks = reponse
+                    let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
+                    Data.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
+                    Data.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
+                    Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
+                }
+                UpdateData.NewData = Data
+                Socket.emit("UpdateData", UpdateData)
+                // Log socket action
+                this._MyApp.LogAppliInfo("Track deleted and SoApi send UpdateData", User, UserId)
+            },(erreur)=>{
+                this._MyApp.LogAppliError("GeoXServerApi DeleteTrack DB error : " + erreur, User, UserId)
+                Socket.emit("GeoXError", "GeoXServerApi DeleteTrack error")
+            })
+            
+        },(erreur)=>{
+            this._MyApp.LogAppliError("GeoXServerApi DeleteTrack DB error : " + erreur, User, UserId)
+            Socket.emit("GeoXError", "GeoXServerApi DeleteTrack error")
+        })
     }
 
     /**

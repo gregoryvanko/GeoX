@@ -7,8 +7,7 @@
 }
 /* Sous Titre */
 .SousTitre{
-    margin: 1%;
-    font-size: 3vw;
+    font-size: calc(var(--TitreNormale)*0.6);
     color: var(--CoreX-color);
 }
 /* Texte */
@@ -44,6 +43,11 @@
   border: 1px solid #999999;
   background-color: #cccccc;
   color: #666666;
+}
+
+/* Button Top */
+.ButtonTop{
+    margin: 1vh 0vh 4vh 0vh;
 }
 
 /* Drop Down */
@@ -118,7 +122,7 @@ only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-we
 screen and (max-width: 700px)
 {
     .Titre{font-size: var(--TitreIphone);}
-    .SousTitre{font-size: 6vw;}
+    .SousTitre{font-size: calc(var(--TitreIphone)*0.6);}
     .Text{font-size: var(--TexteIphone);}
     .TextSmall{font-size: calc(var(--TexteIphone)*0.7);}
     .Button{border-radius: 40px;}
@@ -129,7 +133,7 @@ screen and (max-width: 700px)
 @media screen and (min-width: 1200px)
 {
     .Titre{font-size: var(--TitreMax);}
-    .SousTitre{font-size: 35px;}
+    .SousTitre{font-size: calc(var(--TitreMax)*0.6);}
     .Text{font-size: var(--TexteMax);}
     .TextSmall{font-size: calc(var(--TexteMax)*0.7);}
     .Button{border-radius: 40px;}
