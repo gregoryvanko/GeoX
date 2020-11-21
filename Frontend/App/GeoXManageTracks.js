@@ -3,22 +3,12 @@ class GeoXManageTracks {
         this._DivApp = DivApp
     }
 
-    BuildViewWatingData(){
-        // Titre
-        this._DivApp.appendChild(CoreXBuild.DivTexte("Manage Tracks", "", "Titre", "text-align: center;"))
-        // Contener
-        let Conteneur = CoreXBuild.Div("TracksConteneur", "TracksConteneur")
-        this._DivApp.appendChild(Conteneur)
-        // on construit le texte d'attente
-        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center;"))
-        // Send status to serveur
-        GlobalSendSocketIo("GeoX", "BuildViewManageTracks", "")
-    }
-
     LoadViewManageTracks(Data){
-        // Conteneur pour la liste des track
-        let TracksConteneur = document.getElementById("TracksConteneur")
-        TracksConteneur.innerHTML=""
+        // Clear Conteneur
+        this._DivApp.innerHTML = ""
+        // Contener
+        let TracksConteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(TracksConteneur)
         // Div pour le titre des colonnes
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         TracksConteneur.appendChild(BoxTitre)

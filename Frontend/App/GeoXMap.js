@@ -28,18 +28,6 @@ class GeoXMap {
         document.head.appendChild(Leafletjs)
     }
 
-    BuildViewWatingData(){
-        // Contener
-        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
-        this._DivApp.appendChild(Conteneur)
-        // Titre de l'application
-        Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
-        // on construit le texte d'attente
-        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center;"))
-        // Send status to serveur
-        GlobalSendSocketIo("GeoX", "BuildViewMap", "")
-    }
-
     LoadViewMap(Data){
         // Clear Conteneur
         this._DivApp.innerHTML = ""
