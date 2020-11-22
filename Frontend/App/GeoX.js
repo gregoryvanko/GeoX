@@ -5,7 +5,12 @@ class GeoX{
         this._DivApp.style.width = "99%"
         this._DivApp.style.padding = "0%"
         this._DivApp.style.margin = "0.4%"
-        // All tracks
+        // const
+        this._NameLoadViewMap = "LoadViewMap"
+        this._NameLoadViewManageTracks = "LoadViewManageTracks"
+        // Current view
+        this._CurrentView = this._NameLoadViewMap
+        // App Data
         this._GeoXData = []
         // Map
         this._MyGeoXMap = null
@@ -13,27 +18,31 @@ class GeoX{
         this._MyGeoXManageTracks = null
     }
 
-    /** Start de l'application */
-    Start(){
+    /** Initiation de l'application */
+    Initiation(){
         // Create map une seul fois (attention au refresh)
         this._MyGeoXMap = new GeoXMap(this._DivApp)
-        // Create ManageTracks
+        // Create GeoXManageTracks
         this._MyGeoXManageTracks = new GeoXManageTracks(this._DivApp)
         // SocketIo Listener
         let SocketIo = GlobalGetSocketIo()
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
         SocketIo.on('StartApp', (Value) => {
-            this._GeoXData = Value
-            this.LoadViewMap()
-        })
-        SocketIo.on('UpdateData', (Value) => {
-            this._GeoXData = Value.NewData
-            if (Value.View == "GeoXManageTracks"){
+            this._GeoXData = Value.Data
+            if (Value.StartView == this._NameLoadViewMap){
+                this.LoadViewMap()
+            } else if (Value.StartView == this._NameLoadViewManageTracks){
                 this.LoadViewManageTracks()
+            } else {
+                this.Error("Start view not find: " + Value.StartView)
             }
         })
+        SocketIo.on('LoadMap', (Value) => {
+            this.LoadViewMapWithDate(Value)
+        })
+        
         // Build view map
-        this.LoadData()
+        this.LoadAppData()
     }
     
     /** Clear view */
@@ -44,14 +53,16 @@ class GeoX{
         }
         // Clear Global action
         GlobalClearActionList()
-        GlobalAddActionInList("Reload", this.LoadData.bind(this))
-        GlobalAddActionInList("View Map", this.LoadViewMap.bind(this))
+        GlobalAddActionInList("View Map", this.LoadAppData.bind(this))
+        //GlobalAddActionInList("View Map", this.LoadViewMap.bind(this))
         GlobalAddActionInList("Manage Tracks", this.LoadViewManageTracks.bind(this))
+        GlobalAddActionInList("Add Track", this.LoadViewAddTracks.bind(this))
         // Show Action Button
         GlobalDisplayAction('On')
         // Clear view
         this._DivApp.innerHTML=""
     }
+
     /**
      * Affichage du message d'erreur venant du serveur
      * @param {String} ErrorMsg Message d'erreur envoyé du serveur
@@ -68,7 +79,9 @@ class GeoX{
         Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
     }
 
-    LoadData(){
+    /** Load des Data de l'application */
+    LoadAppData(){
+        this._CurrentView = this._NameLoadViewMap
         this.ClearView()
         // Contener
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
@@ -76,25 +89,45 @@ class GeoX{
         // Titre de l'application
         Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
         // on construit le texte d'attente
-        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 15vh;"))
+        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 10vh;"))
         // Send status to serveur
-        GlobalSendSocketIo("GeoX", "LoadData", "")
+        GlobalSendSocketIo("GeoX", "LoadAppData", this._CurrentView )
     }
 
     /** Ouvre la vue Map */
     LoadViewMap(){
+        this._CurrentView = this._NameLoadViewMap
         // Clear view
         this.ClearView()
         // Load view map
-        this._MyGeoXMap.LoadViewMap(this._GeoXData)
+        this._MyGeoXMap.LoadViewGroup(this._GeoXData.AppGroup)
     }
 
-    /** Ouvre la vie Manage track */
+    /** Ouvre la vue Map avec des data*/
+    LoadViewMapWithDate(Data){
+        this._CurrentView = this._NameLoadViewMap
+        // Clear view
+        this.ClearView()
+        // Load view map
+        this._MyGeoXMap.LoadViewMap(Data)
+    }
+
+    /** Ouvre la vue Manage track */
     LoadViewManageTracks(){
+        this._CurrentView = this._NameLoadViewManageTracks
+        // Clear view
+        this.ClearView()
+        // Build view
+        this._MyGeoXManageTracks.LoadViewManageTracks(this._GeoXData.AppData, this._CurrentView)
+    }
+
+    /** Ouverture de la vue Add Track */
+    LoadViewAddTracks(){
+        this._CurrentView = this._NameLoadViewMap
         // Clear view
         this.ClearView()
         // Build view waiting data of manage track
-        this._MyGeoXManageTracks.LoadViewManageTracks(this._GeoXData.ListOfTracks)
+        this._MyGeoXManageTracks.LoadViewAddTrack(this._CurrentView)
     }
 
     /** Get Titre de l'application */
@@ -107,4 +140,4 @@ class GeoX{
 // Creation de l'application
 let MyClientApp = new GeoX(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp(MyClientApp.GetTitre(), MyClientApp.GetImgSrc(), MyClientApp.Start.bind(MyClientApp))
+GlobalCoreXAddApp(MyClientApp.GetTitre(), MyClientApp.GetImgSrc(), MyClientApp.Initiation.bind(MyClientApp))

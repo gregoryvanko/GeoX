@@ -1,6 +1,10 @@
 {
     "TracksCollection":{
         "Collection": "Tracks",
-        "Track": "Track"
+        "Name": "Name",
+        "Group": "Group",
+        "Date": "Date",
+        "ExteriorPoint": "ExteriorPoint",
+        "GeoJsonData": "GeoJsonData"
     } 
 }

@@ -16,17 +16,23 @@ class GeoXServer{
     * @param {String} UserId Id du user
     */
     Api(Data, Socket, User, UserId){
-        this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
         switch (Data.Action) {
-            case "LoadData":
-                this.LoadData(Data.Value, Socket, User, UserId)
+            case "LoadAppData":
+                this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
+                this.LoadAppData(Data.Value, Socket, User, UserId)
+                break
+            case "LoadMapData":
+                this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
+                this.LoadMapData(Data.Value, Socket, User, UserId)
                 break
             case "ManageTrack":
                 if (Data.Value.Action == "Delete"){
-                    this.DeleteTrack(Data.Value.Data, Socket, User, UserId)
+                    this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
+                    this.DeleteTrack(Data.Value, Socket, User, UserId)
                 }
                 if (Data.Value.Action == "Add"){
-                    this.AddTrack(Data.Value.Data, Socket, User, UserId)
+                    this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
+                    this.AddTrack(Data.Value, Socket, User, UserId)
                 }
                 break
             default:
@@ -36,26 +42,52 @@ class GeoXServer{
         }
     }
 
-    async LoadData(Value, Socket, User, UserId){
+    /**
+     * Load all Data of the App
+     * @param {String} CurrentView Name of the current view
+     * @param {Socket} Socket SocketIO
+     * @param {String} User Nom du user
+     * @param {String} UserId Id du user
+     */
+    async LoadAppData(CurrentView, Socket, User, UserId){
+        let Data = {AppData: null, AppGroup: null}
+        let ReponseAppData = await this.PromiseGetAppDataFromDb()
+        if(!ReponseAppData.Error){
+            Data.AppData = ReponseAppData.Data
+        } else {
+            this._MyApp.LogAppliError(ReponseAppData.ErrorMsg, User, UserId)
+            Socket.emit("GeoXError", "GeoXServerApi PromiseGetAppDataFromDb error")
+        }
+        // Find all different group
+        Data.AppGroup= [...new Set(Data.AppData.map(item => item.Group))]        
+        //Send Data
+        let StartupData = {StartView:CurrentView, Data: Data}
+        Socket.emit("StartApp", StartupData)
+        // Log socket action
+        this._MyApp.LogAppliInfo(`SoApi send StartApp vue ${CurrentView}`, User, UserId)
+    }
 
+    /**
+     * Load all the data for all tracks of one group
+     * @param {String} GroupName Name of the group of tracks
+     * @param {Socket} Socket SocketIO
+     * @param {String} User Nom du user
+     * @param {String} UserId Id du user
+     */
+    async LoadMapData(GroupName, Socket, User, UserId){
         // Build Tracks Data
         let Data = new Object()
         Data.ListOfTracks = []
         Data.CenterPoint = {Lat:50.709446, Long:4.543413}
         Data.Zoom = 8
-
-        // Test Get Tracks
-        //Data.ListOfTracks = this.GetTracksStatic()
-
         // Get Tracks
-        let ReponseListOfTracks = await this.PromiseGetTracksFromDb()
+        let ReponseListOfTracks = await this.PromiseGetTracksFromDb(GroupName)
         if(!ReponseListOfTracks.Error){
             Data.ListOfTracks = ReponseListOfTracks.Data
         } else {
             this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
             Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksFromDb error")
         }
-
         // Calcul des point extérieur et du centre de toutes les tracks
         if (Data.ListOfTracks.length != 0){
             let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
@@ -64,9 +96,68 @@ class GeoXServer{
             Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
         }
         // Send tracks
-        Socket.emit("StartApp", Data)
+        Socket.emit("LoadMap", Data)
         // Log socket action
-        this._MyApp.LogAppliInfo("SoApi send StartApp", User, UserId)
+        this._MyApp.LogAppliInfo("SoApi send LoadMap", User, UserId)
+    }
+
+    /**
+     * Get App Data from DB (promise)
+     */
+    PromiseGetAppDataFromDb(){
+        return new Promise(resolve => {
+            let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
+            const Querry = {}
+            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Date]: 1}}
+            this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
+                if(reponse.length == 0){
+                    ReponseTracks.Error = false
+                    ReponseTracks.ErrorMsg = null
+                    ReponseTracks.Data = []
+                } else {
+                    ReponseTracks.Error = false
+                    ReponseTracks.ErrorMsg = null
+                    ReponseTracks.Data = reponse
+                }
+                resolve(ReponseTracks)
+            },(erreur)=>{
+                ReponseTracks.Error = true
+                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetAppDataFromDb error: " + erreur
+                ReponseTracks.Data = []
+                resolve(ReponseTracks)
+            })
+        })
+    }
+
+    /**
+     * Get Tracks Data from DB (promise)
+     */
+    PromiseGetTracksFromDb(GroupName){
+        return new Promise(resolve => {
+            let ReponseTracks = new Object()
+            ReponseTracks.Error = true
+            ReponseTracks.ErrorMsg = ""
+            ReponseTracks.Data = null
+            const Querry = {[this._MongoTracksCollection.Group]: GroupName}
+            const Projection = { projection:{}}
+            this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
+                if(reponse.length == 0){
+                    ReponseTracks.Error = false
+                    ReponseTracks.ErrorMsg = null
+                    ReponseTracks.Data = []
+                } else {
+                    ReponseTracks.Error = false
+                    ReponseTracks.ErrorMsg = null
+                    ReponseTracks.Data = reponse
+                }
+                resolve(ReponseTracks)
+            },(erreur)=>{
+                ReponseTracks.Error = true
+                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksFromDb error: " + erreur
+                ReponseTracks.Data = []
+                resolve(ReponseTracks)
+            })
+        })
     }
 
     /**
@@ -139,48 +230,35 @@ class GeoXServer{
         return {MinLat:MinLat1, MaxLat:MaxLat1, MinLong:MinLong1, MaxLong:MaxLong1}
     }
 
+    /**
+     * 
+     * @param {Object} Value {Data: Id of track to delete, FromCurrentView: name of the current view}
+     * @param {Socket} Socket SocketIO
+     * @param {String} User Nom du user
+     * @param {String} UserId Id du user
+     */
     DeleteTrack(Value, Socket, User, UserId){
-        this._Mongo.DeleteByIdPromise(Value, this._MongoTracksCollection.Collection).then((reponse)=>{
-            // Send Data
-            let UpdateData = new Object()
-            UpdateData.NewData = null
-            UpdateData.View = "GeoXManageTracks"
-
-            const Querry = {}
-            const Projection = { projection:{}}
-            this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
-                // Build Tracks Data
-                let Data = new Object()
-                Data.ListOfTracks = []
-                Data.CenterPoint = {Lat:50.709446, Long:4.543413}
-                Data.Zoom = 8
-                if(reponse.length == 0){
-                    Data.ListOfTracks = []
-                } else {
-                    Data.ListOfTracks = reponse
-                    let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
-                    Data.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
-                    Data.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
-                    Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
-                }
-                UpdateData.NewData = Data
-                Socket.emit("UpdateData", UpdateData)
-                // Log socket action
-                this._MyApp.LogAppliInfo("Track deleted and SoApi send UpdateData", User, UserId)
-            },(erreur)=>{
-                this._MyApp.LogAppliError("GeoXServerApi DeleteTrack DB error : " + erreur, User, UserId)
-                Socket.emit("GeoXError", "GeoXServerApi DeleteTrack error")
-            })
-            
+        this._Mongo.DeleteByIdPromise(Value.Data, this._MongoTracksCollection.Collection).then((reponse)=>{
+            // Log
+            this._MyApp.LogAppliInfo("Track deleted", User, UserId)
+            // Load App Data
+            this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
         },(erreur)=>{
             this._MyApp.LogAppliError("GeoXServerApi DeleteTrack DB error : " + erreur, User, UserId)
             Socket.emit("GeoXError", "GeoXServerApi DeleteTrack error")
         })
     }
 
-    AddTrack(Track, Socket, User, UserId){
+    /**
+     * 
+     * @param {Object} Value {Data: DataTrack to add, FromCurrentView: name of the current view}
+     * @param {Socket} Socket SocketIO
+     * @param {String} User Nom du user
+     * @param {String} UserId Id du user
+     */
+    AddTrack(Value, Socket, User, UserId){
+        let Track = Value.Data
         let GeoJson = this.ConvertGpxToGeoJson(Track.FileContent)
-        console.log(GeoJson)
         let TrackData = new Object()
         TrackData.Name = Track.Name
         TrackData.Group = Track.Group
@@ -191,7 +269,10 @@ class GeoXServer{
         //let DataToMongo = { [this._MongoTracksCollection.Track]: TrackData}
         let DataToMongo = TrackData
         this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
-            // ToDo
+            // Log
+            this._MyApp.LogAppliInfo("New track saved", User, UserId)
+            // Load App Data
+            this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
         },(erreur)=>{
             this._MyApp.LogAppliError("GeoXServerApi AddTrack DB error : " + erreur, User, UserId)
             Socket.emit("GeoXError", "GeoXServerApi AddTrack DB error")
@@ -209,73 +290,6 @@ class GeoXServer{
         var converted = tj.gpx(Mygpx)
         return converted
     }
-
-    /**
-     * Get Tracks from DB
-     */
-    PromiseGetTracksFromDb(){
-        return new Promise(resolve => {
-            let ReponseTracks = new Object()
-            ReponseTracks.Error = true
-            ReponseTracks.ErrorMsg = ""
-            ReponseTracks.Data = null
-            const Querry = {}
-            const Projection = { projection:{}}
-            this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
-                if(reponse.length == 0){
-                    ReponseTracks.Error = false
-                    ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = []
-                } else {
-                    ReponseTracks.Error = false
-                    ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = reponse
-                }
-                resolve(ReponseTracks)
-            },(erreur)=>{
-                ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksFromDb error: " + erreur
-                ReponseTracks.Data = []
-                resolve(ReponseTracks)
-            })
-        })
-    }
-
-    // Test
-    // GetTracksStatic(){
-    //     let ListOfTracks = []
-
-    //     let GeoJson = this.ConvertGpxToGeoJson(__dirname + '/Temp/2020-09-20-Rixensart.gpx')
-    //     let track1 = new Object()
-    //     track1.Name = "Rix"
-    //     track1.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
-    //     track1.GeoJsonData = GeoJson
-    //     ListOfTracks.push(track1)
-
-    //     var geojson2 = {
-    //         "type": "FeatureCollection",
-    //         "name": "routes",
-    //         "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-    //         "features": [{ 
-    //             "type": "Feature", 
-    //             "properties": { 
-    //                 "name": "Chateau de la Hulpe", 
-    //                 "type": "Route", 
-    //                 "gpx_style_line": "<gpx_style:color>0000ff<\/gpx_style:color>" 
-    //             }, 
-    //             "geometry": { 
-    //                 "type": "LineString", 
-    //                 "coordinates": [ [ 4.543312, 50.709529 ], [ 4.543202, 50.709554 ], [ 4.543145, 50.709266 ], [ 4.542521, 50.709138 ], [ 4.541694, 50.709124 ], [ 4.540902, 50.708812 ], [ 4.539258, 50.709388 ], [ 4.539305, 50.709485 ], [ 4.539954, 50.709828 ], [ 4.539894, 50.709928 ], [ 4.539598, 50.71014 ], [ 4.538838, 50.711027 ], [ 4.538507, 50.711632 ], [ 4.537731, 50.711619 ], [ 4.537425, 50.711678 ], [ 4.53684, 50.712723 ], [ 4.536083, 50.713405 ], [ 4.535911, 50.713801 ], [ 4.535877, 50.714439 ], [ 4.534965, 50.714796 ], [ 4.534177, 50.714858 ], [ 4.533084, 50.714834 ], [ 4.53323, 50.715222 ], [ 4.533097, 50.715599 ], [ 4.532165, 50.716433 ], [ 4.53161, 50.717183 ], [ 4.531371, 50.717346 ], [ 4.531058, 50.717427 ], [ 4.531027, 50.718256 ], [ 4.531465, 50.720992 ], [ 4.530103, 50.720716 ], [ 4.52996, 50.720784 ], [ 4.529296, 50.721674 ], [ 4.529057, 50.722171 ], [ 4.529008, 50.722597 ], [ 4.528827, 50.722769 ], [ 4.527822, 50.723293 ], [ 4.527524, 50.72385 ], [ 4.525783, 50.72609 ], [ 4.524191, 50.727113 ], [ 4.524043, 50.727151 ], [ 4.523763, 50.727062 ], [ 4.523012, 50.726656 ], [ 4.521776, 50.726864 ], [ 4.520631, 50.727496 ], [ 4.518537, 50.728441 ], [ 4.516546, 50.729071 ], [ 4.514528, 50.729305 ], [ 4.514233, 50.729253 ], [ 4.51405, 50.729088 ], [ 4.513008, 50.729269 ], [ 4.512529, 50.729436 ], [ 4.512365, 50.72943 ], [ 4.511965, 50.729095 ], [ 4.511788, 50.729118 ], [ 4.509839, 50.730085 ], [ 4.508921, 50.73031 ], [ 4.508639, 50.730249 ], [ 4.508293, 50.730007 ], [ 4.507981, 50.730074 ], [ 4.506039, 50.731217 ], [ 4.503404, 50.731775 ], [ 4.501868, 50.731741 ], [ 4.501257, 50.731597 ], [ 4.496919, 50.731045 ], [ 4.494995, 50.730867 ], [ 4.491996, 50.729778 ], [ 4.490037, 50.729369 ], [ 4.489121, 50.729577 ], [ 4.488512, 50.729636 ], [ 4.485964, 50.72974 ], [ 4.485344, 50.729693 ], [ 4.48448, 50.729512 ], [ 4.483991, 50.729528 ], [ 4.4836, 50.7294 ], [ 4.482806, 50.729315 ], [ 4.482653, 50.729357 ], [ 4.482167, 50.729917 ], [ 4.482229, 50.730429 ], [ 4.482077, 50.730741 ], [ 4.481497, 50.731247 ], [ 4.480512, 50.73234 ], [ 4.479939, 50.732696 ], [ 4.478199, 50.733482 ], [ 4.476302, 50.734919 ], [ 4.474798, 50.735884 ], [ 4.473161, 50.73708 ], [ 4.472863, 50.737167 ], [ 4.472512, 50.737393 ], [ 4.472016, 50.737899 ], [ 4.471638, 50.737738 ], [ 4.469186, 50.735959 ], [ 4.467854, 50.735659 ], [ 4.466899, 50.734717 ], [ 4.466185, 50.734398 ], [ 4.465291, 50.734141 ], [ 4.463309, 50.733393 ], [ 4.461831, 50.733221 ], [ 4.460765, 50.733395 ], [ 4.460061, 50.73365 ], [ 4.459908, 50.733821 ], [ 4.459863, 50.734732 ], [ 4.459858, 50.73381 ], [ 4.460428, 50.733453 ], [ 4.461226, 50.733303 ], [ 4.462206, 50.733301 ], [ 4.46397, 50.733676 ], [ 4.466954, 50.734799 ], [ 4.467659, 50.735588 ], [ 4.468223, 50.735818 ], [ 4.469048, 50.735998 ], [ 4.469839, 50.736421 ], [ 4.47188, 50.737957 ], [ 4.471765, 50.738556 ], [ 4.472043, 50.738925 ], [ 4.473532, 50.739246 ], [ 4.474363, 50.739293 ], [ 4.474897, 50.739519 ], [ 4.47695, 50.740019 ], [ 4.477582, 50.740076 ], [ 4.479352, 50.740588 ], [ 4.480177, 50.740649 ], [ 4.481601, 50.740975 ], [ 4.482101, 50.740994 ], [ 4.482907, 50.740799 ], [ 4.484357, 50.739758 ], [ 4.484656, 50.739672 ], [ 4.485281, 50.7398 ], [ 4.485984, 50.73982 ], [ 4.486514, 50.740016 ], [ 4.488456, 50.740229 ], [ 4.489263, 50.740129 ], [ 4.491539, 50.739572 ], [ 4.491881, 50.739553 ], [ 4.493849, 50.739924 ], [ 4.49435, 50.739904 ], [ 4.494634, 50.739793 ], [ 4.496387, 50.738303 ], [ 4.49684, 50.738022 ], [ 4.497326, 50.738083 ], [ 4.497486, 50.738246 ], [ 4.497269, 50.738515 ], [ 4.497678, 50.738318 ], [ 4.499445, 50.736738 ], [ 4.500217, 50.736792 ], [ 4.500499, 50.736701 ], [ 4.508589, 50.733256 ], [ 4.509661, 50.733483 ], [ 4.5123, 50.732262 ], [ 4.513917, 50.731955 ], [ 4.514216, 50.731708 ], [ 4.513854, 50.730765 ], [ 4.515122, 50.730559 ], [ 4.518161, 50.730519 ], [ 4.519337, 50.7304 ], [ 4.521308, 50.729943 ], [ 4.522325, 50.729608 ], [ 4.524504, 50.729229 ], [ 4.524783, 50.729103 ], [ 4.52507, 50.72873 ], [ 4.524836, 50.728336 ], [ 4.524167, 50.727827 ], [ 4.523, 50.727398 ], [ 4.522598, 50.726945 ], [ 4.522659, 50.726761 ], [ 4.522905, 50.726658 ], [ 4.523475, 50.727027 ], [ 4.524096, 50.727194 ], [ 4.524343, 50.727113 ], [ 4.526061, 50.726061 ], [ 4.527121, 50.726466 ], [ 4.529642, 50.725843 ], [ 4.529719, 50.72575 ], [ 4.528879, 50.72466 ], [ 4.52849, 50.723811 ], [ 4.527858, 50.723107 ], [ 4.529378, 50.722554 ], [ 4.532204, 50.721311 ], [ 4.534013, 50.721652 ], [ 4.538848, 50.722765 ], [ 4.543059, 50.723624 ], [ 4.543788, 50.723836 ], [ 4.54409, 50.723842 ], [ 4.544006, 50.723553 ], [ 4.543347, 50.722721 ], [ 4.541583, 50.720989 ], [ 4.538807, 50.717964 ], [ 4.538332, 50.716888 ], [ 4.537752, 50.714727 ], [ 4.537846, 50.714441 ], [ 4.537757, 50.71407 ], [ 4.538331, 50.713616 ], [ 4.538923, 50.712361 ], [ 4.539606, 50.711959 ], [ 4.539214, 50.711813 ], [ 4.538877, 50.711873 ], [ 4.538782, 50.7118 ], [ 4.538864, 50.711531 ], [ 4.539331, 50.711288 ], [ 4.539736, 50.711205 ], [ 4.54069, 50.710837 ], [ 4.541316, 50.710798 ], [ 4.54222, 50.710937 ], [ 4.542517, 50.710707 ] ] 
-    //             } 
-    //         }]
-    //     }
-    //     let track2 = new Object()
-    //     track2.Name = "course2"
-    //     track2.ExteriorPoint = this.MinMaxGeoJsonTrack(geojson2)
-    //     track2.GeoJsonData = geojson2
-    //     ListOfTracks.push(track2)
-    //     return ListOfTracks
-    // }
   }
   
 module.exports.GeoXServer = GeoXServer

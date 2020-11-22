@@ -1,6 +1,7 @@
 /* Titre */
 .Titre{
-    margin-bottom: 2%;
+    margin-top: 1vh;
+    margin-bottom: 2vh;
     font-size: var(--TitreNormale);
     color: var(--CoreX-color);
     word-wrap: break-word;
@@ -22,7 +23,7 @@
 /* Button */
 .Button{
     margin: 4vh 0vh 1vh 0vh;
-    padding: 1vh 2vh 1vh 2vh;
+    padding: 2vh 2vh 2vh 2vh;
     cursor: pointer;
     border: 1px solid var(--CoreX-color);
     border-radius: 20px;
@@ -48,6 +49,17 @@
 /* Button Top */
 .ButtonTop{
     margin: 1vh 0vh 4vh 0vh;
+}
+
+.ButtonIcon{
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+@media (hover: hover) {
+    .ButtonIcon:hover:enabled{
+        color: var(--CoreX-color);
+    }
 }
 
 /* Drop Down */
@@ -89,7 +101,8 @@
 
 /* Input */
 .InputBox{
-    width: 40%;
+    width: 30%;
+    margin-top: 2vh;
 }
 .Input {
     box-sizing: border-box;
