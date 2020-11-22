@@ -21,8 +21,13 @@ class GeoXServer{
             case "LoadData":
                 this.LoadData(Data.Value, Socket, User, UserId)
                 break
-            case "DeleteTrack":
-                this.DeleteTrack(Data.Value, Socket, User, UserId)
+            case "ManageTrack":
+                if (Data.Value.Action == "Delete"){
+                    this.DeleteTrack(Data.Value.Data, Socket, User, UserId)
+                }
+                if (Data.Value.Action == "Add"){
+                    this.AddTrack(Data.Value.Data, Socket, User, UserId)
+                }
                 break
             default:
                 this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
@@ -32,8 +37,6 @@ class GeoXServer{
     }
 
     async LoadData(Value, Socket, User, UserId){
-        // Test save track in db
-        //this.SaveTrackInDb("Rixensart",__dirname + '/Temp/2020-09-20-Rixensart.gpx',Socket, User, UserId)
 
         // Build Tracks Data
         let Data = new Object()
@@ -175,29 +178,23 @@ class GeoXServer{
         })
     }
 
-    /**
-     * Sauve une track en DB a partir d'un fichier GPX
-     * @param {String} TrackName Nom de la track
-     * @param {String} FilePathandName Path et name du fichier GPX 
-     * @param {Socket} Socket Socket
-     * @param {String} User User
-     * @param {String} UserId UserId
-     */
-    SaveTrackInDb(TrackName, FilePathandName, Socket, User, UserId){
-        let GeoJson = this.ConvertGpxToGeoJson(FilePathandName)
+    AddTrack(Track, Socket, User, UserId){
+        let GeoJson = this.ConvertGpxToGeoJson(Track.FileContent)
+        console.log(GeoJson)
         let TrackData = new Object()
-        TrackData.Name = TrackName
+        TrackData.Name = Track.Name
+        TrackData.Group = Track.Group
+        TrackData.Date = new Date()
         TrackData.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
         TrackData.GeoJsonData = GeoJson
-        TrackData.Date = new Date()
 
         //let DataToMongo = { [this._MongoTracksCollection.Track]: TrackData}
         let DataToMongo = TrackData
         this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
-            // ToDo Delete temp file
+            // ToDo
         },(erreur)=>{
-            this._MyApp.LogAppliError("GeoXServerApi SaveTrackInDb DB error : " + erreur, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi SaveTrackInDb DB error")
+            this._MyApp.LogAppliError("GeoXServerApi AddTrack DB error : " + erreur, User, UserId)
+            Socket.emit("GeoXError", "GeoXServerApi AddTrack DB error")
         })
     }
 
@@ -205,11 +202,10 @@ class GeoXServer{
      * Convertir un fichier GPX en GeoJson
      * @param {String} FilePathandName path et name du fichier Gpx
      */
-    ConvertGpxToGeoJson(FilePathandName){
+    ConvertGpxToGeoJson(FileContent){
         var tj = require('@mapbox/togeojson')
-        var fs = require('fs')
         var DOMParser = require('xmldom').DOMParser
-        var Mygpx = new DOMParser().parseFromString(fs.readFileSync(FilePathandName, 'utf8'))
+        var Mygpx = new DOMParser().parseFromString(FileContent)
         var converted = tj.gpx(Mygpx)
         return converted
     }
