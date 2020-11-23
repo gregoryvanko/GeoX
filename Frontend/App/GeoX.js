@@ -118,7 +118,7 @@ class GeoX{
         // Clear view
         this.ClearView()
         // Build view
-        this._MyGeoXManageTracks.LoadViewManageTracks(this._GeoXData.AppData, this._CurrentView)
+        this._MyGeoXManageTracks.LoadViewManageTracks(this._GeoXData, this._CurrentView)
     }
 
     /** Ouverture de la vue Add Track */
@@ -127,7 +127,7 @@ class GeoX{
         // Clear view
         this.ClearView()
         // Build view waiting data of manage track
-        this._MyGeoXManageTracks.LoadViewAddTrack(this._CurrentView)
+        this._MyGeoXManageTracks.LoadViewAddTrack(this._GeoXData.AppGroup, this._CurrentView)
     }
 
     /** Get Titre de l'application */

@@ -17,33 +17,33 @@ class GeoXManageTracks {
         let AppConteneur = CoreXBuild.Div("AppConteneur", "AppConteneur", "")
         Contener.appendChild(AppConteneur)
         // Boutton Add Track
-        AppConteneur.appendChild(CoreXBuild.Button("Add Track",this.LoadViewAddTrack.bind(this, this._FromCurrentView),"Text Button ButtonTop"))
+        AppConteneur.appendChild(CoreXBuild.Button("Add Track",this.LoadViewAddTrack.bind(this,Data.AppGroup, this._FromCurrentView),"Text Button ButtonTop"))
         // Div pour le titre des colonnes
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         AppConteneur.appendChild(BoxTitre)
         // Titre des colonnes
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 40%; margin-left:1%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 20%; margin-left:1%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 38%; margin-left:1%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 18%; margin-left:1%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 20%;"))
         // Ajout d'une ligne
         AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5; margin: 1% 0% 0% 0%;"))
         // Ajout des lignes des tracks
-        if (Data.length == 0){
+        if (Data.AppData.length == 0){
             let BoxTracks = CoreXBuild.DivFlexRowStart("")
             AppConteneur.appendChild(BoxTracks)
             BoxTracks.appendChild(CoreXBuild.DivTexte("No track saved","","Text","margin-top: 4vh; width: 100%; text-align: center;"))
         } else {
-            Data.forEach(Track => {
+            Data.AppData.forEach(Track => {
                 let BoxTracks = CoreXBuild.DivFlexRowStart("")
                 BoxTracks.style.marginTop = "1vh"
                 BoxTracks.style.marginBottom = "1vh"
                 AppConteneur.appendChild(BoxTracks)
-                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 40%; margin-left:1%;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","Text", "width: 20%; margin-left:1%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 38%; margin-left:1%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","Text", "width: 18%; margin-left:1%;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateTimeString(Track.Date),"","Text", "width: 20%;"))
                 let DivButton = document.createElement("div")
                 DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
-                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this, Track._id, Track.Name, Track.Group), "ButtonIcon Text"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group), "ButtonIcon Text"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "ButtonIcon Text"))
                 BoxTracks.appendChild(DivButton)
                 // Ajout d'une ligne
@@ -64,7 +64,7 @@ class GeoXManageTracks {
         }
     }
 
-    LoadViewUpdateTrack(TrackId, TrackName, TrackGroup){
+    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup){
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Contener
@@ -73,9 +73,30 @@ class GeoXManageTracks {
         // Titre de l'application
         Contener.appendChild(CoreXBuild.DivTexte("Update Track", "", "Titre", ""))
         // Input Name
-        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name of the track", "Text", "InputTrackName",TrackName, "Input Text", "text", "Name",))
+        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Name:", "Text", "InputTrackName",TrackName, "Input Text", "text", "Name",))
         // Input `Group
-        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name of the group", "Text", "InputTrackGroup",TrackGroup, "Input Text", "text", "Group",))
+        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Group:", "Text", "InputTrackGroup",TrackGroup, "Input Text", "text", "Group",))
+        // create list of element for input group suggestion
+        var ListofLabelgroup = []
+        Groups.forEach(element => {
+            let labelgroup = {label: element, value: element}
+            ListofLabelgroup.push(labelgroup)
+        });
+        // Add AutoComplete
+        document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
+        autocomplete({
+            input: document.getElementById("InputTrackGroup"),
+            minLength: 1,
+            emptyMsg: 'No suggestion',
+            fetch: function(text, update) {
+                text = text.toLowerCase();
+                var suggestions = ListofLabelgroup.filter(n => n.label.toLowerCase().startsWith(text))
+                update(suggestions);
+            },
+            onSelect: function(item) {
+                document.getElementById("InputTrackGroup").value = item.label;
+            }
+        });
         // Button Update
         Contener.appendChild(CoreXBuild.Button("Update Track",this.SendUpdateTrack.bind(this, TrackId),"Text Button"))
     }
@@ -97,7 +118,7 @@ class GeoXManageTracks {
         }
     }
 
-    LoadViewAddTrack(CurrentView){
+    LoadViewAddTrack(Groups, CurrentView){
         this._FromCurrentView = CurrentView
         // Clear Conteneur
         this._DivApp.innerHTML = ""
@@ -107,9 +128,30 @@ class GeoXManageTracks {
         // Titre de l'application
         Contener.appendChild(CoreXBuild.DivTexte("Add new Track", "", "Titre", ""))
         // Input Name
-        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name of the track", "Text", "InputTrackName","", "Input Text", "text", "Name",))
+        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name",))
         // Input `Group
-        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name of the group", "Text", "InputTrackGroup","", "Input Text", "text", "Group",))
+        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group",))
+        // create list of element for input group suggestion
+        var ListofLabelgroup = []
+        Groups.forEach(element => {
+            let labelgroup = {label: element, value: element}
+            ListofLabelgroup.push(labelgroup)
+        });
+        // Add AutoComplete
+        document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
+        autocomplete({
+            input: document.getElementById("InputTrackGroup"),
+            minLength: 1,
+            emptyMsg: 'No suggestion',
+            fetch: function(text, update) {
+                text = text.toLowerCase();
+                var suggestions = ListofLabelgroup.filter(n => n.label.toLowerCase().startsWith(text))
+                update(suggestions);
+            },
+            onSelect: function(item) {
+                document.getElementById("InputTrackGroup").value = item.label;
+            }
+        });
         // Button select file
         Contener.appendChild(CoreXBuild.Button("Select and upload File",this.SelectFile.bind(this),"Text Button"))
         //Input file
