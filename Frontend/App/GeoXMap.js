@@ -79,24 +79,18 @@ class GeoXMap {
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 98vh; width: 100%"))
-        // If receive no Listoftracks from server
+        // Parametre de la carte
+        let CenterPoint = null
+        let zoom = null
+        let FitBounds=null
         if (DataMap == null){
-            this.CreateMap()
+            CenterPoint = {Lat: 50.709446, Long: 4.543413}
+            zoom= 8
         } else {
-            this.CreateMap(DataMap.CenterPoint, DataMap.Zoom, DataMap.FitBounds)
-            DataMap.ListOfTracks.forEach(Track => {
-                this.AddTrack(Track._id, Track.Name, Track.GeoJsonData)
-            });
+            CenterPoint = DataMap.CenterPoint
+            zoom = DataMap.Zoom
+            FitBounds = DataMap.FitBounds
         }
-    }
-
-    /**
-     * Creation d'un carte
-     * @param {Object} CenterPoint Lat et Long du centre de la carte
-     * @param {Int} zoom valeur du zoom
-     * @param {Object} FitBounds Fitbounds
-     */
-    CreateMap(CenterPoint = {Lat: 50.709446, Long: 4.543413}, zoom= 8, FitBounds=null){
         // Creation de la carte
         this._Map = L.map(this._MapId , {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
         L.control.zoom({position: 'bottomright'}).addTo(this._Map);
@@ -104,12 +98,19 @@ class GeoXMap {
             maxZoom: 19,
             attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
         }).addTo(this._Map)
-        if (FitBounds != null){
-            this._Map.fitBounds(FitBounds)
-        }
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
+        // Zoom in
+        if (FitBounds != null){
+            this._Map.flyToBounds(FitBounds,{'duration':4} )
+            let me = this
+            this._Map.once('moveend', function() {
+                DataMap.ListOfTracks.forEach(Track => {
+                    me.AddTrack(Track._id, Track.Name, Track.GeoJsonData)
+                });
+            });
+        }
     }
 
     /**
