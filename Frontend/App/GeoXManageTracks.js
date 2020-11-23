@@ -43,7 +43,7 @@ class GeoXManageTracks {
                 BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateTimeString(Track.Date),"","Text", "width: 20%;"))
                 let DivButton = document.createElement("div")
                 DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
-                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.UpdateTrack.bind(this, Track._id), "ButtonIcon Text"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this, Track._id, Track.Name, Track.Group), "ButtonIcon Text"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "ButtonIcon Text"))
                 BoxTracks.appendChild(DivButton)
                 // Ajout d'une ligne
@@ -64,8 +64,37 @@ class GeoXManageTracks {
         }
     }
 
-    UpdateTrack(TrackId){
-        alert("ToDo")
+    LoadViewUpdateTrack(TrackId, TrackName, TrackGroup){
+        // Clear Conteneur
+        this._DivApp.innerHTML = ""
+        // Contener
+        let Contener = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Contener)
+        // Titre de l'application
+        Contener.appendChild(CoreXBuild.DivTexte("Update Track", "", "Titre", ""))
+        // Input Name
+        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name of the track", "Text", "InputTrackName",TrackName, "Input Text", "text", "Name",))
+        // Input `Group
+        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name of the group", "Text", "InputTrackGroup",TrackGroup, "Input Text", "text", "Group",))
+        // Button Update
+        Contener.appendChild(CoreXBuild.Button("Update Track",this.SendUpdateTrack.bind(this, TrackId),"Text Button"))
+    }
+
+    SendUpdateTrack(TrackId){
+        if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            let Track = new Object()
+            Track.Id = TrackId
+            Track.Name = document.getElementById("InputTrackName").value 
+            Track.Group = document.getElementById("InputTrackGroup").value 
+            // Data to send
+            let Data = new Object()
+            Data.Action = "Update"
+            Data.Data = Track
+            Data.FromCurrentView = this._FromCurrentView
+            GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+        } else {
+            alert("Enter a name and a group before updating a track")
+        }
     }
 
     LoadViewAddTrack(CurrentView){
@@ -76,13 +105,13 @@ class GeoXManageTracks {
         let Contener = CoreXBuild.DivFlexColumn("Conteneur")
         this._DivApp.appendChild(Contener)
         // Titre de l'application
-        Contener.appendChild(CoreXBuild.DivTexte("Add new Tracks", "", "Titre", ""))
+        Contener.appendChild(CoreXBuild.DivTexte("Add new Track", "", "Titre", ""))
         // Input Name
         Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name of the track", "Text", "InputTrackName","", "Input Text", "text", "Name",))
         // Input `Group
         Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name of the group", "Text", "InputTrackGroup","", "Input Text", "text", "Group",))
         // Button select file
-        Contener.appendChild(CoreXBuild.Button("Select and update File",this.SelectFile.bind(this),"Text Button"))
+        Contener.appendChild(CoreXBuild.Button("Select and upload File",this.SelectFile.bind(this),"Text Button"))
         //Input file
         var Input = document.createElement("input")
         Input.setAttribute("type","file")

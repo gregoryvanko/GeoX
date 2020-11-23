@@ -29,10 +29,15 @@ class GeoXServer{
                 if (Data.Value.Action == "Delete"){
                     this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
                     this.DeleteTrack(Data.Value, Socket, User, UserId)
-                }
-                if (Data.Value.Action == "Add"){
+                } else if (Data.Value.Action == "Add"){
                     this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
                     this.AddTrack(Data.Value, Socket, User, UserId)
+                }else if (Data.Value.Action == "Update"){
+                    this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
+                    this.UpdateTrack(Data.Value, Socket, User, UserId)
+                } else {
+                    this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
+                    Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
                 }
                 break
             default:
@@ -289,6 +294,28 @@ class GeoXServer{
         var Mygpx = new DOMParser().parseFromString(FileContent)
         var converted = tj.gpx(Mygpx)
         return converted
+    }
+
+    UpdateTrack(Value, Socket, User, UserId){
+        let Track = Value.Data
+        let DataToDb = new Object()
+        DataToDb[this._MongoTracksCollection.Name]= Track.Name
+        DataToDb[this._MongoTracksCollection.Group]= Track.Group
+        DataToDb[this._MongoTracksCollection.Date]= new Date()
+        this._Mongo.UpdateByIdPromise(Track.Id, DataToDb, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if (reponse.matchedCount == 0){
+                this._MyApp.LogAppliError("GeoXServerApi UpdateTrack Track Id not found", User, UserId)
+                Socket.emit("GeoXError", "GeoXServerApi UpdateTrack Track Id not found")
+            } else {
+                // Log
+                this._MyApp.LogAppliInfo("Track Updated", User, UserId)
+                // Load App Data
+                this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
+            }
+        },(erreur)=>{
+            this._MyApp.LogAppliError("GeoXServerApi UpdateTrack DB error : " + erreur, User, UserId)
+            Socket.emit("GeoXError", "GeoXServerApi UpdateTrack DB error")
+        })
     }
   }
   

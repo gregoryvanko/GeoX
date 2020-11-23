@@ -101,16 +101,19 @@ class GeoXMap {
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
-        // Zoom in
-        if (FitBounds != null){
-            this._Map.flyToBounds(FitBounds,{'duration':4} )
-            let me = this
-            this._Map.once('moveend', function() {
-                DataMap.ListOfTracks.forEach(Track => {
-                    me.AddTrack(Track._id, Track.Name, Track.GeoJsonData)
-                });
-            });
-        }
+        // // Zoom in
+        // if (FitBounds != null){
+        //     let me = this
+        //     setTimeout(function(){
+        //         me._Map.flyToBounds(FitBounds,{'duration':4} )
+        //         me._Map.once('moveend', function() {
+        //             DataMap.ListOfTracks.forEach(Track => {
+        //                 me.AddTrack(Track._id, Track.Name, Track.GeoJsonData)
+        //             });
+        //         });
+        //     }, 1000);
+        // }
+        this.AddTrack(DataMap)
     }
 
     /**
@@ -133,13 +136,30 @@ class GeoXMap {
      * @param {Object} GeoJsonData GeoJson Data de la track
      * @param {string} TrackColor Color de la track
      */
-    AddTrack(TrackId, TrackName, GeoJsonData, TrackColor="Blue"){
+    //AddTrack(TrackId, TrackName, GeoJsonData, TrackColor="Blue"){
+    AddTrack(DataMap){
+        // Remove all tracks
+        this._LayerGroup.eachLayer(function (layer) {
+            layerGroup.removeLayer(layer);
+        })
+        // Style for tracks
         var TrackStyle = {
-            "color": TrackColor,
+            "color": "Blue",
             "weight": 3
         };
-        var layerTrack1=L.geoJSON(GeoJsonData, {style: TrackStyle}).addTo(this._LayerGroup).bindPopup(TrackName)
-        layerTrack1.id = TrackId
+        // Zoom in and add tracks
+        if (DataMap.FitBounds != null){
+            let me = this
+            setTimeout(function(){
+                me._Map.flyToBounds(DataMap.FitBounds,{'duration':2} )
+                me._Map.once('moveend', function() {
+                    DataMap.ListOfTracks.forEach(Track => {
+                        var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle}).addTo(me._LayerGroup).bindPopup(Track.Name)
+                        layerTrack1.id = Track._id
+                    });
+                });
+            }, 500);
+        }
     }
 
     /**
