@@ -31,65 +31,40 @@ class GeoXMap {
     }
 
     /**
-     * Load de la vue liste of group
-     * @param {Array} Groups liste of group
-     */
-    LoadViewGroup(Groups){
-        if (Groups == null){
-            let DataMap = null
-            this.LoadViewMap(DataMap)
-        } else if (Groups.length == 1){
-            this.SendLoadMapData(Groups[0])
-        } else {
-            // Clear Conteneur
-            this._DivApp.innerHTML = ""
-            // Contener
-            let Contener = CoreXBuild.DivFlexColumn("Conteneur")
-            this._DivApp.appendChild(Contener)
-            // Titre
-            Contener.appendChild(CoreXBuild.DivTexte("Group of Tracks", "", "Titre", ""))
-            // Conteneur de la liste des tracks
-            let AppConteneur = CoreXBuild.Div("AppConteneur", "AppConteneur", "")
-            Contener.appendChild(AppConteneur)
-            AppConteneur.appendChild(CoreXBuild.DivTexte("Select the group of tracks to show in your map:", "", "Text", "text-align: left; margin-top:2vh; margin-bottom:2vh;"))
-            // Div pour le titre des colonnes
-            let BoxGroup = CoreXBuild.DivFlexColumn("")
-            AppConteneur.appendChild(BoxGroup)
-            Groups.forEach(GroupName => {
-                BoxGroup.appendChild(CoreXBuild.Button(GroupName,this.SendLoadMapData.bind(this, GroupName),"Text ButtonMapGroup"))
-            });
-        }
-
-    }
-
-    /**
-     * Send to serveur commande LoadMapData
-     * @param {String} Group Name of the group
-     */
-    SendLoadMapData(Group){
-        GlobalSendSocketIo("GeoX", "LoadMapData", Group)
-    }
-
-    /**
      * Load de la vue Map
      * @param {Object} DataMap Object contenant toutes les data d'une map
      */
-    LoadViewMap(DataMap){
+    LoadViewMap(GeoXData){
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 98vh; width: 100%"))
+        // Ajout du drop down avec le nom des groupes des map
+        let divdropdown = CoreXBuild.Div("", "DivMapGroupDropDown", "")
+        this._DivApp.appendChild(divdropdown)
+        let DropDown = document.createElement("select")
+        DropDown.setAttribute("id", "Group")
+        DropDown.setAttribute("class", "Text MapGroupDropDown")
+        // liste des differents type
+        GeoXData.AppGroup.forEach(element => {
+            let option = document.createElement("option")
+            option.setAttribute("value", element)
+            option.innerHTML = element
+            DropDown.appendChild(option)
+        });
+        DropDown.onchange = this.NewGroupSelected.bind(this)
+        divdropdown.appendChild(DropDown)
         // Parametre de la carte
         let CenterPoint = null
         let zoom = null
         let FitBounds=null
-        if (DataMap == null){
+        if (GeoXData.AppInitMapData != null ){
+            CenterPoint = GeoXData.AppInitMapData.CenterPoint
+            zoom = GeoXData.AppInitMapData.Zoom
+            FitBounds = GeoXData.AppInitMapData.FitBounds
+        } else {
             CenterPoint = {Lat: 50.709446, Long: 4.543413}
             zoom= 8
-        } else {
-            CenterPoint = DataMap.CenterPoint
-            zoom = DataMap.Zoom
-            FitBounds = DataMap.FitBounds
         }
         // Creation de la carte
         this._Map = L.map(this._MapId , {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
@@ -101,19 +76,24 @@ class GeoXMap {
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
-        // // Zoom in
-        // if (FitBounds != null){
-        //     let me = this
-        //     setTimeout(function(){
-        //         me._Map.flyToBounds(FitBounds,{'duration':4} )
-        //         me._Map.once('moveend', function() {
-        //             DataMap.ListOfTracks.forEach(Track => {
-        //                 me.AddTrack(Track._id, Track.Name, Track.GeoJsonData)
-        //             });
-        //         });
-        //     }, 1000);
-        // }
-        this.AddTrack(DataMap)
+        let me = this
+        setTimeout(function(){
+            me.ModifyTracksOnMap(GeoXData.AppInitMapData)
+        }, 500);
+    }
+
+    NewGroupSelected(){
+        // get du nom du type
+        let DropDownGroupValue = document.getElementById("Group").value
+        this.SendLoadMapData(DropDownGroupValue)
+    }
+
+    /**
+     * Send to serveur commande LoadMapData
+     * @param {String} Group Name of the group
+     */
+    SendLoadMapData(Group){
+        GlobalSendSocketIo("GeoX", "LoadMapData", Group)
     }
 
     /**
@@ -136,11 +116,11 @@ class GeoXMap {
      * @param {Object} GeoJsonData GeoJson Data de la track
      * @param {string} TrackColor Color de la track
      */
-    //AddTrack(TrackId, TrackName, GeoJsonData, TrackColor="Blue"){
-    AddTrack(DataMap){
+    ModifyTracksOnMap(DataMap){
+        let me = this
         // Remove all tracks
         this._LayerGroup.eachLayer(function (layer) {
-            layerGroup.removeLayer(layer);
+            me._LayerGroup.removeLayer(layer);
         })
         // Style for tracks
         var TrackStyle = {
@@ -149,16 +129,13 @@ class GeoXMap {
         };
         // Zoom in and add tracks
         if (DataMap.FitBounds != null){
-            let me = this
-            setTimeout(function(){
-                me._Map.flyToBounds(DataMap.FitBounds,{'duration':2} )
-                me._Map.once('moveend', function() {
-                    DataMap.ListOfTracks.forEach(Track => {
-                        var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle}).addTo(me._LayerGroup).bindPopup(Track.Name)
-                        layerTrack1.id = Track._id
-                    });
+            this._Map.flyToBounds(DataMap.FitBounds,{'duration':2} )
+            this._Map.once('moveend', function() {
+                DataMap.ListOfTracks.forEach(Track => {
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle}).addTo(me._LayerGroup).bindPopup(Track.Name)
+                    layerTrack1.id = Track._id
                 });
-            }, 500);
+            });
         }
     }
 

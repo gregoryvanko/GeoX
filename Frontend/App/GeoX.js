@@ -37,12 +37,12 @@ class GeoX{
                 this.Error("Start view not find: " + Value.StartView)
             }
         })
-        SocketIo.on('LoadMap', (Value) => {
-            this.LoadViewMapWithDate(Value)
+        SocketIo.on('ModifyTracksOnMap', (Value) => {
+            this.ModifyTracksOnMap(Value)
         })
         
         // Build view map
-        this.LoadAppData()
+        this.LoadViewGetAppData()
     }
     
     /** Clear view */
@@ -53,8 +53,7 @@ class GeoX{
         }
         // Clear Global action
         GlobalClearActionList()
-        GlobalAddActionInList("View Map", this.LoadAppData.bind(this))
-        //GlobalAddActionInList("View Map", this.LoadViewMap.bind(this))
+        GlobalAddActionInList("View Map", this.LoadViewGetAppData.bind(this))
         GlobalAddActionInList("Manage Tracks", this.LoadViewManageTracks.bind(this))
         GlobalAddActionInList("Add Track", this.LoadViewAddTracks.bind(this))
         // Show Action Button
@@ -80,7 +79,7 @@ class GeoX{
     }
 
     /** Load des Data de l'application */
-    LoadAppData(){
+    LoadViewGetAppData(){
         this._CurrentView = this._NameLoadViewMap
         this.ClearView()
         // Contener
@@ -100,16 +99,14 @@ class GeoX{
         // Clear view
         this.ClearView()
         // Load view map
-        this._MyGeoXMap.LoadViewGroup(this._GeoXData.AppGroup)
+        this._MyGeoXMap.LoadViewMap(this._GeoXData)
     }
 
     /** Ouvre la vue Map avec des data*/
-    LoadViewMapWithDate(Data){
+    ModifyTracksOnMap(Data){
         this._CurrentView = this._NameLoadViewMap
-        // Clear view
-        this.ClearView()
         // Load view map
-        this._MyGeoXMap.LoadViewMap(Data)
+        this._MyGeoXMap.ModifyTracksOnMap(Data)
     }
 
     /** Ouvre la vue Manage track */

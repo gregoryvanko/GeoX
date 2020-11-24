@@ -55,7 +55,8 @@ class GeoXServer{
      * @param {String} UserId Id du user
      */
     async LoadAppData(CurrentView, Socket, User, UserId){
-        let Data = {AppData: null, AppGroup: null}
+        let Data = {AppData: null, AppGroup: null, AppInitMapData: null}
+        // Get all tracks info (but no track data)
         let ReponseAppData = await this.PromiseGetAppDataFromDb()
         if(!ReponseAppData.Error){
             Data.AppData = ReponseAppData.Data
@@ -64,7 +65,35 @@ class GeoXServer{
             Socket.emit("GeoXError", "GeoXServerApi PromiseGetAppDataFromDb error")
         }
         // Find all different group
-        Data.AppGroup= [...new Set(Data.AppData.map(item => item.Group))]        
+        if (Data.AppData.length > 0){
+            Data.AppGroup= [...new Set(Data.AppData.map(item => item.Group))] 
+        } else {
+            Data.AppGroup=[]
+        }
+          
+        // Find all track data of the first group
+        if (Data.AppGroup.length > 0){
+            // Build Tracks Data
+            Data.AppInitMapData = new Object()
+            Data.AppInitMapData.ListOfTracks = []
+            Data.AppInitMapData.CenterPoint = {Lat:50.709446, Long:4.543413}
+            Data.AppInitMapData.Zoom = 8
+            // Get Tracks
+            let ReponseListOfTracks = await this.PromiseGetTracksFromDb(Data.AppGroup[0])
+            if(!ReponseListOfTracks.Error){
+                Data.AppInitMapData.ListOfTracks = ReponseListOfTracks.Data
+            } else {
+                this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
+                Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksFromDb error")
+            }
+            // Calcul des point extérieur et du centre de toutes les tracks
+            if (Data.AppInitMapData.ListOfTracks.length != 0){
+                let MinMax = this.MinMaxOfTracks(Data.AppInitMapData.ListOfTracks)
+                Data.AppInitMapData.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
+                Data.AppInitMapData.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
+                Data.AppInitMapData.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
+            }
+        } 
         //Send Data
         let StartupData = {StartView:CurrentView, Data: Data}
         Socket.emit("StartApp", StartupData)
@@ -101,9 +130,9 @@ class GeoXServer{
             Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
         }
         // Send tracks
-        Socket.emit("LoadMap", Data)
+        Socket.emit("ModifyTracksOnMap", Data)
         // Log socket action
-        this._MyApp.LogAppliInfo("SoApi send LoadMap", User, UserId)
+        this._MyApp.LogAppliInfo("SoApi send ModifyTracksOnMap", User, UserId)
     }
 
     /**
