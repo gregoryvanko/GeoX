@@ -82,6 +82,9 @@ class GeoXMap {
         }, 500);
     }
 
+    /**
+     * Fonction triggered by the dropdown Group
+     */
     NewGroupSelected(){
         // get du nom du type
         let DropDownGroupValue = document.getElementById("Group").value
