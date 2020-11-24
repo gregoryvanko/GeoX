@@ -76,12 +76,6 @@ class GeoXManageTracks {
         Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Name:", "Text", "InputTrackName",TrackName, "Input Text", "text", "Name",))
         // Input `Group
         Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Group:", "Text", "InputTrackGroup",TrackGroup, "Input Text", "text", "Group",))
-        // create list of element for input group suggestion
-        var ListofLabelgroup = []
-        Groups.forEach(element => {
-            let labelgroup = {label: element, value: element}
-            ListofLabelgroup.push(labelgroup)
-        });
         // Add AutoComplete
         document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
         autocomplete({
@@ -90,11 +84,11 @@ class GeoXManageTracks {
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 text = text.toLowerCase();
-                var suggestions = ListofLabelgroup.filter(n => n.label.toLowerCase().startsWith(text))
+                var suggestions = Groups.filter(n => n.toLowerCase().startsWith(text))
                 update(suggestions);
             },
             onSelect: function(item) {
-                document.getElementById("InputTrackGroup").value = item.label;
+                document.getElementById("InputTrackGroup").value = item;
             }
         });
         // Button Update
@@ -131,12 +125,6 @@ class GeoXManageTracks {
         Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name",))
         // Input `Group
         Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group",))
-        // create list of element for input group suggestion
-        var ListofLabelgroup = []
-        Groups.forEach(element => {
-            let labelgroup = {label: element, value: element}
-            ListofLabelgroup.push(labelgroup)
-        });
         // Add AutoComplete
         document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
         autocomplete({
@@ -145,11 +133,11 @@ class GeoXManageTracks {
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 text = text.toLowerCase();
-                var suggestions = ListofLabelgroup.filter(n => n.label.toLowerCase().startsWith(text))
+                var suggestions = Groups.filter(n => n.toLowerCase().startsWith(text))
                 update(suggestions);
             },
             onSelect: function(item) {
-                document.getElementById("InputTrackGroup").value = item.label;
+                document.getElementById("InputTrackGroup").value = item;
             }
         });
         // Button select file

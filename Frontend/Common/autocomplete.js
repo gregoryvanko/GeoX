@@ -128,7 +128,8 @@
           // function for rendering autocomplete suggestions
           var render = function (item, currentValue) {
               var itemElement = doc.createElement("div");
-              itemElement.textContent = item.label || "";
+              //itemElement.textContent = item.label || "";
+              itemElement.textContent = item || "";
               return itemElement;
           };
           if (settings.render) {
