@@ -50,7 +50,7 @@ class GeoX {
        // Chemin vers le dossier contenant les sources Js et CSS Commun
        this._MyApp.CommonAppFolder = __dirname + "/Frontend/Common"
        // Chemin relatif de l'icone
-       //this._MyApp.IconRelPath = __dirname + "/apple-icon-192x192.png"
+       this._MyApp.IconRelPath = __dirname + "/Backend/apple-icon-192x192.png"
        // Chemin relatif du dossier video
        //this._MyServeurApp.VideoFolder = __dirname + "/Video"
        // Set Tag name du serveur video
