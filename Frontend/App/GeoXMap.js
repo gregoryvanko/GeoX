@@ -55,6 +55,9 @@ class GeoXMap {
             DropDown.onchange = this.NewGroupSelected.bind(this)
             divdropdown.appendChild(DropDown)
         }
+        // Ajout du box Tracks info
+        // ToDo
+
         // Parametre de la carte
         let CenterPoint = null
         let zoom = null
@@ -78,6 +81,7 @@ class GeoXMap {
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
         let me = this
+        // Ajout des tracks sur la map
         setTimeout(function(){
             me.ModifyTracksOnMap(GeoXData.AppInitMapData)
         }, 500);
