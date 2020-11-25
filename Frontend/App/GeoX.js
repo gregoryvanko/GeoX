@@ -2,9 +2,9 @@ class GeoX{
     constructor(HtmlId){
         this._DivApp = document.getElementById(HtmlId)
         // App en full screen 
-        this._DivApp.style.width = "99%"
+        this._DivApp.style.width = "99.4%"
         this._DivApp.style.padding = "0%"
-        this._DivApp.style.margin = "0.4%"
+        this._DivApp.style.margin = "0% AUTO"
         // const
         this._NameLoadViewMap = "LoadViewMap"
         this._NameLoadViewManageTracks = "LoadViewManageTracks"

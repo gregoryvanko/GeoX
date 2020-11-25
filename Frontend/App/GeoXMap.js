@@ -40,20 +40,21 @@ class GeoXMap {
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 98vh; width: 100%"))
         // Ajout du drop down avec le nom des groupes des map
-        let divdropdown = CoreXBuild.Div("", "DivMapGroupDropDown", "")
-        this._DivApp.appendChild(divdropdown)
-        let DropDown = document.createElement("select")
-        DropDown.setAttribute("id", "Group")
-        DropDown.setAttribute("class", "Text MapGroupDropDown")
-        // liste des differents type
-        GeoXData.AppGroup.forEach(element => {
-            let option = document.createElement("option")
-            option.setAttribute("value", element)
-            option.innerHTML = element
-            DropDown.appendChild(option)
-        });
-        DropDown.onchange = this.NewGroupSelected.bind(this)
-        divdropdown.appendChild(DropDown)
+        if (GeoXData.AppGroup.length > 0){
+            let divdropdown = CoreXBuild.Div("", "DivMapGroupDropDown", "")
+            this._DivApp.appendChild(divdropdown)
+            let DropDown = document.createElement("select")
+            DropDown.setAttribute("id", "Group")
+            DropDown.setAttribute("class", "Text MapGroupDropDown")
+            GeoXData.AppGroup.forEach(element => {
+                let option = document.createElement("option")
+                option.setAttribute("value", element)
+                option.innerHTML = element
+                DropDown.appendChild(option)
+            });
+            DropDown.onchange = this.NewGroupSelected.bind(this)
+            divdropdown.appendChild(DropDown)
+        }
         // Parametre de la carte
         let CenterPoint = null
         let zoom = null
