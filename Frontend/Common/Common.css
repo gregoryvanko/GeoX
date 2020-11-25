@@ -52,16 +52,17 @@
 }
 
 .ButtonIcon{
+    font-size: calc(var(--TexteNomrale)*1.4);
+    outline: none;
+    border: 1px solid transparent;
     margin: 1vh;
     padding: 0;
     border: none;
     background-color: transparent;
     cursor: pointer;
 }
-@media (hover: hover) {
-    .ButtonIcon:hover:enabled{
-        color: var(--CoreX-color);
-    }
+.ButtonIcon:focus{
+    border-color: transparent;
 }
 
 /* Drop Down */
@@ -141,6 +142,7 @@ screen and (max-width: 700px)
     .Text{font-size: var(--TexteIphone);}
     .TextSmall{font-size: calc(var(--TexteIphone)*0.7);}
     .Button{border-radius: 40px;}
+    .ButtonIcon{font-size: calc(var(--TexteIphone)*2);}
     .InputBox{width: 90%;}
     .Input {padding: 3%;}
 }
@@ -152,4 +154,5 @@ screen and (max-width: 700px)
     .Text{font-size: var(--TexteMax);}
     .TextSmall{font-size: calc(var(--TexteMax)*0.7);}
     .Button{border-radius: 40px;}
+    .ButtonIcon{font-size: calc(var(--TexteMax)*1.4);}
 }

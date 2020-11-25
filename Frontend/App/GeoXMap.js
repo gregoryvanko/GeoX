@@ -4,6 +4,9 @@ class GeoXMap {
         this._MapId = "mapid"
         this._Map = null
         this._LayerGroup = null
+        this._GroupSelected = null
+        this._DataMap = null
+        this._DataApp = null
 
         // Add Leaflet Links
         this.AddLeafletLinks()
@@ -35,6 +38,7 @@ class GeoXMap {
      * @param {Object} DataMap Object contenant toutes les data d'une map
      */
     LoadViewMap(GeoXData){
+        this._DataApp = GeoXData.AppData
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
@@ -54,10 +58,11 @@ class GeoXMap {
             });
             DropDown.onchange = this.NewGroupSelected.bind(this)
             divdropdown.appendChild(DropDown)
+            this._GroupSelected = GeoXData.AppGroup[0]
         }
-        // Ajout du box Tracks info
-        // ToDo
-
+        // Ajout du bouton info
+        let ButtonActionInfo = CoreXBuild.Button ("&#128065", this.ShowTrackInfoBox.bind(this), "ButtonActionTopLeft", "ButtonShowTrackInfo")
+        this._DivApp.appendChild(ButtonActionInfo)
         // Parametre de la carte
         let CenterPoint = null
         let zoom = null
@@ -87,21 +92,69 @@ class GeoXMap {
         }, 500);
     }
 
+    ShowTrackInfoBox(){
+        // Show track info box
+        this.BuildBoxTracksInfo(this._DataApp)
+        // hide boutton
+        document.getElementById("ButtonShowTrackInfo").style.display = "none";
+    }
+
+    HideTrackInfoBox(){
+        // If TracksInfo existe alors on le supprime
+        let MyDivBoxTracks = document.getElementById("DivBoxTracks")
+        if(MyDivBoxTracks){
+            MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
+            // Show button
+            document.getElementById("ButtonShowTrackInfo").style.display = "block";
+        }
+    }
+
+    BuildBoxTracksInfo(AppData){
+        // Div du box
+        let DivBoxTracks = CoreXBuild.Div("DivBoxTracks", "DivBoxTracks", "")
+        this._DivApp.appendChild(DivBoxTracks)
+        // Add Close button
+        DivBoxTracks.appendChild(CoreXBuild.Button ("&#x21E6", this.HideTrackInfoBox.bind(this), "ButtonClose", ""))
+        // Div empty
+        DivBoxTracks.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Add all tracks of the group
+        AppData.forEach(element => {
+            if (element.Group == this._GroupSelected){
+                let DivBoxTrackInfo = CoreXBuild.Div("", "DivBoxTrackInfo", "")
+                DivBoxTracks.appendChild(DivBoxTrackInfo)
+                let Conteneur = CoreXBuild.DivFlexRowStart("")
+                DivBoxTrackInfo.appendChild(Conteneur)
+                Conteneur.appendChild(CoreXBuild.DivTexte(element.Name,"","Text", "color: white; margin-left: 4%; width:56%"))
+                let DivButton = document.createElement("div")
+                DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
+                let inputcolor = document.createElement("input")
+                inputcolor.setAttribute("id","color" + element._id)
+                inputcolor.setAttribute("type","color")
+                inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px;")
+                inputcolor.setAttribute("value","#0000FF")
+                inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, element._id)}
+                DivButton.appendChild(inputcolor)
+                DivButton.appendChild(CoreXBuild.Button ("&#128065", this.ToogleTrack.bind(this, element._id), "ButtonIcon"))
+                Conteneur.appendChild(DivButton)
+            }
+        });
+    }
+
     /**
      * Fonction triggered by the dropdown Group
      */
     NewGroupSelected(){
+        // If TracksInfo existe alors on le supprime
+        let MyDivBoxTracks = document.getElementById("DivBoxTracks")
+        if(MyDivBoxTracks){
+            MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
+            document.getElementById("ButtonShowTrackInfo").style.display = "block";
+        }
         // get du nom du type
         let DropDownGroupValue = document.getElementById("Group").value
-        this.SendLoadMapData(DropDownGroupValue)
-    }
-
-    /**
-     * Send to serveur commande LoadMapData
-     * @param {String} Group Name of the group
-     */
-    SendLoadMapData(Group){
-        GlobalSendSocketIo("GeoX", "LoadMapData", Group)
+        this._GroupSelected = DropDownGroupValue
+        // Send data to server
+        GlobalSendSocketIo("GeoX", "LoadMapData", DropDownGroupValue)
     }
 
     /**
@@ -125,6 +178,7 @@ class GeoXMap {
      * @param {string} TrackColor Color de la track
      */
     ModifyTracksOnMap(DataMap){
+        this._DataMap = DataMap
         let me = this
         // Remove all tracks
         this._LayerGroup.eachLayer(function (layer) {
@@ -151,10 +205,46 @@ class GeoXMap {
      * Supprimer une track de la carte
      * @param {String} TrackId Id de la track a supprimer de la carte
      */
-    RemoveTrack(TrackId){
+    ToogleTrack(TrackId){
+        // On chercher la track dans le LayerGroup, si on la trouve on la supprime, si on ne la trouve pas on l'ajoute
+        let me = this
+        let AddTrack = true
         this._LayerGroup.eachLayer(function (layer) {
             if (layer.id == TrackId){
-                layerGroup.removeLayer(layer);
+                me._LayerGroup.removeLayer(layer);
+                AddTrack = false
+            }
+        })
+        if (AddTrack){
+            // Style for tracks
+            let color = "Blue"
+            let ColorPicker = document.getElementById("color"+TrackId)
+            if(ColorPicker){
+                color = ColorPicker.value
+            }
+            var TrackStyle = {
+                "color": color,
+                "weight": 3
+            };
+            this._DataMap.ListOfTracks.forEach(Track => {
+                if (Track._id == TrackId){
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle}).addTo(me._LayerGroup).bindPopup(Track.Name)
+                    layerTrack1.id = Track._id
+                }
+            });
+        }
+    }
+
+    /**
+     * Change the color of a track
+     * @param {Color} Color New color
+     * @param {String} TrackId id of the track to color
+     */
+    ChangeTrackColor(Color, TrackId){
+        let me = this
+        this._LayerGroup.eachLayer(function (layer) {
+            if (layer.id == TrackId){
+                layer.setStyle({color: Color});
             }
         })
     }

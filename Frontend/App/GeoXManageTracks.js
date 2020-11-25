@@ -22,7 +22,7 @@ class GeoXManageTracks {
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         AppConteneur.appendChild(BoxTitre)
         // Titre des colonnes
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 38%; margin-left:1%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 36%; margin-left:1%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 18%; margin-left:1%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 20%;"))
         // Ajout d'une ligne
@@ -38,13 +38,13 @@ class GeoXManageTracks {
                 BoxTracks.style.marginTop = "1vh"
                 BoxTracks.style.marginBottom = "1vh"
                 AppConteneur.appendChild(BoxTracks)
-                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 38%; margin-left:1%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 36%; margin-left:1%;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","Text", "width: 18%; margin-left:1%;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateTimeString(Track.Date),"","Text", "width: 20%;"))
                 let DivButton = document.createElement("div")
                 DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
-                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group), "ButtonIcon Text"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "ButtonIcon Text"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "ButtonIcon"))
                 BoxTracks.appendChild(DivButton)
                 // Ajout d'une ligne
                 AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
