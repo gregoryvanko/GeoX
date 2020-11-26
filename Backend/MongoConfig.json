@@ -2,6 +2,7 @@
     "TracksCollection":{
         "Collection": "Tracks",
         "Name": "Name",
+        "Color": "Color",
         "Group": "Group",
         "Date": "Date",
         "ExteriorPoint": "ExteriorPoint",

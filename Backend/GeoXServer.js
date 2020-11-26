@@ -142,7 +142,7 @@ class GeoXServer{
         return new Promise(resolve => {
             let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
             const Querry = {}
-            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Date]: 1}}
+            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1}}
             this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
                     ReponseTracks.Error = false
@@ -296,11 +296,11 @@ class GeoXServer{
         let TrackData = new Object()
         TrackData.Name = Track.Name
         TrackData.Group = Track.Group
+        TrackData.Color = "#0000FF"
         TrackData.Date = new Date()
         TrackData.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
         TrackData.GeoJsonData = GeoJson
 
-        //let DataToMongo = { [this._MongoTracksCollection.Track]: TrackData}
         let DataToMongo = TrackData
         this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
             // Log
@@ -328,9 +328,18 @@ class GeoXServer{
     UpdateTrack(Value, Socket, User, UserId){
         let Track = Value.Data
         let DataToDb = new Object()
-        DataToDb[this._MongoTracksCollection.Name]= Track.Name
-        DataToDb[this._MongoTracksCollection.Group]= Track.Group
-        DataToDb[this._MongoTracksCollection.Date]= new Date()
+        if(Track.Name){
+            DataToDb[this._MongoTracksCollection.Name]= Track.Name
+            DataToDb[this._MongoTracksCollection.Date]= new Date()
+        }
+        if(Track.Group){
+            DataToDb[this._MongoTracksCollection.Group]= Track.Group
+            DataToDb[this._MongoTracksCollection.Date]= new Date()
+        }
+        if (Track.Color){
+            DataToDb[this._MongoTracksCollection.Color]= Track.Color
+        }
+        
         this._Mongo.UpdateByIdPromise(Track.Id, DataToDb, this._MongoTracksCollection.Collection).then((reponse)=>{
             if (reponse.matchedCount == 0){
                 this._MyApp.LogAppliError("GeoXServerApi UpdateTrack Track Id not found", User, UserId)
@@ -339,7 +348,9 @@ class GeoXServer{
                 // Log
                 this._MyApp.LogAppliInfo("Track Updated", User, UserId)
                 // Load App Data
-                this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
+                if (Value.FromCurrentView != null){
+                    this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
+                }
             }
         },(erreur)=>{
             this._MyApp.LogAppliError("GeoXServerApi UpdateTrack DB error : " + erreur, User, UserId)

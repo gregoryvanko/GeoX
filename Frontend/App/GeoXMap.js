@@ -43,8 +43,8 @@ class GeoXMap {
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 98vh; width: 100%"))
-        // Ajout du drop down avec le nom des groupes des map
         if (GeoXData.AppGroup.length > 0){
+            // Ajout du drop down avec le nom des groupes des map
             let divdropdown = CoreXBuild.Div("", "DivMapGroupDropDown", "")
             this._DivApp.appendChild(divdropdown)
             let DropDown = document.createElement("select")
@@ -59,10 +59,10 @@ class GeoXMap {
             DropDown.onchange = this.NewGroupSelected.bind(this)
             divdropdown.appendChild(DropDown)
             this._GroupSelected = GeoXData.AppGroup[0]
+            // Ajout du bouton info
+            let ButtonActionInfo = CoreXBuild.Button ("&#128065", this.ShowTrackInfoBox.bind(this), "ButtonActionTopLeft", "ButtonShowTrackInfo")
+            this._DivApp.appendChild(ButtonActionInfo)
         }
-        // Ajout du bouton info
-        let ButtonActionInfo = CoreXBuild.Button ("&#128065", this.ShowTrackInfoBox.bind(this), "ButtonActionTopLeft", "ButtonShowTrackInfo")
-        this._DivApp.appendChild(ButtonActionInfo)
         // Parametre de la carte
         let CenterPoint = null
         let zoom = null
@@ -97,15 +97,24 @@ class GeoXMap {
         this.BuildBoxTracksInfo(this._DataApp)
         // hide boutton
         document.getElementById("ButtonShowTrackInfo").style.display = "none";
+        // Start transition
+        setTimeout(function(){
+            let DivBoxTracks = document.getElementById("DivBoxTracks")
+            DivBoxTracks.style.left = '1%';
+        }, 100);
+        
     }
 
     HideTrackInfoBox(){
         // If TracksInfo existe alors on le supprime
         let MyDivBoxTracks = document.getElementById("DivBoxTracks")
         if(MyDivBoxTracks){
-            MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
             // Show button
             document.getElementById("ButtonShowTrackInfo").style.display = "block";
+            MyDivBoxTracks.style.left = '-20%';
+            setTimeout(function(){
+                MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
+            }, 1500);
         }
     }
 
@@ -131,7 +140,7 @@ class GeoXMap {
                 inputcolor.setAttribute("id","color" + element._id)
                 inputcolor.setAttribute("type","color")
                 inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px;")
-                inputcolor.setAttribute("value","#0000FF")
+                inputcolor.setAttribute("value",element.Color)
                 inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, element._id)}
                 DivButton.appendChild(inputcolor)
                 DivButton.appendChild(CoreXBuild.Button ("&#128065", this.ToogleTrack.bind(this, element._id), "ButtonIcon"))
@@ -145,11 +154,7 @@ class GeoXMap {
      */
     NewGroupSelected(){
         // If TracksInfo existe alors on le supprime
-        let MyDivBoxTracks = document.getElementById("DivBoxTracks")
-        if(MyDivBoxTracks){
-            MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
-            document.getElementById("ButtonShowTrackInfo").style.display = "block";
-        }
+        this.HideTrackInfoBox()
         // get du nom du type
         let DropDownGroupValue = document.getElementById("Group").value
         this._GroupSelected = DropDownGroupValue
@@ -184,16 +189,17 @@ class GeoXMap {
         this._LayerGroup.eachLayer(function (layer) {
             me._LayerGroup.removeLayer(layer);
         })
-        // Style for tracks
-        var TrackStyle = {
-            "color": "Blue",
-            "weight": 3
-        };
         // Zoom in and add tracks
-        if (DataMap.FitBounds != null){
-            this._Map.flyToBounds(DataMap.FitBounds,{'duration':2} )
+        if (this._DataMap.FitBounds != null){
+            this._Map.flyToBounds(this._DataMap.FitBounds,{'duration':2} )
+            let me = this
             this._Map.once('moveend', function() {
-                DataMap.ListOfTracks.forEach(Track => {
+                me._DataMap.ListOfTracks.forEach(Track => {
+                    // Style for tracks
+                    var TrackStyle = {
+                        "color": Track.Color,
+                        "weight": 3
+                    };
                     var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle}).addTo(me._LayerGroup).bindPopup(Track.Name)
                     layerTrack1.id = Track._id
                 });
@@ -217,17 +223,21 @@ class GeoXMap {
         })
         if (AddTrack){
             // Style for tracks
-            let color = "Blue"
-            let ColorPicker = document.getElementById("color"+TrackId)
-            if(ColorPicker){
-                color = ColorPicker.value
-            }
-            var TrackStyle = {
-                "color": color,
-                "weight": 3
-            };
+            // let color = "Blue"
+            // let ColorPicker = document.getElementById("color"+TrackId)
+            // if(ColorPicker){
+            //     color = ColorPicker.value
+            // }
+            // var TrackStyle = {
+            //     "color": color,
+            //     "weight": 3
+            // };
             this._DataMap.ListOfTracks.forEach(Track => {
                 if (Track._id == TrackId){
+                    var TrackStyle = {
+                        "color": Track.Color,
+                        "weight": 3
+                    };
                     var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle}).addTo(me._LayerGroup).bindPopup(Track.Name)
                     layerTrack1.id = Track._id
                 }
@@ -241,11 +251,29 @@ class GeoXMap {
      * @param {String} TrackId id of the track to color
      */
     ChangeTrackColor(Color, TrackId){
-        let me = this
         this._LayerGroup.eachLayer(function (layer) {
             if (layer.id == TrackId){
                 layer.setStyle({color: Color});
             }
         })
+        this._DataMap.ListOfTracks.forEach(Track => {
+            if (Track._id == TrackId){
+                Track.Color = Color
+            }
+        });
+        this._DataApp.forEach(Track => {
+            if (Track._id == TrackId){
+                Track.Color = Color
+            }
+        });
+        let Track = new Object()
+        Track.Id = TrackId
+        Track.Color = Color
+        // Data to send
+        let Data = new Object()
+        Data.Action = "Update"
+        Data.Data = Track
+        Data.FromCurrentView = null
+        GlobalSendSocketIo("GeoX", "ManageTrack", Data)
     }
 }

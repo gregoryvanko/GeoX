@@ -59,12 +59,18 @@
     height: 70vh;
     position: fixed;
     z-index: 998; 
-    left: 1%; 
+    left: -20%; 
     top: 15vh; 
     background-color: black;
     opacity: 0.6;
     border-radius: 15px;
     overflow-y:auto;
+    
+    -moz-transition: left 1s ease-in-out; 
+    -webkit-transition: left 1s ease-in-out;  
+    -ms-transition: left 1s ease-in-out;  
+    -o-transition: left 1s ease-in-out;  
+    transition: left 1s ease-in-out;
 }
 .DivBoxTrackInfo{
     width: 90%;
