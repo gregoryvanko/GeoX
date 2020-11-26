@@ -100,7 +100,7 @@ class GeoXMap {
         // Start transition
         setTimeout(function(){
             let DivBoxTracks = document.getElementById("DivBoxTracks")
-            DivBoxTracks.style.left = '1%';
+            DivBoxTracks.classList.add("DivBoxTracksShow")
         }, 100);
         
     }
@@ -111,7 +111,8 @@ class GeoXMap {
         if(MyDivBoxTracks){
             // Show button
             document.getElementById("ButtonShowTrackInfo").style.display = "block";
-            MyDivBoxTracks.style.left = '-20%';
+            //MyDivBoxTracks.style.left = '-20%';
+            MyDivBoxTracks.classList.remove("DivBoxTracksShow")
             setTimeout(function(){
                 MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
             }, 1500);
@@ -140,7 +141,7 @@ class GeoXMap {
                 inputcolor.setAttribute("id","color" + element._id)
                 inputcolor.setAttribute("type","color")
                 inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px;")
-                inputcolor.setAttribute("value",element.Color)
+                inputcolor.value = element.Color
                 inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, element._id)}
                 DivButton.appendChild(inputcolor)
                 DivButton.appendChild(CoreXBuild.Button ("&#128065", this.ToogleTrack.bind(this, element._id), "ButtonIcon"))
