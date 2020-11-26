@@ -92,6 +92,9 @@ class GeoXMap {
         }, 500);
     }
 
+    /**
+     * Show le box du track info
+     */
     ShowTrackInfoBox(){
         // Show track info box
         this.BuildBoxTracksInfo(this._DataApp)
@@ -105,6 +108,9 @@ class GeoXMap {
         
     }
 
+    /**
+     * Hide du box du track info
+     */
     HideTrackInfoBox(){
         // If TracksInfo existe alors on le supprime
         let MyDivBoxTracks = document.getElementById("DivBoxTracks")
@@ -119,6 +125,10 @@ class GeoXMap {
         }
     }
 
+    /**
+     * Construit la vue du box track info
+     * @param {Object} AppData liste des donnees de l'application
+     */
     BuildBoxTracksInfo(AppData){
         // Div du box
         let DivBoxTracks = CoreXBuild.Div("DivBoxTracks", "DivBoxTracks", "")
