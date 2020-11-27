@@ -59,9 +59,8 @@ class GeoXMap {
             DropDown.onchange = this.NewGroupSelected.bind(this)
             divdropdown.appendChild(DropDown)
             this._GroupSelected = GeoXData.AppGroup[0]
-            // Ajout du bouton info
-            let ButtonActionInfo = CoreXBuild.Button ("&#128065", this.ShowTrackInfoBox.bind(this), "ButtonActionTopLeft", "ButtonShowTrackInfo")
-            this._DivApp.appendChild(ButtonActionInfo)
+            // Ajout du bouton action left
+            this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this.ShowTrackInfoBox.bind(this), "ButtonShowTrackInfo"))
         }
         // Parametre de la carte
         let CenterPoint = null
