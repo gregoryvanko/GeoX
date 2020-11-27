@@ -300,6 +300,7 @@ class GeoXServer{
         TrackData.Date = new Date()
         TrackData.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
         TrackData.GeoJsonData = GeoJson
+        TrackData.GpxData = Track.FileContent
 
         let DataToMongo = TrackData
         this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{

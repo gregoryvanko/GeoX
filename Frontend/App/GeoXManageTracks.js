@@ -141,7 +141,7 @@ class GeoXManageTracks {
             }
         });
         // Button select file
-        Contener.appendChild(CoreXBuild.Button("Select and upload File",this.SelectFile.bind(this),"Text Button"))
+        Contener.appendChild(CoreXBuild.Button("Select and upload File",this.SelectFile.bind(this),"Text Button", "SelectAndSend"))
         //Input file
         var Input = document.createElement("input")
         Input.setAttribute("type","file")
@@ -174,6 +174,8 @@ class GeoXManageTracks {
     }
 
     SendAddTrack(File){
+        // Change button to waiting
+        document.getElementById("SelectAndSend").innerHTML="Waiting..."
         let Track = new Object()
         Track.Name = document.getElementById("InputTrackName").value 
         Track.Group = document.getElementById("InputTrackGroup").value 
