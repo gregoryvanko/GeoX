@@ -46,7 +46,7 @@ class GeoX {
        // Chemin vers le dossier contenant les sources Js et CSS de l'app client
        this._MyApp.ClientAppFolder = __dirname + "/Frontend/App"
        // Chemin vers le dossier contenant les sources Js et CSS de l'app Admin
-       this._MyApp.AdminAppFolder = __dirname + "/Frontend/Admin"
+       //this._MyApp.AdminAppFolder = __dirname + "/Frontend/Admin"
        // Chemin vers le dossier contenant les sources Js et CSS Commun
        this._MyApp.CommonAppFolder = __dirname + "/Frontend/Common"
        // Chemin relatif de l'icone
