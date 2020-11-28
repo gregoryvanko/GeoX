@@ -1,6 +1,6 @@
 {
   "name": "@gregvanko/geox",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "description": "geolocalisation",
   "main": "index.js",
   "scripts": {
