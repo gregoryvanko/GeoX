@@ -143,7 +143,8 @@ class GeoXServer{
             let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
             const Querry = {}
             const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1}}
-            this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
+            const Sort = {[this._MongoTracksCollection.Date]: -1}
+            this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
                     ReponseTracks.Error = false
                     ReponseTracks.ErrorMsg = null
@@ -174,7 +175,8 @@ class GeoXServer{
             ReponseTracks.Data = null
             const Querry = {[this._MongoTracksCollection.Group]: GroupName}
             const Projection = { projection:{}}
-            this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
+            const Sort = {[this._MongoTracksCollection.Date]: -1}
+            this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
                     ReponseTracks.Error = false
                     ReponseTracks.ErrorMsg = null
@@ -329,17 +331,9 @@ class GeoXServer{
     UpdateTrack(Value, Socket, User, UserId){
         let Track = Value.Data
         let DataToDb = new Object()
-        if(Track.Name){
-            DataToDb[this._MongoTracksCollection.Name]= Track.Name
-            DataToDb[this._MongoTracksCollection.Date]= new Date()
-        }
-        if(Track.Group){
-            DataToDb[this._MongoTracksCollection.Group]= Track.Group
-            DataToDb[this._MongoTracksCollection.Date]= new Date()
-        }
-        if (Track.Color){
-            DataToDb[this._MongoTracksCollection.Color]= Track.Color
-        }
+        if(Track.Name){DataToDb[this._MongoTracksCollection.Name]= Track.Name}
+        if(Track.Group){DataToDb[this._MongoTracksCollection.Group]= Track.Group}
+        if (Track.Color){DataToDb[this._MongoTracksCollection.Color]= Track.Color}
         
         this._Mongo.UpdateByIdPromise(Track.Id, DataToDb, this._MongoTracksCollection.Collection).then((reponse)=>{
             if (reponse.matchedCount == 0){
