@@ -9,29 +9,29 @@ class GeoXMap {
         this._DataApp = null
 
         // Add Leaflet Links
-        this.AddLeafletLinks()
+        //this.AddLeafletLinks()
         
     }
 
     /**
      * Add Leaflet links
      */
-    AddLeafletLinks(){
-        // Add css for maps
-        var link  = document.createElement('link');
-        link.rel  = 'stylesheet';
-        link.type = 'text/css';
-        link.href = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css';
-        link.integrity='sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=='
-        link.crossOrigin =""
-        // Add css for maps
-        document.head.appendChild(link)
-        var Leafletjs = document.createElement('script')
-        Leafletjs.setAttribute('src','https://unpkg.com/leaflet@1.7.1/dist/leaflet.js')
-        Leafletjs.setAttribute('integrity','sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==')
-        Leafletjs.setAttribute('crossorigin','')
-        document.head.appendChild(Leafletjs)
-    }
+    //AddLeafletLinks(){
+        // // Add css for maps
+        // var link  = document.createElement('link');
+        // link.rel  = 'stylesheet';
+        // link.type = 'text/css';
+        // link.href = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css';
+        // link.integrity='sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=='
+        // link.crossOrigin =""
+        // // Add css for maps
+        // document.head.appendChild(link)
+        // var Leafletjs = document.createElement('script')
+        // Leafletjs.setAttribute('src','https://unpkg.com/leaflet@1.7.1/dist/leaflet.js')
+        // Leafletjs.setAttribute('integrity','sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==')
+        // Leafletjs.setAttribute('crossorigin','')
+        // document.head.appendChild(Leafletjs)
+    //}
 
     /**
      * Load de la vue Map
@@ -210,7 +210,7 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": 3
                     };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle}).addTo(me._LayerGroup).bindPopup(Track.Name)
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '20%', fill: true}}).addTo(me._LayerGroup).bindPopup(Track.Name)
                     layerTrack1.id = Track._id
                 });
             });
