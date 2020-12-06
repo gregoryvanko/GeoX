@@ -236,23 +236,13 @@ class GeoXMap {
             }
         })
         if (AddTrack){
-            // Style for tracks
-            // let color = "Blue"
-            // let ColorPicker = document.getElementById("color"+TrackId)
-            // if(ColorPicker){
-            //     color = ColorPicker.value
-            // }
-            // var TrackStyle = {
-            //     "color": color,
-            //     "weight": 3
-            // };
             this._DataMap.ListOfTracks.forEach(Track => {
                 if (Track._id == TrackId){
                     var TrackStyle = {
                         "color": Track.Color,
                         "weight": 3
                     };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle}).addTo(me._LayerGroup).bindPopup(Track.Name)
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(me._LayerGroup).bindPopup(Track.Name)
                     layerTrack1.id = Track._id
                 }
             });
