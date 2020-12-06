@@ -210,7 +210,7 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": 3
                     };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '20%', fill: true}}).addTo(me._LayerGroup).bindPopup(Track.Name)
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '30%', fill: true}}).addTo(me._LayerGroup).bindPopup(Track.Name)
                     layerTrack1.id = Track._id
                 });
             });
