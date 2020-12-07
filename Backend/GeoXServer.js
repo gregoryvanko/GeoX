@@ -34,7 +34,10 @@ class GeoXServer{
                     this.AddTrack(Data.Value, Socket, User, UserId)
                 }else if (Data.Value.Action == "Update"){
                     this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
-                    this.UpdateTrack(Data.Value, Socket, User, UserId)
+                    //this.UpdateTrack(Data.Value, Socket, User, UserId)
+
+                    // ToDo
+                    this.UpdateLengthOfAllTracksInDb(User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
@@ -142,7 +145,7 @@ class GeoXServer{
         return new Promise(resolve => {
             let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
             const Querry = {}
-            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1}}
+            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.Length]: 1}}
             const Sort = {[this._MongoTracksCollection.Date]: -1}
             this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
@@ -174,7 +177,8 @@ class GeoXServer{
             ReponseTracks.ErrorMsg = ""
             ReponseTracks.Data = null
             const Querry = {[this._MongoTracksCollection.Group]: GroupName}
-            const Projection = { projection:{}}
+            const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
+            //const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.GeoJsonData]: 1, [this._MongoTracksCollection.Length]: 1 }}
             const Sort = {[this._MongoTracksCollection.Date]: -1}
             this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
@@ -303,6 +307,7 @@ class GeoXServer{
         TrackData.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
         TrackData.GeoJsonData = GeoJson
         TrackData.GpxData = Track.FileContent
+        TrackData.Length = this.CalculateTrackLength(GeoJson)
 
         let DataToMongo = TrackData
         this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
@@ -352,6 +357,41 @@ class GeoXServer{
             Socket.emit("GeoXError", "GeoXServerApi UpdateTrack DB error")
         })
     }
+
+    CalculateTrackLength(GeoJson){
+        var Turf = require('@turf/length').default
+        let distance = Math.round((Turf(GeoJson) + Number.EPSILON) * 100) / 100
+        return distance
+    }
+
+    UpdateLengthOfAllTracksInDb(User, UserId){
+        const Querry = {}
+        const Projection = { projection:{}}
+        const Sort = {[this._MongoTracksCollection.Date]: -1}
+        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+            reponse.forEach(element => {
+                let GeoJsonData = element.GeoJsonData
+                let id = element._id
+                let dist = this.CalculateTrackLength(GeoJsonData)
+                let DataToDb = new Object()
+                DataToDb[this._MongoTracksCollection.Length]=dist
+                this._Mongo.UpdateByIdPromise(id, DataToDb, this._MongoTracksCollection.Collection).then((reponse)=>{
+                    if (reponse.matchedCount == 0){
+                        this._MyApp.LogAppliError("UpdateTrack Track Id not found", User, UserId)
+                    } else {
+                        // Log
+                        this._MyApp.LogAppliInfo("Track Updated", User, UserId)
+                        // Load App Data
+                    }
+                },(erreur)=>{
+                    this._MyApp.LogAppliError("UpdateTrack DB error : " + erreur, User, UserId)
+                })
+            });
+        },(erreur)=>{
+            console.log("error: " + erreur)
+        })
+    }
+
   }
   
 module.exports.GeoXServer = GeoXServer
