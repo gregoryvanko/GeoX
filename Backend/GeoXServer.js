@@ -34,10 +34,7 @@ class GeoXServer{
                     this.AddTrack(Data.Value, Socket, User, UserId)
                 }else if (Data.Value.Action == "Update"){
                     this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
-                    //this.UpdateTrack(Data.Value, Socket, User, UserId)
-
-                    // ToDo
-                    this.UpdateLengthOfAllTracksInDb(User, UserId)
+                    this.UpdateTrack(Data.Value, Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
