@@ -51,12 +51,10 @@ class GeoX {
        this._MyApp.CommonAppFolder = __dirname + "/Frontend/Common"
        // Chemin relatif de l'icone
        this._MyApp.IconRelPath = __dirname + "/Backend/apple-icon-192x192.png"
-       // Chemin relatif du dossier video
-       //this._MyServeurApp.VideoFolder = __dirname + "/Video"
-       // Set Tag name du serveur video
-       //this._MyServeurApp.VideoTagName = "name"
        // SocketIo
        this._MyApp.AddSocketIoFct("GeoX", this._GeoXServer.Api.bind(this._GeoXServer))
+       // Route GetMap
+       this._MyApp.AddRouteGet("getmap", this._GeoXServer.RouteGetMap.bind(this._GeoXServer))
        // Start
        this._MyApp.Start()
        }

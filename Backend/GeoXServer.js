@@ -268,7 +268,7 @@ class GeoXServer{
     }
 
     /**
-     * 
+     * Delete d'une track
      * @param {Object} Value {Data: Id of track to delete, FromCurrentView: name of the current view}
      * @param {Socket} Socket SocketIO
      * @param {String} User Nom du user
@@ -330,6 +330,13 @@ class GeoXServer{
         return converted
     }
 
+    /**
+     * update d'une track
+     * @param {Object} Value {Data: Object Track {Id: Id de la track a updater, Name: Nom de la track, Group: group de la track, Color: Color de la track}}
+     * @param {Socket} Socket SocketIO
+     * @param {String} User Nom du user
+     * @param {String} UserId Id du user
+     */
     UpdateTrack(Value, Socket, User, UserId){
         let Track = Value.Data
         let DataToDb = new Object()
@@ -355,12 +362,21 @@ class GeoXServer{
         })
     }
 
+    /**
+     * Calcule la longeur en Km d'une track
+     * @param {GeoJson} GeoJson GeoJson object de la track
+     */
     CalculateTrackLength(GeoJson){
         var Turf = require('@turf/length').default
         let distance = Math.round((Turf(GeoJson) + Number.EPSILON) * 100) / 100
         return distance
     }
 
+    /**
+     * Fonction executant un update du calcul de la longeur pour toutes les track de la DB
+     * @param {String} User Nom du user
+     * @param {String} UserId Id du user
+     */
     UpdateLengthOfAllTracksInDb(User, UserId){
         const Querry = {}
         const Projection = { projection:{}}
@@ -387,6 +403,29 @@ class GeoXServer{
         },(erreur)=>{
             console.log("error: " + erreur)
         })
+    }
+
+    /**
+     * Fonction executee lors d'un appel a la route GET getmap
+     * @param {req} req request html GET
+     * @param {res} res response html GET
+     */
+    RouteGetMap(req, res){
+        let ListOfTrackId = req.query["trackid"]
+        if (ListOfTrackId) {
+            if (typeof ListOfTrackId === 'object'){
+                ListOfTrackId.forEach(element => {
+                    console.log(element)
+                });
+                res.send("Object of trackid")
+            } else {
+                console.log(ListOfTrackId)
+                res.send("Une trackid")
+            }
+        } else {
+            res.send("No trackid defined in url query")
+        }
+        
     }
 
   }
