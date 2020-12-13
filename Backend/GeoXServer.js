@@ -420,7 +420,7 @@ class GeoXServer{
                 res.send("Object of trackid")
             } else {
                 console.log(ListOfTrackId)
-                res.send("Une trackid")
+                res.send("Une trackid def")
             }
         } else {
             res.send("No trackid defined in url query")
