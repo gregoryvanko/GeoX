@@ -40,9 +40,10 @@ class GeoXManageTracks {
                 AppConteneur.appendChild(BoxTracks)
                 BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 36%; margin-left:1%;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","Text", "width: 18%; margin-left:1%;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateTimeString(Track.Date),"","Text", "width: 20%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","Text", "width: 20%;"))
                 let DivButton = document.createElement("div")
                 DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
+                DivButton.appendChild(CoreXBuild.Button ("&#128279", this.LoadViewLink.bind(this,Track._id), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "ButtonIcon"))
                 BoxTracks.appendChild(DivButton)
@@ -62,6 +63,10 @@ class GeoXManageTracks {
             Data.FromCurrentView = this._FromCurrentView
             GlobalSendSocketIo("GeoX", "ManageTrack", Data)
         }
+    }
+
+    LoadViewLink(TrackId){
+        alert(window.location.href + "getmap/?trackid=" + TrackId)
     }
 
     LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup){
