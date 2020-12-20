@@ -411,24 +411,16 @@ class GeoXServer{
      * @param {res} res response html GET
      */
     RouteGetMap(req, res){
-        let me = this
+        // https://dev.gregvanko.com/getmap/?trackid=5fc12c5ebe87dc3b01725bd1&trackid=5fc12c0abe87dc3b01725bcb
         let ListOfTrackId = req.query["trackid"]
         if (ListOfTrackId) {
-            if (typeof ListOfTrackId === 'object'){
-                ListOfTrackId.forEach(element => {
-                    console.log(element)
-                });
-                res.send(this.BuildHtmlGetMap())
-            } else {
-                console.log(ListOfTrackId)
-                res.send(me.BuildHtmlGetMap())
-            }
+            this.GetMapDataById(ListOfTrackId, res)
         } else {
             res.send("No trackid defined in url query")
         }
     }
 
-    BuildHtmlGetMap(){
+    BuildHtmlGetMap(DataMap){
         let fs = require('fs')
         var reponse = ""
         reponse +=`
@@ -476,18 +468,108 @@ class GeoXServer{
                 <div id="mapid" style="height: 100vh; width: 100%"></div>
             </body>
             <script>
-                let CenterPoint = {Lat: 50.709446, Long: 4.543413}
-                let zoom= 8
+                let ListeOfTracks = `+ JSON.stringify(DataMap) + `
+                let CenterPoint = ListeOfTracks.CenterPoint
+                let zoom= ListeOfTracks.Zoom
+                FitBounds = ListeOfTracks.FitBounds
                 // Creation de la carte
-                var MyMap = L.map("mapid" , {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
+                var MyMap = L.map("mapid" , {zoomControl: false}).fitBounds(FitBounds);
                 L.control.zoom({position: 'bottomright'}).addTo(MyMap);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
                 }).addTo(MyMap)
+                // Creation du groupe de layer
+                var MyLayerGroup = new L.LayerGroup()
+                MyLayerGroup.addTo(MyMap)
+                let me = this
+                // Ajout des tracks sur la map
+                setTimeout(function(){
+                    //MyMap.flyToBounds(FitBounds,{'duration':2} )
+                    ListeOfTracks.ListOfTracks.forEach(Track => {
+                        // Style for tracks
+                        var TrackStyle = {
+                            "color": Track.Color,
+                            "weight": 3
+                        };
+                        // Add track
+                        var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(MyLayerGroup).bindPopup(Track.Name)
+                        layerTrack1.id = Track._id
+                    });
+                }, 500);
             </script>
         </html>`
         return reponse
+    }
+
+    async GetMapDataById(ListOfTrackId, res){
+        // Build Tracks Data
+        let Data = new Object()
+        Data.IsError = false
+        Data.ErrorMsg = "No Error"
+        Data.ListOfTracks = []
+        Data.CenterPoint = {Lat:50.709446, Long:4.543413}
+        Data.Zoom = 8
+        // Get Tracks
+        let ReponseListOfTracks = await this.PromiseGetTracksByIdFromDb(ListOfTrackId)
+        if(!ReponseListOfTracks.Error){
+            Data.ListOfTracks = ReponseListOfTracks.Data
+        } else {
+            this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg)
+            Data.IsError = true
+            Data.ErrorMsg = ReponseListOfTracks.ErrorMsg
+        }
+        // Calcul des point extérieur et du centre de toutes les tracks
+        if (Data.ListOfTracks.length != 0){
+            let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
+            Data.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
+            Data.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
+            Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
+        }
+        if (Data.IsError){
+            res.send("Error: " + Data.ErrorMsg)
+        } else {
+            res.send(this.BuildHtmlGetMap(Data))
+        }
+    }
+
+    PromiseGetTracksByIdFromDb(ListOfTrackId){
+        return new Promise(resolve => {
+            let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+            var Querry = null
+            if (typeof ListOfTrackId === 'object'){
+                let list = []
+                ListOfTrackId.forEach(element => {
+                    list.push({'_id': new MongoObjectId(element)})
+                });
+                Querry= {$or:list}
+            } else {
+                Querry = {'_id': new MongoObjectId(ListOfTrackId)}
+            }
+            let ReponseTracks = new Object()
+            ReponseTracks.Error = true
+            ReponseTracks.ErrorMsg = ""
+            ReponseTracks.Data = null
+            const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
+            const Sort = {[this._MongoTracksCollection.Date]: -1}
+            this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+                if(reponse.length == 0){
+                    ReponseTracks.Error = false
+                    ReponseTracks.ErrorMsg = null
+                    ReponseTracks.Data = []
+                } else {
+                    ReponseTracks.Error = false
+                    ReponseTracks.ErrorMsg = null
+                    ReponseTracks.Data = reponse
+                }
+                resolve(ReponseTracks)
+            },(erreur)=>{
+                ReponseTracks.Error = true
+                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksFromDb error: " + erreur
+                ReponseTracks.Data = []
+                resolve(ReponseTracks)
+            })
+        })
     }
 
   }
