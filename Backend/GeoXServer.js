@@ -420,6 +420,10 @@ class GeoXServer{
         }
     }
 
+    /**
+     * Construction de la page HTML avec les tracks a montrer
+     * @param {Object} DataMap Object contenant les data des map
+     */
     BuildHtmlGetMap(DataMap){
         let fs = require('fs')
         var reponse = ""
@@ -473,7 +477,13 @@ class GeoXServer{
                 let zoom= ListeOfTracks.Zoom
                 FitBounds = ListeOfTracks.FitBounds
                 // Creation de la carte
-                var MyMap = L.map("mapid" , {zoomControl: false}).fitBounds(FitBounds);
+                var MyMap = null
+                if (FitBounds == null){
+                    MyMap = L.map("mapid", {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
+                } else {
+                    MyMap = L.map("mapid" , {zoomControl: false}).fitBounds(FitBounds);
+                }
+                
                 L.control.zoom({position: 'bottomright'}).addTo(MyMap);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
@@ -502,6 +512,11 @@ class GeoXServer{
         return reponse
     }
 
+    /**
+     * Get data of map by Id
+     * @param {String or Array} ListOfTrackId liste des Id des tracks a trouver en DB
+     * @param {res} res res
+     */
     async GetMapDataById(ListOfTrackId, res){
         // Build Tracks Data
         let Data = new Object()
@@ -509,6 +524,7 @@ class GeoXServer{
         Data.ErrorMsg = "No Error"
         Data.ListOfTracks = []
         Data.CenterPoint = {Lat:50.709446, Long:4.543413}
+        Data.FitBounds = null
         Data.Zoom = 8
         // Get Tracks
         let ReponseListOfTracks = await this.PromiseGetTracksByIdFromDb(ListOfTrackId)
@@ -519,59 +535,83 @@ class GeoXServer{
             Data.IsError = true
             Data.ErrorMsg = ReponseListOfTracks.ErrorMsg
         }
-        // Calcul des point extérieur et du centre de toutes les tracks
-        if (Data.ListOfTracks.length != 0){
-            let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
-            Data.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
-            Data.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
-            Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
-        }
         if (Data.IsError){
             res.send("Error: " + Data.ErrorMsg)
         } else {
+        // Calcul des point extérieur et du centre de toutes les tracks
+            if (Data.ListOfTracks.length != 0){
+                let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
+                Data.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
+                Data.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
+                Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
+            }
             res.send(this.BuildHtmlGetMap(Data))
         }
     }
 
+    /**
+     * Rechercher les track par Id en DB
+     * @param {String of Array} ListOfTrackId liste des ID des tracks a trouver en DB
+     */
     PromiseGetTracksByIdFromDb(ListOfTrackId){
         return new Promise(resolve => {
+            let ReponseTracks = new Object()
+            ReponseTracks.Error = true
+            ReponseTracks.ErrorMsg = ""
+            ReponseTracks.Data = null
+
+            let searchindb = false
             let MongoObjectId = require('@gregvanko/corex').MongoObjectId
             var Querry = null
             if (typeof ListOfTrackId === 'object'){
                 let list = []
                 ListOfTrackId.forEach(element => {
-                    list.push({'_id': new MongoObjectId(element)})
+                    try {
+                        list.push({'_id': new MongoObjectId(element)}) 
+                    } catch (error) {
+                        // Error in new MongoObjectId
+                    }
                 });
-                Querry= {$or:list}
-            } else {
-                Querry = {'_id': new MongoObjectId(ListOfTrackId)}
-            }
-            let ReponseTracks = new Object()
-            ReponseTracks.Error = true
-            ReponseTracks.ErrorMsg = ""
-            ReponseTracks.Data = null
-            const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
-            const Sort = {[this._MongoTracksCollection.Date]: -1}
-            this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
-                if(reponse.length == 0){
-                    ReponseTracks.Error = false
-                    ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = []
+                if (list.length > 0){
+                    Querry= {$or:list}
+                    searchindb = true
                 } else {
-                    ReponseTracks.Error = false
-                    ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = reponse
+                    ReponseTracks.ErrorMsg = "List of TrackId not good"
                 }
+                
+            } else {
+                try {
+                    Querry = {'_id': new MongoObjectId(ListOfTrackId)}
+                    searchindb = true
+                } catch (error) {
+                    ReponseTracks.ErrorMsg = "List of TrackId not good"
+                }
+            }
+            if (searchindb){
+                const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
+                const Sort = {[this._MongoTracksCollection.Date]: -1}
+                this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+                    if(reponse.length == 0){
+                        ReponseTracks.Error = false
+                        ReponseTracks.ErrorMsg = null
+                        ReponseTracks.Data = []
+                    } else {
+                        ReponseTracks.Error = false
+                        ReponseTracks.ErrorMsg = null
+                        ReponseTracks.Data = reponse
+                    }
+                    resolve(ReponseTracks)
+                },(erreur)=>{
+                    ReponseTracks.Error = true
+                    ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksFromDb error: " + erreur
+                    ReponseTracks.Data = []
+                    resolve(ReponseTracks)
+                })
+            } else {
                 resolve(ReponseTracks)
-            },(erreur)=>{
-                ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksFromDb error: " + erreur
-                ReponseTracks.Data = []
-                resolve(ReponseTracks)
-            })
+            }
         })
     }
-
   }
   
 module.exports.GeoXServer = GeoXServer
