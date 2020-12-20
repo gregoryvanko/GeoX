@@ -411,21 +411,83 @@ class GeoXServer{
      * @param {res} res response html GET
      */
     RouteGetMap(req, res){
+        let me = this
         let ListOfTrackId = req.query["trackid"]
         if (ListOfTrackId) {
             if (typeof ListOfTrackId === 'object'){
                 ListOfTrackId.forEach(element => {
                     console.log(element)
                 });
-                res.send("Object of trackid")
+                res.send(this.BuildHtmlGetMap())
             } else {
                 console.log(ListOfTrackId)
-                res.send("Une trackid def")
+                res.send(me.BuildHtmlGetMap())
             }
         } else {
             res.send("No trackid defined in url query")
         }
-        
+    }
+
+    BuildHtmlGetMap(){
+        let fs = require('fs')
+        var reponse = ""
+        reponse +=`
+        <!doctype html>
+        <html>
+            <head>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/>
+                <meta name="apple-mobile-web-app-capable" content="yes">
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+                <meta name="apple-mobile-web-app-title" content="GeoX">
+                <link rel="apple-touch-icon" href="apple-icon.png">
+                <meta http-equiv="X-UA-Compatible" content="ie=edge">
+                <title>GeoX</title>
+                <style>
+                    body{
+                        margin: 0;
+                        padding: 0;
+                        -webkit-tap-highlight-color: transparent;
+                        -webkit-touch-callout: none; 
+                        -webkit-user-select: none;   
+                        -khtml-user-select: none;    
+                        -moz-user-select: none;      
+                        -ms-user-select: none;      
+                        user-select: none;  
+                        cursor: default;
+                        font-family: 'Myriad Set Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-synthesis: none;
+                        letter-spacing: normal;
+                        text-rendering: optimizelegibility;
+                        width: 100%;
+                        height: 100%;
+                    }
+                    `
+        reponse += fs.readFileSync(__dirname + "/../Frontend/App/0-leaflet.css", 'utf8')
+        reponse +=`
+                </style>
+                <script>`
+        reponse += fs.readFileSync(__dirname + "/../Frontend/App/0-leaflet.js", 'utf8')
+        reponse += fs.readFileSync(__dirname + "/../Frontend/App/1-leaflet.geometryutil.js", 'utf8')
+        reponse += fs.readFileSync(__dirname + "/../Frontend/App/2-leaflet-arrowheads.js", 'utf8')
+        reponse += `
+                </script>
+            </head>
+            <body>
+                <div id="mapid" style="height: 100vh; width: 100%"></div>
+            </body>
+            <script>
+                let CenterPoint = {Lat: 50.709446, Long: 4.543413}
+                let zoom= 8
+                // Creation de la carte
+                var MyMap = L.map("mapid" , {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
+                L.control.zoom({position: 'bottomright'}).addTo(MyMap);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+                }).addTo(MyMap)
+            </script>
+        </html>`
+        return reponse
     }
 
   }
