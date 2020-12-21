@@ -144,6 +144,7 @@ class GeoXMap {
                 let Conteneur = CoreXBuild.DivFlexRowStart("")
                 DivBoxTrackInfo.appendChild(Conteneur)
                 let DivTrackinfo = CoreXBuild.Div("", "", "width: 56%; display: -webkit-flex; display: flex; flex-direction: column; justify-content:flex-start;")
+                DivTrackinfo.addEventListener('click', this.FitboundOnTrack.bind(this, element))
                 Conteneur.appendChild(DivTrackinfo)
                 DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "color: white; margin-left: 4%;"))
                 let DivSubInfo = CoreXBuild.Div("","","width: 100%; display: -webkit-flex; display: flex; flex-direction: row;  justify-content:space-between;")
@@ -163,6 +164,11 @@ class GeoXMap {
                 Conteneur.appendChild(DivButton)
             }
         });
+    }
+
+    FitboundOnTrack(track){
+        let FitboundTrack = [ [track.ExteriorPoint.MaxLong, track.ExteriorPoint.MinLat], [track.ExteriorPoint.MaxLong, track.ExteriorPoint.MaxLat], [ track.ExteriorPoint.MinLong, track.ExteriorPoint.MaxLat ], [ track.ExteriorPoint.MinLong, track.ExteriorPoint.MinLat], [track.ExteriorPoint.MaxLong, track.ExteriorPoint.MinLat]] 
+        this._Map.flyToBounds(FitboundTrack,{'duration':2} )
     }
 
     /**
