@@ -40,6 +40,13 @@ class GeoX{
         SocketIo.on('ModifyTracksOnMap', (Value) => {
             this.ModifyTracksOnMap(Value)
         })
+        SocketIo.on('DownloadFile', (Value) => {
+            var link = document.createElement('a')
+            link.download = 'Track.' + Value.Type
+            var blob = new Blob([Value.File], {typde: 'text/plain'})
+            link.href = window.URL.createObjectURL(blob)
+            link.click()
+        })
         
         // Build view map
         this.LoadViewGetAppData()

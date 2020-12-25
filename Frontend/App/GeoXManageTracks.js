@@ -45,9 +45,9 @@ class GeoXManageTracks {
                 DivButton.setAttribute("style", "margin-left: auto; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
                 DivButton.setAttribute("class", "NotOnIphone")
                 DivButton.appendChild(CoreXBuild.Button ("&#8681", this.LoadViewDownload.bind(this,Track._id), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128279", this.LoadViewLink.bind(this,Track._id), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128279", this.LoadViewLink.bind(this,Track._id, false), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group, false), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name, false), "ButtonIcon"))
                 BoxTracks.appendChild(DivButton)
                 let DivButtonIphone = document.createElement("div")
                 DivButtonIphone.setAttribute("style", "margin-left: auto; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
@@ -63,28 +63,34 @@ class GeoXManageTracks {
     LoadViewIphone(AppGroup, Track){
         let HTMLContent = CoreXBuild.DivFlexColumn()
         HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id), "Text Button"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group), "Text Button"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#128465 Delete Track", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "Text Button"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "GPX", Track._id), "Text Button"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "GeoJson", Track._id), "Text Button"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id, true), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group, true), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128465 Delete Track", this.SendDeleteTrack.bind(this, Track._id, Track.Name, true), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "gpx", Track._id), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "geojson", Track._id), "Text ButtonCoreXWindow"))
         CoreXWindow.BuildWindow(HTMLContent)
     }
 
     LoadViewDownload(TrackId){
         let HTMLContent = CoreXBuild.DivFlexColumn()
         HTMLContent.appendChild(CoreXBuild.DivTexte("Download file", "", "Text", ""))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "GPX", TrackId), "Text Button"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "GeoJson", TrackId), "Text Button"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "gpx", TrackId), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "geojson", TrackId), "Text ButtonCoreXWindow"))
         CoreXWindow.BuildWindow(HTMLContent)
     }
 
     DownloadFile(Type, TrackId){
         CoreXWindow.DeleteWindow()
-        alert(Type)
+        // Data to send
+        let Data = new Object()
+        Data.Action = "Download"
+        Data.Data = {Id:TrackId, Type:Type}
+        Data.FromCurrentView = this._FromCurrentView
+        GlobalSendSocketIo("GeoX", "ManageTrack", Data)
     }
 
-    SendDeleteTrack(TrackId, TrackName){
+    SendDeleteTrack(TrackId, TrackName, IsCoreXWindow){
+        if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
         // Send delete tracks to serveur
         if (confirm(`Do you want to delete track : ${TrackName}?`)){
             // Data to send
@@ -96,11 +102,13 @@ class GeoXManageTracks {
         }
     }
 
-    LoadViewLink(TrackId){
+    LoadViewLink(TrackId, IsCoreXWindow){
+        if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
         alert(window.location.href + "getmap/?trackid=" + TrackId)
     }
 
-    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup){
+    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup, IsCoreXWindow){
+        if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Contener
