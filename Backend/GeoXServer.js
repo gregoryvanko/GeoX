@@ -418,8 +418,6 @@ class GeoXServer{
         }
         const Sort = {[this._MongoTracksCollection.Date]: -1}
         const Querry = {'_id': new MongoObjectId(Value.Id)}
-        console.log(Value.Id)
-        console.log(Querry)
         this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){
                 this._MyApp.LogAppliError("GeoXServerApi DownloadTrack Track Id not found", User, UserId)
