@@ -84,7 +84,7 @@ class GeoXManageTracks {
         // Data to send
         let Data = new Object()
         Data.Action = "Download"
-        Data.Data = {Id:TrackId, Type:Type}
+        Data.Data = {Id: TrackId, Type : Type}
         Data.FromCurrentView = this._FromCurrentView
         GlobalSendSocketIo("GeoX", "ManageTrack", Data)
     }

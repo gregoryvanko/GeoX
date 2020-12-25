@@ -32,9 +32,12 @@ class GeoXServer{
                 } else if (Data.Value.Action == "Add"){
                     this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
                     this.AddTrack(Data.Value, Socket, User, UserId)
-                }else if (Data.Value.Action == "Update"){
+                } else if (Data.Value.Action == "Update"){
                     this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
                     this.UpdateTrack(Data.Value, Socket, User, UserId)
+                } else if (Data.Value.Action == "Download"){
+                    this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:`+ JSON.stringify(Data), User, UserId)
+                    this.DownloadTrack(Data.Value.Data, Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
@@ -402,6 +405,43 @@ class GeoXServer{
             });
         },(erreur)=>{
             console.log("error: " + erreur)
+        })
+    }
+
+    DownloadTrack(Value, Socket, User, UserId){
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+        var Projection = {}
+        if (Value.Type == "gpx"){
+            Projection = { projection:{[this._MongoTracksCollection.GpxData]: 1}}
+        } else {
+            Projection = { projection:{[this._MongoTracksCollection.GeoJsonData]: 1}}
+        }
+        const Sort = {[this._MongoTracksCollection.Date]: -1}
+        const Querry = {'_id': new MongoObjectId(Value.Id)}
+        console.log(Value.Id)
+        console.log(Querry)
+        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                this._MyApp.LogAppliError("GeoXServerApi DownloadTrack Track Id not found", User, UserId)
+                Socket.emit("GeoXError", "GeoXServerApi DownloadTrack Track Id not found")
+            } else {
+                // Log
+                this._MyApp.LogAppliInfo("Track Downloaded", User, UserId)
+                let Data = new Object()
+                Data.Type = Value.Type
+                if (Value.Type == "gpx"){
+                    Data.File = reponse[0][this._MongoTracksCollection.GpxData]
+                } else {
+                    Data.File = JSON.stringify(reponse[0][this._MongoTracksCollection.GeoJsonData])
+                }
+                
+                // Send tracks
+                Socket.emit("DownloadFile", Data)
+            }
+
+        },(erreur)=>{
+            this._MyApp.LogAppliError("GeoXServerApi DownloadTrack DB error : " + erreur, User, UserId)
+            Socket.emit("GeoXError", "GeoXServerApi DownloadTrack DB error")
         })
     }
 
