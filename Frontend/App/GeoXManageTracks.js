@@ -42,15 +42,46 @@ class GeoXManageTracks {
                 BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","Text", "width: 18%; margin-left:1%;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","Text", "width: 20%;"))
                 let DivButton = document.createElement("div")
-                DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
+                DivButton.setAttribute("style", "margin-left: auto; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
+                DivButton.setAttribute("class", "NotOnIphone")
+                DivButton.appendChild(CoreXBuild.Button ("&#8681", this.LoadViewDownload.bind(this,Track._id), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128279", this.LoadViewLink.bind(this,Track._id), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "ButtonIcon"))
                 BoxTracks.appendChild(DivButton)
+                let DivButtonIphone = document.createElement("div")
+                DivButtonIphone.setAttribute("style", "margin-left: auto; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
+                DivButtonIphone.setAttribute("class", "OnlyIphone")
+                DivButtonIphone.appendChild(CoreXBuild.Button ("&#8286", this.LoadViewIphone.bind(this,Data.AppGroup, Track), "ButtonIcon"))
+                BoxTracks.appendChild(DivButtonIphone)
                 // Ajout d'une ligne
                 AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
             });
         }
+    }
+
+    LoadViewIphone(AppGroup, Track){
+        let HTMLContent = CoreXBuild.DivFlexColumn()
+        HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id), "Text Button"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group), "Text Button"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128465 Delete Track", this.SendDeleteTrack.bind(this, Track._id, Track.Name), "Text Button"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "GPX", Track._id), "Text Button"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "GeoJson", Track._id), "Text Button"))
+        CoreXWindow.BuildWindow(HTMLContent)
+    }
+
+    LoadViewDownload(TrackId){
+        let HTMLContent = CoreXBuild.DivFlexColumn()
+        HTMLContent.appendChild(CoreXBuild.DivTexte("Download file", "", "Text", ""))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "GPX", TrackId), "Text Button"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "GeoJson", TrackId), "Text Button"))
+        CoreXWindow.BuildWindow(HTMLContent)
+    }
+
+    DownloadFile(Type, TrackId){
+        CoreXWindow.DeleteWindow()
+        alert(Type)
     }
 
     SendDeleteTrack(TrackId, TrackName){

@@ -133,6 +133,14 @@
     }
 }
 
+/* Only Iphone */
+.OnlyIphone{
+    display: none;
+}
+.NotOnIphone{
+    display: flex;
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)
@@ -145,6 +153,8 @@ screen and (max-width: 700px)
     .ButtonIcon{font-size: calc(var(--TexteIphone)*2);}
     .InputBox{width: 90%;}
     .Input {padding: 3%;}
+    .OnlyIphone{display: flex;}
+    .NotOnIphone{display: none;}
 }
 
 @media screen and (min-width: 1200px)
