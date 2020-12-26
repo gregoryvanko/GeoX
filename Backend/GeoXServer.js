@@ -240,34 +240,70 @@ class GeoXServer{
      * @param {geojson object} geojson Object GeaoJson d'une track
      */
     MinMaxGeoJsonTrack(geojson){
-        let listofcoordonate = geojson.features[0].geometry.coordinates
+        let reponse = new Object()
+        reponse.IsError = false
+        reponse.ErrorMsg = "no error"
+        reponse.Data = null
+        const listofcoordonate = geojson.features[0].geometry.coordinates
+        const LineType = geojson.features[0].geometry.type
         let MinLat1 = null
         let MaxLat1 = null
         let MinLong1 = null
         let MaxLong1 = null
-        listofcoordonate.forEach(element => {
-            if(MinLat1 == null){
-                MinLat1 = element[0]
-            } else {
-                if(element[0] < MinLat1){MinLat1 = element[0]}
-            }
-            if(MaxLat1 == null){
-                MaxLat1 = element[0]
-            } else {
-                if(element[0] > MaxLat1){MaxLat1 = element[0]}
-            }
-            if(MinLong1 == null){
-                MinLong1 = element[1]
-            } else {
-                if(element[1] < MinLong1){MinLong1 = element[1]}
-            }
-            if(MaxLong1 == null){
-                MaxLong1 = element[1]
-            } else {
-                if(element[1] > MaxLong1){MaxLong1 = element[1]}
-            }
-        });
-        return {MinLat:MinLat1, MaxLat:MaxLat1, MinLong:MinLong1, MaxLong:MaxLong1}
+        if (LineType == "LineString"){
+            listofcoordonate.forEach(element => {
+                if(MinLat1 == null){
+                    MinLat1 = element[0]
+                } else {
+                    if(element[0] < MinLat1){MinLat1 = element[0]}
+                }
+                if(MaxLat1 == null){
+                    MaxLat1 = element[0]
+                } else {
+                    if(element[0] > MaxLat1){MaxLat1 = element[0]}
+                }
+                if(MinLong1 == null){
+                    MinLong1 = element[1]
+                } else {
+                    if(element[1] < MinLong1){MinLong1 = element[1]}
+                }
+                if(MaxLong1 == null){
+                    MaxLong1 = element[1]
+                } else {
+                    if(element[1] > MaxLong1){MaxLong1 = element[1]}
+                }
+            });
+        } else if (LineType == "MultiLineString"){
+            listofcoordonate.forEach(OneListe => {
+                OneListe.forEach(element => {
+                    if(MinLat1 == null){
+                        MinLat1 = element[0]
+                    } else {
+                        if(element[0] < MinLat1){MinLat1 = element[0]}
+                    }
+                    if(MaxLat1 == null){
+                        MaxLat1 = element[0]
+                    } else {
+                        if(element[0] > MaxLat1){MaxLat1 = element[0]}
+                    }
+                    if(MinLong1 == null){
+                        MinLong1 = element[1]
+                    } else {
+                        if(element[1] < MinLong1){MinLong1 = element[1]}
+                    }
+                    if(MaxLong1 == null){
+                        MaxLong1 = element[1]
+                    } else {
+                        if(element[1] > MaxLong1){MaxLong1 = element[1]}
+                    }
+                });
+            });
+        } else {
+            reponse.IsError = true
+            reponse.ErrorMsg = "LineType not know in GeoJson file"
+        }
+        reponse.Data = {MinLat:MinLat1, MaxLat:MaxLat1, MinLong:MinLong1, MaxLong:MaxLong1}
+        return reponse
     }
 
     /**
@@ -304,21 +340,27 @@ class GeoXServer{
         TrackData.Group = Track.Group
         TrackData.Color = "#0000FF"
         TrackData.Date = new Date()
-        TrackData.ExteriorPoint = this.MinMaxGeoJsonTrack(GeoJson)
-        TrackData.GeoJsonData = GeoJson
-        TrackData.GpxData = Track.FileContent
-        TrackData.Length = this.CalculateTrackLength(GeoJson)
-
-        let DataToMongo = TrackData
-        this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
-            // Log
-            this._MyApp.LogAppliInfo("New track saved", User, UserId)
-            // Load App Data
-            this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
-        },(erreur)=>{
-            this._MyApp.LogAppliError("GeoXServerApi AddTrack DB error : " + erreur, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi AddTrack DB error")
-        })
+        let ReponseMinMaxGeoJsonTrack = this.MinMaxGeoJsonTrack(GeoJson)
+        if (ReponseMinMaxGeoJsonTrack.IsError){
+            this._MyApp.LogAppliError("GeoXServerApi AddTrack MinMaxGeoJsonTrack error : " + ReponseMinMaxGeoJsonTrack.ErrorMsg, User, UserId)
+            Socket.emit("GeoXError", "GeoXServerApi AddTrack MinMaxGeoJsonTrack :" + ReponseMinMaxGeoJsonTrack.ErrorMsg)
+        } else {
+            TrackData.ExteriorPoint = ReponseMinMaxGeoJsonTrack.Data
+            TrackData.GeoJsonData = GeoJson
+            TrackData.GpxData = Track.FileContent
+            TrackData.Length = this.CalculateTrackLength(GeoJson)
+    
+            let DataToMongo = TrackData
+            this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
+                // Log
+                this._MyApp.LogAppliInfo("New track saved", User, UserId)
+                // Load App Data
+                this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
+            },(erreur)=>{
+                this._MyApp.LogAppliError("GeoXServerApi AddTrack DB error : " + erreur, User, UserId)
+                Socket.emit("GeoXError", "GeoXServerApi AddTrack DB error")
+            })
+        }
     }
 
     /**
