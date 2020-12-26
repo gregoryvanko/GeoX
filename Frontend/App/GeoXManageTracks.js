@@ -184,6 +184,11 @@ class GeoXManageTracks {
                 document.getElementById("InputTrackGroup").value = item;
             }
         });
+        // Toggle MultiLine to OneLine
+        let DivToogle = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-start; align-content:center; align-items: center;")
+        Contener.appendChild(DivToogle)
+        DivToogle.appendChild(CoreXBuild.ToggleSwitch("ToggleMultiToOneLine", true))
+        DivToogle.appendChild(CoreXBuild.DivTexte("MultiLine to OneLine Track", "", "", "margin-left: 5%"))
         // Button select file
         Contener.appendChild(CoreXBuild.Button("Select and upload File",this.SelectFile.bind(this),"Text Button", "SelectAndSend"))
         //Input file
@@ -223,6 +228,7 @@ class GeoXManageTracks {
         let Track = new Object()
         Track.Name = document.getElementById("InputTrackName").value 
         Track.Group = document.getElementById("InputTrackGroup").value 
+        Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
         Track.FileContent = File
         // Data to send
         let Data = new Object()

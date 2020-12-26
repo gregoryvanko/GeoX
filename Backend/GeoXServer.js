@@ -333,34 +333,39 @@ class GeoXServer{
      * @param {String} UserId Id du user
      */
     AddTrack(Value, Socket, User, UserId){
-        let Track = Value.Data
+        const Track = Value.Data
         let GeoJson = this.ConvertGpxToGeoJson(Track.FileContent)
+        const MultiToOneLine = Track.MultiToOneLine
+        // Si on a un GeoJson avec plusieurs line pour une track on le modifie
+        if ((MultiToOneLine) && (GeoJson.features[0].geometry.type == "MultiLineString")){
+            console.log("MultiToOneLine") // ToDo
+        }
         let TrackData = new Object()
         TrackData.Name = Track.Name
         TrackData.Group = Track.Group
         TrackData.Color = "#0000FF"
         TrackData.Date = new Date()
-        let ReponseMinMaxGeoJsonTrack = this.MinMaxGeoJsonTrack(GeoJson)
-        if (ReponseMinMaxGeoJsonTrack.IsError){
-            this._MyApp.LogAppliError("GeoXServerApi AddTrack MinMaxGeoJsonTrack error : " + ReponseMinMaxGeoJsonTrack.ErrorMsg, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi AddTrack MinMaxGeoJsonTrack :" + ReponseMinMaxGeoJsonTrack.ErrorMsg)
-        } else {
-            TrackData.ExteriorPoint = ReponseMinMaxGeoJsonTrack.Data
-            TrackData.GeoJsonData = GeoJson
-            TrackData.GpxData = Track.FileContent
-            TrackData.Length = this.CalculateTrackLength(GeoJson)
+        // let ReponseMinMaxGeoJsonTrack = this.MinMaxGeoJsonTrack(GeoJson)
+        // if (ReponseMinMaxGeoJsonTrack.IsError){
+        //     this._MyApp.LogAppliError("GeoXServerApi AddTrack MinMaxGeoJsonTrack error : " + ReponseMinMaxGeoJsonTrack.ErrorMsg, User, UserId)
+        //     Socket.emit("GeoXError", "GeoXServerApi AddTrack MinMaxGeoJsonTrack :" + ReponseMinMaxGeoJsonTrack.ErrorMsg)
+        // } else {
+        //     TrackData.ExteriorPoint = ReponseMinMaxGeoJsonTrack.Data
+        //     TrackData.GeoJsonData = GeoJson
+        //     TrackData.GpxData = Track.FileContent
+        //     TrackData.Length = this.CalculateTrackLength(GeoJson)
     
-            let DataToMongo = TrackData
-            this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
-                // Log
-                this._MyApp.LogAppliInfo("New track saved", User, UserId)
-                // Load App Data
-                this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
-            },(erreur)=>{
-                this._MyApp.LogAppliError("GeoXServerApi AddTrack DB error : " + erreur, User, UserId)
-                Socket.emit("GeoXError", "GeoXServerApi AddTrack DB error")
-            })
-        }
+        //     let DataToMongo = TrackData
+        //     this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
+        //         // Log
+        //         this._MyApp.LogAppliInfo("New track saved", User, UserId)
+        //         // Load App Data
+        //         this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
+        //     },(erreur)=>{
+        //         this._MyApp.LogAppliError("GeoXServerApi AddTrack DB error : " + erreur, User, UserId)
+        //         Socket.emit("GeoXError", "GeoXServerApi AddTrack DB error")
+        //     })
+        // }
     }
 
     /**
