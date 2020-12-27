@@ -30,9 +30,9 @@ class GeoX {
              Normale:"rgb(20, 163, 255)" //--CoreX-color
           },
           AppContent:{
-             WidthNormale:"96%",
-             WidthIphone:"96%",
-             WidthMax:"1100px"
+             WidthNormale:"100%",
+             WidthIphone:"100%",
+             WidthMax:"100%"
          }
        }
        // Affichier les message de debug du serveur
