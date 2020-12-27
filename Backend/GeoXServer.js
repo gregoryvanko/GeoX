@@ -338,7 +338,6 @@ class GeoXServer{
         const MultiToOneLine = Track.MultiToOneLine
         // Si on a un GeoJson avec plusieurs line pour une track on le modifie
         if ((MultiToOneLine) && (GeoJson.features[0].geometry.type == "MultiLineString")){
-            console.log("MultiToOneLine") // ToDo
             // Changer le type en LineString
             GeoJson.features[0].geometry.type = "LineString"
             // Fusionner les coodronnee
