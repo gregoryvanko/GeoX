@@ -555,6 +555,9 @@ class GeoXServer{
                     `
         reponse += fs.readFileSync(__dirname + "/../Frontend/App/0-leaflet.css", 'utf8')
         reponse +=`
+                    .leaflet-retina .leaflet-control-layers-toggle {
+                        background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/layers-2x.png");
+                    }
                 </style>
                 <script>`
         reponse += fs.readFileSync(__dirname + "/../Frontend/App/0-leaflet.js", 'utf8')
@@ -573,17 +576,31 @@ class GeoXServer{
                 FitBounds = ListeOfTracks.FitBounds
                 // Creation de la carte
                 var MyMap = null
-                if (FitBounds == null){
-                    MyMap = L.map("mapid", {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
-                } else {
-                    MyMap = L.map("mapid" , {zoomControl: false}).fitBounds(FitBounds);
-                }
-                
-                L.control.zoom({position: 'bottomright'}).addTo(MyMap);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 19,
+                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                })
+                var Openstreetmap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-                }).addTo(MyMap)
+                })
+                var OpenStreetMap_France = L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+                    maxZoom: 20,
+                    attribution: '&copy; Openstreetmap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                });
+                var baseLayers = {
+                    "OpenStreet": Openstreetmap,
+                    "OpenStreetFrance" : OpenStreetMap_France,
+                    "Satellite": satellite
+                };
+                if (FitBounds == null){
+                    MyMap = L.map("mapid", {zoomControl: false, layers: [Openstreetmap]}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
+                } else {
+                    MyMap = L.map("mapid" , {zoomControl: false, layers: [Openstreetmap]}).fitBounds(FitBounds);
+                }
+                L.control.zoom({position: 'bottomright'}).addTo(MyMap);
+                L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(MyMap);
+
                 // Creation du groupe de layer
                 var MyLayerGroup = new L.LayerGroup()
                 MyLayerGroup.addTo(MyMap)

@@ -79,12 +79,27 @@ class GeoXMap {
             zoom= 8
         }
         // Creation de la carte
-        this._Map = L.map(this._MapId , {zoomControl: false}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
-        L.control.zoom({position: 'bottomright'}).addTo(this._Map);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        
+        var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        })
+        var Openstreetmap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-        }).addTo(this._Map)
+        })
+        var OpenStreetMap_France = L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+            maxZoom: 20,
+            attribution: '&copy; Openstreetmap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+        var baseLayers = {
+            "OpenStreet": Openstreetmap,
+            "OpenStreetFrance" : OpenStreetMap_France,
+            "Satellite": satellite
+        };
+        this._Map = L.map(this._MapId , {zoomControl: false, layers: [Openstreetmap]}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
+        L.control.zoom({position: 'bottomright'}).addTo(this._Map);
+        L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(this._Map);
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
