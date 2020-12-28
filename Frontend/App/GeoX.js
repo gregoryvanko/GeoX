@@ -7,6 +7,7 @@ class GeoX{
         // const
         this._NameLoadViewMap = "LoadViewMap"
         this._NameLoadViewManageTracks = "LoadViewManageTracks"
+        this._NameLoadViewCreateTrack = "LoadViewCreateTrack"
         // Current view
         this._CurrentView = this._NameLoadViewMap
         // App Data
@@ -15,14 +16,18 @@ class GeoX{
         this._MyGeoXMap = null
         // Manage Tracks
         this._MyGeoXManageTracks = null
+        // Create Track
+        this._MyGeoXCreateTrack  = null
     }
 
     /** Initiation de l'application */
     Initiation(){
-        // Create map une seul fois (attention au refresh)
+        // Create map
         this._MyGeoXMap = new GeoXMap(this._DivApp)
         // Create GeoXManageTracks
         this._MyGeoXManageTracks = new GeoXManageTracks(this._DivApp)
+        // Create GeoXCreateTrack
+        this._MyGeoXCreateTrack = new GeoXCreateTrack(this._DivApp)
         // SocketIo Listener
         let SocketIo = GlobalGetSocketIo()
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
@@ -53,15 +58,20 @@ class GeoX{
     
     /** Clear view */
     ClearView(){
-        // Delete map if existe
+        // Delete map if existe on MyGeoXMap
         if (this._MyGeoXMap){
             this._MyGeoXMap.DeleteMap()
+        }
+        // Delete map if existe on MyGeoXMap
+        if (this._MyGeoXCreateTrack){
+            this._MyGeoXCreateTrack.DeleteMap()
         }
         // Clear Global action
         GlobalClearActionList()
         GlobalAddActionInList("View Map", this.LoadViewGetAppData.bind(this))
         GlobalAddActionInList("Manage Tracks", this.LoadViewManageTracks.bind(this))
         GlobalAddActionInList("Add Track", this.LoadViewAddTracks.bind(this))
+        GlobalAddActionInList("Create Track", this.LoadViewCreateTracks.bind(this))
         // Show Action Button
         GlobalDisplayAction('On')
         // Clear view
@@ -131,6 +141,14 @@ class GeoX{
         this.ClearView()
         // Build view waiting data of manage track
         this._MyGeoXManageTracks.LoadViewAddTrack(this._GeoXData.AppGroup, this._CurrentView)
+    }
+
+    LoadViewCreateTracks(){
+        this._CurrentView = this._NameLoadViewCreateTrack
+        // Clear view
+        this.ClearView()
+        // Load view map
+        this._MyGeoXCreateTrack.LoadViewMap()
     }
 
     /** Get Titre de l'application */
