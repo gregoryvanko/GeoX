@@ -6,9 +6,9 @@ class GeoXCreateTrack {
         this._Polyline = null
         this._MarkerGroup = null
 
-        this._Nextpoint = 0
-        this._Nextlatlng = null
-        this._Newpoint = null
+        this._Nextpoint = 0 // ToDelete
+        this._Nextlatlng = null // ToDelet
+        this._Newpoint = null // ToDelete
 
         this._IconPointOption = L.icon({
             iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -81,18 +81,44 @@ class GeoXCreateTrack {
 
     OnMapClick(e) {
         var newMarker = new L.marker(e.latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup);
+        this._Polyline.addLatLng(L.latLng(e.latlng));
+        newMarker.bindPopup(this.BuildPopupContent(newMarker._leaflet_id));
         let me = this
         newMarker
             .on('dragstart', me.DragStartHandler.bind(this, newMarker))
-            .on('click', me.DragStartHandler.bind(this, newMarker))
+            .on('click', me.MarkerOnClick.bind(this, newMarker._leaflet_id))
             .on('drag', me.DragHandler.bind(this, newMarker))
             .on('dragend', me.DragEndHandler.bind(this, newMarker));
-        this._Polyline.addLatLng(L.latLng(e.latlng));
         this._Map.setView((e.latlng));
-        //displaylatlong();
+    }
+
+    BuildPopupContent(myid){
+        let Div = document.createElement("div")
+        let ButtonDelete = document.createElement("button")
+        ButtonDelete.innerHTML = "Delete"
+        ButtonDelete.onclick = this.Deletepoint.bind(this, myid)
+        Div.appendChild(ButtonDelete)
+
+        // Si le marker est le premier, il ne faut pas ajouter le boutton indsert
+        var latlngs = this._Polyline.getLatLngs()
+        var CurrentMarker = this._MarkerGroup.getLayer(myid)
+        var latlng = CurrentMarker.getLatLng();
+        if (!latlng.equals(latlngs[0])){
+            let ButtonInsert = document.createElement("button")
+            ButtonInsert.innerHTML = "Insert"
+            ButtonInsert.onclick = this.Insertpoint.bind(this, myid)
+            Div.appendChild(ButtonInsert)
+        }
+        return Div
+    }
+
+    MarkerOnClick(Id){
+        var CurrentMarker = this._MarkerGroup.getLayer(Id)
+        CurrentMarker.openPopup()
     }
 
     DragStartHandler(e){
+        this._Map.closePopup();
         // Get the polyline's latlngs
         var latlngs = this._Polyline.getLatLngs()
         // Get the marker's start latlng
@@ -102,34 +128,30 @@ class GeoXCreateTrack {
             if (latlng.equals(latlngs[i])) {
                 // If equals store key in marker instance
                 e.polylineLatlng = i;
-                this._Nextpoint = i - 1;
-                if (this._Nextpoint  < 0) {
-                    this._Nextpoint  = 0;
-                }
-                this._Nextlatlng = latlngs[this._Nextpoint];
-                var bounds = L.latLngBounds(latlng, this._Nextlatlng);
-                this._Newpoint = bounds.getCenter();
+                
+                
                 var markerid = e._leaflet_id
                 if (e.polylineLatlng > -1) {
-                    e.bindPopup(this.BuildPopupContent(e.polylineLatlng, markerid)).openPopup();
+                    var popup = e.getPopup()
+                    if(popup){
+                        if (!popup._isOpen){
+                            console.log("Open popup")
+                            e.openPopup()
+                        } else {
+                            console.log("popup is open")
+                        }
+                    } else {
+                        console.log("create popup")
+                        //e.bindPopup(this.BuildPopupContent(e.polylineLatlng, markerid)).openPopup();
+                        e.bindPopup(this.BuildPopupContent(e.polylineLatlng, markerid));
+                        e.openPopup()
+                    }
                 }
             }
         };
     }
-    BuildPopupContent(mypoint, myid){
-        let Div = document.createElement("div")
-        let ButtonDelete = document.createElement("button")
-        ButtonDelete.innerHTML = "Delete"
-        ButtonDelete.onclick = this.Deletepoint.bind(this, mypoint, myid)
-        Div.appendChild(ButtonDelete)
 
-        let ButtonInsert = document.createElement("button")
-        ButtonInsert.innerHTML = "Insert"
-        ButtonInsert.onclick = this.Insertpoint.bind(this, mypoint, myid)
-        Div.appendChild(ButtonInsert)
-        
-        return Div
-    }
+    
 
     DragHandler(e){
         // Get the polyline's latlngs
@@ -143,34 +165,70 @@ class GeoXCreateTrack {
 
     DragEndHandler(e){
         // Delete key from marker instance
-        delete e.polylineLatlng;
+        //delete e.polylineLatlng;
         //displaylatlong();
     }
 
-    Deletepoint(mypoint, myid) {
-        this._MarkerGroup.removeLayer(myid);
-        var latlngs = this._Polyline.getLatLngs();
-        latlngs.splice(mypoint, 1);
-        this._Polyline.setLatLngs(latlngs);
-        //displaylatlong();
-        this._Map.closePopup();
-        this.Redrawmarkers();
+    Deletepoint(myid) {
+        var mypoint = 0
+        var latlngs = this._Polyline.getLatLngs()
+        var CurrentMarker = this._MarkerGroup.getLayer(myid)
+        var latlng = CurrentMarker.getLatLng();
+        var Found = false
+        for (var i = 0; i < latlngs.length; i++){
+            if (latlng.equals(latlngs[i])){
+                mypoint = i
+                Found = true
+            }
+        }
+        if (Found){
+            this._MarkerGroup.removeLayer(myid);
+            latlngs.splice(mypoint, 1);
+            this._Polyline.setLatLngs(latlngs);
+            this._Map.closePopup();
+            this.Redrawmarkers();
+        } else {
+            alert("Error, Marker not found")
+        }
+        
     }
 
-    Insertpoint(mypoint, myid){
-        //markerGroup.removeLayer(myid);
-        var latlngs = this._Polyline.getLatLngs();
-        latlngs.splice(mypoint, 0, this._Newpoint);
-        var newMarker = new L.marker(this._Newpoint, {icon: this._IconPointOption, draggable: 'true'}).addTo(this._MarkerGroup);
-        let me = this
-        newMarker
-            .on('dragstart', me.DragStartHandler.bind(this, newMarker))
-            .on('click', me.DragStartHandler.bind(this, newMarker))
-            .on('drag', me.DragHandler.bind(this, newMarker))
-            .on('dragend', me.DragEndHandler.bind(this, newMarker));
-        this._Polyline.setLatLngs(latlngs);
-        //displaylatlong();
-        this._Map.closePopup();
+    Insertpoint(myid){
+        var mypoint = 0
+        var latlngs = this._Polyline.getLatLngs()
+        var CurrentMarker = this._MarkerGroup.getLayer(myid)
+        var latlng = CurrentMarker.getLatLng();
+        var Found = false
+        for (var i = 0; i < latlngs.length; i++){
+            if (latlng.equals(latlngs[i])){
+                mypoint = i
+                Found = true
+            }
+        }
+        if (Found){
+            this._Nextpoint = mypoint - 1;
+            if (this._Nextpoint  >= 0) {
+                this._Nextlatlng = latlngs[this._Nextpoint];
+                var bounds = L.latLngBounds(latlng, this._Nextlatlng);
+                this._Newpoint = bounds.getCenter();
+                latlngs.splice(mypoint, 0, this._Newpoint);
+                this._Polyline.setLatLngs(latlngs);
+                var newMarker = new L.marker(this._Newpoint, {icon: this._IconPointOption, draggable: 'true'}).addTo(this._MarkerGroup);
+                newMarker.bindPopup(this.BuildPopupContent(newMarker._leaflet_id));
+                let me = this
+                newMarker
+                    .on('dragstart', me.DragStartHandler.bind(this, newMarker))
+                    .on('click', me.MarkerOnClick.bind(this, newMarker._leaflet_id))
+                    .on('drag', me.DragHandler.bind(this, newMarker))
+                    .on('dragend', me.DragEndHandler.bind(this, newMarker));
+                
+                this._Map.closePopup();
+            } else {
+                alert("Error, no marker before this one")
+            }
+        } else {
+            alert("Error, Marker not found")
+        }
     }
 
     Redrawmarkers() {
@@ -180,10 +238,11 @@ class GeoXCreateTrack {
         // Iterate the polyline's latlngs
         for (var i = 0; i < latlngs.length; i++) {
             var newMarker = new L.marker(latlngs[i], {icon: this._IconPointOption, draggable: 'true'}).addTo(this._MarkerGroup);
+            newMarker.bindPopup(this.BuildPopupContent(newMarker._leaflet_id));
             let me = this
             newMarker
                 .on('dragstart', me.DragStartHandler.bind(this, newMarker))
-                .on('click', me.DragStartHandler.bind(this, newMarker))
+                .on('click', me.MarkerOnClick.bind(this, newMarker._leaflet_id))
                 .on('drag', me.DragHandler.bind(this, newMarker))
                 .on('dragend', me.DragEndHandler.bind(this, newMarker));
             }
