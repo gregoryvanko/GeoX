@@ -114,42 +114,17 @@ class GeoXMap {
             this._Map.off('locationfound', this.ShowPosition.bind(this))
             this._Map.off('locationerror', this.ErrorPosition.bind(this))
             this._Map.stopLocate()
-            // if (navigator.geolocation){
-            //     navigator.geolocation.clearWatch(this._WatchPositionID)
-            //     this._WatchPositionID = null
-            //}
         } else {
             this._CurrentPosShowed = true
-            const MyIcon = L.icon({
-                iconUrl: GeoXImages.GetIconCible(),
-                iconSize: [70, 70],
-                iconAnchor: [35, 35]
-            })
-            this._GpsPointer = L.marker([50.709446,4.543413], {icon : MyIcon}).addTo(this._Map)
             this._GpsRadius = L.circle([50.709446,4.543413], 1).addTo(this._Map)
-            
+            this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'#0073f0', fillOpacity:1}).addTo(this._Map)
             this._Map.locate({watch: true, enableHighAccuracy: true})
             this._Map.on('locationfound', this.ShowPosition.bind(this))
             this._Map.on('locationerror', this.ErrorPosition.bind(this))
-            //this.StartLocalisation()
         }
     }
 
-    StartLocalisation(){
-        // if (navigator.geolocation) {
-        //     const options = {
-        //         enableHighAccuracy: true,
-        //         timeout: 5000,
-        //         maximumAge: 0
-        //       };
-        //     this._WatchPositionID = navigator.geolocation.watchPosition(this.ShowPosition.bind(this),this.ErrorPosition, options)
-        // } else {
-        //     alert("Geolocation is not supported by this browser.")
-        // }
-    }
-
     ShowPosition(e){
-        //this._GpsPointer.setLatLng([Position.coords.latitude, Position.coords.longitude])
         var radius = e.accuracy
         this._GpsPointer.setLatLng(e.latlng)
         this._GpsRadius.setLatLng(e.latlng)
@@ -157,7 +132,6 @@ class GeoXMap {
     }
     
     ErrorPosition(err){
-        debugger
         alert('ERROR Position: ' + err.message)
     }
 
