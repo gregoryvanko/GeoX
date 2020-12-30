@@ -108,6 +108,32 @@
     margin: 0%;
 }
 
+.DivInfoBox{
+    position: fixed;
+    z-index: 998; 
+    left: 1%; 
+    top: 1vh; 
+    background-color: black;
+    opacity: 0.7;
+    border-radius: 15px;
+    overflow-y:auto;
+    white-space: nowrap;
+    padding: 1%;
+}
+
+.ButtonPopup{
+    cursor: pointer;
+    margin: 8%;
+    padding: 10%;
+    border: 1px solid var(--CoreX-color);
+    text-align: center;
+    display: inline-block;
+    border-radius: 10px;
+    color: rgb(44,1,21);
+    background: white;
+    outline: none;
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)
@@ -120,6 +146,7 @@ screen and (max-width: 700px)
     .DivBoxTracks{width: 90%; left: -90%;}
     .DivBoxTracksShow{left: 5%;}
     .ButtonClose{font-size: calc(var(--TexteIphone)*2);}
+    .DivInfoBox{padding: 2%;}
 }
 
 @media screen and (min-width: 1200px)

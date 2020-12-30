@@ -165,7 +165,7 @@ screen and (max-width: 700px)
     .Titre{font-size: var(--TitreIphone);}
     .SousTitre{font-size: calc(var(--TitreIphone)*0.6);}
     .Text{font-size: var(--TexteIphone);}
-    .TextSmall{font-size: calc(var(--TexteIphone)*0.7);}
+    .TextSmall{font-size: calc(var(--TexteIphone)*0.8);}
     .Button{border-radius: 40px;}
     .ButtonIcon{font-size: calc(var(--TexteIphone)*2);}
     .ButtonCoreXWindow{width: 60%;}
@@ -180,7 +180,7 @@ screen and (max-width: 700px)
     .Titre{font-size: var(--TitreMax);}
     .SousTitre{font-size: calc(var(--TitreMax)*0.6);}
     .Text{font-size: var(--TexteMax);}
-    .TextSmall{font-size: calc(var(--TexteMax)*0.7);}
+    .TextSmall{font-size: calc(var(--TexteMax)*0.8);}
     .Button{border-radius: 40px;}
     .ButtonIcon{font-size: calc(var(--TexteMax)*1.4);}
 }

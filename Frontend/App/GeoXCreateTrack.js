@@ -10,9 +10,9 @@ class GeoXCreateTrack {
 
         this._IconPointOption = L.icon({
             iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-            iconSize:     [12, 20],
-            iconAnchor:   [6, 20],
-            popupAnchor:  [0, -20] // point from which the popup should open relative to the iconAnchor
+            iconSize:     [18, 30],
+            iconAnchor:   [9, 30],
+            popupAnchor:  [0, -30] // point from which the popup should open relative to the iconAnchor
         });
     }
 
@@ -54,12 +54,15 @@ class GeoXCreateTrack {
 
         this._Polyline = L.polyline([]).arrowheads({frequency: '50px', size: '10m', fill: true}).addTo(this._Map)
 
-        var marker = L.marker([50.709446, 4.543413], {icon: this._IconPointOption}).addTo(this._Map)
-        marker.bindPopup("<b>La Villa</b>")
+        //var marker = L.marker([50.709446, 4.543413], {icon: this._IconPointOption}).addTo(this._Map)
+        //marker.bindPopup("<b>La Villa</b>")
 
         this._MarkerGroup = L.layerGroup().addTo(this._Map)
 
-        this._Map.clicked = 0; 
+        let me = this
+        // Gestion du bug click deux fois sur IOS
+        this._Map.on('movestart', (e)=>{this._AllowClick = false})
+        this._Map.on('moveend', (e)=>{setTimeout(()=>{me._AllowClick = true}, 300);})
         this._Map.on('click', (e)=>{
             if (e.originalEvent.isTrusted){
                 if (this._AllowClick){
@@ -67,6 +70,8 @@ class GeoXCreateTrack {
                 }
             }
         })
+
+        this.BuildInfoBox()
     }
 
     OnMapClick(e) {
@@ -80,11 +85,14 @@ class GeoXCreateTrack {
             .on('drag', me.MarkerDragHandler.bind(this, newMarker))
             .on('dragend', me.MarkerDragEndHandler.bind(this, newMarker));
         this._Map.setView((e.latlng));
+        this.UpdateViewDistance()
     }
 
     BuildPopupContent(myid){
         let Div = document.createElement("div")
+        Div.setAttribute("style","display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center; box-sizing: border-box; margin:10%;")
         let ButtonDelete = document.createElement("button")
+        ButtonDelete.setAttribute("Class", "ButtonPopup TextSmall")
         ButtonDelete.innerHTML = "Delete"
         ButtonDelete.onclick = this.Deletepoint.bind(this, myid)
         Div.appendChild(ButtonDelete)
@@ -95,6 +103,7 @@ class GeoXCreateTrack {
         var latlng = CurrentMarker.getLatLng();
         if (!latlng.equals(latlngs[0])){
             let ButtonInsert = document.createElement("button")
+            ButtonInsert.setAttribute("Class", "ButtonPopup TextSmall")
             ButtonInsert.innerHTML = "Insert"
             ButtonInsert.onclick = this.Insertpoint.bind(this, myid)
             Div.appendChild(ButtonInsert)
@@ -127,6 +136,7 @@ class GeoXCreateTrack {
     }
 
     MarkerDragEndHandler(newMarker){
+        this.UpdateViewDistance()
         let me = this
         setTimeout(()=>{ me._AllowClick = true}, 300);
     }
@@ -146,6 +156,7 @@ class GeoXCreateTrack {
                 this._Polyline.setLatLngs(latlngs);
                 this._Map.closePopup();
                 this.Redrawmarkers();
+                this.UpdateViewDistance()
             }
         }
         if (!Found){
@@ -205,6 +216,34 @@ class GeoXCreateTrack {
             }
     }
 
+    UpdateViewDistance(){
+        var Dist = this.CalculDistance()
+        document.getElementById("DivDistance").innerText = "Distance: " + Dist +"km"
+    }
+
+    CalculDistance(){
+        var Dist = 0
+        var latlngs = this._Polyline.getLatLngs();
+        if (latlngs.length > 0){
+            var lastpoint = latlngs[0];
+            // Iterate the polyline's latlngs
+            for (var i = 0; i < latlngs.length; i++) {
+                Dist += latlngs[i].distanceTo(lastpoint);
+                lastpoint = latlngs[i]
+            }
+            Dist = Dist / 1000;
+        }
+        Dist = Dist.toFixed(2)
+        return Dist
+    }
+
+    BuildInfoBox(){
+        var Dist = this.CalculDistance()
+        let DivInfoBox = CoreXBuild.Div("DivInfoBox", "DivInfoBox", "")
+        this._DivApp.appendChild(DivInfoBox)
+        DivInfoBox.appendChild(CoreXBuild.DivTexte("Distance: " + Dist +"km","DivDistance","TextTrackInfo", "color: white; margin-left: 1%;"))
+    }
+
     /**
      * Suppression d'une carte
      */
@@ -218,6 +257,7 @@ class GeoXCreateTrack {
             this._Polyline = null
             this._MarkerGroup = null
             this._DragpointNb = 0
+            this._AllowClick = true
         }
     }
 }
