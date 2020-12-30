@@ -273,8 +273,34 @@ class GeoXCreateTrack {
             Data.Action = "Add"
             Data.Data = Track
             Data.FromCurrentView = "LoadViewMap"
-            GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+            //GlobalSendSocketIo("GeoX", "ManageTrack", Data)
         }
+        
+        this.TestAutoRoute()
+    }
+
+    async TestAutoRoute(){
+        var latlngs = this._Polyline.getLatLngs()
+        const PointA = latlngs[0]
+        const PointB = latlngs[1]
+        const ListOfPoint = await this.GetRoute(PointA,PointB)
+        var Newlatlngs = []
+        Newlatlngs.push(PointA)
+        ListOfPoint.forEach(element => {
+            Newlatlngs.push(element)
+        });
+        Newlatlngs.push(PointB)
+        this._Polyline.setLatLngs(Newlatlngs);
+    }
+
+    async GetRoute(PointA, PointB){
+        const reponse = await fetch(`https://router.project-osrm.org/route/v1/foot/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
+        const data = await reponse.json()
+        var ListOfPoint = []
+        data.routes[0].geometry.coordinates.forEach(element => {
+            ListOfPoint.push({lat: element[1], lng: element[0]})
+        });
+        return ListOfPoint
     }
 
     /**
