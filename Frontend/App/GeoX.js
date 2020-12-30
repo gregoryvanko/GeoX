@@ -53,8 +53,7 @@ class GeoX{
         })
         
         // Build view map
-        //this.LoadViewGetAppData()
-        this.LoadViewCreateTracks()
+        this.LoadViewGetAppData()
     }
     
     /** Clear view */

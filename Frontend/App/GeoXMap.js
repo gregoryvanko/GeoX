@@ -9,6 +9,7 @@ class GeoXMap {
         this._DataApp = null
         this._CurrentPosShowed = false
         this._GpsPointer = null
+        this._GpsRadius = null
         this._WatchPositionID = null
     }
 
@@ -24,7 +25,7 @@ class GeoXMap {
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%"))
-        // Add dropdown groupe et bouton action left
+        // Add dropdown groupe
         if (GeoXData.AppGroup.length > 0){
             // Ajout du drop down avec le nom des groupes des map
             let divdropdown = CoreXBuild.Div("", "DivMapGroupDropDown", "")
@@ -41,8 +42,13 @@ class GeoXMap {
             DropDown.onchange = this.NewGroupSelected.bind(this)
             divdropdown.appendChild(DropDown)
             this._GroupSelected = GeoXData.AppGroup[0]
-            // Ajout du bouton action left
-            this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this.ShowTrackInfoBox.bind(this), "ButtonShowTrackInfo"))
+        }
+        // Ajout du bouton action left
+        this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this.ShowTrackInfoBox.bind(this), "ButtonShowTrackInfo"))
+        if (GeoXData.AppData.length > 1){
+            this.SetButtonShowTrackInfoVisible(true)
+        } else {
+            this.SetButtonShowTrackInfoVisible(false)
         }
         // Ajout du bouton en bas a gauche pour geolocaliser
         this._DivApp.appendChild(CoreXBuild.ButtonLeftBottomAction(this.Gpslocalisation.bind(this), "Bottom" , "&#8982"))
@@ -87,8 +93,8 @@ class GeoXMap {
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
-        let me = this
         // Ajout des tracks sur la map
+        let me = this
         setTimeout(function(){
             me.ModifyTracksOnMap(GeoXData.AppInitMapData)
         }, 500);
@@ -103,10 +109,15 @@ class GeoXMap {
             this._CurrentPosShowed = false
             this._Map.removeLayer(this._GpsPointer)
             this._GpsPointer = null
-            if (navigator.geolocation){
-                navigator.geolocation.clearWatch(this._WatchPositionID)
-                this._WatchPositionID = null
-            }
+            this._Map.removeLayer(this._GpsRadius)
+            this._GpsRadius = null
+            this._Map.off('locationfound', this.ShowPosition.bind(this))
+            this._Map.off('locationerror', this.ErrorPosition.bind(this))
+            this._Map.stopLocate()
+            // if (navigator.geolocation){
+            //     navigator.geolocation.clearWatch(this._WatchPositionID)
+            //     this._WatchPositionID = null
+            //}
         } else {
             this._CurrentPosShowed = true
             const MyIcon = L.icon({
@@ -115,29 +126,47 @@ class GeoXMap {
                 iconAnchor: [35, 35]
             })
             this._GpsPointer = L.marker([50.709446,4.543413], {icon : MyIcon}).addTo(this._Map)
-            this.StartLocalisation()
+            this._GpsRadius = L.circle([50.709446,4.543413], 1).addTo(this._Map)
+            
+            this._Map.locate({watch: true, enableHighAccuracy: true})
+            this._Map.on('locationfound', this.ShowPosition.bind(this))
+            this._Map.on('locationerror', this.ErrorPosition.bind(this))
+            //this.StartLocalisation()
         }
     }
 
     StartLocalisation(){
-        if (navigator.geolocation) {
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-              };
-            this._WatchPositionID = navigator.geolocation.watchPosition(this.ShowPosition.bind(this),this.ErrorPosition, options)
-        } else {
-            alert("Geolocation is not supported by this browser.")
-        }
+        // if (navigator.geolocation) {
+        //     const options = {
+        //         enableHighAccuracy: true,
+        //         timeout: 5000,
+        //         maximumAge: 0
+        //       };
+        //     this._WatchPositionID = navigator.geolocation.watchPosition(this.ShowPosition.bind(this),this.ErrorPosition, options)
+        // } else {
+        //     alert("Geolocation is not supported by this browser.")
+        // }
     }
 
-    ShowPosition(Position){
-        this._GpsPointer.setLatLng([Position.coords.latitude, Position.coords.longitude])
+    ShowPosition(e){
+        //this._GpsPointer.setLatLng([Position.coords.latitude, Position.coords.longitude])
+        var radius = e.accuracy
+        this._GpsPointer.setLatLng(e.latlng)
+        this._GpsRadius.setLatLng(e.latlng)
+        this._GpsRadius.setRadius(radius)
     }
     
     ErrorPosition(err){
-        alert('ERROR Position (' + err.code + '): ' + err.message);
+        debugger
+        alert('ERROR Position: ' + err.message)
+    }
+
+    SetButtonShowTrackInfoVisible(Visible){
+        if (Visible){
+            document.getElementById("ButtonShowTrackInfo").style.display = "block";
+        } else {
+            document.getElementById("ButtonShowTrackInfo").style.display = "none";
+        }
     }
 
     /**
@@ -147,7 +176,7 @@ class GeoXMap {
         // Show track info box
         this.BuildBoxTracksInfo(this._DataApp)
         // hide boutton
-        document.getElementById("ButtonShowTrackInfo").style.display = "none";
+        this.SetButtonShowTrackInfoVisible(false)
         // Start transition
         setTimeout(function(){
             let DivBoxTracks = document.getElementById("DivBoxTracks")
@@ -164,8 +193,7 @@ class GeoXMap {
         let MyDivBoxTracks = document.getElementById("DivBoxTracks")
         if(MyDivBoxTracks){
             // Show button
-            document.getElementById("ButtonShowTrackInfo").style.display = "block";
-            //MyDivBoxTracks.style.left = '-20%';
+            this.SetButtonShowTrackInfoVisible(true)
             MyDivBoxTracks.classList.remove("DivBoxTracksShow")
             setTimeout(function(){
                 MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
@@ -276,6 +304,11 @@ class GeoXMap {
                     layerTrack1.id = Track._id
                 });
             });
+        }
+        if (this._DataMap.ListOfTracks.length > 1){
+            this.SetButtonShowTrackInfoVisible(true)
+        } else {
+            this.SetButtonShowTrackInfoVisible(false)
         }
     }
 

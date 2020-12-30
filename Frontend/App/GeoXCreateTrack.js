@@ -7,6 +7,7 @@ class GeoXCreateTrack {
         this._MarkerGroup = null
         this._DragpointNb = 0
         this._AllowClick = true
+        this._TrackName = "Rixensart"
 
         this._IconPointOption = L.icon({
             iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -90,7 +91,7 @@ class GeoXCreateTrack {
 
     BuildPopupContent(myid){
         let Div = document.createElement("div")
-        Div.setAttribute("style","display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center; box-sizing: border-box; margin:10%;")
+        Div.setAttribute("Class", "MarkerPopupContent")
         let ButtonDelete = document.createElement("button")
         ButtonDelete.setAttribute("Class", "ButtonPopup TextSmall")
         ButtonDelete.innerHTML = "Delete"
@@ -242,6 +243,38 @@ class GeoXCreateTrack {
         let DivInfoBox = CoreXBuild.Div("DivInfoBox", "DivInfoBox", "")
         this._DivApp.appendChild(DivInfoBox)
         DivInfoBox.appendChild(CoreXBuild.DivTexte("Distance: " + Dist +"km","DivDistance","TextTrackInfo", "color: white; margin-left: 1%;"))
+        DivInfoBox.appendChild(CoreXBuild.Button("Save", this.SaveTrack.bind(this), "ButtonInfoBox"))
+    }
+
+    SaveTrack(){
+        var latlngs = this._Polyline.getLatLngs();
+            if (latlngs.length > 0){
+            var timestamp = new Date().toLocaleString('fr-BE');
+            var gpxtrack = `
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+    <gpx xmlns="https://www.topografix.com/GPX/1/1"  creator="vanko.be" version="1.1" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd">
+        <trk><name>${this._TrackName} ${timestamp}</name>
+            <trkseg>`
+            for (var i = 0; i < latlngs.length; i++) {
+                gpxtrack += `
+                <trkpt lat="${latlngs[i].lat}" lon="${latlngs[i].lng}"></trkpt>`
+            }
+            gpxtrack += `
+            </trkseg>
+        </trk>
+    </gpx>`
+            let Track = new Object()
+            Track.Name = this._TrackName
+            Track.Group = "Plannifié"
+            Track.MultiToOneLine = false
+            Track.FileContent = gpxtrack
+            // Data to send
+            let Data = new Object()
+            Data.Action = "Add"
+            Data.Data = Track
+            Data.FromCurrentView = "LoadViewMap"
+            GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+        }
     }
 
     /**
