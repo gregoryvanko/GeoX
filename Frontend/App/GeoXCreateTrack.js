@@ -275,8 +275,6 @@ class GeoXCreateTrack {
             Data.FromCurrentView = "LoadViewMap"
             GlobalSendSocketIo("GeoX", "ManageTrack", Data)
         }
-        
-        //this.TestAutoRoute()
     }
 
     async TestAutoRoute(){

@@ -162,6 +162,16 @@
     box-sizing: border-box; 
 }
 
+.TrackPopupContent{
+    display: -webkit-flex; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content:center; 
+    align-content:center; 
+    align-items: center; 
+    box-sizing: border-box; 
+}
+
 .leaflet-popup-content {
     margin: 20px 10px 10px 10px;
     min-width: 100px;

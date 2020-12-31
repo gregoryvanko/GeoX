@@ -13,8 +13,6 @@ class GeoXMap {
         this._WatchPositionID = null
     }
 
-
-
     /**
      * Load de la vue Map
      * @param {Object} DataMap Object contenant toutes les data d'une map
@@ -190,29 +188,40 @@ class GeoXMap {
         // Add all tracks of the group
         AppData.forEach(element => {
             if (element.Group == this._GroupSelected){
+                // Box pour toutes les info d'un track
                 let DivBoxTrackInfo = CoreXBuild.Div("", "DivBoxTrackInfo", "")
                 DivBoxTracks.appendChild(DivBoxTrackInfo)
+                // Conteneur flewRow
                 let Conteneur = CoreXBuild.DivFlexRowStart("")
                 DivBoxTrackInfo.appendChild(Conteneur)
+                // Box pour click sur le nom de la track et pour faire un zoom sur la track
                 let DivTrackinfo = CoreXBuild.Div("", "", "width: 56%; display: -webkit-flex; display: flex; flex-direction: column; justify-content:flex-start;")
-                DivTrackinfo.addEventListener('click', this.FitboundOnTrack.bind(this, element))
                 Conteneur.appendChild(DivTrackinfo)
+                DivTrackinfo.addEventListener('click', this.FitboundOnTrack.bind(this, element))
+                // Nom de la track
                 DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                // Conteur sub info des track
                 let DivSubInfo = CoreXBuild.Div("","","width: 100%; display: -webkit-flex; display: flex; flex-direction: row;  justify-content:space-between;")
                 DivTrackinfo.appendChild(DivSubInfo)
+                // Date de la track
                 DivSubInfo.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(element.Date),"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                // Longeur de la track
                 DivSubInfo.appendChild(CoreXBuild.DivTexte(element.Length + "Km","","TextTrackInfo", "color: white; margin-left: 0%;"))
+                // Box pour les bouttons
                 let DivButton = document.createElement("div")
+                Conteneur.appendChild(DivButton)
                 DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
+                // Boutton Color track
                 let inputcolor = document.createElement("input")
                 inputcolor.setAttribute("id","color" + element._id)
                 inputcolor.setAttribute("type","color")
                 inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px;")
                 inputcolor.value = element.Color
-                inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, element._id)}
+                inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, element.Name, element.Length, element._id)}
                 DivButton.appendChild(inputcolor)
+                // Button show/hide track
                 DivButton.appendChild(CoreXBuild.Button ("&#128065", this.ToogleTrack.bind(this, element._id), "ButtonIcon"))
-                Conteneur.appendChild(DivButton)
+                
             }
         });
     }
@@ -274,7 +283,7 @@ class GeoXMap {
                         "weight": 3
                     };
                     // Add track
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(me._LayerGroup).bindPopup(Track.Name)
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(me._LayerGroup).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
                     layerTrack1.id = Track._id
                 });
             });
@@ -284,6 +293,24 @@ class GeoXMap {
         } else {
             this.SetButtonShowTrackInfoVisible(false)
         }
+    }
+
+    BuildPopupContentTrack(Name, Length, Id, Color){
+        let Div = document.createElement("div")
+        Div.setAttribute("Class", "TrackPopupContent")
+        // Nom de la track
+        Div.appendChild(CoreXBuild.DivTexte(Name,"","TextSmall", ""))
+        // Longueur de la track
+        Div.appendChild(CoreXBuild.DivTexte(Length + "km","","TextSmall", ""))
+        // Boutton change color
+        let inputcolor = document.createElement("input")
+        Div.appendChild(inputcolor)
+        inputcolor.setAttribute("id","PopupColor" + Id)
+        inputcolor.setAttribute("type","color")
+        inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px;")
+        inputcolor.value = Color
+        inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, Name, Length, Id)}
+        return Div
     }
 
     /**
@@ -319,10 +346,19 @@ class GeoXMap {
      * @param {Color} Color New color
      * @param {String} TrackId id of the track to color
      */
-    ChangeTrackColor(Color, TrackId){
+    ChangeTrackColor(Color, Name, Length, TrackId){
+        let me = this
         this._LayerGroup.eachLayer(function (layer) {
             if (layer.id == TrackId){
+                // Changer la couleur de la track
                 layer.setStyle({color: Color});
+                // Changer le popup de la track
+                layer.bindPopup(me.BuildPopupContentTrack(Name, Length, TrackId, Color))
+                // Changer la couleur du boutton change color dans le trackInfo
+                let ButtonColorInTrackInfo = document.getElementById("color" + TrackId)
+                if (ButtonColorInTrackInfo){
+                    ButtonColorInTrackInfo.value = Color
+                }
             }
         })
         this._DataMap.ListOfTracks.forEach(Track => {
