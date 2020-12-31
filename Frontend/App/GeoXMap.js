@@ -276,10 +276,14 @@ class GeoXMap {
             let me = this
             this._Map.once('moveend', function() {
                 me._DataMap.ListOfTracks.forEach(Track => {
+                    var TrackWeight = 3
+                    if (L.Browser.mobile){
+                        TrackWeight = 6
+                    }
                     // Style for tracks
                     var TrackStyle = {
                         "color": Track.Color,
-                        "weight": 3
+                        "weight": TrackWeight
                     };
                     // Add track
                     var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(me._LayerGroup).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
