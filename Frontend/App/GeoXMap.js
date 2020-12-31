@@ -215,13 +215,12 @@ class GeoXMap {
                 let inputcolor = document.createElement("input")
                 inputcolor.setAttribute("id","color" + element._id)
                 inputcolor.setAttribute("type","color")
-                inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px;")
+                inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px; border: 1px solid black;")
                 inputcolor.value = element.Color
                 inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, element.Name, element.Length, element._id)}
                 DivButton.appendChild(inputcolor)
                 // Button show/hide track
                 DivButton.appendChild(CoreXBuild.Button ("&#128065", this.ToogleTrack.bind(this, element._id), "ButtonIcon"))
-                
             }
         });
     }
@@ -307,7 +306,7 @@ class GeoXMap {
         Div.appendChild(inputcolor)
         inputcolor.setAttribute("id","PopupColor" + Id)
         inputcolor.setAttribute("type","color")
-        inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px;")
+        inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px; border: 1px solid black; margin-top: 1vh;")
         inputcolor.value = Color
         inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, Name, Length, Id)}
         return Div
