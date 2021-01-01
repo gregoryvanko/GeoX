@@ -333,6 +333,10 @@ class GeoXMap {
         if (AddTrack){
             this._DataMap.ListOfTracks.forEach(Track => {
                 if (Track._id == TrackId){
+                    var TrackWeight = 3
+                    if (L.Browser.mobile){
+                        TrackWeight = 6
+                    }
                     var TrackStyle = {
                         "color": Track.Color,
                         "weight": 3
