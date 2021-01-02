@@ -145,12 +145,15 @@ class GeoXCreateTrack {
             // Si le marker n'est pas en autoroute
             const currentmarker = this._TrackMarkers.find( x => x.LeafletId == myid)
             if (! currentmarker.AutoRoute){
-                // Buton insert
+                // Button insert
                 let ButtonInsert = document.createElement("button")
                 ButtonInsert.setAttribute("Class", "ButtonPopup TextSmall")
                 ButtonInsert.innerHTML = "Insert"
                 ButtonInsert.onclick = this.Insertpoint.bind(this, myid)
                 Div.appendChild(ButtonInsert)
+                // Button SetMarkerToAuto
+            } else {
+                // Boutton SetMarkerToManual
             }
         }
         return Div
@@ -427,7 +430,8 @@ class GeoXCreateTrack {
     }
 
     async GetRoute(PointA, PointB){
-        const reponse = await fetch(`https://router.project-osrm.org/route/v1/footing/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
+        //const reponse = await fetch(`https://router.project-osrm.org/route/v1/footing/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
+        const reponse = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
         const data = await reponse.json()
         var ListOfPoint = []
         data.routes[0].geometry.coordinates.forEach(element => {
