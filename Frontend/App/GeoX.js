@@ -149,7 +149,7 @@ class GeoX{
         // Clear view
         this.ClearView()
         // Load view map
-        this._MyGeoXCreateTrack.LoadViewMap()
+        this._MyGeoXCreateTrack.Start()
     }
 
     /** Get Titre de l'application */

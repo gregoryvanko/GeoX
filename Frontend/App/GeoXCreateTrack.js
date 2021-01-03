@@ -2,6 +2,8 @@ class GeoXCreateTrack {
     constructor(DivApp){
         this._DivApp = DivApp
         this._MapId = "mapid"
+        this._InitLat = "50.709446"
+        this._InitLong = "4.543413"
         this._Map = null
         this._Polyline = null
         this._MarkerGroup = null
@@ -21,14 +23,121 @@ class GeoXCreateTrack {
         });
     }
 
-    LoadViewMap(){
+    Start(){
+        // Clear Conteneur
+        this._DivApp.innerHTML = ""
+        let Conteneur = CoreXBuild.DivFlexColumn()
+        this._DivApp.appendChild(Conteneur)
+        Conteneur.style.height = "70vh"
+        Conteneur.style.justifyContent = "center"
+        // Texte
+        Conteneur.appendChild(CoreXBuild.DivTexte("Choose your location", "", "SousTitre", ""))
+        // Pays
+        let divdropdown = CoreXBuild.Div("", "DivDropDownPays", "")
+        Conteneur.appendChild(divdropdown)
+        let DropDown = document.createElement("select")
+        DropDown.setAttribute("id", "InputCountry")
+        DropDown.setAttribute("class", "Text MapGroupDropDown")
+        let option1 = document.createElement("option")
+        option1.setAttribute("value", "Belgique")
+        option1.innerHTML = "Belgique"
+        DropDown.appendChild(option1)
+        let option2 = document.createElement("option")
+        option2.setAttribute("value", "France")
+        option2.innerHTML = "France"
+        DropDown.appendChild(option2)
+        divdropdown.appendChild(DropDown)
+
+        // Input city
+        //Conteneur.appendChild(CoreXBuild.InputWithLabel("InputBox", "City", "Text", "InputCity","", "Input Text", "text", "City"))
+        //document.getElementById("InputCity").setAttribute("autocomplete", "off")
+        let DivInput = CoreXBuild.Div("", "InputCity", "")
+        Conteneur.appendChild(DivInput)
+        let InputCity = CoreXBuild.Input("InputCity", "", "Input Text", "", "text", "InputCity", "City")
+        DivInput.appendChild(InputCity)
+        InputCity.autocomplete = "off"
+        autocomplete({
+            input: document.getElementById("InputCity"),
+            minLength: 3,
+            emptyMsg: 'No suggestion',
+            fetch: function(text, update) {
+                if (document.getElementById("InputCountry").value == "Belgique"){
+                    fetch(`https://www.odwb.be/api/records/1.0/search/?dataset=code-postaux-belge&q=${text}`).then((response) => {
+                        response.json().then((data) =>{
+                            var suggestions = []
+                            data.records.forEach(element => {
+                                suggestions.push(element.fields.column_2)
+                            });
+                            update(suggestions);
+                        })
+                    })
+                } else if (document.getElementById("InputCountry").value == "France") {
+                    var suggestions = []
+                    update(suggestions);
+                } else {
+                    var suggestions = []
+                    update(suggestions);
+                }
+            },
+            onSelect: function(item) {
+                document.getElementById("InputCity").value = item;
+            }
+        });
+        let me = this
+        InputCity.addEventListener("keyup", function(event) {
+            // Number 13 is the "Enter" key on the keyboard
+            if (event.keyCode === 13) {
+              event.preventDefault()
+              me.FindCityLatLong()
+            }
+        });
+        
+
+        // Boutton
+        let ButtonGo = CoreXBuild.Button("&#8680",this.FindCityLatLong.bind(this),"Titre Button")
+        Conteneur.appendChild(ButtonGo)
+        ButtonGo.style.padding = "0px"
+        ButtonGo.style.borderRadius = "50%"
+        ButtonGo.style.width = "8vh"
+        ButtonGo.style.height = "8vh"
+
+        // Error text
+        Conteneur.appendChild(CoreXBuild.DivTexte("", "SearchError", "Text", "color:red; height:4vh;"))
+    }
+
+    async FindCityLatLong(){
+        let city = document.getElementById("InputCity").value
+        //let country = document.getElementById("InputCountry").value
+        if (city != ""){
+            //const reponse = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&country=${country}&format=json&addressdetails=1&limit=1`)
+            if (document.getElementById("InputCountry").value == "Belgique"){
+                const reponse = await fetch(`https://www.odwb.be/api/records/1.0/search/?dataset=code-postaux-belge&q=${city}`)
+                const data = await reponse.json()
+                if (data.length == 0){
+                    document.getElementById("SearchError").innerText = "City not found...!"
+                } else {
+                    this._InitLat = data.records[0].fields.column_4
+                    this._InitLong = data.records[0].fields.column_3
+                    this.LoadViewMap(this._InitLat, this._InitLong)
+                }
+            } else if (document.getElementById("InputCountry").value == "France") {
+                document.getElementById("SearchError").innerText = "API France not defined...!"
+            } else {
+                document.getElementById("SearchError").innerText = "Country not found...!"
+            }
+        } else {
+            this.LoadViewMap(this._InitLat, this._InitLong)
+        }
+    }
+
+    LoadViewMap(Lat, Long){
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%"))
         // Parametre de la carte
-        let CenterPoint = {Lat: 50.709446, Long: 4.543413}
-        let Zoom = 15
+        let CenterPoint = {Lat: Lat, Long: Long}
+        let Zoom = 14
         // Creation de la carte
         var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19,
@@ -428,6 +537,8 @@ class GeoXCreateTrack {
             this._Map = null
             let mapDiv = document.getElementById(this._MapId)
             if(mapDiv) mapDiv.parentNode.removeChild(mapDiv)
+            this._InitLat = "50.709446"
+            this._InitLong = "4.543413"
             this._Polyline = null
             this._MarkerGroup = null
             this._DragpointNb = 0

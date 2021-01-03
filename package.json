@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon —inspect exemple.js",
-    "up": "npm version minor && npm publish && git push"
+    "up": "npm version minor && npm publish && git push",
+    "vanko": "ssh root@vanko.be -p 9922"
   },
   "nodemonConfig": {
     "ext": "css, js",

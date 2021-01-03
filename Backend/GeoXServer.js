@@ -620,7 +620,7 @@ class GeoXServer{
                             "weight": 3
                         };
                         // Add track
-                        var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(MyLayerGroup).bindPopup(Track.Name)
+                        var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(MyLayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
                         layerTrack1.id = Track._id
                     });
                 }, 500);
