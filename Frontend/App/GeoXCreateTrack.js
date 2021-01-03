@@ -136,7 +136,7 @@ class GeoXCreateTrack {
         // Bouton delete
         let ButtonDelete = document.createElement("button")
         ButtonDelete.setAttribute("Class", "ButtonPopup TextSmall")
-        ButtonDelete.innerHTML = "Delete"
+        ButtonDelete.innerHTML = "&#128465"
         ButtonDelete.onclick = this.Deletepoint.bind(this, myid)
         Div.appendChild(ButtonDelete)
 
@@ -148,12 +148,22 @@ class GeoXCreateTrack {
                 // Button insert
                 let ButtonInsert = document.createElement("button")
                 ButtonInsert.setAttribute("Class", "ButtonPopup TextSmall")
-                ButtonInsert.innerHTML = "Insert"
+                ButtonInsert.innerHTML = "&#128205"
                 ButtonInsert.onclick = this.Insertpoint.bind(this, myid)
                 Div.appendChild(ButtonInsert)
                 // Button SetMarkerToAuto
+                let ButtonSetMarkerToAuto = document.createElement("button")
+                ButtonSetMarkerToAuto.setAttribute("Class", "ButtonPopup TextSmall")
+                ButtonSetMarkerToAuto.innerHTML = "&#128171"
+                ButtonSetMarkerToAuto.onclick = this.SetMarkerToAuto.bind(this, myid)
+                Div.appendChild(ButtonSetMarkerToAuto)
             } else {
                 // Boutton SetMarkerToManual
+                let ButtonSetMarkerToManual = document.createElement("button")
+                ButtonSetMarkerToManual.setAttribute("Class", "ButtonPopup TextSmall")
+                ButtonSetMarkerToManual.innerHTML = "&#128207"
+                ButtonSetMarkerToManual.onclick = this.SetMarkerToManual.bind(this, myid)
+                Div.appendChild(ButtonSetMarkerToManual)
             }
         }
         return Div
@@ -312,6 +322,14 @@ class GeoXCreateTrack {
             // Update distance
             this.UpdateViewDistance()
         }
+    }
+
+    SetMarkerToAuto(myid){
+        alert("To Auto")
+    }
+
+    SetMarkerToManual(myid){
+        alert("To Manual")
     }
 
     RedrawTrack() {
