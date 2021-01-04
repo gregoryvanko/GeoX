@@ -37,6 +37,8 @@ class GeoX{
                 this.LoadViewMap()
             } else if (Value.StartView == this._NameLoadViewManageTracks){
                 this.LoadViewManageTracks()
+            } else if (Value.StartView == this._NameLoadViewCreateTrack){
+                this.LoadViewCreateTracks()
             } else {
                 this.Error("Start view not find: " + Value.StartView)
             }
@@ -52,9 +54,8 @@ class GeoX{
             link.click()
         })
         
-        // Build view map
+        // Build view Get App Data
         this.LoadViewGetAppData()
-        //this.LoadViewCreateTracks()
     }
     
     /** Clear view */
@@ -69,7 +70,8 @@ class GeoX{
         }
         // Clear Global action
         GlobalClearActionList()
-        GlobalAddActionInList("View Map", this.LoadViewGetAppData.bind(this))
+        GlobalAddActionInList("Refresh", this.LoadViewGetAppData.bind(this))
+        GlobalAddActionInList("View Map", this.LoadViewMap.bind(this))
         GlobalAddActionInList("Manage Tracks", this.LoadViewManageTracks.bind(this))
         GlobalAddActionInList("Add Track", this.LoadViewAddTracks.bind(this))
         GlobalAddActionInList("Create Track", this.LoadViewCreateTracks.bind(this))
@@ -97,7 +99,6 @@ class GeoX{
 
     /** Load des Data de l'application */
     LoadViewGetAppData(){
-        this._CurrentView = this._NameLoadViewMap
         this.ClearView()
         // Contener
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
@@ -121,9 +122,15 @@ class GeoX{
 
     /** Ouvre la vue Map avec des data*/
     ModifyTracksOnMap(Data){
-        this._CurrentView = this._NameLoadViewMap
-        // Load view map
-        this._MyGeoXMap.ModifyTracksOnMap(Data)
+        if (this._CurrentView == this._NameLoadViewMap){
+            // change view map
+            this._MyGeoXMap.ModifyTracksOnMap(Data)
+        } else if (this._CurrentView == this._NameLoadViewCreateTrack){
+            // change view create track
+            this._MyGeoXCreateTrack.ModifyTracksOnMap(Data)
+        } else {
+            this.Error("ModifyTracksOnMap view not find: " + this._CurrentView)
+        }
     }
 
     /** Ouvre la vue Manage track */
@@ -149,7 +156,7 @@ class GeoX{
         // Clear view
         this.ClearView()
         // Load view map
-        this._MyGeoXCreateTrack.Start()
+        this._MyGeoXCreateTrack.Start(this._GeoXData)
     }
 
     /** Get Titre de l'application */

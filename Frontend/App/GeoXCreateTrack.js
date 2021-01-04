@@ -15,6 +15,11 @@ class GeoXCreateTrack {
         this._TrackMarkers = []
         this._AutoRouteBehavior = true
         this.CityFound = false
+        this._GeoXData = null
+        this._GroupSelected = null
+        this._NoTrack = "No Track"
+        this._DataMap = null
+        this._LayerGroup = null
 
         this._IconPointOption = L.icon({
             iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -24,7 +29,9 @@ class GeoXCreateTrack {
         });
     }
 
-    Start(){
+    Start(GeoXData = null){
+        // Save data
+        this._GeoXData = GeoXData
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         let Conteneur = CoreXBuild.DivFlexColumn()
@@ -33,7 +40,7 @@ class GeoXCreateTrack {
         Conteneur.style.justifyContent = "center"
         // Texte
         Conteneur.appendChild(CoreXBuild.DivTexte("Choose your location", "", "SousTitre", ""))
-        // Pays
+        // dropdown Pays
         let divdropdown = CoreXBuild.Div("", "DivDropDownPays", "")
         Conteneur.appendChild(divdropdown)
         let DropDown = document.createElement("select")
@@ -48,10 +55,7 @@ class GeoXCreateTrack {
         option2.innerHTML = "France"
         DropDown.appendChild(option2)
         divdropdown.appendChild(DropDown)
-
-        // Input city
-        //Conteneur.appendChild(CoreXBuild.InputWithLabel("InputBox", "City", "Text", "InputCity","", "Input Text", "text", "City"))
-        //document.getElementById("InputCity").setAttribute("autocomplete", "off")
+        // Input City
         let DivInput = CoreXBuild.Div("", "InputCity", "")
         Conteneur.appendChild(DivInput)
         let InputCity = CoreXBuild.Input("InputCity", "", "Input Text", "padding: 4%;", "text", "InputCity", "City")
@@ -121,8 +125,6 @@ class GeoXCreateTrack {
               me.FindCityLatLong()
             }
         });
-        
-
         // Boutton
         let ButtonGo = CoreXBuild.Button("&#8680",this.FindCityLatLong.bind(this),"Titre Button")
         Conteneur.appendChild(ButtonGo)
@@ -130,7 +132,6 @@ class GeoXCreateTrack {
         ButtonGo.style.borderRadius = "50%"
         ButtonGo.style.width = "8vh"
         ButtonGo.style.height = "8vh"
-
         // Error text
         Conteneur.appendChild(CoreXBuild.DivTexte("", "SearchError", "Text", "color:red; height:4vh;"))
     }
@@ -152,6 +153,28 @@ class GeoXCreateTrack {
     LoadViewMap(Lat, Long){
         // Clear Conteneur
         this._DivApp.innerHTML = ""
+        // Add dropdown groupe
+        if (this._GeoXData.AppGroup.length > 0){
+            // Ajout du drop down avec le nom des groupes des map
+            let divdropdown = CoreXBuild.Div("", "DivMapGroupDropDown", "")
+            this._DivApp.appendChild(divdropdown)
+            let DropDown = document.createElement("select")
+            DropDown.setAttribute("id", "Group")
+            DropDown.setAttribute("class", "Text MapGroupDropDown")
+            let optionS = document.createElement("option")
+            optionS.setAttribute("value", this._NoTrack)
+            optionS.innerHTML = this._NoTrack
+            DropDown.appendChild(optionS)
+            this._GeoXData.AppGroup.forEach(element => {
+                let option = document.createElement("option")
+                option.setAttribute("value", element)
+                option.innerHTML = element
+                DropDown.appendChild(option)
+            });
+            DropDown.onchange = this.NewGroupSelected.bind(this)
+            divdropdown.appendChild(DropDown)
+            this._GroupSelected = this._NoTrack
+        }
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%"))
         // Parametre de la carte
@@ -183,7 +206,9 @@ class GeoXCreateTrack {
         this._Map = L.map(this._MapId , {zoomControl: false, tapTolerance:40, tap:false, layers: [Openstreetmap]}).setView([CenterPoint.Lat, CenterPoint.Long], Zoom);
         L.control.zoom({position: 'bottomright'}).addTo(this._Map);
         L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(this._Map);
-        
+        // Creation du groupe de layer
+        this._LayerGroup = new L.LayerGroup()
+        this._LayerGroup.addTo(this._Map)
 
         this._Polyline = L.polyline([]).arrowheads({frequency: '50px', size: '10m', fill: true}).addTo(this._Map)
 
@@ -547,6 +572,54 @@ class GeoXCreateTrack {
     }
 
     /**
+     * Fonction triggered by the dropdown Group
+     */
+    NewGroupSelected(){
+        // get du nom du type
+        let DropDownGroupValue = document.getElementById("Group").value
+        this._GroupSelected = DropDownGroupValue
+        if (DropDownGroupValue != this._NoTrack){
+            // Send data to server
+            GlobalSendSocketIo("GeoX", "LoadMapData", DropDownGroupValue)
+        } else {
+            // Remove all tracks
+            let me = this
+            this._LayerGroup.eachLayer(function (layer) {
+                me._LayerGroup.removeLayer(layer);
+            })
+        }
+    }
+
+    /**
+     * Ajouter une track a la carte
+     * @param {String} TrackId Id de la track
+     * @param {String} TrackName Nom de la track
+     * @param {Object} GeoJsonData GeoJson Data de la track
+     * @param {string} TrackColor Color de la track
+     */
+    ModifyTracksOnMap(DataMap){
+        this._DataMap = DataMap
+        // Remove all tracks
+        let me = this
+        this._LayerGroup.eachLayer(function (layer) {
+            me._LayerGroup.removeLayer(layer);
+        })
+        // Zoom in and add tracks
+        this._DataMap.ListOfTracks.forEach(Track => {
+            var TrackWeight = 3
+            if (L.Browser.mobile){TrackWeight = 6}
+            // Style for tracks
+            var TrackStyle = {
+                "color": Track.Color,
+                "weight": TrackWeight
+            };
+            // Add track
+            var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(this._LayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
+            layerTrack1.id = Track._id
+        });
+    }
+
+    /**
      * Suppression d'une carte
      */
     DeleteMap(){
@@ -567,6 +640,10 @@ class GeoXCreateTrack {
             this._TrackMarkers = []
             this._AutoRouteBehavior = true
             this.CityFound = false
+            this._GeoXData = null
+            this._GroupSelected = null
+            this._DataMap = null
+            this._LayerGroup = null
         }
     }
 }
