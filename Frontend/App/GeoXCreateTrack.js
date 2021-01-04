@@ -14,6 +14,7 @@ class GeoXCreateTrack {
         this._TrackName = "Rixensart"
         this._TrackMarkers = []
         this._AutoRouteBehavior = true
+        this.CityFound = false
 
         this._IconPointOption = L.icon({
             iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -53,12 +54,14 @@ class GeoXCreateTrack {
         //document.getElementById("InputCity").setAttribute("autocomplete", "off")
         let DivInput = CoreXBuild.Div("", "InputCity", "")
         Conteneur.appendChild(DivInput)
-        let InputCity = CoreXBuild.Input("InputCity", "", "Input Text", "", "text", "InputCity", "City")
+        let InputCity = CoreXBuild.Input("InputCity", "", "Input Text", "padding: 4%;", "text", "InputCity", "City")
         DivInput.appendChild(InputCity)
         InputCity.autocomplete = "off"
+        let me = this
         autocomplete({
             input: document.getElementById("InputCity"),
             minLength: 3,
+            debounceWaitMs: 200,
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 if (document.getElementById("InputCountry").value == "Belgique"){
@@ -66,24 +69,51 @@ class GeoXCreateTrack {
                         response.json().then((data) =>{
                             var suggestions = []
                             data.records.forEach(element => {
-                                suggestions.push(element.fields.column_2)
+                                var MyObject = new Object()
+                                MyObject.label = element.fields.column_2
+                                MyObject.Lat = element.fields.column_4
+                                MyObject.Long = element.fields.column_3
+                                suggestions.push(MyObject)
                             });
                             update(suggestions);
                         })
                     })
                 } else if (document.getElementById("InputCountry").value == "France") {
-                    var suggestions = []
-                    update(suggestions);
+                    fetch(`https://datanova.laposte.fr/api/records/1.0/search/?dataset=laposte_hexasmal&q=${text}`).then((response) => {
+                        response.json().then((data) =>{
+                            var suggestions = []
+                            data.records.forEach(element => {
+                                var MyObject = new Object()
+                                MyObject.label = element.fields.nom_de_la_commune
+                                MyObject.Lat = element.fields.coordonnees_gps[0]
+                                MyObject.Long = element.fields.coordonnees_gps[1]
+                                suggestions.push(MyObject)
+                            });
+                            update(suggestions);
+                        })
+                    })
                 } else {
                     var suggestions = []
                     update(suggestions);
                 }
             },
             onSelect: function(item) {
-                document.getElementById("InputCity").value = item;
-            }
+                document.getElementById("InputCity").value = item.label
+                me._InitLat = item.Lat
+                me._InitLong = item.Long
+                me.CityFound = true
+            },
+            customize: function(input, inputRect, container, maxHeight) {
+                if (container.childNodes.length == 1){
+                    if (container.childNodes[0].innerText == 'No suggestion'){
+                        input.style.backgroundColor = "lightcoral"
+                    } else {
+                        input.style.backgroundColor = "white"
+                    }
+                }
+            },
+            disableAutoSelect: false
         });
-        let me = this
         InputCity.addEventListener("keyup", function(event) {
             // Number 13 is the "Enter" key on the keyboard
             if (event.keyCode === 13) {
@@ -107,26 +137,15 @@ class GeoXCreateTrack {
 
     async FindCityLatLong(){
         let city = document.getElementById("InputCity").value
-        //let country = document.getElementById("InputCountry").value
-        if (city != ""){
-            //const reponse = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&country=${country}&format=json&addressdetails=1&limit=1`)
-            if (document.getElementById("InputCountry").value == "Belgique"){
-                const reponse = await fetch(`https://www.odwb.be/api/records/1.0/search/?dataset=code-postaux-belge&q=${city}`)
-                const data = await reponse.json()
-                if (data.length == 0){
-                    document.getElementById("SearchError").innerText = "City not found...!"
-                } else {
-                    this._InitLat = data.records[0].fields.column_4
-                    this._InitLong = data.records[0].fields.column_3
-                    this.LoadViewMap(this._InitLat, this._InitLong)
-                }
-            } else if (document.getElementById("InputCountry").value == "France") {
-                document.getElementById("SearchError").innerText = "API France not defined...!"
-            } else {
-                document.getElementById("SearchError").innerText = "Country not found...!"
-            }
+        if (city == "") {
+            // On centre sur rixensart
+            this.LoadViewMap("50.709446", "4.543413")
         } else {
-            this.LoadViewMap(this._InitLat, this._InitLong)
+            if (this.CityFound){
+                this.LoadViewMap(this._InitLat, this._InitLong)
+            } else {
+                document.getElementById("SearchError").innerText = "City not found...!"
+            }
         }
     }
 
@@ -546,7 +565,8 @@ class GeoXCreateTrack {
             this._DragPolylineNb = 0
             this._AllowClick = true
             this._TrackMarkers = []
-            this._AutoRouteBehavior = false
+            this._AutoRouteBehavior = true
+            this.CityFound = false
         }
     }
 }

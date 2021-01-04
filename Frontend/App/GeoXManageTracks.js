@@ -128,11 +128,17 @@ class GeoXManageTracks {
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 text = text.toLowerCase();
-                var suggestions = Groups.filter(n => n.toLowerCase().startsWith(text))
+                var GroupFiltred = Groups.filter(n => n.toLowerCase().startsWith(text))
+                var suggestions = []
+                GroupFiltred.forEach(element => {
+                    var MyObject = new Object()
+                    MyObject.label = element
+                    suggestions.push(MyObject)
+                });
                 update(suggestions);
             },
             onSelect: function(item) {
-                document.getElementById("InputTrackGroup").value = item;
+                document.getElementById("InputTrackGroup").value = item.label;
             }
         });
         // Button Update
@@ -177,11 +183,17 @@ class GeoXManageTracks {
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 text = text.toLowerCase();
-                var suggestions = Groups.filter(n => n.toLowerCase().startsWith(text))
+                var GroupFiltred = Groups.filter(n => n.toLowerCase().startsWith(text))
+                var suggestions = []
+                GroupFiltred.forEach(element => {
+                    var MyObject = new Object()
+                    MyObject.label = element
+                    suggestions.push(MyObject)
+                });
                 update(suggestions);
             },
             onSelect: function(item) {
-                document.getElementById("InputTrackGroup").value = item;
+                document.getElementById("InputTrackGroup").value = item.label;
             }
         });
         // Toggle MultiLine to OneLine
