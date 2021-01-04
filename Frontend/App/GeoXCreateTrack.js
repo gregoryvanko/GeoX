@@ -106,6 +106,7 @@ class GeoXCreateTrack {
                 me._InitLat = item.Lat
                 me._InitLong = item.Long
                 me.CityFound = true
+                me._TrackName = item.label.charAt(0).toUpperCase() + item.label.slice(1)
             },
             customize: function(input, inputRect, container, maxHeight) {
                 if (container.childNodes.length == 1){
@@ -114,6 +115,8 @@ class GeoXCreateTrack {
                     } else {
                         input.style.backgroundColor = "white"
                     }
+                } else {
+                    input.style.backgroundColor = "white"
                 }
             },
             disableAutoSelect: false
