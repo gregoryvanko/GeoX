@@ -9,6 +9,7 @@ class GeoXMap {
         this._DataApp = null
         this._CurrentPosShowed = false
         this._GpsPointer = null
+        this._GpsPointerTrack = null
         this._GpsRadius = null
         this._WatchPositionID = null
     }
@@ -107,14 +108,17 @@ class GeoXMap {
             this._CurrentPosShowed = false
             this._Map.removeLayer(this._GpsPointer)
             this._GpsPointer = null
+            this._Map.removeLayer(this._GpsPointerTrack)
+            this._GpsPointerTrack = null
             this._Map.removeLayer(this._GpsRadius)
             this._GpsRadius = null
-            this._Map.off('locationfound', this.ShowPosition.bind(this))
-            this._Map.off('locationerror', this.ErrorPosition.bind(this))
+            this._Map.off('locationfound')
+            this._Map.off('locationerror')
             this._Map.stopLocate()
         } else {
             this._CurrentPosShowed = true
             this._GpsRadius = L.circle([50.709446,4.543413], 1).addTo(this._Map)
+            this._GpsPointerTrack = L.circle([50.709446,4.543413], 3, {color: "red", fillColor:'red', fillOpacity:1}).addTo(this._Map)
             this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'#0073f0', fillOpacity:1}).addTo(this._Map)
             this._Map.locate({watch: true, enableHighAccuracy: true})
             this._Map.on('locationfound', this.ShowPosition.bind(this))
@@ -127,10 +131,34 @@ class GeoXMap {
         this._GpsPointer.setLatLng(e.latlng)
         this._GpsRadius.setLatLng(e.latlng)
         this._GpsRadius.setRadius(radius)
+        this.CalculateLivePositionOnTrack(e)
     }
     
     ErrorPosition(err){
         alert('ERROR Position: ' + err.message)
+    }
+
+    CalculateLivePositionOnTrack(Gps){
+        // get all layer
+        var arrayOfLayers = this._LayerGroup.getLayers()
+        // Verifier si il n'y a qu'une seule track sur la carte
+        if(arrayOfLayers.length == 1){
+            var layer = arrayOfLayers[0]._layers
+            var id = Object.keys(layer)[0]
+            var coord = layer[id].feature.geometry.coordinates
+            var line = turf.lineString(coord)
+            var pt = turf.point([Gps.longitude, Gps.latitude])
+            var snapped = turf.nearestPointOnLine(line, pt)
+            this._GpsPointerTrack.setLatLng([snapped.geometry.coordinates[1],snapped.geometry.coordinates[0]])
+            var DistandceParcourue = Math.round((snapped.properties.location + Number.EPSILON) * 100) / 100
+            var DistranceTotale = Math.round((turf.length(line) + Number.EPSILON) * 100) / 100
+            var DistancePourcent =Math.round(((DistandceParcourue/DistranceTotale) * 100 + Number.EPSILON) * 100) / 100 
+            console.log(DistandceParcourue + "km sur " + DistranceTotale + "km")
+            console.log("=> " + DistancePourcent +"%")
+        } else {
+            // afficher qu'il plus que un layer
+            console.log("show only one track")
+        }
     }
 
     SetButtonShowTrackInfoVisible(Visible){
@@ -253,6 +281,15 @@ class GeoXMap {
             this._Map = null
             let mapDiv = document.getElementById(this._MapId)
             if(mapDiv) mapDiv.parentNode.removeChild(mapDiv)
+            this._LayerGroup = null
+            this._GroupSelected = null
+            this._DataMap = null
+            this._DataApp = null
+            this._CurrentPosShowed = false
+            this._GpsPointer = null
+            this._GpsPointerTrack = null
+            this._GpsRadius = null
+            this._WatchPositionID = null
         }
     }
 
