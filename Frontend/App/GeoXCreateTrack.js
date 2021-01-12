@@ -492,7 +492,13 @@ class GeoXCreateTrack {
 
     UpdateViewDistance(){
         var Dist = this.CalculDistance()
-        document.getElementById("DivDistance").innerText = "Distance: " + Dist +"km"
+        if (Dist < 1){
+            Dist = Dist * 1000
+            Dist = Dist.toString() + "m"
+        } else {
+            Dist = Dist.toString() + "Km"
+        }
+        document.getElementById("DivDistance").innerText = "Distance: " + Dist
     }
 
     CalculDistance(){
@@ -507,15 +513,21 @@ class GeoXCreateTrack {
             }
             Dist = Dist / 1000;
         }
-        Dist = Dist.toFixed(2)
+        Dist = Dist.toFixed(3)
         return Dist
     }
 
     BuildInfoBox(){
         var Dist = this.CalculDistance()
+        if (Dist < 1){
+            Dist = Dist * 1000
+            Dist = Dist.toString() + "m"
+        } else {
+            Dist = Dist.toString() + "Km"
+        }
         let DivInfoBox = CoreXBuild.Div("DivInfoBox", "DivInfoBox", "")
         this._DivApp.appendChild(DivInfoBox)
-        DivInfoBox.appendChild(CoreXBuild.DivTexte("Distance: " + Dist +"km","DivDistance","TextTrackInfo", "color: white; margin-left: 1%;"))
+        DivInfoBox.appendChild(CoreXBuild.DivTexte("Distance: " + Dist,"DivDistance","TextTrackInfo", "color: white; margin-left: 1%;"))
         // Toggle MultiLine to OneLine
         let DivToogle = CoreXBuild.Div("","", "width: 100%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; margin: 1vh 0vh;")
         DivInfoBox.appendChild(DivToogle)

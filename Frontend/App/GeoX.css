@@ -103,6 +103,25 @@
     padding: 1%;
 }
 
+.DivBoxDistance{
+    width: 20%;
+    height: 8vh;
+    position: fixed;
+    z-index: 998; 
+    top: 90vh; 
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    overflow-y:auto;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-content: center;
+    align-items: center;
+}
+
 .ButtonClose{
     font-size: calc(var(--TexteNomrale)*1.4);
     outline: none;
@@ -223,6 +242,7 @@ screen and (max-width: 700px)
     .ButtonInfoBox{border-radius: 40px;}
     .MarkerPopupContent{margin:auto 20%;}
     .ButtonPopup{ padding: 8% 0%;}
+    .DivBoxDistance{width: 50%;}
 }
 
 @media screen and (min-width: 1200px)
