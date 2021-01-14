@@ -344,7 +344,7 @@ class GeoXMap {
                 // Date de la track
                 DivSubInfo.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(element.Date),"","TextTrackInfo", "color: white; margin-left: 4%;"))
                 // Longeur de la track
-                DivSubInfo.appendChild(CoreXBuild.DivTexte(element.Length + "Km","","TextTrackInfo", "color: white; margin-left: 0%;"))
+                DivSubInfo.appendChild(CoreXBuild.DivTexte(element.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; margin-left: 0%;"))
                 // Box pour les bouttons
                 let DivButton = document.createElement("div")
                 Conteneur.appendChild(DivButton)

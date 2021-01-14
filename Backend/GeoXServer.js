@@ -18,8 +18,9 @@ class GeoXServer{
     Api(Data, Socket, User, UserId){
         switch (Data.Action) {
             case "LoadAppData":
-                this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
-                this.LoadAppData(Data.Value, Socket, User, UserId)
+                this.UpdateLengthOfAllTracksInDb(User, UserId)
+                //this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
+                //this.LoadAppData(Data.Value, Socket, User, UserId)
                 break
             case "LoadMapData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
@@ -428,7 +429,7 @@ class GeoXServer{
      */
     CalculateTrackLength(GeoJson){
         var Turf = require('@turf/length').default
-        let distance = Math.round((Turf(GeoJson) + Number.EPSILON) * 100) / 100
+        let distance = Math.round((Turf(GeoJson) + Number.EPSILON) * 1000) / 1000
         return distance
     }
 
