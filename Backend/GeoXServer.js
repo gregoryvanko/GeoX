@@ -18,9 +18,8 @@ class GeoXServer{
     Api(Data, Socket, User, UserId){
         switch (Data.Action) {
             case "LoadAppData":
-                this.UpdateLengthOfAllTracksInDb(User, UserId)
-                //this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
-                //this.LoadAppData(Data.Value, Socket, User, UserId)
+                this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
+                this.LoadAppData(Data.Value, Socket, User, UserId)
                 break
             case "LoadMapData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
