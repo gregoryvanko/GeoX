@@ -12,7 +12,6 @@ class GeoXMap {
         this._GpsPointerTrack = null
         this._GpsRadius = null
         this._GpsLineToPosition = null
-        this._WatchPositionID = null
     }
 
     /**
@@ -109,8 +108,14 @@ class GeoXMap {
             this._CurrentPosShowed = false
             this._Map.removeLayer(this._GpsPointer)
             this._GpsPointer = null
-            this._Map.removeLayer(this._GpsPointerTrack)
-            this._GpsPointerTrack = null
+            if(this._GpsPointerTrack){
+                this._Map.removeLayer(this._GpsPointerTrack)
+                this._GpsPointerTrack = null
+            }
+            if (this._GpsLineToPosition){
+                this._Map.removeLayer(this._GpsLineToPosition)
+                this._GpsLineToPosition = null
+            }
             this._Map.removeLayer(this._GpsRadius)
             this._GpsRadius = null
             this._Map.off('locationfound')
@@ -139,19 +144,28 @@ class GeoXMap {
         let Conteneur = CoreXBuild.DivFlexColumn("")
         DivBoxTracks.appendChild(Conteneur)
         // ConteneurTxt
-        let ConteneurTxt = CoreXBuild.Div("ConteneurTxt", "", "width: 100%; display:none; justify-content:center;")
+        let ConteneurTxt = CoreXBuild.Div("ConteneurTxt", "", "width: 100%; display:flex; justify-content:center;")
         Conteneur.appendChild(ConteneurTxt)
-        ConteneurTxt.appendChild(CoreXBuild.DivTexte("","DistanceTxt","TextTrackInfo", "color: white;"))
+        ConteneurTxt.appendChild(CoreXBuild.DivTexte("Waiting for GPS position...","DistanceTxt","TextTrackInfo", "color: white; text-align: center;"))
         // ConteneurData
-        let ConteneurData = CoreXBuild.DivFlexRowStart("ConteneurData")
+        let ConteneurData = CoreXBuild.DivFlexRowAr("ConteneurData")
+        ConteneurData.style.display = "none"
         Conteneur.appendChild(ConteneurData)
         // Pourcentage
-        ConteneurData.appendChild(CoreXBuild.DivTexte("0%","DistancePourcent","TextTrackInfo", "color: white; margin-left: 4%; width: 48%;"))
+        let DivProgressRing = CoreXBuild.Div("", "", "width: 30%; display: flex; flex-direction:column; justify-content:flex-start;")
+        ConteneurData.appendChild(DivProgressRing)
+        DivProgressRing.appendChild(CoreXBuild.ProgressRing({Id:"MyProgressRing", Radius:30, RadiusMobile:30, ScaleText:0.7, TextColor:"white", StrokeColor:"var(--CoreX-color)"}))
         // Div Distance
-        let DivDistane = CoreXBuild.Div("", "", "width: 48%; display: flex; flex-direction:column; justify-content:flex-start;")
+        let DivDistane = CoreXBuild.Div("", "", "width: 60%; display: flex; flex-direction:column; justify-content:center;")
         ConteneurData.appendChild(DivDistane)
-        DivDistane.appendChild(CoreXBuild.DivTexte("Done: 0km","DistaneDone","TextTrackInfo", "color: white;"))
-        DivDistane.appendChild(CoreXBuild.DivTexte("Total: 0km","DistanceTotal","TextTrackInfo", "color: white;"))
+        let DivDone = CoreXBuild.DivFlexRowStart("")
+        DivDistane.appendChild(DivDone)
+        DivDone.appendChild(CoreXBuild.DivTexte("Done:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
+        DivDone.appendChild(CoreXBuild.DivTexte("0km","DistaneDone","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
+        let DivTotal = CoreXBuild.DivFlexRowStart("")
+        DivDistane.appendChild(DivTotal)
+        DivTotal.appendChild(CoreXBuild.DivTexte("Total:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
+        DivTotal.appendChild(CoreXBuild.DivTexte("0km","DistanceTotal","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
     }
 
     HideDistanceInfoBox(){
@@ -195,7 +209,7 @@ class GeoXMap {
             if (snapped.properties.dist < 0.04){
                 var DistandceParcourue = Math.round((snapped.properties.location + Number.EPSILON) * 1000) / 1000
                 var DistranceTotale = Math.round((turf.length(line) + Number.EPSILON) * 1000) / 1000
-                var DistancePourcent =Math.round(((DistandceParcourue/DistranceTotale) * 100 + Number.EPSILON) * 1000) / 1000 
+                var DistancePourcent =Math.round(((DistandceParcourue/DistranceTotale) * 100 + Number.EPSILON) * 10) / 10
                 if (DistandceParcourue >= 1){
                     DistandceParcourue = DistandceParcourue.toString() + "Km"
                 } else {
@@ -211,16 +225,15 @@ class GeoXMap {
                 document.getElementById("ConteneurTxt").style.display = "none";
                 document.getElementById("ConteneurData").style.display = "flex";
                 document.getElementById("DistanceTxt").innerText = ``
-                document.getElementById("DistaneDone").innerText = `Done: ${DistandceParcourue}`
-                document.getElementById("DistanceTotal").innerText = `Total: ${DistranceTotale}`
-                document.getElementById("DistancePourcent").innerText = `${DistancePourcent}%`
+                document.getElementById("DistaneDone").innerText = DistandceParcourue
+                document.getElementById("DistanceTotal").innerText = DistranceTotale
+                document.getElementById("MyProgressRing").setAttribute('progress', DistancePourcent);
                 // retirer la ligne entre la track et la position
                 if (this._GpsLineToPosition != null){
                     this._Map.removeLayer(this._GpsLineToPosition)
                     this._GpsLineToPosition = null
                 }
             } else {
-                console.log(snapped.properties.dist)
                 var DistandcePosAndTrack = Math.round((snapped.properties.dist + Number.EPSILON) * 1000) / 1000
                 if (DistandcePosAndTrack >= 1){
                     DistandcePosAndTrack = DistandcePosAndTrack.toString() + "Km"
@@ -228,7 +241,6 @@ class GeoXMap {
                     DistandcePosAndTrack = DistandcePosAndTrack * 1000
                     DistandcePosAndTrack = DistandcePosAndTrack.toString()  + "m"
                 }
-                console.log(DistandcePosAndTrack)
                 // afficher que l'on est trop loin
                 document.getElementById("ConteneurTxt").style.display = "flex";
                 document.getElementById("ConteneurData").style.display = "none";
@@ -388,7 +400,6 @@ class GeoXMap {
             this._GpsPointerTrack = null
             this._GpsRadius = null
             this._GpsLineToPosition = null
-            this._WatchPositionID = null
         }
     }
 
