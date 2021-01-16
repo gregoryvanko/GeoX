@@ -19,11 +19,13 @@ class GeoXMap {
      * @param {Object} DataMap Object contenant toutes les data d'une map
      */
     LoadViewMap(GeoXData){
+        // mettre le backgroundColor du body à Black pour la vue Iphone
+        document.body.style.backgroundColor= "black"
         this._DataApp = GeoXData.AppData
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
-        this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%"))
+        this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
         // Add dropdown groupe
         if (GeoXData.AppGroup.length > 0){
             // Ajout du drop down avec le nom des groupes des map
@@ -400,6 +402,7 @@ class GeoXMap {
             this._GpsPointerTrack = null
             this._GpsRadius = null
             this._GpsLineToPosition = null
+            document.body.style.backgroundColor= "white"
         }
     }
 

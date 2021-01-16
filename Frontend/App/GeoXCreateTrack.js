@@ -154,6 +154,8 @@ class GeoXCreateTrack {
     }
 
     LoadViewMap(Lat, Long){
+        // mettre le backgroundColor du body à Black pour la vue Iphone
+        document.body.style.backgroundColor= "black"
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Add dropdown groupe
@@ -659,6 +661,8 @@ class GeoXCreateTrack {
             this._GroupSelected = null
             this._DataMap = null
             this._LayerGroup = null
+            // mettre le backgroundColor du body à Black pour la vue Iphone
+            document.body.style.backgroundColor= "white"
         }
     }
 }

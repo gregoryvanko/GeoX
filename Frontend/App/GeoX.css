@@ -233,7 +233,7 @@ screen and (max-width: 700px)
     .TextTrackInfo{font-size: var(--TexteIphone);}
     .DivDropDownPays{width: 90%;}
     .InputCity{width: 90%;}
-    .DivMapGroupDropDown{width: 70%; top: 0%; margin:4px;}
+    .DivMapGroupDropDown{width: 50%; top: 0%; margin:4px;}
     .MapGroupDropDown{padding: 1.5vh;}
     .DivBoxTracks{width: 90%; left: -90%;}
     .DivBoxTracksShow{left: 5%;}
