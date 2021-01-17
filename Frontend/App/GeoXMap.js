@@ -12,6 +12,7 @@ class GeoXMap {
         this._GpsPointerTrack = null
         this._GpsRadius = null
         this._GpsLineToPosition = null
+        this._GeoLocalisation = new GeoLocalisation(this.ShowPosition.bind(this), this.ErrorPosition.bind(this))
     }
 
     /**
@@ -111,6 +112,8 @@ class GeoXMap {
             this._CurrentPosShowed = false
             this._Map.removeLayer(this._GpsPointer)
             this._GpsPointer = null
+            this._Map.removeLayer(this._GpsRadius)
+            this._GpsRadius = null
             if(this._GpsPointerTrack){
                 this._Map.removeLayer(this._GpsPointerTrack)
                 this._GpsPointerTrack = null
@@ -119,11 +122,8 @@ class GeoXMap {
                 this._Map.removeLayer(this._GpsLineToPosition)
                 this._GpsLineToPosition = null
             }
-            this._Map.removeLayer(this._GpsRadius)
-            this._GpsRadius = null
-            this._Map.off('locationfound')
-            this._Map.off('locationerror')
-            this._Map.stopLocate()
+            // Stop Localisation
+            this._GeoLocalisation.StopLocalisation()
             // remove box info
             this.HideDistanceInfoBox()
         } else {
@@ -133,9 +133,8 @@ class GeoXMap {
             this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'#0073f0', fillOpacity:1}).addTo(this._Map)
             // Add box info
             this.ShowDistanceInfoBox()
-            this._Map.locate({watch: true, enableHighAccuracy: true})
-            this._Map.on('locationfound', this.ShowPosition.bind(this))
-            this._Map.on('locationerror', this.ErrorPosition.bind(this))
+            // Start Localisation
+            this._GeoLocalisation.StartLocalisation()
         }
     }
 
@@ -187,16 +186,19 @@ class GeoXMap {
         this.CalculateLivePositionOnTrack(e)
     }
     
-    ErrorPosition(err){
-        alert('ERROR Position: ' + err.message)
+    ErrorPosition(ErrorTxt){
+        document.getElementById("ConteneurTxt").style.display = "flex";
+        document.getElementById("ConteneurData").style.display = "none";
+        document.getElementById("DistanceTxt").innerText = ErrorTxt
     }
 
     CalculateLivePositionOnTrack(Gps){
         // get all layer
         var arrayOfLayers = this._LayerGroup.getLayers()
+        let MyLayer = arrayOfLayers.filter(x => x.Type== "Track")
         // Verifier si il n'y a qu'une seule track sur la carte
-        if(arrayOfLayers.length == 1){
-            var layer = arrayOfLayers[0]._layers
+        if(MyLayer.length == 1){
+            var layer = MyLayer[0]._layers
             var id = Object.keys(layer)[0]
             var coord = layer[id].feature.geometry.coordinates
             var line = turf.lineString(coord)
@@ -257,7 +259,7 @@ class GeoXMap {
                 this._GpsLineToPosition.addLatLng(L.latLng([snapped.geometry.coordinates[1],snapped.geometry.coordinates[0]]))
             }
         } else {
-            // afficher qu'il plus que un layer
+            // afficher qu'il y a plus que un layer
             document.getElementById("ConteneurTxt").style.display = "flex";
             document.getElementById("ConteneurData").style.display = "none";
             document.getElementById("DistanceTxt").innerText = `Show only one track to follow on map`
@@ -404,6 +406,7 @@ class GeoXMap {
             this._GpsRadius = null
             this._GpsLineToPosition = null
             document.body.style.backgroundColor= "white"
+            this._GeoLocalisation.StopLocalisation()
         }
     }
 
@@ -455,6 +458,7 @@ class GeoXMap {
                     };
                     var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(me._LayerGroup).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
                     layerTrack1.id = Track._id
+                    layerTrack1.Type= "Track"
                     // Get Start and end point
                     var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
                     var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
@@ -462,10 +466,12 @@ class GeoXMap {
                     // Marker Start
                     var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(me._LayerGroup)
                     MarkerStart.id = Track._id + "start"
+                    MarkerStart.Type = "Marker"
                     MarkerStart.dragging.disable();
                     // Marker End
                     var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(me._LayerGroup)
                     MarkerEnd.id = Track._id + "end"
+                    MarkerEnd.Type = "Marker"
                     MarkerEnd.dragging.disable();
                 });
                 // Si on suit la postion, on fait un update du calcul des distance realisee
@@ -543,6 +549,7 @@ class GeoXMap {
                     });
                     var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(me._LayerGroup).bindPopup(Track.Name)
                     layerTrack1.id = Track._id
+                    layerTrack1.Type= "Track"
                     // Get Start and end point
                     var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
                     var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
@@ -550,10 +557,12 @@ class GeoXMap {
                     // Marker Start
                     var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(me._LayerGroup)
                     MarkerStart.id = Track._id + "start"
+                    MarkerStart.Type = "Marker"
                     MarkerStart.dragging.disable();
                     // Marker End
                     var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(me._LayerGroup)
                     MarkerEnd.id = Track._id + "end"
+                    MarkerEnd.Type = "Marker"
                     MarkerEnd.dragging.disable();
                 }
             });
