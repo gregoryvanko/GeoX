@@ -616,15 +616,32 @@ class GeoXCreateTrack {
      */
     ModifyTracksOnMap(DataMap){
         this._DataMap = DataMap
-        // Remove all tracks
         let me = this
+        // Remove all tracks
         this._LayerGroup.eachLayer(function (layer) {
             me._LayerGroup.removeLayer(layer);
         })
-        // Zoom in and add tracks
+        // Style for tracks
+        var TrackWeight = 3
+        if (L.Browser.mobile){
+            TrackWeight = 6
+        }
+        // Style for Marker Start
+        var IconPointStartOption = L.icon({
+            iconUrl: MarkerIcon.MarkerVert(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+        });
+        // Style for Marker End
+        var IconPointEndOption = L.icon({
+            iconUrl: MarkerIcon.MarkerRouge(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+        });
+        // Add track
         this._DataMap.ListOfTracks.forEach(Track => {
-            var TrackWeight = 3
-            if (L.Browser.mobile){TrackWeight = 6}
             // Style for tracks
             var TrackStyle = {
                 "color": Track.Color,
@@ -633,6 +650,18 @@ class GeoXCreateTrack {
             // Add track
             var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(this._LayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
             layerTrack1.id = Track._id
+            // Get Start and end point
+            var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+            var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
+            var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+            // Marker Start
+            var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(me._LayerGroup)
+            MarkerStart.id = Track._id + "start"
+            MarkerStart.dragging.disable();
+            // Marker End
+            var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(me._LayerGroup)
+            MarkerEnd.id = Track._id + "end"
+            MarkerEnd.dragging.disable();
         });
     }
 

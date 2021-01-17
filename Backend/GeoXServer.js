@@ -563,6 +563,7 @@ class GeoXServer{
         reponse += fs.readFileSync(__dirname + "/../Frontend/App/0-leaflet.js", 'utf8')
         reponse += fs.readFileSync(__dirname + "/../Frontend/App/1-leaflet.geometryutil.js", 'utf8')
         reponse += fs.readFileSync(__dirname + "/../Frontend/App/2-leaflet-arrowheads.js", 'utf8')
+        reponse += fs.readFileSync(__dirname + "/../Frontend/App/MarkerIcon.js", 'utf8')
         reponse += `
                 </script>
             </head>
@@ -615,13 +616,43 @@ class GeoXServer{
                     //MyMap.flyToBounds(FitBounds,{'duration':2} )
                     ListeOfTracks.ListOfTracks.forEach(Track => {
                         // Style for tracks
+                        var TrackWeight = 3
+                        if (L.Browser.mobile){
+                            TrackWeight = 6
+                        }
                         var TrackStyle = {
                             "color": Track.Color,
-                            "weight": 3
+                            "weight": TrackWeight
                         };
+                        // Style for Marker Start
+                        var IconPointStartOption = L.icon({
+                            iconUrl: MarkerIcon.MarkerVert(),
+                            iconSize:     [40, 40],
+                            iconAnchor:   [20, 40],
+                            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+                        });
+                        // Style for Marker End
+                        var IconPointEndOption = L.icon({
+                            iconUrl: MarkerIcon.MarkerRouge(),
+                            iconSize:     [40, 40],
+                            iconAnchor:   [20, 40],
+                            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+                        });
                         // Add track
                         var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(MyLayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
                         layerTrack1.id = Track._id
+                        // Get Start and end point
+                        var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+                        var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
+                        var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+                        // Marker Start
+                        var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(MyLayerGroup)
+                        MarkerStart.id = Track._id + "start"
+                        MarkerStart.dragging.disable();
+                        // Marker End
+                        var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(MyLayerGroup)
+                        MarkerEnd.id = Track._id + "end"
+                        MarkerEnd.dragging.disable();
                     });
                 }, 500);
             </script>

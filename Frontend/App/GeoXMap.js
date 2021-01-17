@@ -439,6 +439,7 @@ class GeoXMap {
                     iconAnchor:   [20, 40],
                     popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
                 });
+                // Style for Marker End
                 var IconPointEndOption = L.icon({
                     iconUrl: MarkerIcon.MarkerRouge(),
                     iconSize:     [40, 40],
@@ -459,11 +460,13 @@ class GeoXMap {
                     var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
                     var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
                     // Marker Start
-                    var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption, draggable: 'false',}).addTo(me._LayerGroup)
+                    var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(me._LayerGroup)
                     MarkerStart.id = Track._id + "start"
+                    MarkerStart.dragging.disable();
                     // Marker End
-                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption, draggable: 'flase',}).addTo(me._LayerGroup)
+                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(me._LayerGroup)
                     MarkerEnd.id = Track._id + "end"
+                    MarkerEnd.dragging.disable();
                 });
                 // Si on suit la postion, on fait un update du calcul des distance realisee
                 if (me._CurrentPosShowed){
@@ -507,7 +510,7 @@ class GeoXMap {
         let me = this
         let AddTrack = true
         this._LayerGroup.eachLayer(function (layer) {
-            if (layer.id == TrackId){
+            if ((layer.id == TrackId) || (layer.id == TrackId + "start") || (layer.id == TrackId + "end")){
                 me._LayerGroup.removeLayer(layer);
                 AddTrack = false
             }
@@ -515,6 +518,7 @@ class GeoXMap {
         if (AddTrack){
             this._DataMap.ListOfTracks.forEach(Track => {
                 if (Track._id == TrackId){
+                    // Track style
                     var TrackWeight = 3
                     if (L.Browser.mobile){
                         TrackWeight = 6
@@ -523,8 +527,34 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": 3
                     };
+                    // Style for Marker Start
+                    var IconPointStartOption = L.icon({
+                        iconUrl: MarkerIcon.MarkerVert(),
+                        iconSize:     [40, 40],
+                        iconAnchor:   [20, 40],
+                        popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+                    });
+                    // Style for Marker End
+                    var IconPointEndOption = L.icon({
+                        iconUrl: MarkerIcon.MarkerRouge(),
+                        iconSize:     [40, 40],
+                        iconAnchor:   [20, 40],
+                        popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+                    });
                     var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(me._LayerGroup).bindPopup(Track.Name)
                     layerTrack1.id = Track._id
+                    // Get Start and end point
+                    var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+                    var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
+                    var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+                    // Marker Start
+                    var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(me._LayerGroup)
+                    MarkerStart.id = Track._id + "start"
+                    MarkerStart.dragging.disable();
+                    // Marker End
+                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(me._LayerGroup)
+                    MarkerEnd.id = Track._id + "end"
+                    MarkerEnd.dragging.disable();
                 }
             });
         }
