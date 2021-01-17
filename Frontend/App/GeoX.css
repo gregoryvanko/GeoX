@@ -34,7 +34,7 @@
     position: fixed;
     z-index: 999; 
     left: 50%; 
-    top: 0.5%; 
+    top: 1%; 
     transform: translate(-50%, 0%);
 }
 
@@ -74,7 +74,8 @@
 }
 
 .DivBoxTracks{
-    width: 20%;
+    width: 48vh;
+    max-width: 280px;
     height: 70vh;
     position: fixed;
     z-index: 998; 
@@ -235,7 +236,7 @@ screen and (max-width: 700px)
     .InputCity{width: 90%;}
     .DivMapGroupDropDown{width: 50%; top: 0%; margin:4px;}
     .MapGroupDropDown{padding: 1.5vh;}
-    .DivBoxTracks{width: 90%; left: -90%;}
+    .DivBoxTracks{width: 90%; left: -90%; max-width: 100%;}
     .DivBoxTracksShow{left: 5%;}
     .ButtonClose{font-size: calc(var(--TexteIphone)*2);}
     .DivInfoBox{padding: 2%;}

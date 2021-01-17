@@ -21,6 +21,7 @@ class GeoXMap {
     LoadViewMap(GeoXData){
         // mettre le backgroundColor du body à Black pour la vue Iphone
         document.body.style.backgroundColor= "black"
+        
         this._DataApp = GeoXData.AppData
         // Clear Conteneur
         this._DivApp.innerHTML = ""
@@ -426,20 +427,43 @@ class GeoXMap {
             this._Map.flyToBounds(this._DataMap.FitBounds,{'duration':2} )
             let me = this
             this._Map.once('moveend', function() {
-                // Add tracks
+                // Style for tracks
+                var TrackWeight = 3
+                if (L.Browser.mobile){
+                    TrackWeight = 6
+                }
+                // Style for Marker Start
+                var IconPointStartOption = L.icon({
+                    iconUrl: MarkerIcon.MarkerVert(),
+                    iconSize:     [40, 40],
+                    iconAnchor:   [20, 40],
+                    popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+                });
+                var IconPointEndOption = L.icon({
+                    iconUrl: MarkerIcon.MarkerRouge(),
+                    iconSize:     [40, 40],
+                    iconAnchor:   [20, 40],
+                    popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+                });
+                // Add track
                 me._DataMap.ListOfTracks.forEach(Track => {
-                    var TrackWeight = 3
-                    if (L.Browser.mobile){
-                        TrackWeight = 6
-                    }
-                    // Style for tracks
+                    // Track
                     var TrackStyle = {
                         "color": Track.Color,
                         "weight": TrackWeight
                     };
-                    // Add track
                     var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(me._LayerGroup).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
                     layerTrack1.id = Track._id
+                    // Get Start and end point
+                    var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+                    var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
+                    var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+                    // Marker Start
+                    var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption, draggable: 'false',}).addTo(me._LayerGroup)
+                    MarkerStart.id = Track._id + "start"
+                    // Marker End
+                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption, draggable: 'flase',}).addTo(me._LayerGroup)
+                    MarkerEnd.id = Track._id + "end"
                 });
                 // Si on suit la postion, on fait un update du calcul des distance realisee
                 if (me._CurrentPosShowed){

@@ -22,10 +22,10 @@ class GeoXCreateTrack {
         this._LayerGroup = null
 
         this._IconPointOption = L.icon({
-            iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-            iconSize:     [18, 30],
-            iconAnchor:   [9, 30],
-            popupAnchor:  [0, -30] // point from which the popup should open relative to the iconAnchor
+            iconUrl: MarkerIcon.MarkerBleu(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
     }
 

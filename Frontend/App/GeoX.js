@@ -86,10 +86,6 @@ class GeoX{
      * @param {String} ErrorMsg Message d'erreur envoyé du serveur
      */
     Error(ErrorMsg){
-        // Delete map if existe
-        if (this._MyGeoXMap){
-            this._MyGeoXMap.DeleteMap()
-        }
         // Clear view
         this.ClearView()
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
