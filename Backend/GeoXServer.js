@@ -730,6 +730,29 @@ class GeoXServer{
             }
         })
     }
+
+    /**
+     * Fonction executee lors de l'action de delete d'un user   
+     * @param {String} DeleteUsesrId Id du user que l'on suppprime
+     * @param {String} DeleteUserLogin Login du user que l'on delete
+     * @param {String} User Login du user qui execute l'action
+     * @param {String} UserId Id du user qui execute l'action
+     */
+    OnDeleteUser(DeleteUsesrId, DeleteUserLogin, User, UserId){
+        return new Promise((resolve, reject) => {
+            let Query = { [this._MongoTracksCollection.Owner]: DeleteUserLogin }
+            this._Mongo.DeleteByQueryPromise(Query, this._MongoTracksCollection.Collection).then((reponse)=>{
+                this._MyApp.LogAppliInfo(`delete action done for the user with id: ${DeleteUsesrId} and login:${DeleteUserLogin}`, User, UserId)
+                resolve()
+            },(erreur)=>{
+                this._MyApp.LogAppliError("Error during deleting track of the user: " + erreur, User, UserId)
+                reject()
+            })           
+        })
+    }
+
   }
+
+  
   
 module.exports.GeoXServer = GeoXServer

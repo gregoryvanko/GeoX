@@ -53,6 +53,8 @@ class GeoX {
        this._MyApp.CommonAppFolder = __dirname + "/Frontend/Common"
        // Chemin relatif de l'icone
        this._MyApp.IconRelPath = __dirname + "/Backend/apple-icon-192x192.png"
+       // Function to execute when a user is deleted
+       this._MyApp.OnDeleteUser = this._GeoXServer.OnDeleteUser.bind(this._GeoXServer)
        // SocketIo
        this._MyApp.AddSocketIoFct("GeoX", this._GeoXServer.Api.bind(this._GeoXServer))
        // Route GetMap
