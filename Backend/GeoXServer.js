@@ -358,6 +358,7 @@ class GeoXServer{
         TrackData.Group = Track.Group
         TrackData.Color = "#0000FF"
         TrackData.Date = new Date()
+        TrackData.Owner = User
         let ReponseMinMaxGeoJsonTrack = this.MinMaxGeoJsonTrack(GeoJson)
         if (ReponseMinMaxGeoJsonTrack.IsError){
             this._MyApp.LogAppliError("GeoXServerApi AddTrack MinMaxGeoJsonTrack error : " + ReponseMinMaxGeoJsonTrack.ErrorMsg, User, UserId)
@@ -368,8 +369,7 @@ class GeoXServer{
             TrackData.GpxData = Track.FileContent
             TrackData.Length = this.CalculateTrackLength(GeoJson)
     
-            let DataToMongo = TrackData
-            this._Mongo.InsertOnePromise(DataToMongo, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
+            this._Mongo.InsertOnePromise(TrackData, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
                 // Log
                 this._MyApp.LogAppliInfo("New track saved", User, UserId)
                 // Load App Data
