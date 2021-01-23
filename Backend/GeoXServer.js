@@ -19,11 +19,11 @@ class GeoXServer{
         switch (Data.Action) {
             case "LoadAppData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
-                //this.LoadAppData(Data.Value, Socket, User, UserId)
+                this.LoadAppData(Data.Value, Socket, User, UserId)
 
                 // Modify Db
-                let ModifyDb = require("./ModifyDb")
-                ModifyDb.AddUserToAlTracks(this._MyApp, User)
+                //let ModifyDb = require("./ModifyDb")
+                //ModifyDb.AddUserToAlTracks(this._MyApp, User)
                 break
             case "LoadMapData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
