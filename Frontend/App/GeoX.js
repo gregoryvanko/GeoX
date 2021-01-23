@@ -8,6 +8,7 @@ class GeoX{
         this._NameLoadViewMap = "LoadViewMap"
         this._NameLoadViewManageTracks = "LoadViewManageTracks"
         this._NameLoadViewCreateTrack = "LoadViewCreateTrack"
+        this._NameLoadViewSearchTracksOnMap = "LoadViewSearchTracksOnMap"
         // Current view
         this._CurrentView = this._NameLoadViewMap
         // App Data
@@ -18,6 +19,8 @@ class GeoX{
         this._MyGeoXManageTracks = null
         // Create Track
         this._MyGeoXCreateTrack  = null
+        // Search Tracks On Map
+        this._MyGeoXSearchTracksOnMap = null
     }
 
     /** Initiation de l'application */
@@ -28,6 +31,8 @@ class GeoX{
         this._MyGeoXManageTracks = new GeoXManageTracks(this._DivApp)
         // Create GeoXCreateTrack
         this._MyGeoXCreateTrack = new GeoXCreateTrack(this._DivApp)
+        // Create GeoXSearchTracksOnMap
+        this._MyGeoXSearchTracksOnMap = new GeoXSearchTracksOnMap(this._DivApp)
         // SocketIo Listener
         let SocketIo = GlobalGetSocketIo()
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
@@ -64,15 +69,19 @@ class GeoX{
         if (this._MyGeoXMap){
             this._MyGeoXMap.DeleteMap()
         }
-        // Delete map if existe on MyGeoXMap
+        // Delete map if existe on MyGeoXCreateTrack
         if (this._MyGeoXCreateTrack){
             this._MyGeoXCreateTrack.DeleteMap()
         }
+        // Delete map if existe on MyGeoXSearchTracksOnMap
+        if (this._MyGeoXSearchTracksOnMap){
+            this._MyGeoXSearchTracksOnMap.DeleteMap()
+        }
         // Clear Global action
         GlobalClearActionList()
-        GlobalAddActionInList("Refresh", this.LoadViewGetAppData.bind(this))
-        GlobalAddActionInList("View Map", this.LoadViewMap.bind(this))
-        GlobalAddActionInList("Manage Tracks", this.LoadViewManageTracks.bind(this))
+        GlobalAddActionInList("Search Tracks On Map", this.LoadViewSearchTracksOnMap.bind(this))
+        GlobalAddActionInList("View My Tracks", this.LoadViewGetAppData.bind(this))
+        GlobalAddActionInList("Manage My Tracks", this.LoadViewManageTracks.bind(this))
         GlobalAddActionInList("Add Track", this.LoadViewAddTracks.bind(this))
         GlobalAddActionInList("Create Track", this.LoadViewCreateTracks.bind(this))
         // Show Action Button
@@ -104,7 +113,7 @@ class GeoX{
         // on construit le texte d'attente
         Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 10vh;"))
         // Send status to serveur
-        GlobalSendSocketIo("GeoX", "LoadAppData", this._CurrentView )
+        GlobalSendSocketIo("GeoX", "LoadAppData", this._NameLoadViewMap )
     }
 
     /** Ouvre la vue Map */
@@ -153,6 +162,14 @@ class GeoX{
         this.ClearView()
         // Load view map
         this._MyGeoXCreateTrack.Start(this._GeoXData)
+    }
+
+    LoadViewSearchTracksOnMap(){
+        this._CurrentView = this._NameLoadViewSearchTracksOnMap
+        // Clear view
+        this.ClearView()
+        // Build view 
+        this._MyGeoXSearchTracksOnMap.LoadView(this._CurrentView)
     }
 
     /** Get Titre de l'application */
