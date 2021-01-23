@@ -431,9 +431,9 @@ class GeoXMap {
             let me = this
             this._Map.once('moveend', function() {
                 // Style for tracks
-                var TrackWeight = 3
+                let TrackWeight = 3
                 if (L.Browser.mobile){
-                    TrackWeight = 6
+                    TrackWeight = 5
                 }
                 // Style for Marker Start
                 var IconPointStartOption = L.icon({
@@ -525,13 +525,13 @@ class GeoXMap {
             this._DataMap.ListOfTracks.forEach(Track => {
                 if (Track._id == TrackId){
                     // Track style
-                    var TrackWeight = 3
+                    let TrackWeight = 3
                     if (L.Browser.mobile){
-                        TrackWeight = 6
+                        TrackWeight = 5
                     }
                     var TrackStyle = {
                         "color": Track.Color,
-                        "weight": 3
+                        "weight": TrackWeight
                     };
                     // Style for Marker Start
                     var IconPointStartOption = L.icon({

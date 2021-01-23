@@ -8,6 +8,7 @@
         "ExteriorPoint": "ExteriorPoint",
         "GeoJsonData": "GeoJsonData",
         "GpxData": "GpxData",
-        "Length": "Length"
+        "Length": "Length",
+        "Owner": "Owner"
     } 
 }

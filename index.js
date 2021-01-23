@@ -40,7 +40,7 @@ class GeoX {
        // L'application est elle securisee par un login
        this._MyApp.AppIsSecured = true
        // L'application permet elle au user de creer son compte
-       this._MyApp.AllowSignUp= false
+       this._MyApp.AllowSignUp= true
        // Css de base de l'application
        this._MyApp.CSS = CSS
        // L'application utilise SocketIo

@@ -19,7 +19,11 @@ class GeoXServer{
         switch (Data.Action) {
             case "LoadAppData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
-                this.LoadAppData(Data.Value, Socket, User, UserId)
+                //this.LoadAppData(Data.Value, Socket, User, UserId)
+
+                // Modify Db
+                let ModifyDb = require("./ModifyDb")
+                ModifyDb.AddUserToAlTracks(this._MyApp, User)
                 break
             case "LoadMapData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
@@ -60,12 +64,12 @@ class GeoXServer{
     async LoadAppData(CurrentView, Socket, User, UserId){
         let Data = {AppData: null, AppGroup: null, AppInitMapData: null}
         // Get all tracks info (but no track data)
-        let ReponseAppData = await this.PromiseGetAppDataFromDb()
-        if(!ReponseAppData.Error){
-            Data.AppData = ReponseAppData.Data
+        let ReponseAllTracksInfo = await this.PromiseGetAllTracksInfo(User)
+        if(!ReponseAllTracksInfo.Error){
+            Data.AppData = ReponseAllTracksInfo.Data
         } else {
-            this._MyApp.LogAppliError(ReponseAppData.ErrorMsg, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi PromiseGetAppDataFromDb error")
+            this._MyApp.LogAppliError(ReponseAllTracksInfo.ErrorMsg, User, UserId)
+            Socket.emit("GeoXError", "GeoXServerApi PromiseGetAllTracksInfo error")
         }
         // Find all different group
         if (Data.AppData.length > 0){
@@ -82,12 +86,12 @@ class GeoXServer{
             Data.AppInitMapData.CenterPoint = {Lat:50.709446, Long:4.543413}
             Data.AppInitMapData.Zoom = 8
             // Get Tracks
-            let ReponseListOfTracks = await this.PromiseGetTracksFromDb(Data.AppGroup[0])
+            let ReponseListOfTracks = await this.PromiseGetTracksData(Data.AppGroup[0], User)
             if(!ReponseListOfTracks.Error){
                 Data.AppInitMapData.ListOfTracks = ReponseListOfTracks.Data
             } else {
                 this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
-                Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksFromDb error")
+                Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksData error")
             }
             // Calcul des point extérieur et du centre de toutes les tracks
             if (Data.AppInitMapData.ListOfTracks.length != 0){
@@ -118,12 +122,12 @@ class GeoXServer{
         Data.CenterPoint = {Lat:50.709446, Long:4.543413}
         Data.Zoom = 8
         // Get Tracks
-        let ReponseListOfTracks = await this.PromiseGetTracksFromDb(GroupName)
+        let ReponseListOfTracks = await this.PromiseGetTracksData(GroupName, User)
         if(!ReponseListOfTracks.Error){
             Data.ListOfTracks = ReponseListOfTracks.Data
         } else {
             this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksFromDb error")
+            Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksData error")
         }
         // Calcul des point extérieur et du centre de toutes les tracks
         if (Data.ListOfTracks.length != 0){
@@ -139,12 +143,12 @@ class GeoXServer{
     }
 
     /**
-     * Get App Data from DB (promise)
+     * Get Tracks info from DB for one User (promise)
      */
-    PromiseGetAppDataFromDb(){
+    PromiseGetAllTracksInfo(User){
         return new Promise(resolve => {
             let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
-            const Querry = {}
+            const Querry = {[this._MongoTracksCollection.Owner]: User}
             const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.Length]: 1}}
             const Sort = {[this._MongoTracksCollection.Date]: -1}
             this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
@@ -160,7 +164,7 @@ class GeoXServer{
                 resolve(ReponseTracks)
             },(erreur)=>{
                 ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetAppDataFromDb error: " + erreur
+                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetAllTracksInfo error: " + erreur
                 ReponseTracks.Data = []
                 resolve(ReponseTracks)
             })
@@ -170,15 +174,14 @@ class GeoXServer{
     /**
      * Get Tracks Data from DB (promise)
      */
-    PromiseGetTracksFromDb(GroupName){
+    PromiseGetTracksData(GroupName, User){
         return new Promise(resolve => {
             let ReponseTracks = new Object()
             ReponseTracks.Error = true
             ReponseTracks.ErrorMsg = ""
             ReponseTracks.Data = null
-            const Querry = {[this._MongoTracksCollection.Group]: GroupName}
+            const Querry = {$and: [{[this._MongoTracksCollection.Group]: GroupName},{[this._MongoTracksCollection.Owner]: User}]}
             const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
-            //const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.GeoJsonData]: 1, [this._MongoTracksCollection.Length]: 1 }}
             const Sort = {[this._MongoTracksCollection.Date]: -1}
             this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
@@ -193,7 +196,7 @@ class GeoXServer{
                 resolve(ReponseTracks)
             },(erreur)=>{
                 ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksFromDb error: " + erreur
+                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksData error: " + erreur
                 ReponseTracks.Data = []
                 resolve(ReponseTracks)
             })
@@ -430,39 +433,6 @@ class GeoXServer{
         var Turf = require('@turf/length').default
         let distance = Math.round((Turf(GeoJson) + Number.EPSILON) * 1000) / 1000
         return distance
-    }
-
-    /**
-     * Fonction executant un update du calcul de la longeur pour toutes les track de la DB
-     * @param {String} User Nom du user
-     * @param {String} UserId Id du user
-     */
-    UpdateLengthOfAllTracksInDb(User, UserId){
-        const Querry = {}
-        const Projection = { projection:{}}
-        const Sort = {[this._MongoTracksCollection.Date]: -1}
-        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
-            reponse.forEach(element => {
-                let GeoJsonData = element.GeoJsonData
-                let id = element._id
-                let dist = this.CalculateTrackLength(GeoJsonData)
-                let DataToDb = new Object()
-                DataToDb[this._MongoTracksCollection.Length]=dist
-                this._Mongo.UpdateByIdPromise(id, DataToDb, this._MongoTracksCollection.Collection).then((reponse)=>{
-                    if (reponse.matchedCount == 0){
-                        this._MyApp.LogAppliError("UpdateTrack Track Id not found", User, UserId)
-                    } else {
-                        // Log
-                        this._MyApp.LogAppliInfo("Track Updated", User, UserId)
-                        // Load App Data
-                    }
-                },(erreur)=>{
-                    this._MyApp.LogAppliError("UpdateTrack DB error : " + erreur, User, UserId)
-                })
-            });
-        },(erreur)=>{
-            console.log("error: " + erreur)
-        })
     }
 
     DownloadTrack(Value, Socket, User, UserId){
@@ -751,7 +721,7 @@ class GeoXServer{
                     resolve(ReponseTracks)
                 },(erreur)=>{
                     ReponseTracks.Error = true
-                    ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksFromDb error: " + erreur
+                    ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksByIdFromDb error: " + erreur
                     ReponseTracks.Data = []
                     resolve(ReponseTracks)
                 })
