@@ -58,9 +58,12 @@ class GeoX{
             link.href = window.URL.createObjectURL(blob)
             link.click()
         })
+        SocketIo.on('SearchTracksOnMap', (Value) => {this._MyGeoXSearchTracksOnMap.MessageRecieve(Value)})
+
         
         // Build view Get App Data
-        this.LoadViewGetAppData()
+        //this.LoadViewGetAppData()
+        this.LoadViewSearchTracksOnMap()
     }
     
     /** Clear view */

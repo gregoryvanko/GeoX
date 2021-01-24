@@ -47,6 +47,15 @@ class GeoXServer{
                     Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
                 }
                 break
+            case "SearchTracksOnMap":
+                if(Data.Value.Action == "GetCenterOfTracks"){
+                    let SearchTracksOnMap = require("./SearchTracksOnMap")
+                    SearchTracksOnMap.CallGetCenterOfTracks(this._MyApp, Data.Value.Data, Data.Value.FromCurrentView, Socket, User, UserId)
+                } else {
+                    this._MyApp.LogAppliError(`Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
+                    Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)
+                }
+                break
             default:
                 this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
                 Socket.emit("GeoXError", `Api GeoXServer error, Action ${Data.Action} not found`)

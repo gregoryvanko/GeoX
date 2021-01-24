@@ -3,9 +3,18 @@ class GeoXSearchTracksOnMap {
         this._DivApp = DivApp
         this._CurrentView = null
         this._MapId = "mapid"
+        this._MapBoundPadding = -0.05
         this._InitLat = "50.709446"
         this._InitLong = "4.543413"
         this._Map = null
+    }
+
+    MessageRecieve(Value){
+        if (Value.Action == "SetAllTracksInfo" ){
+            console.log(Value.Data)
+        } else {
+            console.log("error, Action not found: " + Value.Action)
+        }
     }
 
     LoadView(CurrentView){
@@ -46,6 +55,38 @@ class GeoXSearchTracksOnMap {
         this._Map = L.map(this._MapId , {zoomControl: false, layers: [Openstreetmap]}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
         L.control.zoom({position: 'bottomright'}).addTo(this._Map);
         L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(this._Map);
+
+        // Get all centerPoint of tracks
+        this.CallServerGetCenterOfTracks()
+        
+        //this.DrawCornerOfMap(this.GetCornerOfMap())
+
+    }
+
+    CallServerGetCenterOfTracks(){
+        let CallToServer = new Object()
+        CallToServer.Action = "GetCenterOfTracks"
+        CallToServer.Data = null
+        CallToServer.FromCurrentView = this._CurrentView
+        GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
+    }
+
+    GetCornerOfMap(){
+        let Corner = new Object()
+        Corner.NW = this._Map.getBounds().pad(this._MapBoundPadding).getNorthWest()
+        Corner.NE = this._Map.getBounds().pad(this._MapBoundPadding).getNorthEast()
+        Corner.SE = this._Map.getBounds().pad(this._MapBoundPadding).getSouthEast()
+        Corner.SW = this._Map.getBounds().pad(this._MapBoundPadding).getSouthWest()
+        return Corner
+    }
+
+    DrawCornerOfMap(Corner){
+        let BoundsOfMap = L.polyline([]).addTo(this._Map)
+        BoundsOfMap.addLatLng(L.latLng(Corner.NW))
+        BoundsOfMap.addLatLng(L.latLng(Corner.NE))
+        BoundsOfMap.addLatLng(L.latLng(Corner.SE))
+        BoundsOfMap.addLatLng(L.latLng(Corner.SW))
+        BoundsOfMap.addLatLng(L.latLng(Corner.NW))
     }
 
     /**
