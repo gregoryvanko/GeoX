@@ -23,7 +23,7 @@ class GeoXServer{
 
                 // Modify Db
                 //let ModifyDb = require("./ModifyDb")
-                //ModifyDb.AddUserToAlTracks(this._MyApp, User)
+                //ModifyDb.CalculCenterofAlTracks(this._MyApp)
                 break
             case "LoadMapData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
@@ -48,9 +48,9 @@ class GeoXServer{
                 }
                 break
             case "SearchTracksOnMap":
-                if(Data.Value.Action == "GetCenterOfTracks"){
+                if(Data.Value.Action == "GetTracksInfo"){
                     let SearchTracksOnMap = require("./SearchTracksOnMap")
-                    SearchTracksOnMap.CallGetCenterOfTracks(this._MyApp, Data.Value.Data, Data.Value.FromCurrentView, Socket, User, UserId)
+                    SearchTracksOnMap.CallGetTracksInfo(this._MyApp, Data.Value.Data, Data.Value.FromCurrentView, Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)
@@ -158,7 +158,7 @@ class GeoXServer{
         return new Promise(resolve => {
             let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
             const Querry = {[this._MongoTracksCollection.Owner]: User}
-            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.Length]: 1}}
+            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1}}
             const Sort = {[this._MongoTracksCollection.Date]: -1}
             this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
@@ -377,6 +377,11 @@ class GeoXServer{
             TrackData.GeoJsonData = GeoJson
             TrackData.GpxData = Track.FileContent
             TrackData.Length = this.CalculateTrackLength(GeoJson)
+            // Calcul du center point
+            let CenterPoint = new Object()
+            CenterPoint.Lat = (TrackData.ExteriorPoint.MinLat + TrackData.ExteriorPoint.MaxLat)/2
+            CenterPoint.Long = (TrackData.ExteriorPoint.MinLong + TrackData.ExteriorPoint.MaxLong)/2
+            TrackData.Center = CenterPoint
     
             this._Mongo.InsertOnePromise(TrackData, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
                 // Log

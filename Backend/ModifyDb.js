@@ -44,7 +44,6 @@ function CalculateTrackLength(GeoJson){
     return distance
 }
 
-
 exports.AddUserToAlTracks = (MyApp, UserLogin) => {
     let MongoR = require('@gregvanko/corex').Mongo
     let Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
@@ -56,6 +55,40 @@ exports.AddUserToAlTracks = (MyApp, UserLogin) => {
         reponse.forEach(element => {
             let DataToDb = new Object()
             DataToDb[MongoTracksCollection.Owner] = UserLogin
+            Mongo.UpdateByIdPromise(element._id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
+                if (reponse.matchedCount == 0){
+                    // Log
+                    MyApp.LogAppliError("UpdateTrack Track Id not found: "+ element._id, "Server", "Server")
+                } else {
+                    // Log
+                    MyApp.LogAppliInfo("Track Updated", "Server", "Server")
+                }
+            },(erreur)=>{
+                MyApp.LogAppliError("UpdateTrack DB error : " + erreur, "Server", "Server")
+            })
+        })
+    },(erreur)=>{
+        MyApp.LogAppliError("error: " + erreur)
+    })
+}
+
+exports.CalculCenterofAlTracks = (MyApp) => {
+    let MongoR = require('@gregvanko/corex').Mongo
+    let Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    let MongoTracksCollection = MongoConfig.TracksCollection
+
+    const Querry = {}
+    const Projection = { projection:{}}
+    Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=> {
+        reponse.forEach(element => {
+            // Calcul du center point
+            let CenterPoint = new Object()
+            CenterPoint.Lat = (element.ExteriorPoint.MinLat + element.ExteriorPoint.MaxLat)/2
+            CenterPoint.Long = (element.ExteriorPoint.MinLong + element.ExteriorPoint.MaxLong)/2
+            // Add du center point
+            let DataToDb = new Object()
+            DataToDb[MongoTracksCollection.Center] = CenterPoint
             Mongo.UpdateByIdPromise(element._id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
                 if (reponse.matchedCount == 0){
                     // Log

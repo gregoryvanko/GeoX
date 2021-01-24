@@ -9,6 +9,7 @@
         "GeoJsonData": "GeoJsonData",
         "GpxData": "GpxData",
         "Length": "Length",
-        "Owner": "Owner"
+        "Owner": "Owner",
+        "Center": "Center"
     } 
 }

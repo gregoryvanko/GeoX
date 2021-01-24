@@ -25,6 +25,7 @@
   "dependencies": {
     "@gregvanko/corex": "^4.78.0",
     "@mapbox/togeojson": "^0.16.0",
-    "@turf/length": "^6.3.0"
+    "@turf/length": "^6.3.0",
+    "@turf/turf": "^6.3.0"
   }
 }

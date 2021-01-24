@@ -3,15 +3,23 @@ class GeoXSearchTracksOnMap {
         this._DivApp = DivApp
         this._CurrentView = null
         this._MapId = "mapid"
-        this._MapBoundPadding = -0.05
+        this._MapBoundPadding = -0.08
+        this._ZoomValurToShowTrack = 12
         this._InitLat = "50.709446"
         this._InitLong = "4.543413"
         this._Map = null
+        this._MarkerGroup = null
+        this._IconPointOption = L.icon({
+            iconUrl: MarkerIcon.MarkerBleu(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+        });
     }
 
     MessageRecieve(Value){
         if (Value.Action == "SetAllTracksInfo" ){
-            console.log(Value.Data)
+            this.AddMarkerOrTrackOnMap(Value.Data)
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -55,20 +63,79 @@ class GeoXSearchTracksOnMap {
         this._Map = L.map(this._MapId , {zoomControl: false, layers: [Openstreetmap]}).setView([CenterPoint.Lat, CenterPoint.Long], zoom);
         L.control.zoom({position: 'bottomright'}).addTo(this._Map);
         L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(this._Map);
+        // Add layer
+        this._MarkerGroup = L.layerGroup().addTo(this._Map)
+        // Add event listener on map
+        this._Map.on('zoomend', this.CallServerGetTracksInfo.bind(this))
+        this._Map.on('dragend', this.CallServerGetTracksInfo.bind(this))
 
         // Get all centerPoint of tracks
-        this.CallServerGetCenterOfTracks()
-        
-        //this.DrawCornerOfMap(this.GetCornerOfMap())
-
+        this.CallServerGetTracksInfo()
     }
 
-    CallServerGetCenterOfTracks(){
+    CallServerGetTracksInfo(){
         let CallToServer = new Object()
-        CallToServer.Action = "GetCenterOfTracks"
-        CallToServer.Data = null
+        CallToServer.Action = "GetTracksInfo"
+        CallToServer.Data = this.GetCornerOfMap()
         CallToServer.FromCurrentView = this._CurrentView
         GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
+    }
+
+    AddMarkerOrTrackOnMap(ListeOfTracks){
+        // Remove all markers
+        let me = this
+        this._MarkerGroup.eachLayer(function (layer) {
+            me._MarkerGroup.removeLayer(layer);
+        })
+        console.log(this._Map.getZoom())
+        if (this._Map.getZoom() < this._ZoomValurToShowTrack){
+            // Creation d'un nouveau marker par track et l'ajouter à la carte
+            ListeOfTracks.forEach(Track => {
+                var newMarker = new L.marker(L.latLng([Track.Center.Long,Track.Center.Lat]), {icon: this._IconPointOption}).addTo(this._MarkerGroup)
+            });
+        } else {
+            // Creation des track et les ajouter à la carte
+            // Style for tracks
+            let TrackWeight = 3
+            if (L.Browser.mobile){TrackWeight = 5}
+            // Style for Marker Start
+            var IconPointStartOption = L.icon({
+                iconUrl: MarkerIcon.MarkerVert(),
+                iconSize:     [40, 40],
+                iconAnchor:   [20, 40],
+                popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+            });
+            // Style for Marker End
+            var IconPointEndOption = L.icon({
+                iconUrl: MarkerIcon.MarkerRouge(),
+                iconSize:     [40, 40],
+                iconAnchor:   [20, 40],
+                popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+            });
+            ListeOfTracks.forEach(Track => {
+                var TrackStyle = {
+                    "color": Track.Color,
+                    "weight": TrackWeight
+                };
+                var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(this._MarkerGroup)
+                layerTrack1.id = Track._id
+                layerTrack1.Type= "Track"
+                // Get Start and end point
+                var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+                var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
+                var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+                // Marker Start
+                var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(this._MarkerGroup)
+                MarkerStart.id = Track._id + "start"
+                MarkerStart.Type = "Marker"
+                MarkerStart.dragging.disable();
+                // Marker End
+                var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(this._MarkerGroup)
+                MarkerEnd.id = Track._id + "end"
+                MarkerEnd.Type = "Marker"
+                MarkerEnd.dragging.disable();
+            });
+        }
     }
 
     GetCornerOfMap(){
@@ -80,14 +147,14 @@ class GeoXSearchTracksOnMap {
         return Corner
     }
 
-    DrawCornerOfMap(Corner){
-        let BoundsOfMap = L.polyline([]).addTo(this._Map)
-        BoundsOfMap.addLatLng(L.latLng(Corner.NW))
-        BoundsOfMap.addLatLng(L.latLng(Corner.NE))
-        BoundsOfMap.addLatLng(L.latLng(Corner.SE))
-        BoundsOfMap.addLatLng(L.latLng(Corner.SW))
-        BoundsOfMap.addLatLng(L.latLng(Corner.NW))
-    }
+    // DrawCornerOfMap(Corner){
+    //     let BoundsOfMap = L.polyline([]).addTo(this._Map)
+    //     BoundsOfMap.addLatLng(L.latLng(Corner.NW))
+    //     BoundsOfMap.addLatLng(L.latLng(Corner.NE))
+    //     BoundsOfMap.addLatLng(L.latLng(Corner.SE))
+    //     BoundsOfMap.addLatLng(L.latLng(Corner.SW))
+    //     BoundsOfMap.addLatLng(L.latLng(Corner.NW))
+    // }
 
     /**
      * Suppression d'une carte
@@ -102,6 +169,7 @@ class GeoXSearchTracksOnMap {
             if(mapDiv) mapDiv.parentNode.removeChild(mapDiv)
             this._InitLat = "50.709446"
             this._InitLong = "4.543413"
+            this._MarkerGroup = null
             // mettre le backgroundColor du body à Black pour la vue Iphone
             document.body.style.backgroundColor= "white"
         }
