@@ -3,8 +3,8 @@ class GeoXSearchTracksOnMap {
         this._DivApp = DivApp
         this._CurrentView = null
         this._MapId = "mapid"
-        this._MapBoundPadding = -0.08
-        this._ZoomValurToShowTrack = 12
+        this._MapBoundPadding = -0.02
+        this._ZoomValueToShowTrack = 12
         this._InitLat = "50.709446"
         this._InitLong = "4.543413"
         this._Map = null
@@ -17,7 +17,7 @@ class GeoXSearchTracksOnMap {
         });
     }
 
-    MessageRecieve(Value){
+    MessageRecieved(Value){
         if (Value.Action == "SetAllTracksInfo" ){
             this.AddMarkerOrTrackOnMap(Value.Data)
         } else {
@@ -69,26 +69,58 @@ class GeoXSearchTracksOnMap {
         this._Map.on('zoomend', this.CallServerGetTracksInfo.bind(this))
         this._Map.on('dragend', this.CallServerGetTracksInfo.bind(this))
 
+        // Create Waiting Box
+        this.WaitingBoxCreate()
         // Get all centerPoint of tracks
         this.CallServerGetTracksInfo()
     }
 
+    WaitingBoxCreate(){
+        // Div du box
+        let DivBoxTracks = CoreXBuild.Div("DivBoxInfoTxt", "DivBoxInfoTxt", "")
+        this._DivApp.appendChild(DivBoxTracks)
+        // Texte
+        DivBoxTracks.appendChild(CoreXBuild.DivTexte("Waiting for data...","","Text", "color: white; text-align: center;"))
+    }
+
+    WaitingBoxShow(){
+        document.getElementById("DivBoxInfoTxt").style.display = "flex"
+    }
+
+    WaitingBoxHide(){
+        setTimeout(()=>{document.getElementById("DivBoxInfoTxt").style.display = "none"}, 200)
+    }
+
+    GetCornerOfMap(){
+        let Corner = new Object()
+        Corner.NW = this._Map.getBounds().pad(this._MapBoundPadding).getNorthWest()
+        Corner.NE = this._Map.getBounds().pad(this._MapBoundPadding).getNorthEast()
+        Corner.SE = this._Map.getBounds().pad(this._MapBoundPadding).getSouthEast()
+        Corner.SW = this._Map.getBounds().pad(this._MapBoundPadding).getSouthWest()
+        return Corner
+    }
+
     CallServerGetTracksInfo(){
+        // Show waiting box
+        this.WaitingBoxShow()
+        // Data to send
         let CallToServer = new Object()
         CallToServer.Action = "GetTracksInfo"
         CallToServer.Data = this.GetCornerOfMap()
         CallToServer.FromCurrentView = this._CurrentView
+        // Call Server
         GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
     }
 
     AddMarkerOrTrackOnMap(ListeOfTracks){
+        console.log(ListeOfTracks.length)
         // Remove all markers
         let me = this
         this._MarkerGroup.eachLayer(function (layer) {
             me._MarkerGroup.removeLayer(layer);
         })
-        console.log(this._Map.getZoom())
-        if (this._Map.getZoom() < this._ZoomValurToShowTrack){
+        // On affiche les marker ou les tracks en fonction du zoom
+        if (this._Map.getZoom() < this._ZoomValueToShowTrack){
             // Creation d'un nouveau marker par track et l'ajouter à la carte
             ListeOfTracks.forEach(Track => {
                 var newMarker = new L.marker(L.latLng([Track.Center.Long,Track.Center.Lat]), {icon: this._IconPointOption}).addTo(this._MarkerGroup)
@@ -136,15 +168,8 @@ class GeoXSearchTracksOnMap {
                 MarkerEnd.dragging.disable();
             });
         }
-    }
-
-    GetCornerOfMap(){
-        let Corner = new Object()
-        Corner.NW = this._Map.getBounds().pad(this._MapBoundPadding).getNorthWest()
-        Corner.NE = this._Map.getBounds().pad(this._MapBoundPadding).getNorthEast()
-        Corner.SE = this._Map.getBounds().pad(this._MapBoundPadding).getSouthEast()
-        Corner.SW = this._Map.getBounds().pad(this._MapBoundPadding).getSouthWest()
-        return Corner
+        // Hide waiting Box
+        this.WaitingBoxHide()
     }
 
     // DrawCornerOfMap(Corner){

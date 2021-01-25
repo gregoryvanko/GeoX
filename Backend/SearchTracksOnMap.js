@@ -5,12 +5,19 @@ async function CallGetTracksInfo(MyApp, Data, FromCurrentView, Socket, User, Use
         let TracksToSend = []
         let turf = require('@turf/turf');
         let poly = turf.polygon([[[Data.NW.lat, Data.NW.lng],[Data.NE.lat, Data.NE.lng],[Data.SE.lat, Data.SE.lng],[Data.SW.lat, Data.SW.lng],[Data.NW.lat, Data.NW.lng]]]);
+        // find track with track exterieur intersect with screen
         ReponseAllTracksInfo.Data.forEach(Track => {
-            let pt = turf.point([Track.Center.Long , Track.Center.Lat]);
-            if(turf.booleanPointInPolygon(pt, poly)){
+            let polyTrack = turf.polygon([[[Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat],
+                [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat],
+                [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat],
+                [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat],
+                [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat]]]);
+            if(!turf.booleanDisjoint(poly, polyTrack)){
                 TracksToSend.push(Track)
             }
         });
+        // Delete identical tracks
+        // ToDo
 
         let reponse = new Object()
         reponse.Action = "SetAllTracksInfo"
