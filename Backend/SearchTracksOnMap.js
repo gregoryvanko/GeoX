@@ -17,11 +17,11 @@ async function CallGetTracksInfo(MyApp, Data, FromCurrentView, Socket, User, Use
             }
         });
         // Delete identical tracks
-        // ToDo
+        let UniqueTrack = TracksToSend.filter((v,i,a)=>a.findIndex(t=>(JSON.stringify(t.GeoJsonData) === JSON.stringify(v.GeoJsonData)))===i)
 
         let reponse = new Object()
         reponse.Action = "SetAllTracksInfo"
-        reponse.Data = TracksToSend
+        reponse.Data = UniqueTrack
         Socket.emit("SearchTracksOnMap", reponse)
     } else {
         MyApp.LogAppliError(ReponseAllTracksInfo.ErrorMsg, User, UserId)

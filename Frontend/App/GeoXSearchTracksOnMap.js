@@ -113,7 +113,6 @@ class GeoXSearchTracksOnMap {
     }
 
     AddMarkerOrTrackOnMap(ListeOfTracks){
-        console.log(ListeOfTracks.length)
         // Remove all markers
         let me = this
         this._MarkerGroup.eachLayer(function (layer) {
