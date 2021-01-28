@@ -5,12 +5,27 @@ class GeoXSearchTracksOnMap {
         this._MapId = "mapid"
         this._MapBoundPadding = -0.02
         this._ZoomValueToShowTrack = 12
+        this._ListeOfTracks = null
+        this._ListeOfTracksOnMap = []
         this._InitLat = "50.709446"
         this._InitLong = "4.543413"
         this._Map = null
         this._MarkerGroup = null
+        this._TrackGroup = null
         this._IconPointOption = L.icon({
             iconUrl: MarkerIcon.MarkerBleu(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+        });
+        this._IconPointStartOption = L.icon({
+            iconUrl: MarkerIcon.MarkerVert(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+        });
+        this._IconPointEndOption = L.icon({
+            iconUrl: MarkerIcon.MarkerRouge(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
@@ -19,7 +34,8 @@ class GeoXSearchTracksOnMap {
 
     MessageRecieved(Value){
         if (Value.Action == "SetAllTracksInfo" ){
-            this.AddMarkerOrTrackOnMap(Value.Data)
+            this._ListeOfTracks = Value.Data
+            this.AddMarkerOrTrackOnMap()
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -65,9 +81,10 @@ class GeoXSearchTracksOnMap {
         L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(this._Map);
         // Add layer
         this._MarkerGroup = L.layerGroup().addTo(this._Map)
+        this._TrackGroup = L.layerGroup().addTo(this._Map)
         // Add event listener on map
-        this._Map.on('zoomend', this.CallServerGetTracksInfo.bind(this))
-        this._Map.on('dragend', this.CallServerGetTracksInfo.bind(this))
+        this._Map.on('zoomend', this.MapOnMove.bind(this))
+        this._Map.on('dragend', this.MapOnMove.bind(this))
 
         // Create Waiting Box
         this.WaitingBoxCreate()
@@ -100,6 +117,47 @@ class GeoXSearchTracksOnMap {
         return Corner
     }
 
+    MapOnMove(){
+        // Clear track out of map view
+        this.RemoveTrackOnMapView()
+        // Call server to get track on the map
+        this.CallServerGetTracksInfo()
+    }
+
+    RemoveTrackOnMapView(){
+        if (this._TrackGroup.getLayers().length > 0){
+            // Get Corener of the map view
+            let MapView = this.GetCornerOfMap()
+            let poly = turf.polygon([[[MapView.NW.lat, MapView.NW.lng],[MapView.NE.lat, MapView.NE.lng],[MapView.SE.lat, MapView.SE.lng],[MapView.SW.lat, MapView.SW.lng],[MapView.NW.lat, MapView.NW.lng]]]);
+            let me = this
+            this._TrackGroup.eachLayer(function (layer) {
+                // get track data
+                me._ListeOfTracksOnMap.forEach(Track => {
+                    if (layer.id == Track._id){
+                        let polyTrack = turf.polygon([[
+                            [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat],
+                            [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat],
+                            [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat],
+                            [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat],
+                            [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat]
+                        ]]);
+                        // Remove track if track is not visible in map view
+                        if(turf.booleanDisjoint(poly, polyTrack)){
+                            // Remove track in layer
+                            me._TrackGroup.removeLayer(layer)
+                            // Remove en point marker of track
+                            me._TrackGroup.eachLayer(function (layer) {
+                                if (layer.id == Track._id + "end"){me._TrackGroup.removeLayer(layer)}
+                            });
+                            // Remove track from ListeOfTracksOnMap 
+                            me._ListeOfTracksOnMap = me._ListeOfTracksOnMap.filter((item)=>{return item._id != Track._id})
+                        }
+                    }
+                });
+            })
+        }
+    }
+
     CallServerGetTracksInfo(){
         // Show waiting box
         this.WaitingBoxShow()
@@ -112,63 +170,62 @@ class GeoXSearchTracksOnMap {
         GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
     }
 
-    AddMarkerOrTrackOnMap(ListeOfTracks){
+    AddMarkerOrTrackOnMap(){
         // Remove all markers
         let me = this
-        this._MarkerGroup.eachLayer(function (layer) {
-            me._MarkerGroup.removeLayer(layer);
-        })
-        // On affiche les marker ou les tracks en fonction du zoom
-        if (this._Map.getZoom() < this._ZoomValueToShowTrack){
-            // Creation d'un nouveau marker par track et l'ajouter à la carte
-            ListeOfTracks.forEach(Track => {
-                var newMarker = new L.marker(L.latLng([Track.Center.Long,Track.Center.Lat]), {icon: this._IconPointOption}).addTo(this._MarkerGroup)
-            });
-        } else {
-            // Creation des track et les ajouter à la carte
-            // Style for tracks
-            let TrackWeight = 3
-            if (L.Browser.mobile){TrackWeight = 5}
-            // Style for Marker Start
-            var IconPointStartOption = L.icon({
-                iconUrl: MarkerIcon.MarkerVert(),
-                iconSize:     [40, 40],
-                iconAnchor:   [20, 40],
-                popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
-            });
-            // Style for Marker End
-            var IconPointEndOption = L.icon({
-                iconUrl: MarkerIcon.MarkerRouge(),
-                iconSize:     [40, 40],
-                iconAnchor:   [20, 40],
-                popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
-            });
-            ListeOfTracks.forEach(Track => {
-                var TrackStyle = {
-                    "color": Track.Color,
-                    "weight": TrackWeight
-                };
-                var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(this._MarkerGroup)
-                layerTrack1.id = Track._id
-                layerTrack1.Type= "Track"
-                // Get Start and end point
-                var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
-                var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
-                var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
-                // Marker Start
-                var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(this._MarkerGroup)
-                MarkerStart.id = Track._id + "start"
-                MarkerStart.Type = "Marker"
-                MarkerStart.dragging.disable();
-                // Marker End
-                var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(this._MarkerGroup)
-                MarkerEnd.id = Track._id + "end"
-                MarkerEnd.Type = "Marker"
-                MarkerEnd.dragging.disable();
-            });
-        }
+        this._MarkerGroup.eachLayer(function (layer) {me._MarkerGroup.removeLayer(layer);})
+        // On affiche les marker
+        this._ListeOfTracks.forEach(Track => {
+            // Get Start and end point
+            var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
+            var newMarker = new L.marker([beg[1],beg[0]], {icon: this._IconPointOption}).addTo(this._MarkerGroup).on('click', this.ToogleOneTrackOnMap.bind(this, Track._id))
+        });
         // Hide waiting Box
         this.WaitingBoxHide()
+    }
+
+    ToogleOneTrackOnMap(TrackId){
+        let TrackNotOnMap = true
+        // Remove the track if this track is on the map
+        this._ListeOfTracksOnMap.forEach(Track => {
+            if (Track._id == TrackId){
+                TrackNotOnMap = false
+                // Remove track of ListeOfTracksOnMap
+                this._ListeOfTracksOnMap = this._ListeOfTracksOnMap.filter((item)=>{return item._id != Track._id})
+                // Remove track of layer
+                let me = this
+                this._TrackGroup.eachLayer(function (layer) {
+                    if ((layer.id == TrackId) || (layer.id == TrackId + "end")){
+                        me._TrackGroup.removeLayer(layer);
+                    }
+                })
+            }
+        });
+
+        // Creation de la track si elle n'est pas sur la map
+        if (TrackNotOnMap){
+            this._ListeOfTracks.forEach(Track => {
+                if (Track._id == TrackId){
+                    var TrackStyle = {
+                        "color": Track.Color,
+                        "weight": (L.Browser.mobile) ? 5 : 3
+                    };
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(this._TrackGroup)
+                    layerTrack1.id = Track._id
+                    layerTrack1.Type= "Track"
+                    // Get End point
+                    var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+                    var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+                    // Marker End
+                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._TrackGroup).on('click', this.ToogleOneTrackOnMap.bind(this, Track._id))
+                    MarkerEnd.id = Track._id + "end"
+                    MarkerEnd.Type = "Marker"
+                    MarkerEnd.dragging.disable()
+                    // Add this track on ListeOfTracksOnMap
+                    this._ListeOfTracksOnMap.push(Track)
+                }
+            });
+        }
     }
 
     // DrawCornerOfMap(Corner){
@@ -191,9 +248,12 @@ class GeoXSearchTracksOnMap {
             this._Map = null
             let mapDiv = document.getElementById(this._MapId)
             if(mapDiv) mapDiv.parentNode.removeChild(mapDiv)
+            this._ListeOfTracks = null
+            this._ListeOfTracksOnMap = []
             this._InitLat = "50.709446"
             this._InitLong = "4.543413"
             this._MarkerGroup = null
+            this._TrackGroup = null
             // mettre le backgroundColor du body à Black pour la vue Iphone
             document.body.style.backgroundColor= "white"
         }
