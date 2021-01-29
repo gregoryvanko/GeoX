@@ -308,11 +308,21 @@ class GeoXMap {
         let MyDivBoxTracks = document.getElementById("DivBoxTracks")
         if(MyDivBoxTracks){
             // Show button
-            this.SetButtonShowTrackInfoVisible(true)
+            //this.SetButtonShowTrackInfoVisible(true)
             MyDivBoxTracks.classList.remove("DivBoxTracksShow")
-            setTimeout(function(){
-                MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
-            }, 1500);
+            //setTimeout(function(){
+            //    MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
+            //}, 1500);
+        }
+    }
+
+    TrackInfoBoxTransitionEnd(){
+        let MyDivBoxTracks = document.getElementById("DivBoxTracks")
+        if (!MyDivBoxTracks.classList.contains("DivBoxTracksShow")){
+            console.log("ok")
+            // show boutton action set track info visible
+            this.SetButtonShowTrackInfoVisible(true)
+            MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
         }
     }
 
@@ -327,7 +337,7 @@ class GeoXMap {
         // Add Close button
         DivBoxTracks.appendChild(CoreXBuild.Button ("&#x21E6", this.HideTrackInfoBox.bind(this), "ButtonClose", ""))
         // Div empty
-        DivBoxTracks.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        DivBoxTracks.appendChild(CoreXBuild.Div("", "", "height:4vh;"))
         // Add all tracks of the group
         this._DataApp.forEach(element => {
             if (element.Group == this._GroupSelected){
@@ -363,9 +373,11 @@ class GeoXMap {
                 inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, element.Name, element.Length, element._id)}
                 DivButton.appendChild(inputcolor)
                 // Button show/hide track
-                DivButton.appendChild(CoreXBuild.Button ("&#128065", this.ToogleTrack.bind(this, element._id), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleTrack.bind(this, element._id), "ButtonIcon"))
             }
         });
+        // Add event for transition end
+        DivBoxTracks.addEventListener('transitionend',this.TrackInfoBoxTransitionEnd.bind(this))
     }
 
     FitboundOnTrack(track){
@@ -456,7 +468,7 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": TrackWeight
                     };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(me._LayerGroup).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color)).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e){e.target.setStyle({weight:(L.Browser.mobile) ? 5 : 3});}).addTo(me._LayerGroup)
                     layerTrack1.id = Track._id
                     layerTrack1.Type= "Track"
                     // Get Start and end point
@@ -547,7 +559,7 @@ class GeoXMap {
                         iconAnchor:   [20, 40],
                         popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
                     });
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(me._LayerGroup).bindPopup(Track.Name)
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: (L.Browser.mobile) ? 5 : 3});}).addTo(me._LayerGroup)
                     layerTrack1.id = Track._id
                     layerTrack1.Type= "Track"
                     // Get Start and end point

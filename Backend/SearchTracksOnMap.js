@@ -18,7 +18,12 @@ async function CallGetTracksInfo(MyApp, Data, FromCurrentView, Socket, User, Use
         });
         // Delete identical tracks
         let UniqueTrack = TracksToSend.filter((v,i,a)=>a.findIndex(t=>(JSON.stringify(t.GeoJsonData) === JSON.stringify(v.GeoJsonData)))===i)
-
+        // Sort By Distance
+        UniqueTrack.sort((a,b)=>{
+            if (a.Length <= b.Length) return -1;
+            if (a.Length > b.Length) return 1;
+        })
+        // Send Reponse
         let reponse = new Object()
         reponse.Action = "SetAllTracksInfo"
         reponse.Data = UniqueTrack

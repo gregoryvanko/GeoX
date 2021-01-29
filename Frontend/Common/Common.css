@@ -56,14 +56,22 @@
     font-size: calc(var(--TexteNomrale)*1.4);
     outline: none;
     border: 1px solid transparent;
+    border-radius: 8px;
     margin: 1vh;
     padding: 0;
-    border: none;
     background-color: transparent;
     cursor: pointer;
 }
 .ButtonIcon:focus{
     border-color: transparent;
+}
+@media (hover: hover) {
+    .ButtonIcon:hover:enabled{
+        border-color: white;
+    }
+    .ButtonIconBlackBorder:hover:enabled{
+        border-color: black;
+    }
 }
 
 /* Button CorexWindow */

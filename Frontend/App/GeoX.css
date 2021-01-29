@@ -76,7 +76,7 @@
 .DivBoxTracks{
     width: 48vh;
     max-width: 280px;
-    height: 70vh;
+    height: 66vh;
     position: fixed;
     z-index: 998; 
     left: -20%; 
@@ -97,11 +97,12 @@
 
 .DivBoxTrackInfo{
     width: 90%;
-    margin: 8% auto;
+    margin: 1vh auto;
     background-color: transparent;
     border-radius: 15px;
     border: 1px solid white;
     padding: 1%;
+    box-sizing: border-box;
 }
 
 .DivBoxDistance{
@@ -234,7 +235,7 @@
     left: 50%;
     transform: translate(-50%, 0%);
     display: -webkit-flex;
-    display: flex;
+    display: none;
     flex-direction: row;
     justify-content: center;
     align-content: center;
