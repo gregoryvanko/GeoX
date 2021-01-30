@@ -256,6 +256,10 @@ class GeoXSearchTracksOnMap {
         } else {
             min = DivScreenTrackY
         }
+
+        if (DivScreenTrackY > (ScreenY*3/4) ){min = -1}
+        if (DivScreenTrackX > (ScreenX*3/4) ){min = -1}
+        console.log(min)
         return min
     }
 
@@ -281,37 +285,47 @@ class GeoXSearchTracksOnMap {
         if (TrackNotOnMap){
             this._ListeOfTracks.forEach(Track => {
                 if (Track._id == TrackId){
-
+                    // Calcul de la position de la track par rapport a la carte pour voir si on fait un Fitbound
                     let MinDistance = this.CalculMinDistanceBetweenTrackBoundAndScreen(Track) 
-                    if (MinDistance > 0.009){
+                    if ((MinDistance > 0.009) || (MinDistance < 0)){
                         // Execute FitBound and after shox track
-                        console.log("Fitbound")
+                        this.FitboundOnTrack(Track)
                     } else {
                         // No FitBound but show track
-                        console.log("No Fitbound")
+                        this.DrawTrack(Track)
                     }
-
-                    let WeightTrack = this._WeightTrack
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: this._TrackStyle, arrowheads: this._Arrowheads}).bindPopup(this.BuildPopupContentTrack(Track)).addTo(this._TrackGroup).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: WeightTrack });})
-                    layerTrack1.id = Track._id
-                    layerTrack1.Type= "Track"
-                    // Get End point
-                    var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
-                    var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
-                    // Marker End
-                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._TrackGroup).on('click', (e)=>{if (e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Track._id)}})
-                    MarkerEnd.id = Track._id + "end"
-                    MarkerEnd.Type = "Marker"
-                    MarkerEnd.dragging.disable()
-                    // Draw Tracks Bound
-                    //this.DrawTracksBound(Track)
-                    // Add this track on ListeOfTracksOnMap
-                    this._ListeOfTracksOnMap.push(Track)
-                    // FitBound
-                    //this.FitboundOnTrack(Track)
                 }
             });
         }
+    }
+
+    DrawTrack(Track){
+        let WeightTrack = this._WeightTrack
+        var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: this._TrackStyle, arrowheads: this._Arrowheads})
+        .bindPopup(this.BuildPopupContentTrack(Track))
+        .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
+        .on('mouseout', function (e) {e.target.setStyle({weight: WeightTrack });})
+        .addTo(this._TrackGroup);
+
+        layerTrack1.id = Track._id
+        layerTrack1.Type= "Track"
+        // Get End point
+        var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+        var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+        // Marker End
+        var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption})
+        .on('click', (e)=>{if (e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Track._id)}})
+        .addTo(this._TrackGroup);
+
+        MarkerEnd.id = Track._id + "end"
+        MarkerEnd.Type = "Marker"
+        MarkerEnd.dragging.disable()
+        
+        // Draw Tracks Bound
+        //this.DrawTracksBound(Track)
+
+        // Add this track on ListeOfTracksOnMap
+        this._ListeOfTracksOnMap.push(Track)
     }
 
     BuildPopupContentTrack(Track){
@@ -339,6 +353,10 @@ class GeoXSearchTracksOnMap {
     FitboundOnTrack(Track){
         let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
         this._Map.flyToBounds(FitboundTrack,{'duration':2})
+        let me = this
+        this._Map.once('moveend', function(){
+            me.DrawTrack(Track)
+        })
     }
 
     DrawCornerOfMap(Corner){
