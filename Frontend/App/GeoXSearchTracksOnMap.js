@@ -3,7 +3,7 @@ class GeoXSearchTracksOnMap {
         this._DivApp = DivApp
         this._CurrentView = null
         this._MapId = "mapid"
-        this._MapBoundPadding = -0.02
+        this._MapBoundPadding = 0
         this._ListeOfTracks = null
         this._ListeOfTracksOnMap = []
         this._InitLat = "50.709446"
@@ -38,7 +38,7 @@ class GeoXSearchTracksOnMap {
         if (Value.Action == "SetAllTracksInfo" ){
             this._ListeOfTracks = Value.Data
             this.TrackInfoBoxUpdate()
-            this.AddMarkerOrTrackOnMap()
+            this.AddMarkerOnMap()
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -202,46 +202,8 @@ class GeoXSearchTracksOnMap {
     }
 
     MapOnMove(){
-        // Clear track out of map view
-        this.RemoveTrackOnMapView()
         // Call server to get track on the map
         this.CallServerGetTracksInfo()
-    }
-
-    RemoveTrackOnMapView(){
-        if (this._TrackGroup.getLayers().length > 0){
-            // Get Corener of the map view
-            let MapView = this.GetCornerOfMap()
-            let poly = turf.polygon([[[MapView.NW.lat, MapView.NW.lng],[MapView.NE.lat, MapView.NE.lng],[MapView.SE.lat, MapView.SE.lng],[MapView.SW.lat, MapView.SW.lng],[MapView.NW.lat, MapView.NW.lng]]]);
-            let me = this
-            this._TrackGroup.eachLayer(function (layer) {
-                // get track data
-                me._ListeOfTracksOnMap.forEach(Track => {
-                    if (layer.id == Track._id){
-                        let polyTrack = turf.polygon([[
-                            [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat],
-                            [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat],
-                            [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat],
-                            [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat],
-                            [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat]
-                        ]]);
-                        // Remove track if track is not visible in map view
-                        if(turf.booleanDisjoint(poly, polyTrack)){
-                            console.log("Remove Track")
-                            console.log(Track)
-                            // Remove track in layer
-                            me._TrackGroup.removeLayer(layer)
-                            // Remove en point marker of track
-                            me._TrackGroup.eachLayer(function (layer) {
-                                if (layer.id == Track._id + "end"){me._TrackGroup.removeLayer(layer)}
-                            });
-                            // Remove track from ListeOfTracksOnMap 
-                            me._ListeOfTracksOnMap = me._ListeOfTracksOnMap.filter((item)=>{return item._id != Track._id})
-                        }
-                    }
-                });
-            })
-        }
     }
 
     CallServerGetTracksInfo(){
@@ -256,7 +218,7 @@ class GeoXSearchTracksOnMap {
         GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
     }
 
-    AddMarkerOrTrackOnMap(){
+    AddMarkerOnMap(){
         // Remove all markers
         let me = this
         this._MarkerGroup.eachLayer(function (layer) {me._MarkerGroup.removeLayer(layer);})
@@ -268,6 +230,33 @@ class GeoXSearchTracksOnMap {
         });
         // Hide waiting Box
         this.WaitingBoxHide()
+    }
+
+    CalculMinDistanceBetweenTrackBoundAndScreen(Track){
+        let North = this._Map.getBounds().pad(this._MapBoundPadding).getNorth()
+        let South = this._Map.getBounds().pad(this._MapBoundPadding).getSouth()
+        let West = this._Map.getBounds().pad(this._MapBoundPadding).getWest()
+        let East = this._Map.getBounds().pad(this._MapBoundPadding).getEast()
+        let ScreenY = North - South
+        let ScreenX = East - West
+
+        let TrackNorth = Track.ExteriorPoint.MaxLong
+        let TrackSouth = Track.ExteriorPoint.MinLong
+        let TrackWest = Track.ExteriorPoint.MinLat
+        let TrackEast = Track.ExteriorPoint.MaxLat
+        let TrackY = TrackNorth - TrackSouth
+        let TrackX = TrackEast - TrackWest
+
+        let DivScreenTrackY = ScreenY - TrackY
+        let DivScreenTrackX = ScreenX - TrackX
+
+        let min = 0
+        if (DivScreenTrackY < DivScreenTrackY){
+            min = DivScreenTrackY
+        } else {
+            min = DivScreenTrackY
+        }
+        return min
     }
 
     ToogleOneTrackOnMap(TrackId){
@@ -292,7 +281,18 @@ class GeoXSearchTracksOnMap {
         if (TrackNotOnMap){
             this._ListeOfTracks.forEach(Track => {
                 if (Track._id == TrackId){
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: this._TrackStyle, arrowheads: this._Arrowheads}).bindPopup(this.BuildPopupContentTrack(Track)).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack });}).addTo(this._TrackGroup)
+
+                    let MinDistance = this.CalculMinDistanceBetweenTrackBoundAndScreen(Track) 
+                    if (MinDistance > 0.009){
+                        // Execute FitBound and after shox track
+                        console.log("Fitbound")
+                    } else {
+                        // No FitBound but show track
+                        console.log("No Fitbound")
+                    }
+
+                    let WeightTrack = this._WeightTrack
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: this._TrackStyle, arrowheads: this._Arrowheads}).bindPopup(this.BuildPopupContentTrack(Track)).addTo(this._TrackGroup).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: WeightTrack });})
                     layerTrack1.id = Track._id
                     layerTrack1.Type= "Track"
                     // Get End point
@@ -303,10 +303,12 @@ class GeoXSearchTracksOnMap {
                     MarkerEnd.id = Track._id + "end"
                     MarkerEnd.Type = "Marker"
                     MarkerEnd.dragging.disable()
+                    // Draw Tracks Bound
+                    //this.DrawTracksBound(Track)
                     // Add this track on ListeOfTracksOnMap
                     this._ListeOfTracksOnMap.push(Track)
                     // FitBound
-                    this.FitboundOnTrack(Track)
+                    //this.FitboundOnTrack(Track)
                 }
             });
         }
@@ -346,6 +348,14 @@ class GeoXSearchTracksOnMap {
         BoundsOfMap.addLatLng(L.latLng(Corner.SE))
         BoundsOfMap.addLatLng(L.latLng(Corner.SW))
         BoundsOfMap.addLatLng(L.latLng(Corner.NW))
+    }
+    DrawTracksBound(Track){
+        let BoundsOfMap = L.polyline([]).addTo(this._Map)
+        BoundsOfMap.addLatLng({lat: Track.ExteriorPoint.MinLong, lng: Track.ExteriorPoint.MinLat})
+        BoundsOfMap.addLatLng({lat: Track.ExteriorPoint.MaxLong, lng: Track.ExteriorPoint.MinLat})
+        BoundsOfMap.addLatLng({lat: Track.ExteriorPoint.MaxLong, lng: Track.ExteriorPoint.MaxLat})
+        BoundsOfMap.addLatLng({lat: Track.ExteriorPoint.MinLong, lng: Track.ExteriorPoint.MaxLat})
+        BoundsOfMap.addLatLng({lat: Track.ExteriorPoint.MinLong, lng: Track.ExteriorPoint.MinLat})
     }
 
     /**

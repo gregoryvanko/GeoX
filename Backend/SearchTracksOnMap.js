@@ -7,12 +7,13 @@ async function CallGetTracksInfo(MyApp, Data, FromCurrentView, Socket, User, Use
         let poly = turf.polygon([[[Data.NW.lat, Data.NW.lng],[Data.NE.lat, Data.NE.lng],[Data.SE.lat, Data.SE.lng],[Data.SW.lat, Data.SW.lng],[Data.NW.lat, Data.NW.lng]]]);
         // find track with track exterieur intersect with screen
         ReponseAllTracksInfo.Data.forEach(Track => {
-            let polyTrack = turf.polygon([[[Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat],
+            let polyTrack = turf.polygon([[
+                [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat],
                 [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat],
                 [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat],
                 [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat],
                 [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat]]]);
-            if(!turf.booleanDisjoint(poly, polyTrack)){
+            if((turf.booleanOverlap(poly, polyTrack)) || (turf.booleanWithin(polyTrack, poly)) || (turf.booleanWithin(poly, polyTrack)) ){
                 TracksToSend.push(Track)
             }
         });
