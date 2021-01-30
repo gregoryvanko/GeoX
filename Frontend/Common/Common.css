@@ -46,6 +46,11 @@
   color: #666666;
 }
 
+.ButtonWidth30{
+    margin: 1vh 0vh 1vh 0vh;
+    width: 30%;
+}
+
 /* Button Top */
 .ButtonTop{
     margin: 1vh 0vh 4vh 0vh;
@@ -130,6 +135,10 @@
 /* Input */
 .InputBox{
     width: 30%;
+    margin-top: 2vh;
+}
+.InputBoxCoreXWondow{
+    width: 70%;
     margin-top: 2vh;
 }
 .Input {

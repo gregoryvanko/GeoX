@@ -11,6 +11,7 @@ class GeoXSearchTracksOnMap {
         this._Map = null
         this._MarkerGroup = null
         this._TrackGroup = null
+        this._MyGroups = []
         this._WeightTrack = (L.Browser.mobile) ? 10 : 3
         this._TrackStyle = {"color": "blue", "weight": this._WeightTrack}
         this._Arrowheads = {frequency: '100px', size: '15m', fill: true}
@@ -37,6 +38,7 @@ class GeoXSearchTracksOnMap {
     MessageRecieved(Value){
         if (Value.Action == "SetAllTracksInfo" ){
             this._ListeOfTracks = Value.Data
+            this._MyGroups = Value.Group
             this.TrackInfoBoxUpdate()
             this.AddMarkerOnMap()
         } else {
@@ -186,7 +188,7 @@ class GeoXSearchTracksOnMap {
                 // Longeur de la track
                 DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Track.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; width: 30%;"))
                 // Save Track
-                DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.CoeurBlanc()}" alt="icon" width="25" height="25">`, this.SaveTrackToMyTracks.bind(this, Track), "ButtonIcon"))
+                DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Track), "ButtonIcon"))
             });
         }
         
@@ -251,15 +253,16 @@ class GeoXSearchTracksOnMap {
         let DivScreenTrackX = ScreenX - TrackX
 
         let min = 0
-        if (DivScreenTrackY < DivScreenTrackY){
+        if (DivScreenTrackY < DivScreenTrackX){
             min = DivScreenTrackY
         } else {
-            min = DivScreenTrackY
+            min = DivScreenTrackX
         }
 
-        if (DivScreenTrackY > (ScreenY*3/4) ){min = -1}
-        if (DivScreenTrackX > (ScreenX*3/4) ){min = -1}
-        console.log(min)
+        if((North - TrackNorth) < 0){min = -1}
+        if((East - TrackEast) < 0){min = -2}
+        if((South - TrackSouth) > 0){min = -3}
+        if((West - TrackWest) > 0){min = -4}
         return min
     }
 
@@ -336,7 +339,7 @@ class GeoXSearchTracksOnMap {
         // Longueur de la track
         Div.appendChild(CoreXBuild.DivTexte(Track.Length + "km","","TextSmall", ""))
         // Save Track
-        Div.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.CoeurBlanc()}" alt="icon" width="25" height="25">`, this.SaveTrackToMyTracks.bind(this, Track), "ButtonIcon ButtonIconBlackBorder"))
+        Div.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Track), "ButtonIcon ButtonIconBlackBorder"))
         return Div
     }
 
@@ -344,10 +347,81 @@ class GeoXSearchTracksOnMap {
         this.ToogleOneTrackOnMap(Track._id)
     }
 
-    SaveTrackToMyTracks(Track){
+    ClickSaveTrackToMyTracks(Track){
         event.stopPropagation()
         this._Map.closePopup()
-        console.log("save") // ToDo
+        this.BuildSaveTrackVue(Track)
+    }
+
+    BuildSaveTrackVue(Track){
+        let Content = CoreXBuild.DivFlexColumn("")
+        // Empty space
+        Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Titre
+        Content.append(CoreXBuild.DivTexte("Save Track", "", "SousTitre"))
+        // Input Name
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name",))
+        // Input `Group
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group",))
+        // Error Text
+        Content.appendChild(CoreXBuild.DivTexte("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh; height: 4vh;"))
+        // Div Button
+        let DivButton = CoreXBuild.DivFlexRowAr("")
+        Content.appendChild(DivButton)
+        // Button save
+        DivButton.appendChild(CoreXBuild.Button("Save",this.SaveTrackToMyTracks.bind(this, Track),"Text Button ButtonWidth30", "SaveTrack"))
+        // Button cancel
+        DivButton.appendChild(CoreXBuild.Button("Cancel",this.CancelTrackToMyTracks.bind(this),"Text Button ButtonWidth30", "Cancel"))
+        // Empty space
+        Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Open Window
+        CoreXWindow.BuildWindow(Content)
+        // Modify attribute
+        document.getElementById("InputTrackName").setAttribute("autocomplete", "off")
+        document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
+        // Add AutoComplete
+        let me = this
+        autocomplete({
+            input: document.getElementById("InputTrackGroup"),
+            minLength: 1,
+            emptyMsg: 'No suggestion',
+            fetch: function(text, update) {
+                text = text.toLowerCase();
+                var GroupFiltred = me._MyGroups.filter(n => n.toLowerCase().startsWith(text))
+                var suggestions = []
+                GroupFiltred.forEach(element => {
+                    var MyObject = new Object()
+                    MyObject.label = element
+                    suggestions.push(MyObject)
+                });
+                update(suggestions);
+            },
+            onSelect: function(item) {
+                document.getElementById("InputTrackGroup").value = item.label;
+            }
+        });
+    }
+
+    CancelTrackToMyTracks(){
+        CoreXWindow.DeleteWindow()
+    }
+
+    SaveTrackToMyTracks(Track){
+        if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            document.getElementById("ErrorSaveTrack").innerText = ""
+            // Data to send
+            let CallToServer = new Object()
+            CallToServer.Action = "SaveTrack"
+            CallToServer.TrackId = Track._id
+            CallToServer.Name = document.getElementById("InputTrackName").value 
+            CallToServer.Group = document.getElementById("InputTrackGroup").value 
+            // Call Server
+            GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
+            // Delete Window
+            CoreXWindow.DeleteWindow()
+        } else {
+            document.getElementById("ErrorSaveTrack").innerText = "Enter a name and a group before saving"
+        }
     }
 
     FitboundOnTrack(Track){
@@ -393,6 +467,7 @@ class GeoXSearchTracksOnMap {
             this._InitLong = "4.543413"
             this._MarkerGroup = null
             this._TrackGroup = null
+            this._MyGroups = []
             // mettre le backgroundColor du body à Black pour la vue Iphone
             document.body.style.backgroundColor= "white"
         }

@@ -48,9 +48,11 @@ class GeoXServer{
                 }
                 break
             case "SearchTracksOnMap":
+                let SearchTracksOnMap = require("./SearchTracksOnMap")
                 if(Data.Value.Action == "GetTracksInfo"){
-                    let SearchTracksOnMap = require("./SearchTracksOnMap")
-                    SearchTracksOnMap.CallGetTracksInfo(this._MyApp, Data.Value.Data, Data.Value.FromCurrentView, Socket, User, UserId)
+                    SearchTracksOnMap.CallGetTracksInfo(Data.Value.Data, Data.Value.FromCurrentView, this._MyApp,  Socket, User, UserId)
+                } else if (Data.Value.Action == "SaveTrack"){
+                    SearchTracksOnMap.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, this._MyApp,  Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)
