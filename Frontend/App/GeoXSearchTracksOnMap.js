@@ -117,7 +117,7 @@ class GeoXSearchTracksOnMap {
 
     TrackInfoBoxCreate(){
         // Div du box
-        let DivTrackInfoBox = CoreXBuild.Div("DivTrackInfoBox", "DivBoxTracks", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:start; align-content:center; align-items: center; flex-wrap: wrap; padding: 1vh; -webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box;")
+        let DivTrackInfoBox = CoreXBuild.Div("DivTrackInfoBox", "DivBoxTracks", "padding: 1vh; -webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box;")
         if (L.Browser.mobile){
             // Ajout du bouton action left
             this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this.TrackInfoBoxShow.bind(this), "ButtonShowTrackInfo"))
@@ -131,7 +131,7 @@ class GeoXSearchTracksOnMap {
             // Show TrackInfoBox
             DivTrackInfoBox.classList.add("DivBoxTracksShow")
         }
-        let DivTrackInfoBoxContent = CoreXBuild.Div("DivTrackInfoBoxContent", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:start; align-content:center; align-items: center; flex-wrap: wrap; -webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box; width: 100%;")
+        let DivTrackInfoBoxContent = CoreXBuild.Div("DivTrackInfoBoxContent", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:start; align-content:center; align-items: center; -webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box; width: 100%;")
         DivTrackInfoBox.appendChild(DivTrackInfoBoxContent)
         // Add text no Track
         DivTrackInfoBoxContent.append(CoreXBuild.DivTexte("No Track", "", "TextTrackInfo", "color: white"))
@@ -227,8 +227,19 @@ class GeoXSearchTracksOnMap {
         // On affiche les marker
         this._ListeOfTracks.forEach(Track => {
             // Get Start and end point
-            var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
-            var newMarker = new L.marker([beg[1],beg[0]], {icon: this._IconPointOption}).addTo(this._MarkerGroup).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Track._id)}})
+            let beg = null
+            if (Track.GeoJsonData.features[0].geometry.type == "LineString"){
+                beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
+            } else {
+                if (Track.GeoJsonData.features[0].geometry.coordinates[0][0]){
+                    beg = Track.GeoJsonData.features[0].geometry.coordinates[0][0];
+                }
+            }
+            if (beg != null){
+                var newMarker = new L.marker([beg[1],beg[0]], {icon: this._IconPointOption}).addTo(this._MarkerGroup).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Track._id)}})
+            } else {
+                console.log("Error during drawing Marker, first point not found for track: " +Track.Name)
+            }
         });
         // Hide waiting Box
         this.WaitingBoxHide()

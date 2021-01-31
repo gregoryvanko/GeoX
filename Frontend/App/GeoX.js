@@ -82,10 +82,10 @@ class GeoX{
         }
         // Clear Global action
         GlobalClearActionList()
-        GlobalAddActionInList("Search Tracks On Map", this.LoadViewSearchTracksOnMap.bind(this))
+        GlobalAddActionInList("Find tracks on GeoX", this.LoadViewSearchTracksOnMap.bind(this))
         GlobalAddActionInList("View My Tracks", this.LoadViewGetAppData.bind(this))
         GlobalAddActionInList("Manage My Tracks", this.LoadViewManageTracks.bind(this))
-        GlobalAddActionInList("Add Track", this.LoadViewAddTracks.bind(this))
+        GlobalAddActionInList("Add Track form file", this.LoadViewAddTracks.bind(this))
         GlobalAddActionInList("Create Track", this.LoadViewCreateTracks.bind(this))
         // Show Action Button
         GlobalDisplayAction('On')
