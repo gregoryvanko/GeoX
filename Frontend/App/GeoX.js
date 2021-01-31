@@ -13,6 +13,8 @@ class GeoX{
         this._CurrentView = this._NameLoadViewMap
         // App Data
         this._GeoXData = []
+        // Welcome Screen
+        this._WelcomeScreen = null
         // Map
         this._MyGeoXMap = null
         // Manage Tracks
@@ -25,6 +27,8 @@ class GeoX{
 
     /** Initiation de l'application */
     Initiation(){
+        // Create WelcomeScreen
+        this._WelcomeScreen = new GeoXWelcome(this._DivApp)
         // Create map
         this._MyGeoXMap = new GeoXMap(this._DivApp)
         // Create GeoXManageTracks
@@ -38,14 +42,20 @@ class GeoX{
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
         SocketIo.on('StartApp', (Value) => {
             this._GeoXData = Value.Data
-            if (Value.StartView == this._NameLoadViewMap){
-                this.LoadViewMap()
-            } else if (Value.StartView == this._NameLoadViewManageTracks){
-                this.LoadViewManageTracks()
-            } else if (Value.StartView == this._NameLoadViewCreateTrack){
-                this.LoadViewCreateTracks()
+            if(this._GeoXData.AppData.length == 0){
+                // Show Welcome screen
+                this.LoadWelcomeScreen()
             } else {
-                this.Error("Start view not find: " + Value.StartView)
+                // Show App
+                if (Value.StartView == this._NameLoadViewMap){
+                    this.LoadViewMap()
+                } else if (Value.StartView == this._NameLoadViewManageTracks){
+                    this.LoadViewManageTracks()
+                } else if (Value.StartView == this._NameLoadViewCreateTrack){
+                    this.LoadViewCreateTracks()
+                } else {
+                    this.Error("Start view not find: " + Value.StartView)
+                }
             }
         })
         SocketIo.on('ModifyTracksOnMap', (Value) => {
@@ -60,7 +70,6 @@ class GeoX{
         })
         SocketIo.on('SearchTracksOnMap', (Value) => {this._MyGeoXSearchTracksOnMap.MessageRecieved(Value)})
 
-        
         // Build view Get App Data
         this.LoadViewGetAppData()
         //this.LoadViewSearchTracksOnMap()
@@ -82,7 +91,7 @@ class GeoX{
         }
         // Clear Global action
         GlobalClearActionList()
-        GlobalAddActionInList("Find tracks on GeoX", this.LoadViewSearchTracksOnMap.bind(this))
+        GlobalAddActionInList("Find tracks in GeoX", this.LoadViewSearchTracksOnMap.bind(this))
         GlobalAddActionInList("View My Tracks", this.LoadViewGetAppData.bind(this))
         GlobalAddActionInList("Manage My Tracks", this.LoadViewManageTracks.bind(this))
         GlobalAddActionInList("Add Track form file", this.LoadViewAddTracks.bind(this))
@@ -117,6 +126,12 @@ class GeoX{
         Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 10vh;"))
         // Send status to serveur
         GlobalSendSocketIo("GeoX", "LoadAppData", this._NameLoadViewMap )
+    }
+
+    LoadWelcomeScreen(){
+        this.ClearView()
+        // Load view Welcome screen
+        this._WelcomeScreen.LoadWelcomeView(this.LoadViewSearchTracksOnMap.bind(this), this.LoadViewAddTracks.bind(this), this.LoadViewCreateTracks.bind(this))
     }
 
     /** Ouvre la vue Map */

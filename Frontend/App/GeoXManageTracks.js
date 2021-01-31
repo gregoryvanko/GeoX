@@ -6,7 +6,7 @@ class GeoXManageTracks {
 
     LoadViewManageTracks(Data, CurrentView){
         this._FromCurrentView = CurrentView
-        // Clear Conteneur
+        // Clear view
         this._DivApp.innerHTML = ""
         // Contener
         let Contener = CoreXBuild.DivFlexColumn("Conteneur")
