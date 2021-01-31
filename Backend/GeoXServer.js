@@ -89,14 +89,16 @@ class GeoXServer{
         } else {
             Data.AppGroup=[]
         }
+
+        // Build Tracks Data
+        Data.AppInitMapData = new Object()
+        Data.AppInitMapData.ListOfTracks = []
+        Data.AppInitMapData.CenterPoint = {Lat:50.709446, Long:4.543413}
+        Data.AppInitMapData.Zoom = 8
+        Data.AppInitMapData.FitBounds = null
           
         // Find all track data of the first group
         if (Data.AppGroup.length > 0){
-            // Build Tracks Data
-            Data.AppInitMapData = new Object()
-            Data.AppInitMapData.ListOfTracks = []
-            Data.AppInitMapData.CenterPoint = {Lat:50.709446, Long:4.543413}
-            Data.AppInitMapData.Zoom = 8
             // Get Tracks
             let ReponseListOfTracks = await this.PromiseGetTracksData(Data.AppGroup[0], User)
             if(!ReponseListOfTracks.Error){
@@ -160,6 +162,7 @@ class GeoXServer{
     PromiseGetAllTracksInfo(User){
         return new Promise(resolve => {
             let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
+
             const Querry = {[this._MongoTracksCollection.Owner]: User}
             const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Center]: 1, [this._MongoTracksCollection.Public]: 1}}
             const Sort = {[this._MongoTracksCollection.Date]: -1}
