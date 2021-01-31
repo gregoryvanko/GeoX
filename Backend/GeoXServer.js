@@ -23,7 +23,7 @@ class GeoXServer{
 
                 // Modify Db
                 let ModifyDb = require("./ModifyDb")
-                //ModifyDb.CalculCenterofAlTracks(this._MyApp)
+                ModifyDb.CalculCenterofAlTracks(this._MyApp)
                 //ModifyDb.AddPublicToAlTracks(this._MyApp)
                 break
             case "LoadMapData":
