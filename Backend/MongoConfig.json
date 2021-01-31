@@ -10,6 +10,7 @@
         "GpxData": "GpxData",
         "Length": "Length",
         "Owner": "Owner",
-        "Center": "Center"
+        "Center": "Center",
+        "Public": "Public"
     } 
 }

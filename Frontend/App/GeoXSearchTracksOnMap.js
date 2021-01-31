@@ -360,9 +360,14 @@ class GeoXSearchTracksOnMap {
         // Titre
         Content.append(CoreXBuild.DivTexte("Save Track", "", "SousTitre"))
         // Input Name
-        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name",))
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name","",true))
         // Input `Group
-        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group",))
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group","",true))
+        // Toggle Public
+        let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWondow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Content.appendChild(DivTooglePublic)
+        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
+        DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
         // Error Text
         Content.appendChild(CoreXBuild.DivTexte("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh; height: 4vh;"))
         // Div Button
@@ -376,9 +381,6 @@ class GeoXSearchTracksOnMap {
         Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
         // Open Window
         CoreXWindow.BuildWindow(Content)
-        // Modify attribute
-        document.getElementById("InputTrackName").setAttribute("autocomplete", "off")
-        document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
         // Add AutoComplete
         let me = this
         autocomplete({
@@ -415,6 +417,7 @@ class GeoXSearchTracksOnMap {
             CallToServer.TrackId = Track._id
             CallToServer.Name = document.getElementById("InputTrackName").value 
             CallToServer.Group = document.getElementById("InputTrackGroup").value 
+            CallToServer.Public = document.getElementById("TogglePublic").checked 
             // Call Server
             GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
             // Delete Window

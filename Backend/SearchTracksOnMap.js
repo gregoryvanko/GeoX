@@ -52,7 +52,7 @@ function PromiseGetAllTracksInfo(MyApp){
 
         let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
-        const Querry = {}
+        const Querry = {[MongoTracksCollection.Public]: true}
         const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Color]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.ExteriorPoint]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.GeoJsonData]: 1}}
         Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){
@@ -74,8 +74,8 @@ function PromiseGetAllTracksInfo(MyApp){
     })
 }
 
-async function CallSaveTrack(TrackId, Name, Group, MyApp, Socket, User, UserId){
-    let ReponseSaveTrack = await PromiseSaveTrack(TrackId, Name, Group, MyApp, User)
+async function CallSaveTrack(TrackId, Name, Group, Public, MyApp, Socket, User, UserId){
+    let ReponseSaveTrack = await PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User)
     if (ReponseSaveTrack.Error) {
         MyApp.LogAppliError("CallSaveTrack error: " + ReponseSaveTrack.ErrorMsg, User, UserId)
         Socket.emit("GeoXError", "CallSaveTrack error: " + ReponseSaveTrack.ErrorMsg)
@@ -84,7 +84,7 @@ async function CallSaveTrack(TrackId, Name, Group, MyApp, Socket, User, UserId){
     }
 }
 
-function PromiseSaveTrack(TrackId, Name, Group, MyApp, User){
+function PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User){
     return new Promise (resolve =>{``
         let MongoObjectId = require('@gregvanko/corex').MongoObjectId
         let MongoR = require('@gregvanko/corex').Mongo
@@ -110,6 +110,7 @@ function PromiseSaveTrack(TrackId, Name, Group, MyApp, User){
                 TrackData.GpxData = reponse[0].GpxData
                 TrackData.Length = reponse[0].Length
                 TrackData.Center = reponse[0].Center
+                TrackData.Public = Public
                 Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
                     ReponseSaveTrack.Error = false
                     resolve(ReponseSaveTrack)

@@ -23,8 +23,9 @@ class GeoXManageTracks {
         AppConteneur.appendChild(BoxTitre)
         // Titre des colonnes
         BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 36%; margin-left:1%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 18%; margin-left:1%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 20%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 18%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 15%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Shared","","TextBoxTitre", "width: 12%;"))
         // Ajout d'une ligne
         AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5; margin: 1% 0% 0% 0%;"))
         // Ajout des lignes des tracks
@@ -39,14 +40,20 @@ class GeoXManageTracks {
                 BoxTracks.style.marginBottom = "1vh"
                 AppConteneur.appendChild(BoxTracks)
                 BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 36%; margin-left:1%;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","Text", "width: 18%; margin-left:1%;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","Text", "width: 20%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","TextSmall", "width: 18%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","TextSmall", "width: 15%;"))
+                if (Track.Public){
+                    BoxTracks.appendChild(CoreXBuild.Image64(ButtonIcon.Shared(),"", "IconeInList", ""))
+                } else {
+                    BoxTracks.appendChild(CoreXBuild.Image64(ButtonIcon.Key(),"", "IconeInList", ""))
+                }
+                
                 let DivButton = document.createElement("div")
                 DivButton.setAttribute("style", "margin-left: auto; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
                 DivButton.setAttribute("class", "NotOnIphone")
                 DivButton.appendChild(CoreXBuild.Button ("&#8681", this.LoadViewDownload.bind(this,Track._id), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128279", this.LoadViewLink.bind(this,Track._id, false), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group, false), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group, Track.Public, false), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name, false), "ButtonIcon"))
                 BoxTracks.appendChild(DivButton)
                 let DivButtonIphone = document.createElement("div")
@@ -64,7 +71,7 @@ class GeoXManageTracks {
         let HTMLContent = CoreXBuild.DivFlexColumn()
         HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id, true), "Text ButtonCoreXWindow"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group, true), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group, Track.Public, true), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128465 Delete Track", this.SendDeleteTrack.bind(this, Track._id, Track.Name, true), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "gpx", Track._id), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "geojson", Track._id), "Text ButtonCoreXWindow"))
@@ -107,7 +114,7 @@ class GeoXManageTracks {
         alert(window.location.href + "getmap/?trackid=" + TrackId)
     }
 
-    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup, IsCoreXWindow){
+    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup, Public, IsCoreXWindow){
         if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
         // Clear Conteneur
         this._DivApp.innerHTML = ""
@@ -141,6 +148,11 @@ class GeoXManageTracks {
                 document.getElementById("InputTrackGroup").value = item.label;
             }
         });
+        // Toggle Public
+        let DivTooglePublic = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Contener.appendChild(DivTooglePublic)
+        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
+        DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", Public))
         // Button Update
         Contener.appendChild(CoreXBuild.Button("Update Track",this.SendUpdateTrack.bind(this, TrackId),"Text Button"))
     }
@@ -151,6 +163,7 @@ class GeoXManageTracks {
             Track.Id = TrackId
             Track.Name = document.getElementById("InputTrackName").value 
             Track.Group = document.getElementById("InputTrackGroup").value 
+            Track.Public = document.getElementById("TogglePublic").checked 
             // Data to send
             let Data = new Object()
             Data.Action = "Update"
@@ -196,11 +209,17 @@ class GeoXManageTracks {
                 document.getElementById("InputTrackGroup").value = item.label;
             }
         });
+        // Toggle Public
+        let DivTooglePublic = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Contener.appendChild(DivTooglePublic)
+        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
+        DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
         // Toggle MultiLine to OneLine
-        let DivToogle = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-start; align-content:center; align-items: center;")
+        let DivToogle = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Contener.appendChild(DivToogle)
+        DivToogle.appendChild(CoreXBuild.DivTexte("MultiLine to OneLine Track:", "", "", ""))
         DivToogle.appendChild(CoreXBuild.ToggleSwitch("ToggleMultiToOneLine", true))
-        DivToogle.appendChild(CoreXBuild.DivTexte("MultiLine to OneLine Track", "", "", "margin-left: 5%"))
+        
         // Button select file
         Contener.appendChild(CoreXBuild.Button("Select and upload File",this.SelectFile.bind(this),"Text Button", "SelectAndSend"))
         //Input file
@@ -240,6 +259,7 @@ class GeoXManageTracks {
         let Track = new Object()
         Track.Name = document.getElementById("InputTrackName").value 
         Track.Group = document.getElementById("InputTrackGroup").value 
+        Track.Public = document.getElementById("TogglePublic").checked 
         Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
         Track.FileContent = File
         // Data to send

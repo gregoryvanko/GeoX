@@ -22,8 +22,9 @@ class GeoXServer{
                 this.LoadAppData(Data.Value, Socket, User, UserId)
 
                 // Modify Db
-                //let ModifyDb = require("./ModifyDb")
+                let ModifyDb = require("./ModifyDb")
                 //ModifyDb.CalculCenterofAlTracks(this._MyApp)
+                //ModifyDb.AddPublicToAlTracks(this._MyApp)
                 break
             case "LoadMapData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
@@ -160,7 +161,7 @@ class GeoXServer{
         return new Promise(resolve => {
             let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
             const Querry = {[this._MongoTracksCollection.Owner]: User}
-            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1}}
+            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Center]: 1, [this._MongoTracksCollection.Public]: 1}}
             const Sort = {[this._MongoTracksCollection.Date]: -1}
             this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
                 if(reponse.length == 0){
@@ -384,6 +385,7 @@ class GeoXServer{
             CenterPoint.Lat = (TrackData.ExteriorPoint.MinLat + TrackData.ExteriorPoint.MaxLat)/2
             CenterPoint.Long = (TrackData.ExteriorPoint.MinLong + TrackData.ExteriorPoint.MaxLong)/2
             TrackData.Center = CenterPoint
+            TrackData.Public = Track.Public
     
             this._Mongo.InsertOnePromise(TrackData, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
                 // Log
@@ -421,6 +423,7 @@ class GeoXServer{
         let DataToDb = new Object()
         if(Track.Name){DataToDb[this._MongoTracksCollection.Name]= Track.Name}
         if(Track.Group){DataToDb[this._MongoTracksCollection.Group]= Track.Group}
+        DataToDb[this._MongoTracksCollection.Public]= Track.Public
         if (Track.Color){DataToDb[this._MongoTracksCollection.Color]= Track.Color}
         
         this._Mongo.UpdateByIdPromise(Track.Id, DataToDb, this._MongoTracksCollection.Collection).then((reponse)=>{

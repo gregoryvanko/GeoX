@@ -62,8 +62,8 @@ class GeoX{
 
         
         // Build view Get App Data
-        //this.LoadViewGetAppData()
-        this.LoadViewSearchTracksOnMap()
+        this.LoadViewGetAppData()
+        //this.LoadViewSearchTracksOnMap()
     }
     
     /** Clear view */
