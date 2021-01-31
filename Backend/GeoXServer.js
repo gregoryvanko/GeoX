@@ -22,9 +22,9 @@ class GeoXServer{
                 this.LoadAppData(Data.Value, Socket, User, UserId)
 
                 // Modify Db
-                let ModifyDb = require("./ModifyDb")
+                //let ModifyDb = require("./ModifyDb")
                 //ModifyDb.CalculCenterofAlTracks(this._MyApp)
-                ModifyDb.AddPublicToAlTracks(this._MyApp)
+                //ModifyDb.AddPublicToAlTracks(this._MyApp)
                 break
             case "LoadMapData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
