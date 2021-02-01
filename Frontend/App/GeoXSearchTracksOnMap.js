@@ -189,7 +189,6 @@ class GeoXSearchTracksOnMap {
                 DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Track), "ButtonIcon"))
             });
         }
-        
     }
 
     GetCornerOfMap(){
