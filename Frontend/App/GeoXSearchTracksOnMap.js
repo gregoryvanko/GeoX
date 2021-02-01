@@ -1,7 +1,6 @@
 class GeoXSearchTracksOnMap {
     constructor(DivApp){
         this._DivApp = DivApp
-        this._CurrentView = null
         this._MapId = "mapid"
         this._MapBoundPadding = 0
         this._ListeOfTracks = null
@@ -38,7 +37,6 @@ class GeoXSearchTracksOnMap {
     MessageRecieved(Value){
         if (Value.Action == "SetAllTracksInfo" ){
             this._ListeOfTracks = Value.Data
-            this._MyGroups = Value.Group
             this.TrackInfoBoxUpdate()
             this.AddMarkerOnMap()
         } else {
@@ -46,11 +44,11 @@ class GeoXSearchTracksOnMap {
         }
     }
 
-    LoadView(CurrentView){
-        // Enregister la current view
-        this._CurrentView = CurrentView
+    LoadView(MyGroups){
+        // Enregister le MyGroups
+        this._MyGroups = MyGroups
         // mettre le backgroundColor du body à Black pour la vue Iphone
-        document.body.style.backgroundColor= "black"
+        if (L.Browser.mobile){document.body.style.backgroundColor= "black"}
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
@@ -215,7 +213,6 @@ class GeoXSearchTracksOnMap {
         let CallToServer = new Object()
         CallToServer.Action = "GetTracksInfo"
         CallToServer.Data = this.GetCornerOfMap()
-        CallToServer.FromCurrentView = this._CurrentView
         // Call Server
         GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
     }
@@ -468,7 +465,6 @@ class GeoXSearchTracksOnMap {
      * Suppression d'une carte
      */
     DeleteMap(){
-        this._CurrentView = null
         if (this._Map && this._Map.remove) {
             this._Map.off();
             this._Map.remove();
@@ -483,7 +479,7 @@ class GeoXSearchTracksOnMap {
             this._TrackGroup = null
             this._MyGroups = []
             // mettre le backgroundColor du body à Black pour la vue Iphone
-            document.body.style.backgroundColor= "white"
+            if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
         }
     }
 

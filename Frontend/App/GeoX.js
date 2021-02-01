@@ -187,7 +187,7 @@ class GeoX{
         // Clear view
         this.ClearView()
         // Build view 
-        this._MyGeoXSearchTracksOnMap.LoadView(this._CurrentView)
+        this._MyGeoXSearchTracksOnMap.LoadView(this._GeoXData.AppGroup)
     }
 
     /** Get Titre de l'application */

@@ -21,7 +21,7 @@ class GeoXMap {
      */
     LoadViewMap(GeoXData){
         // mettre le backgroundColor du body à Black pour la vue Iphone
-        document.body.style.backgroundColor= "black"
+        if (L.Browser.mobile){document.body.style.backgroundColor= "black"}
         
         this._DataApp = GeoXData.AppData
         // Clear Conteneur
@@ -417,7 +417,7 @@ class GeoXMap {
             this._GpsPointerTrack = null
             this._GpsRadius = null
             this._GpsLineToPosition = null
-            document.body.style.backgroundColor= "white"
+            if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
             this._GeoLocalisation.StopLocalisation()
         }
     }

@@ -1,13 +1,6 @@
-async function CallGetTracksInfo(Data, FromCurrentView, MyApp, Socket, User, UserId){
+async function CallGetTracksInfo(Data, MyApp, Socket, User, UserId){
     let ReponseAllTracksInfo = await PromiseGetAllTracksInfo(MyApp)
     if(!ReponseAllTracksInfo.Error){
-        // Get All Group
-        let MyGroup = []
-        // Find all different group
-        if (ReponseAllTracksInfo.Data.length > 0){
-            MyGroup = [...new Set(ReponseAllTracksInfo.Data.map(item => item.Group))] 
-        }
-
         // Select Track only on the map screen
         let TracksToSend = []
         let turf = require('@turf/turf');
@@ -35,7 +28,6 @@ async function CallGetTracksInfo(Data, FromCurrentView, MyApp, Socket, User, Use
         let reponse = new Object()
         reponse.Action = "SetAllTracksInfo"
         reponse.Data = UniqueTrack
-        reponse.Group = MyGroup
         Socket.emit("SearchTracksOnMap", reponse)
     } else {
         MyApp.LogAppliError("CallGetTracksInfo PromiseGetAllTracksInfo error: " + ReponseAllTracksInfo.ErrorMsg, User, UserId)

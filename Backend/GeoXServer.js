@@ -51,7 +51,7 @@ class GeoXServer{
             case "SearchTracksOnMap":
                 let SearchTracksOnMap = require("./SearchTracksOnMap")
                 if(Data.Value.Action == "GetTracksInfo"){
-                    SearchTracksOnMap.CallGetTracksInfo(Data.Value.Data, Data.Value.FromCurrentView, this._MyApp,  Socket, User, UserId)
+                    SearchTracksOnMap.CallGetTracksInfo(Data.Value.Data, this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "SaveTrack"){
                     SearchTracksOnMap.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, this._MyApp,  Socket, User, UserId)
                 } else {
