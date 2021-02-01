@@ -133,3 +133,46 @@ exports.AddPublicToAlTracks = (MyApp) => {
         MyApp.LogAppliError("error: " + erreur)
     })
 }
+
+exports.AddStartPointToAlTracks = (MyApp) => {
+    let MongoR = require('@gregvanko/corex').Mongo
+    let Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    let MongoTracksCollection = MongoConfig.TracksCollection
+    const Querry = {}
+    const Projection = { projection:{_id: 1, [MongoTracksCollection.GeoJsonData]: 1}}
+    Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=> {
+        reponse.forEach(element => {
+            let beg = null
+            if (element.GeoJsonData.features[0].geometry.type == "LineString"){
+                beg = element.GeoJsonData.features[0].geometry.coordinates[0];
+            } else {
+                if (element.GeoJsonData.features[0].geometry.coordinates[0][0]){
+                    beg = element.GeoJsonData.features[0].geometry.coordinates[0][0];
+                }
+            }
+            if (beg != null){
+                let latleng = new Object()
+                latleng.Lat = beg[1]
+                latleng.Lng = beg[0]
+                let DataToDb = new Object()
+                DataToDb[MongoTracksCollection.StartPoint] = latleng
+                Mongo.UpdateByIdPromise(element._id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
+                    if (reponse.matchedCount == 0){
+                        // Log
+                        MyApp.LogAppliError("UpdateTrack Track Id not found: "+ element._id, "Server", "Server")
+                    } else {
+                        // Log
+                        MyApp.LogAppliInfo("Track Updated", "Server", "Server")
+                    }
+                },(erreur)=>{
+                    MyApp.LogAppliError("UpdateTrack DB error : " + erreur, "Server", "Server")
+                })
+            } else {
+                MyApp.LogAppliError("Girst point not found for track: " + element.Name, "Server", "Server")
+            }
+        })
+    },(erreur)=>{
+        MyApp.LogAppliError("error: " + erreur)
+    })
+}

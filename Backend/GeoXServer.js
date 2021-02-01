@@ -25,6 +25,8 @@ class GeoXServer{
                 //let ModifyDb = require("./ModifyDb")
                 //ModifyDb.CalculCenterofAlTracks(this._MyApp)
                 //ModifyDb.AddPublicToAlTracks(this._MyApp)
+                //ModifyDb.AddStartPointToAlTracks(this._MyApp)
+
                 break
             case "LoadMapData":
                 this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
@@ -49,11 +51,14 @@ class GeoXServer{
                 }
                 break
             case "SearchTracksOnMap":
+                this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
                 let SearchTracksOnMap = require("./SearchTracksOnMap")
-                if(Data.Value.Action == "GetTracksInfo"){
-                    SearchTracksOnMap.CallGetTracksInfo(Data.Value.Data, this._MyApp,  Socket, User, UserId)
+                if(Data.Value.Action == "GetMarkers"){
+                    SearchTracksOnMap.CallGetMarkers(this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "SaveTrack"){
-                    SearchTracksOnMap.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, this._MyApp,  Socket, User, UserId)
+                    SearchTracksOnMap.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, Data.Value.Public, this._MyApp,  Socket, User, UserId)
+                } else if (Data.Value.Action == "GetTrack"){
+                    SearchTracksOnMap.CallGetTrack(Data.Value.TrackId, this._MyApp,  Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)

@@ -11,6 +11,7 @@
         "Length": "Length",
         "Owner": "Owner",
         "Center": "Center",
-        "Public": "Public"
+        "Public": "Public",
+        "StartPoint": "StartPoint"
     } 
 }

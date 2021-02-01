@@ -1,41 +1,25 @@
-async function CallGetTracksInfo(Data, MyApp, Socket, User, UserId){
-    let ReponseAllTracksInfo = await PromiseGetAllTracksInfo(MyApp)
+async function CallGetMarkers(MyApp, Socket, User, UserId){
+    let ReponseAllTracksInfo = await PromiseGetAllMarkers(MyApp)
     if(!ReponseAllTracksInfo.Error){
-        // Select Track only on the map screen
-        let TracksToSend = []
-        let turf = require('@turf/turf');
-        let poly = turf.polygon([[[Data.NW.lat, Data.NW.lng],[Data.NE.lat, Data.NE.lng],[Data.SE.lat, Data.SE.lng],[Data.SW.lat, Data.SW.lng],[Data.NW.lat, Data.NW.lng]]]);
-        // find track with track exterieur intersect with screen
-        ReponseAllTracksInfo.Data.forEach(Track => {
-            let polyTrack = turf.polygon([[
-                [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat],
-                [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat],
-                [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat],
-                [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat],
-                [Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat]]]);
-            if((turf.booleanOverlap(poly, polyTrack)) || (turf.booleanWithin(polyTrack, poly)) || (turf.booleanWithin(poly, polyTrack)) ){
-                TracksToSend.push(Track)
-            }
-        });
         // Delete identical tracks
-        let UniqueTrack = TracksToSend.filter((v,i,a)=>a.findIndex(t=>(JSON.stringify(t.GeoJsonData) === JSON.stringify(v.GeoJsonData)))===i)
+        let UniqueMarkers = ReponseAllTracksInfo.Data.filter((v,i,a)=>a.findIndex(t=>(JSON.stringify(t.StartPoint) === JSON.stringify(v.StartPoint)))===i)
         // Sort By Distance
-        UniqueTrack.sort((a,b)=>{
+        UniqueMarkers.sort((a,b)=>{
             if (a.Length <= b.Length) return -1;
             if (a.Length > b.Length) return 1;
         })
         // Send Reponse
         let reponse = new Object()
-        reponse.Action = "SetAllTracksInfo"
-        reponse.Data = UniqueTrack
+        reponse.Action = "SetAllMarkers"
+        reponse.Data = UniqueMarkers
         Socket.emit("SearchTracksOnMap", reponse)
     } else {
-        MyApp.LogAppliError("CallGetTracksInfo PromiseGetAllTracksInfo error: " + ReponseAllTracksInfo.ErrorMsg, User, UserId)
-        Socket.emit("GeoXError", "CallGetTracksInfo PromiseGetAllTracksInfo error")
+        MyApp.LogAppliError("CallGetMarkers PromiseGetAllMarkers error: " + ReponseAllTracksInfo.ErrorMsg, User, UserId)
+        Socket.emit("GeoXError", "CallGetMarkers PromiseGetAllMarkers error")
     }
 }
 
-function PromiseGetAllTracksInfo(MyApp){
+function PromiseGetAllMarkers(MyApp){
     return new Promise(resolve => {
         let MongoR = require('@gregvanko/corex').Mongo
         Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
@@ -45,7 +29,7 @@ function PromiseGetAllTracksInfo(MyApp){
         let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
         const Querry = {[MongoTracksCollection.Public]: true}
-        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Color]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.ExteriorPoint]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.GeoJsonData]: 1}}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.StartPoint]: 1}}
         Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){
                 ReponseTracks.Error = false
@@ -59,7 +43,7 @@ function PromiseGetAllTracksInfo(MyApp){
             resolve(ReponseTracks)
         },(erreur)=>{
             ReponseTracks.Error = true
-            ReponseTracks.ErrorMsg = "CallGetTracksInfo PromiseGetAllTracksInfo error: " + erreur
+            ReponseTracks.ErrorMsg = "CallGetMarkers PromiseGetAllMarkers error: " + erreur
             ReponseTracks.Data = []
             resolve(ReponseTracks)
         })
@@ -124,5 +108,32 @@ function PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User){
     })
 }
 
-module.exports.CallGetTracksInfo = CallGetTracksInfo
+function CallGetTrack(TrackId, MyApp, Socket, User, UserId){
+    let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+    let MongoR = require('@gregvanko/corex').Mongo
+    Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    MongoTracksCollection = MongoConfig.TracksCollection
+    // Query Mongodb
+    const Querry = {'_id': new MongoObjectId(TrackId)}
+    const Projection = { projection:{[MongoTracksCollection.GpxData]: 0, [MongoTracksCollection.Color]: 0, [MongoTracksCollection.Group]: 0, [MongoTracksCollection.Date]: 0, [MongoTracksCollection.Owner]: 0, [MongoTracksCollection.Public]: 0}}
+    Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
+        if(reponse.length == 1){
+            // Send Reponse
+            let Clientreponse = new Object()
+            Clientreponse.Action = "SetTrack"
+            Clientreponse.Data = reponse[0]
+            Socket.emit("SearchTracksOnMap", Clientreponse)
+        } else {
+            MyApp.LogAppliError("CallGetTrack error: Track not found", User, UserId)
+            Socket.emit("GeoXError", "CallGetTrack error: Track not found")
+        }
+    },(erreur)=>{
+        MyApp.LogAppliError("CallGetTrack error: " + erreur, User, UserId)
+        Socket.emit("GeoXError", "CallGetTrack error: " + erreur)
+    })
+}
+
+module.exports.CallGetMarkers = CallGetMarkers
 module.exports.CallSaveTrack = CallSaveTrack
+module.exports.CallGetTrack = CallGetTrack

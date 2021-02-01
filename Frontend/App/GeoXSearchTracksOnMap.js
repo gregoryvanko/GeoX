@@ -3,12 +3,11 @@ class GeoXSearchTracksOnMap {
         this._DivApp = DivApp
         this._MapId = "mapid"
         this._MapBoundPadding = 0
-        this._ListeOfTracks = null
+        this._ListeOfMarkers = null
         this._ListeOfTracksOnMap = []
         this._InitLat = "50.709446"
         this._InitLong = "4.543413"
         this._Map = null
-        this._MarkerGroup = null
         this._TrackGroup = null
         this._MyGroups = []
         this._WeightTrack = (L.Browser.mobile) ? 10 : 3
@@ -35,10 +34,12 @@ class GeoXSearchTracksOnMap {
     }
 
     MessageRecieved(Value){
-        if (Value.Action == "SetAllTracksInfo" ){
-            this._ListeOfTracks = Value.Data
+        if (Value.Action == "SetAllMarkers" ){
+            this._ListeOfMarkers = Value.Data
             this.TrackInfoBoxUpdate()
             this.AddMarkerOnMap()
+        } else if(Value.Action == "SetTrack" ){
+            this.SetTrackOnMap(Value.Data)
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -83,18 +84,16 @@ class GeoXSearchTracksOnMap {
         L.control.zoom({position: 'bottomright'}).addTo(this._Map);
         L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(this._Map);
         // Add layer
-        this._MarkerGroup = L.layerGroup().addTo(this._Map)
         this._TrackGroup = L.layerGroup().addTo(this._Map)
-        // Add event listener on map
-        this._Map.on('zoomend', this.MapOnMove.bind(this))
-        this._Map.on('dragend', this.MapOnMove.bind(this))
-
+        // Map event
+        this._Map.on('zoomend', this.TrackInfoBoxUpdate.bind(this))
+        this._Map.on('dragend', this.TrackInfoBoxUpdate.bind(this))
         // Create Waiting Box
         this.WaitingBoxCreate()
         // Create Track Info Box
         this.TrackInfoBoxCreate()
-        // Get all centerPoint of tracks
-        this.CallServerGetTracksInfo()
+        // Get all Markers
+        this.CallServerGetMarkers()
     }
 
     WaitingBoxCreate(){
@@ -168,26 +167,42 @@ class GeoXSearchTracksOnMap {
         // Clear du track info box
         let DivTrackInfoBox = document.getElementById("DivTrackInfoBoxContent")
         DivTrackInfoBox.innerHTML = ""
-        if (this._ListeOfTracks.length == 0){
+        if (this._ListeOfMarkers.length == 0){
             // on affiche un message No Track
             DivTrackInfoBox.append(CoreXBuild.DivTexte("No Track", "", "TextTrackInfo", "color: white"))
         } else {
+            let NoTraclShowed = true
+            let Corner = this.GetCornerOfMap()
+            let polyCorner = turf.polygon([[
+                [Corner.NW.lat, Corner.NW.lng],
+                [Corner.NE.lat, Corner.NE.lng],
+                [Corner.SE.lat, Corner.SE.lng],
+                [Corner.SW.lat, Corner.SW.lng],
+                [Corner.NW.lat, Corner.NW.lng]]]);
             // On affiche les track
-            this._ListeOfTracks.forEach(Track => {
-                // Box pour toutes les info d'un track
-                let DivBoxTrackInfoConteneur = CoreXBuild.DivFlexRowStart("")
-                DivTrackInfoBox.append(DivBoxTrackInfoConteneur)
-                DivBoxTrackInfoConteneur.classList.add("DivBoxTrackInfo")
-                DivBoxTrackInfoConteneur.style.cursor = "pointer"
-                //DivBoxTrackInfoConteneur.style.boxSizing= "border-box"
-                DivBoxTrackInfoConteneur.addEventListener('click', this.ClickOnTrackInfoBoxElement.bind(this, Track))
-                // Nom de la track
-                DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Track.Name,"","TextTrackInfo", "color: white; width: 40%; margin-left: 2%;"))
-                // Longeur de la track
-                DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Track.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; width: 30%;"))
-                // Save Track
-                DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Track), "ButtonIcon"))
+            this._ListeOfMarkers.forEach(Marker => {
+                let point = turf.point([Marker.StartPoint.Lat, Marker.StartPoint.Lng]);
+                if (turf.booleanWithin(point, polyCorner)){
+                    NoTraclShowed = false
+                    // Box pour toutes les info d'un track
+                    let DivBoxTrackInfoConteneur = CoreXBuild.DivFlexRowStart("")
+                    DivTrackInfoBox.append(DivBoxTrackInfoConteneur)
+                    DivBoxTrackInfoConteneur.classList.add("DivBoxTrackInfo")
+                    DivBoxTrackInfoConteneur.style.cursor = "pointer"
+                    //DivBoxTrackInfoConteneur.style.boxSizing= "border-box"
+                    DivBoxTrackInfoConteneur.addEventListener('click', this.ToogleOneTrackOnMap.bind(this, Marker._id))
+                    // Nom de la track
+                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Marker.Name,"","TextTrackInfo", "color: white; width: 40%; margin-left: 2%;"))
+                    // Longeur de la track
+                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Marker.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; width: 30%;"))
+                    // Save Marker
+                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Marker._id), "ButtonIcon"))
+                }
             });
+            if (NoTraclShowed){
+                // on affiche un message No Track
+                DivTrackInfoBox.append(CoreXBuild.DivTexte("No Track in this area", "", "TextTrackInfo", "color: white"))
+            }
         }
     }
 
@@ -200,43 +215,34 @@ class GeoXSearchTracksOnMap {
         return Corner
     }
 
-    MapOnMove(){
-        // Call server to get track on the map
-        this.CallServerGetTracksInfo()
-    }
-
-    CallServerGetTracksInfo(){
+    CallServerGetMarkers(){
         // Show waiting box
         this.WaitingBoxShow()
         // Data to send
         let CallToServer = new Object()
-        CallToServer.Action = "GetTracksInfo"
-        CallToServer.Data = this.GetCornerOfMap()
+        CallToServer.Action = "GetMarkers"
         // Call Server
         GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
     }
 
     AddMarkerOnMap(){
-        // Remove all markers
-        let me = this
-        this._MarkerGroup.eachLayer(function (layer) {me._MarkerGroup.removeLayer(layer);})
-        // On affiche les marker
-        this._ListeOfTracks.forEach(Track => {
-            // Get Start and end point
-            let beg = null
-            if (Track.GeoJsonData.features[0].geometry.type == "LineString"){
-                beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
-            } else {
-                if (Track.GeoJsonData.features[0].geometry.coordinates[0][0]){
-                    beg = Track.GeoJsonData.features[0].geometry.coordinates[0][0];
-                }
-            }
-            if (beg != null){
-                var newMarker = new L.marker([beg[1],beg[0]], {icon: this._IconPointOption}).addTo(this._MarkerGroup).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Track._id)}})
-            } else {
-                console.log("Error during drawing Marker, first point not found for track: " +Track.Name)
+        // Build markerClusterGroup
+        let markersCluster = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({ 
+                    html: cluster.getChildCount(), 
+                    className: 'mycluster', 
+                    iconSize: null 
+                });
             }
         });
+        // On affiche les marker
+        this._ListeOfMarkers.forEach(Marker => {
+            let newMarker = new L.marker([Marker.StartPoint.Lat, Marker.StartPoint.Lng], {icon: this._IconPointOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Marker._id)}})
+            markersCluster.addLayer(newMarker);
+        });
+        // Ajout du markerClusterGroup a la map
+        this._Map.addLayer(markersCluster);
         // Hide waiting Box
         this.WaitingBoxHide()
     }
@@ -273,6 +279,15 @@ class GeoXSearchTracksOnMap {
         return min
     }
 
+    CallServerGetTrack(TrackId){
+        // Data to send
+        let CallToServer = new Object()
+        CallToServer.Action = "GetTrack"
+        CallToServer.TrackId = TrackId
+        // Call Server
+        GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
+    }
+
     ToogleOneTrackOnMap(TrackId){
         let TrackNotOnMap = true
         // Remove the track if this track is on the map
@@ -290,23 +305,30 @@ class GeoXSearchTracksOnMap {
                 })
             }
         });
-
         // Creation de la track si elle n'est pas sur la map
         if (TrackNotOnMap){
-            this._ListeOfTracks.forEach(Track => {
-                if (Track._id == TrackId){
-                    // Calcul de la position de la track par rapport a la carte pour voir si on fait un Fitbound
-                    let MinDistance = this.CalculMinDistanceBetweenTrackBoundAndScreen(Track) 
-                    if ((MinDistance > 0.009) || (MinDistance < 0)){
-                        // Execute FitBound and after shox track
-                        this.FitboundOnTrack(Track)
-                    } else {
-                        // No FitBound but show track
-                        this.DrawTrack(Track)
-                    }
-                }
-            });
+            this.CallServerGetTrack(TrackId)
         }
+    }
+
+    SetTrackOnMap(Track){
+        let MinDistance = this.CalculMinDistanceBetweenTrackBoundAndScreen(Track) 
+        if ((MinDistance > 0.009) || (MinDistance < 0)){
+            // Execute FitBound and after shox track
+            this.FitboundOnTrack(Track)
+        } else {
+            // No FitBound but show track
+            this.DrawTrack(Track)
+        }
+    }
+
+    FitboundOnTrack(Track){
+        let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
+        this._Map.flyToBounds(FitboundTrack,{'duration':2})
+        let me = this
+        this._Map.once('moveend', function(){
+            me.DrawTrack(Track)
+        })
     }
 
     DrawTrack(Track){
@@ -320,17 +342,30 @@ class GeoXSearchTracksOnMap {
         layerTrack1.id = Track._id
         layerTrack1.Type= "Track"
         // Get End point
-        var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
-        var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
-        // Marker End
-        var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption})
-        .on('click', (e)=>{if (e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Track._id)}})
-        .addTo(this._TrackGroup);
+        let end = null
+        if (Track.GeoJsonData.features[0].geometry.type == "LineString"){
+            let numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+            end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+        } else {
+            if (Track.GeoJsonData.features[0].geometry.coordinates[0][0]){
+                let numPts1 = Track.GeoJsonData.features[0].geometry.coordinates.length;
+                let numPts = Track.GeoJsonData.features[0].geometry.coordinates[numPts1-1].length;
+                end = Track.GeoJsonData.features[0].geometry.coordinates[numPts1-1][numPts - 1];
+            }
+        }
+        if (end != null){
+            // Marker End
+            var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption})
+            .on('click', (e)=>{if (e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Track._id)}})
+            .addTo(this._TrackGroup);
 
-        MarkerEnd.id = Track._id + "end"
-        MarkerEnd.Type = "Marker"
-        MarkerEnd.dragging.disable()
-        
+            MarkerEnd.id = Track._id + "end"
+            MarkerEnd.Type = "Marker"
+            MarkerEnd.dragging.disable()
+        } else {
+            console.log("Error during drawing last Marker of track : " +Track.Name)
+        }
+
         // Draw Tracks Bound
         //this.DrawTracksBound(Track)
 
@@ -346,21 +381,17 @@ class GeoXSearchTracksOnMap {
         // Longueur de la track
         Div.appendChild(CoreXBuild.DivTexte(Track.Length + "km","","TextSmall", ""))
         // Save Track
-        Div.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Track), "ButtonIcon ButtonIconBlackBorder"))
+        Div.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Track._id), "ButtonIcon ButtonIconBlackBorder"))
         return Div
     }
 
-    ClickOnTrackInfoBoxElement(Track){
-        this.ToogleOneTrackOnMap(Track._id)
-    }
-
-    ClickSaveTrackToMyTracks(Track){
+    ClickSaveTrackToMyTracks(TrackId){
         event.stopPropagation()
         this._Map.closePopup()
-        this.BuildSaveTrackVue(Track)
+        this.BuildSaveTrackVue(TrackId)
     }
 
-    BuildSaveTrackVue(Track){
+    BuildSaveTrackVue(TrackId){
         let Content = CoreXBuild.DivFlexColumn("")
         // Empty space
         Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
@@ -381,7 +412,7 @@ class GeoXSearchTracksOnMap {
         let DivButton = CoreXBuild.DivFlexRowAr("")
         Content.appendChild(DivButton)
         // Button save
-        DivButton.appendChild(CoreXBuild.Button("Save",this.SaveTrackToMyTracks.bind(this, Track),"Text Button ButtonWidth30", "SaveTrack"))
+        DivButton.appendChild(CoreXBuild.Button("Save",this.SaveTrackToMyTracks.bind(this, TrackId),"Text Button ButtonWidth30", "SaveTrack"))
         // Button cancel
         DivButton.appendChild(CoreXBuild.Button("Cancel",this.CancelTrackToMyTracks.bind(this),"Text Button ButtonWidth30", "Cancel"))
         // Empty space
@@ -415,13 +446,13 @@ class GeoXSearchTracksOnMap {
         CoreXWindow.DeleteWindow()
     }
 
-    SaveTrackToMyTracks(Track){
+    SaveTrackToMyTracks(TrackId){
         if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
             document.getElementById("ErrorSaveTrack").innerText = ""
             // Data to send
             let CallToServer = new Object()
             CallToServer.Action = "SaveTrack"
-            CallToServer.TrackId = Track._id
+            CallToServer.TrackId = TrackId
             CallToServer.Name = document.getElementById("InputTrackName").value 
             CallToServer.Group = document.getElementById("InputTrackGroup").value 
             CallToServer.Public = document.getElementById("TogglePublic").checked 
@@ -432,15 +463,6 @@ class GeoXSearchTracksOnMap {
         } else {
             document.getElementById("ErrorSaveTrack").innerText = "Enter a name and a group before saving"
         }
-    }
-
-    FitboundOnTrack(Track){
-        let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
-        this._Map.flyToBounds(FitboundTrack,{'duration':2})
-        let me = this
-        this._Map.once('moveend', function(){
-            me.DrawTrack(Track)
-        })
     }
 
     DrawCornerOfMap(Corner){
@@ -470,11 +492,10 @@ class GeoXSearchTracksOnMap {
             this._Map = null
             let mapDiv = document.getElementById(this._MapId)
             if(mapDiv) mapDiv.parentNode.removeChild(mapDiv)
-            this._ListeOfTracks = null
+            this._ListeOfMarkers = null
             this._ListeOfTracksOnMap = []
             this._InitLat = "50.709446"
             this._InitLong = "4.543413"
-            this._MarkerGroup = null
             this._TrackGroup = null
             this._MyGroups = []
             // mettre le backgroundColor du body à Black pour la vue Iphone
