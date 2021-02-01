@@ -194,7 +194,7 @@ class GeoXSearchTracksOnMap {
                     // Nom de la track
                     DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Marker.Name,"","TextTrackInfo", "color: white; width: 40%; margin-left: 2%;"))
                     // Longeur de la track
-                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Marker.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; width: 30%;"))
+                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Marker.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; width: 30%; margin-left: 1vh;"))
                     // Save Marker
                     DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Marker._id), "ButtonIcon"))
                 }
