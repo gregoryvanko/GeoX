@@ -60,7 +60,7 @@ class GeoXMap {
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
         this._DivApp.appendChild(Conteneur)
         // Add Error Text
-        Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
+        Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red; margin-top: 20vh;"))
     }
 
     /** Load des Data de l'application */
@@ -689,10 +689,9 @@ class GeoXMap {
         Track.Color = Color
         // Data to send
         let Data = new Object()
-        Data.Action = "Update"
+        Data.Action = "UpdateTrackColor"
         Data.Data = Track
-        Data.FromCurrentView = null
-        GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+        GlobalSendSocketIo("GeoX", "ShowTracksOnMap", Data)
     }
 }
 

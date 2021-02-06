@@ -19,28 +19,75 @@ class GeoXCreateTrack {
         this._TrackMarkers = []
         this._AutoRouteBehavior = true
         this.CityFound = false
-        this._GeoXData = null
+        this._UserGroup = null
         this._GroupSelected = null
         this._NoTrack = "No Track"
         this._DataMap = null
         this._LayerGroup = null
 
-        this._IconPointOption = null
-    }
-
-    Initiation(){
         this._IconPointOption = L.icon({
             iconUrl: Icon.MarkerBleu(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
-        console.log("coucou Create Track")
     }
 
-    Start(GeoXData = null){
-        // Save data
-        this._GeoXData = GeoXData
+    Initiation(){
+        // Show Action Button
+        GlobalDisplayAction('On')
+        // Clear view
+        this._DivApp.innerHTML=""
+        // SocketIO
+        let SocketIo = GlobalGetSocketIo()
+        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
+        SocketIo.on('CreateTracksOnMap', (Value) => {this.MessageRecieved(Value)})
+        // Get User Group
+        let CallToServer = new Object()
+        CallToServer.Action = "GetUserGroup"
+        GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+        // Start view
+        this.Start()
+    }
+
+    MessageRecieved(Value){
+        if (Value.Action == "SetUserGroup"){
+            this._UserGroup = Value.Data
+        } else if (Value.Action == "SetMapData" ){
+            this._DataMap = Value.Data
+            this.ModifyTracksOnMap()
+        } else if (Value.Action == "MapSaved" ){
+            // Delete Map
+            this.DeleteMap()
+            // Clear view
+            this._DivApp.innerHTML=""
+            // Add conteneur
+            let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+            this._DivApp.appendChild(Conteneur)
+            // Add Error Text
+            Conteneur.appendChild(CoreXBuild.DivTexte("Map Saved.","","Text", "text-align: center; margin-top: 20vh;"))
+        } else {
+            console.log("error, Action not found: " + Value.Action)
+        }
+    }
+
+    /**
+     * Affichage du message d'erreur venant du serveur
+     * @param {String} ErrorMsg Message d'erreur envoyé du serveur
+     */
+    Error(ErrorMsg){
+        // Delete map
+        this.DeleteMap()
+        // Clear view
+        this._DivApp.innerHTML=""
+        // Add conteneur
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Add Error Text
+        Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red; margin-top: 20vh;"))
+    }
+
+    Start(){
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         let Conteneur = CoreXBuild.DivFlexColumn()
@@ -164,11 +211,11 @@ class GeoXCreateTrack {
 
     LoadViewMap(Lat, Long){
         // mettre le backgroundColor du body à Black pour la vue Iphone
-        document.body.style.backgroundColor= "black"
+        if (L.Browser.mobile){document.body.style.backgroundColor= "black"}
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Add dropdown groupe
-        if (this._GeoXData.AppGroup.length > 0){
+        if (this._UserGroup.length > 0){
             // Ajout du drop down avec le nom des groupes des map
             let divdropdown = CoreXBuild.Div("", "DivMapGroupDropDown", "")
             this._DivApp.appendChild(divdropdown)
@@ -179,7 +226,7 @@ class GeoXCreateTrack {
             optionS.setAttribute("value", this._NoTrack)
             optionS.innerHTML = this._NoTrack
             DropDown.appendChild(optionS)
-            this._GeoXData.AppGroup.forEach(element => {
+            this._UserGroup.forEach(element => {
                 let option = document.createElement("option")
                 option.setAttribute("value", element)
                 option.innerHTML = element
@@ -577,12 +624,12 @@ class GeoXCreateTrack {
             Track.Group = "Plannifié"
             Track.MultiToOneLine = false
             Track.FileContent = gpxtrack
+            Track.Public = true
             // Data to send
-            let Data = new Object()
-            Data.Action = "Add"
-            Data.Data = Track
-            Data.FromCurrentView = "LoadViewMap"
-            GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+            let CallToServer = new Object()
+            CallToServer.Action = "SaveTrack"
+            CallToServer.Data = Track
+            GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
         }
     }
 
@@ -606,7 +653,10 @@ class GeoXCreateTrack {
         this._GroupSelected = DropDownGroupValue
         if (DropDownGroupValue != this._NoTrack){
             // Send data to server
-            GlobalSendSocketIo("GeoX", "LoadMapData", DropDownGroupValue)
+            let CallToServer = new Object()
+            CallToServer.Action = "GetMapData"
+            CallToServer.Data = DropDownGroupValue
+            GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
         } else {
             // Remove all tracks
             let me = this
@@ -623,8 +673,7 @@ class GeoXCreateTrack {
      * @param {Object} GeoJsonData GeoJson Data de la track
      * @param {string} TrackColor Color de la track
      */
-    ModifyTracksOnMap(DataMap){
-        this._DataMap = DataMap
+    ModifyTracksOnMap(){
         let me = this
         // Remove all tracks
         this._LayerGroup.eachLayer(function (layer) {
@@ -650,7 +699,7 @@ class GeoXCreateTrack {
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         // Add track
-        this._DataMap.ListOfTracks.forEach(Track => {
+        this._DataMap.forEach(Track => {
             // Style for tracks
             var TrackStyle = {
                 "color": Track.Color,
@@ -695,12 +744,12 @@ class GeoXCreateTrack {
             this._TrackMarkers = []
             this._AutoRouteBehavior = true
             this.CityFound = false
-            this._GeoXData = null
+            this._UserGroup = null
             this._GroupSelected = null
             this._DataMap = null
             this._LayerGroup = null
             // mettre le backgroundColor du body à Black pour la vue Iphone
-            document.body.style.backgroundColor= "white"
+            if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
         }
     }
 }
