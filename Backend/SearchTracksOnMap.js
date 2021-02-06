@@ -1,3 +1,32 @@
+function CallGetUserGroup(MyApp, Socket, User, UserId){
+    let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+    let MongoR = require('@gregvanko/corex').Mongo
+    Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    MongoTracksCollection = MongoConfig.TracksCollection
+    // Querry
+    const Querry = {[MongoTracksCollection.Owner]: User}
+    const Projection = { projection:{[MongoTracksCollection.Group]: 1}}
+    const Sort = {[MongoTracksCollection.Date]: -1}
+    Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
+        let DataToSend = []
+        // Find all different group
+        if (reponse.length > 0){
+            DataToSend = [...new Set(reponse.map(item => item.Group))] 
+        }
+        //Send Data
+        let MyReponse = new Object()
+        MyReponse.Action = "SetUserGroup"
+        MyReponse.Data = DataToSend
+        Socket.emit("SearchTracksOnMap", MyReponse)
+        // Log socket action
+        MyApp.LogAppliInfo(`SoApi send User Groups`, User, UserId)
+    },(erreur)=>{
+        MyApp.LogAppliError("GetUserGroup error: " + erreur, User, UserId)
+        Socket.emit("GeoXError", "GetUserGroup error: " + erreur)
+    })
+}
+
 async function CallGetMarkers(MyApp, Socket, User, UserId){
     let ReponseAllTracksInfo = await PromiseGetAllMarkers(MyApp)
     if(!ReponseAllTracksInfo.Error){
@@ -134,6 +163,7 @@ function CallGetTrack(TrackId, MyApp, Socket, User, UserId){
     })
 }
 
+module.exports.CallGetUserGroup = CallGetUserGroup
 module.exports.CallGetMarkers = CallGetMarkers
 module.exports.CallSaveTrack = CallSaveTrack
 module.exports.CallGetTrack = CallGetTrack

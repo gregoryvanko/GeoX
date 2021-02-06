@@ -45,17 +45,16 @@ class GeoXSearchTracksOnMap {
         // SocketIO
         let SocketIo = GlobalGetSocketIo()
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
-        SocketIo.on('StartApp', (Value) => {
-            debugger
-            this._MyGroups = Value
-            this.LoadView()
-        })
+        SocketIo.on('SearchTracksOnMap', (Value) => {this.MessageRecieved(Value)})
         // Load Data
         this.LoadViewGetAppData()
     }
 
     MessageRecieved(Value){
-        if (Value.Action == "SetAllMarkers" ){
+        if (Value.Action == "SetUserGroup"){
+            this._MyGroups = Value.Data
+            this.LoadView()
+        } else if (Value.Action == "SetAllMarkers" ){
             this._ListeOfMarkers = Value.Data
             this.TrackInfoBoxUpdate()
             this.AddMarkerOnMap()
@@ -94,7 +93,6 @@ class GeoXSearchTracksOnMap {
         // on construit le texte d'attente
         Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 10vh;"))
         // Send status to serveur
-        // Data to send
         let CallToServer = new Object()
         CallToServer.Action = "GetUserGroup"
         GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
@@ -148,7 +146,7 @@ class GeoXSearchTracksOnMap {
         // Create Track Info Box
         this.TrackInfoBoxCreate()
         // Get all Markers
-        //this.CallServerGetMarkers()
+        this.CallServerGetMarkers()
     }
 
     WaitingBoxCreate(){

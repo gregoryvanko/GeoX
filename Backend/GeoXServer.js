@@ -16,14 +16,18 @@ class GeoXServer{
     * @param {String} UserId Id du user
     */
     Api(Data, Socket, User, UserId){
+        this._MyApp.LogAppliInfo("SoApi Data:" + JSON.stringify(Data), User, UserId)
         switch (Data.Action) {
-            case "GetUserGroup":
-                this._MyApp.LogAppliInfo("SoApi Data:" + JSON.stringify(Data), User, UserId)
-                this.GetUserGroup(Socket, User, UserId)
-                break
-            case "LoadAppData":
-                this._MyApp.LogAppliInfo("SoApi Data:" + JSON.stringify(Data), User, UserId)
-                this.LoadAppData(Socket, User, UserId)
+            case "ShowTracksOnMap":
+                let ShowTracksOnMap = require("./ShowTracksOnMap")
+                if (Data.Value.Action == "GetUserData"){
+                    ShowTracksOnMap.CallGetUserData(this._MyApp,  Socket, User, UserId)
+                } else if (Data.Value.Action == "GetMapData"){
+                    ShowTracksOnMap.CallGetMapData(Data.Value.Data, this._MyApp,  Socket, User, UserId)
+                }else {
+                    this._MyApp.LogAppliError(`Api GeoXServer error, ShowTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
+                    Socket.emit("GeoXError", `Api GeoXServer error, ShowTracksOnMap Action ${Data.Value.Action} not found`)
+                }
 
                 // Modify Db
                 //let ModifyDb = require("./ModifyDb")
@@ -32,22 +36,19 @@ class GeoXServer{
                 //ModifyDb.AddStartPointToAlTracks(this._MyApp)
 
                 break
-            case "LoadMapData":
-                this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
-                this.LoadMapData(Data.Value, Socket, User, UserId)
-                break
+            // case "LoadMapData":
+            //     this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
+            //     this.LoadMapData(Data.Value, Socket, User, UserId)
+            //     break
             case "ManageTrack":
+                let ManageTrack = require("./ManageTrack")
                 if (Data.Value.Action == "Delete"){
-                    this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
                     this.DeleteTrack(Data.Value, Socket, User, UserId)
                 } else if (Data.Value.Action == "Add"){
-                    this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
                     this.AddTrack(Data.Value, Socket, User, UserId)
                 } else if (Data.Value.Action == "Update"){
-                    this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:{"Action":" ${Data.Action}","Value":"${Data.Value.Action}}"`, User, UserId)
                     this.UpdateTrack(Data.Value, Socket, User, UserId)
                 } else if (Data.Value.Action == "Download"){
-                    this._MyApp.LogAppliInfo(`SoApi GeoXServer Data:`+ JSON.stringify(Data), User, UserId)
                     this.DownloadTrack(Data.Value.Data, Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
@@ -55,9 +56,10 @@ class GeoXServer{
                 }
                 break
             case "SearchTracksOnMap":
-                this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
                 let SearchTracksOnMap = require("./SearchTracksOnMap")
-                if(Data.Value.Action == "GetMarkers"){
+                if (Data.Value.Action == "GetUserGroup"){
+                    SearchTracksOnMap.CallGetUserGroup(this._MyApp,  Socket, User, UserId)
+                } else if(Data.Value.Action == "GetMarkers"){
                     SearchTracksOnMap.CallGetMarkers(this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "SaveTrack"){
                     SearchTracksOnMap.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, Data.Value.Public, this._MyApp,  Socket, User, UserId)
@@ -75,26 +77,6 @@ class GeoXServer{
         }
     }
 
-    GetUserGroup(Socket, User, UserId){
-        const Querry = {[this._MongoTracksCollection.Owner]: User}
-        const Projection = { projection:{[this._MongoTracksCollection.Group]: 1}}
-        const Sort = {[this._MongoTracksCollection.Date]: -1}
-        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
-            let DataToSend = []
-            // Find all different group
-            if (reponse.length > 0){
-                DataToSend = [...new Set(reponse.map(item => item.Group))] 
-            }
-            //Send Data
-            Socket.emit("StartApp", DataToSend)
-            // Log socket action
-            this._MyApp.LogAppliInfo(`SoApi send User Groups`, User, UserId)
-        },(erreur)=>{
-            this._MyApp.LogAppliError("GetUserGroup error: " + erreur, User, UserId)
-            Socket.emit("GeoXError", "GetUserGroup error: " + erreur)
-        })
-    }
-
     /**
      * Load all Data of the App
      * @param {String} CurrentView Name of the current view
@@ -102,54 +84,54 @@ class GeoXServer{
      * @param {String} User Nom du user
      * @param {String} UserId Id du user
      */
-    async LoadAppData(Socket, User, UserId){
-        let Data = {AppData: null, AppGroup: null, AppInitMapData: null}
-        // Get all tracks info (but no track data)
-        let ReponseAllTracksInfo = await this.PromiseGetAllTracksInfo(User)
-        if(!ReponseAllTracksInfo.Error){
-            Data.AppData = ReponseAllTracksInfo.Data
+    // async LoadAppData(Socket, User, UserId){
+    //     let Data = {AppData: null, AppGroup: null, AppInitMapData: null}
+    //     // Get all tracks info (but no track data)
+    //     let ReponseAllTracksInfo = await this.PromiseGetAllTracksInfo(User)
+    //     if(!ReponseAllTracksInfo.Error){
+    //         Data.AppData = ReponseAllTracksInfo.Data
 
-            // Find all different group
-            if (Data.AppData.length > 0){
-                Data.AppGroup= [...new Set(Data.AppData.map(item => item.Group))] 
-            } else {
-                Data.AppGroup=[]
-            }
+    //         // Find all different group
+    //         if (Data.AppData.length > 0){
+    //             Data.AppGroup= [...new Set(Data.AppData.map(item => item.Group))] 
+    //         } else {
+    //             Data.AppGroup=[]
+    //         }
 
-            // Build Tracks Data
-            Data.AppInitMapData = new Object()
-            Data.AppInitMapData.ListOfTracks = []
-            Data.AppInitMapData.CenterPoint = {Lat:50.709446, Long:4.543413}
-            Data.AppInitMapData.Zoom = 8
-            Data.AppInitMapData.FitBounds = null
+    //         // Build Tracks Data
+    //         Data.AppInitMapData = new Object()
+    //         Data.AppInitMapData.ListOfTracks = []
+    //         Data.AppInitMapData.CenterPoint = {Lat:50.709446, Long:4.543413}
+    //         Data.AppInitMapData.Zoom = 8
+    //         Data.AppInitMapData.FitBounds = null
             
-            // Find all track data of the first group
-            if (Data.AppGroup.length > 0){
-                // Get Tracks
-                let ReponseListOfTracks = await this.PromiseGetTracksData(Data.AppGroup[0], User)
-                if(!ReponseListOfTracks.Error){
-                    Data.AppInitMapData.ListOfTracks = ReponseListOfTracks.Data
-                } else {
-                    this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
-                    Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksData error")
-                }
-                // Calcul des point extérieur et du centre de toutes les tracks
-                if (Data.AppInitMapData.ListOfTracks.length != 0){
-                    let MinMax = this.MinMaxOfTracks(Data.AppInitMapData.ListOfTracks)
-                    Data.AppInitMapData.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
-                    Data.AppInitMapData.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
-                    Data.AppInitMapData.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
-                }
-            } 
-            //Send Data
-            Socket.emit("StartApp", Data)
-            // Log socket action
-            this._MyApp.LogAppliInfo(`SoApi send StartApp`, User, UserId)
-        } else {
-            this._MyApp.LogAppliError(ReponseAllTracksInfo.ErrorMsg, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi PromiseGetAllTracksInfo error")
-        }
-    }
+    //         // Find all track data of the first group
+    //         if (Data.AppGroup.length > 0){
+    //             // Get Tracks
+    //             let ReponseListOfTracks = await this.PromiseGetTracksData(Data.AppGroup[0], User)
+    //             if(!ReponseListOfTracks.Error){
+    //                 Data.AppInitMapData.ListOfTracks = ReponseListOfTracks.Data
+    //             } else {
+    //                 this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
+    //                 Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksData error")
+    //             }
+    //             // Calcul des point extérieur et du centre de toutes les tracks
+    //             if (Data.AppInitMapData.ListOfTracks.length != 0){
+    //                 let MinMax = this.MinMaxOfTracks(Data.AppInitMapData.ListOfTracks)
+    //                 Data.AppInitMapData.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
+    //                 Data.AppInitMapData.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
+    //                 Data.AppInitMapData.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
+    //             }
+    //         } 
+    //         //Send Data
+    //         Socket.emit("StartApp", Data)
+    //         // Log socket action
+    //         this._MyApp.LogAppliInfo(`SoApi send StartApp`, User, UserId)
+    //     } else {
+    //         this._MyApp.LogAppliError(ReponseAllTracksInfo.ErrorMsg, User, UserId)
+    //         Socket.emit("GeoXError", "GeoXServerApi PromiseGetAllTracksInfo error")
+    //     }
+    // }
 
     /**
      * Load all the data for all tracks of one group
@@ -158,129 +140,129 @@ class GeoXServer{
      * @param {String} User Nom du user
      * @param {String} UserId Id du user
      */
-    async LoadMapData(GroupName, Socket, User, UserId){
-        // Build Tracks Data
-        let Data = new Object()
-        Data.ListOfTracks = []
-        Data.CenterPoint = {Lat:50.709446, Long:4.543413}
-        Data.Zoom = 8
-        // Get Tracks
-        let ReponseListOfTracks = await this.PromiseGetTracksData(GroupName, User)
-        if(!ReponseListOfTracks.Error){
-            Data.ListOfTracks = ReponseListOfTracks.Data
-        } else {
-            this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksData error")
-        }
-        // Calcul des point extérieur et du centre de toutes les tracks
-        if (Data.ListOfTracks.length != 0){
-            let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
-            Data.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
-            Data.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
-            Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
-        }
-        // Send tracks
-        Socket.emit("ModifyTracksOnMap", Data)
-        // Log socket action
-        this._MyApp.LogAppliInfo("SoApi send ModifyTracksOnMap", User, UserId)
-    }
+    // async LoadMapData(GroupName, Socket, User, UserId){
+    //     // Build Tracks Data
+    //     let Data = new Object()
+    //     Data.ListOfTracks = []
+    //     Data.CenterPoint = {Lat:50.709446, Long:4.543413}
+    //     Data.Zoom = 8
+    //     // Get Tracks
+    //     let ReponseListOfTracks = await this.PromiseGetTracksData(GroupName, User)
+    //     if(!ReponseListOfTracks.Error){
+    //         Data.ListOfTracks = ReponseListOfTracks.Data
+    //     } else {
+    //         this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
+    //         Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksData error")
+    //     }
+    //     // Calcul des point extérieur et du centre de toutes les tracks
+    //     if (Data.ListOfTracks.length != 0){
+    //         let MinMax = this.MinMaxOfTracks(Data.ListOfTracks)
+    //         Data.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
+    //         Data.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
+    //         Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
+    //     }
+    //     // Send tracks
+    //     Socket.emit("ModifyTracksOnMap", Data)
+    //     // Log socket action
+    //     this._MyApp.LogAppliInfo("SoApi send ModifyTracksOnMap", User, UserId)
+    // }
 
-    /**
-     * Get Tracks info from DB for one User (promise)
-     */
-    PromiseGetAllTracksInfo(User){
-        return new Promise(resolve => {
-            let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
+    // /**
+    //  * Get Tracks info from DB for one User (promise)
+    //  */
+    // PromiseGetAllTracksInfo(User){
+    //     return new Promise(resolve => {
+    //         let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
-            const Querry = {[this._MongoTracksCollection.Owner]: User}
-            const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Center]: 1, [this._MongoTracksCollection.Public]: 1}}
-            const Sort = {[this._MongoTracksCollection.Date]: -1}
-            this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
-                if(reponse.length == 0){
-                    ReponseTracks.Error = false
-                    ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = []
-                } else {
-                    ReponseTracks.Error = false
-                    ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = reponse
-                }
-                resolve(ReponseTracks)
-            },(erreur)=>{
-                ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetAllTracksInfo error: " + erreur
-                ReponseTracks.Data = []
-                resolve(ReponseTracks)
-            })
-        })
-    }
+    //         const Querry = {[this._MongoTracksCollection.Owner]: User}
+    //         const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Center]: 1, [this._MongoTracksCollection.Public]: 1}}
+    //         const Sort = {[this._MongoTracksCollection.Date]: -1}
+    //         this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+    //             if(reponse.length == 0){
+    //                 ReponseTracks.Error = false
+    //                 ReponseTracks.ErrorMsg = null
+    //                 ReponseTracks.Data = []
+    //             } else {
+    //                 ReponseTracks.Error = false
+    //                 ReponseTracks.ErrorMsg = null
+    //                 ReponseTracks.Data = reponse
+    //             }
+    //             resolve(ReponseTracks)
+    //         },(erreur)=>{
+    //             ReponseTracks.Error = true
+    //             ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetAllTracksInfo error: " + erreur
+    //             ReponseTracks.Data = []
+    //             resolve(ReponseTracks)
+    //         })
+    //     })
+    // }
 
-    /**
-     * Get Tracks Data from DB (promise)
-     */
-    PromiseGetTracksData(GroupName, User){
-        return new Promise(resolve => {
-            let ReponseTracks = new Object()
-            ReponseTracks.Error = true
-            ReponseTracks.ErrorMsg = ""
-            ReponseTracks.Data = null
-            const Querry = {$and: [{[this._MongoTracksCollection.Group]: GroupName},{[this._MongoTracksCollection.Owner]: User}]}
-            const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
-            const Sort = {[this._MongoTracksCollection.Date]: -1}
-            this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
-                if(reponse.length == 0){
-                    ReponseTracks.Error = false
-                    ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = []
-                } else {
-                    ReponseTracks.Error = false
-                    ReponseTracks.ErrorMsg = null
-                    ReponseTracks.Data = reponse
-                }
-                resolve(ReponseTracks)
-            },(erreur)=>{
-                ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksData error: " + erreur
-                ReponseTracks.Data = []
-                resolve(ReponseTracks)
-            })
-        })
-    }
+    // /**
+    //  * Get Tracks Data from DB (promise)
+    //  */
+    // PromiseGetTracksData(GroupName, User){
+    //     return new Promise(resolve => {
+    //         let ReponseTracks = new Object()
+    //         ReponseTracks.Error = true
+    //         ReponseTracks.ErrorMsg = ""
+    //         ReponseTracks.Data = null
+    //         const Querry = {$and: [{[this._MongoTracksCollection.Group]: GroupName},{[this._MongoTracksCollection.Owner]: User}]}
+    //         const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
+    //         const Sort = {[this._MongoTracksCollection.Date]: -1}
+    //         this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+    //             if(reponse.length == 0){
+    //                 ReponseTracks.Error = false
+    //                 ReponseTracks.ErrorMsg = null
+    //                 ReponseTracks.Data = []
+    //             } else {
+    //                 ReponseTracks.Error = false
+    //                 ReponseTracks.ErrorMsg = null
+    //                 ReponseTracks.Data = reponse
+    //             }
+    //             resolve(ReponseTracks)
+    //         },(erreur)=>{
+    //             ReponseTracks.Error = true
+    //             ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksData error: " + erreur
+    //             ReponseTracks.Data = []
+    //             resolve(ReponseTracks)
+    //         })
+    //     })
+    // }
 
-    /**
-     * Calcul le lat et long min et max de toutes les tracks
-     * @param {Array} ListOfTracks liste de toutes les tracks
-     */
-    MinMaxOfTracks(ListOfTracks){
-        let reponse = new Object()
-        reponse.MinLat = null
-        reponse.MaxLat = null
-        reponse.MinLong = null
-        reponse.MaxLong = null
-        ListOfTracks.forEach(element => {
-            if(reponse.MinLat == null){
-                reponse.MinLat = element.ExteriorPoint.MinLat
-            } else {
-                if(element.ExteriorPoint.MinLat < reponse.MinLat){reponse.MinLat = element.ExteriorPoint.MinLat}
-            }
-            if(reponse.MaxLat == null){
-                reponse.MaxLat = element.ExteriorPoint.MaxLat
-            } else {
-                if(element.ExteriorPoint.MaxLat > reponse.MaxLat){reponse.MaxLat = element.ExteriorPoint.MaxLat}
-            }
-            if(reponse.MinLong == null){
-                reponse.MinLong = element.ExteriorPoint.MinLong
-            } else {
-                if(element.ExteriorPoint.MinLong < reponse.MinLong){reponse.MinLong = element.ExteriorPoint.MinLong}
-            }
-            if(reponse.MaxLong == null){
-                reponse.MaxLong = element.ExteriorPoint.MaxLong
-            } else {
-                if(element.ExteriorPoint.MaxLong > reponse.MaxLong){reponse.MaxLong = element.ExteriorPoint.MaxLong}
-            }
-        });
-        return reponse
-    }
+    // /**
+    //  * Calcul le lat et long min et max de toutes les tracks
+    //  * @param {Array} ListOfTracks liste de toutes les tracks
+    //  */
+    // MinMaxOfTracks(ListOfTracks){
+    //     let reponse = new Object()
+    //     reponse.MinLat = null
+    //     reponse.MaxLat = null
+    //     reponse.MinLong = null
+    //     reponse.MaxLong = null
+    //     ListOfTracks.forEach(element => {
+    //         if(reponse.MinLat == null){
+    //             reponse.MinLat = element.ExteriorPoint.MinLat
+    //         } else {
+    //             if(element.ExteriorPoint.MinLat < reponse.MinLat){reponse.MinLat = element.ExteriorPoint.MinLat}
+    //         }
+    //         if(reponse.MaxLat == null){
+    //             reponse.MaxLat = element.ExteriorPoint.MaxLat
+    //         } else {
+    //             if(element.ExteriorPoint.MaxLat > reponse.MaxLat){reponse.MaxLat = element.ExteriorPoint.MaxLat}
+    //         }
+    //         if(reponse.MinLong == null){
+    //             reponse.MinLong = element.ExteriorPoint.MinLong
+    //         } else {
+    //             if(element.ExteriorPoint.MinLong < reponse.MinLong){reponse.MinLong = element.ExteriorPoint.MinLong}
+    //         }
+    //         if(reponse.MaxLong == null){
+    //             reponse.MaxLong = element.ExteriorPoint.MaxLong
+    //         } else {
+    //             if(element.ExteriorPoint.MaxLong > reponse.MaxLong){reponse.MaxLong = element.ExteriorPoint.MaxLong}
+    //         }
+    //     });
+    //     return reponse
+    // }
 
     /**
      * Calcul les lat et long min et max d'une track contenue dans un object GeoJson

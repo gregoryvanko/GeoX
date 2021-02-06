@@ -10,6 +10,7 @@ class GeoXMap {
         this._LayerGroup = null
         this._GroupSelected = null
         this._DataMap = null
+        this._GeoXData = null
         this._DataApp = null
         this._CurrentPosShowed = false
         this._GpsPointer = null
@@ -20,31 +21,86 @@ class GeoXMap {
     }
 
     Initiation(){
-        console.log("coucou My Track")
+        // Show Action Button
+        GlobalDisplayAction('On')
+        // Clear view
+        this._DivApp.innerHTML=""
+        // SocketIO
+        let SocketIo = GlobalGetSocketIo()
+        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
+        SocketIo.on('ShowTracksOnMap', (Value) => {this.MessageRecieved(Value)})
+        // Load Data
+        this.LoadViewGetAppData()
+    }
+
+    MessageRecieved(Value){
+        if (Value.Action == "SetUserData"){
+            this._GeoXData = Value.Data
+            this._DataApp = this._GeoXData.AppData
+            this._DataMap = this._GeoXData.AppInitMapData
+            this.LoadViewMap()
+        } else if (Value.Action == "SetMapData" ){
+            this._DataMap = Value.Data
+            this.ModifyTracksOnMap()
+        } else {
+            console.log("error, Action not found: " + Value.Action)
+        }
+    }
+
+    /**
+     * Affichage du message d'erreur venant du serveur
+     * @param {String} ErrorMsg Message d'erreur envoyé du serveur
+     */
+    Error(ErrorMsg){
+        // Delete map
+        this.DeleteMap()
+        // Clear view
+        this._DivApp.innerHTML=""
+        // Add conteneur
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Add Error Text
+        Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
+    }
+
+    /** Load des Data de l'application */
+    LoadViewGetAppData(){
+        // Clear view
+        this._DivApp.innerHTML=""
+        // Contener
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Titre de l'application
+        Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
+        // on construit le texte d'attente
+        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 10vh;"))
+        // Send status to serveur
+        let CallToServer = new Object()
+        CallToServer.Action = "GetUserData"
+        GlobalSendSocketIo("GeoX", "ShowTracksOnMap", CallToServer)
     }
 
     /**
      * Load de la vue Map
      * @param {Object} DataMap Object contenant toutes les data d'une map
      */
-    LoadViewMap(GeoXData){
+    LoadViewMap(){
         // mettre le backgroundColor du body à Black pour la vue Iphone
         if (L.Browser.mobile){document.body.style.backgroundColor= "black"}
         
-        this._DataApp = GeoXData.AppData
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
         // Add dropdown groupe
-        if (GeoXData.AppGroup.length > 0){
+        if (this._GeoXData.AppGroup.length > 0){
             // Ajout du drop down avec le nom des groupes des map
             let divdropdown = CoreXBuild.Div("", "DivMapGroupDropDown", "")
             this._DivApp.appendChild(divdropdown)
             let DropDown = document.createElement("select")
             DropDown.setAttribute("id", "Group")
             DropDown.setAttribute("class", "Text MapGroupDropDown")
-            GeoXData.AppGroup.forEach(element => {
+            this._GeoXData.AppGroup.forEach(element => {
                 let option = document.createElement("option")
                 option.setAttribute("value", element)
                 option.innerHTML = element
@@ -52,11 +108,11 @@ class GeoXMap {
             });
             DropDown.onchange = this.NewGroupSelected.bind(this)
             divdropdown.appendChild(DropDown)
-            this._GroupSelected = GeoXData.AppGroup[0]
+            this._GroupSelected = this._GeoXData.AppGroup[0]
         }
         // Ajout du bouton action left
         this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this.ShowTrackInfoBox.bind(this), "ButtonShowTrackInfo"))
-        if (GeoXData.AppData.length > 1){
+        if (this._GeoXData.AppData.length > 1){
             this.SetButtonShowTrackInfoVisible(true)
         } else {
             this.SetButtonShowTrackInfoVisible(false)
@@ -67,10 +123,10 @@ class GeoXMap {
         let CenterPoint = null
         let zoom = null
         let FitBounds=null
-        if (GeoXData.AppInitMapData != null ){
-            CenterPoint = GeoXData.AppInitMapData.CenterPoint
-            zoom = GeoXData.AppInitMapData.Zoom
-            FitBounds = GeoXData.AppInitMapData.FitBounds
+        if (this._GeoXData.AppInitMapData != null ){
+            CenterPoint = this._GeoXData.AppInitMapData.CenterPoint
+            zoom = this._GeoXData.AppInitMapData.Zoom
+            FitBounds = this._GeoXData.AppInitMapData.FitBounds
         } else {
             CenterPoint = {Lat: 50.709446, Long: 4.543413}
             zoom= 8
@@ -107,7 +163,7 @@ class GeoXMap {
         // Ajout des tracks sur la map
         let me = this
         setTimeout(function(){
-            me.ModifyTracksOnMap(GeoXData.AppInitMapData)
+            me.ModifyTracksOnMap()
         }, 500);
     }
 
@@ -327,7 +383,6 @@ class GeoXMap {
     TrackInfoBoxTransitionEnd(){
         let MyDivBoxTracks = document.getElementById("DivBoxTracks")
         if (!MyDivBoxTracks.classList.contains("DivBoxTracksShow")){
-            console.log("ok")
             // show boutton action set track info visible
             this.SetButtonShowTrackInfoVisible(true)
             MyDivBoxTracks.parentNode.removeChild(MyDivBoxTracks)
@@ -403,7 +458,10 @@ class GeoXMap {
         let DropDownGroupValue = document.getElementById("Group").value
         this._GroupSelected = DropDownGroupValue
         // Send data to server
-        GlobalSendSocketIo("GeoX", "LoadMapData", DropDownGroupValue)
+        let CallToServer = new Object()
+        CallToServer.Action = "GetMapData"
+        CallToServer.Data = DropDownGroupValue
+        GlobalSendSocketIo("GeoX", "ShowTracksOnMap", CallToServer)
     }
 
     /**
@@ -419,6 +477,7 @@ class GeoXMap {
             this._LayerGroup = null
             this._GroupSelected = null
             this._DataMap = null
+            this._GeoXData = null
             this._DataApp = null
             this._CurrentPosShowed = false
             this._GpsPointer = null
@@ -437,8 +496,7 @@ class GeoXMap {
      * @param {Object} GeoJsonData GeoJson Data de la track
      * @param {string} TrackColor Color de la track
      */
-    ModifyTracksOnMap(DataMap){
-        this._DataMap = DataMap
+    ModifyTracksOnMap(){
         let me = this
         // Remove all tracks
         this._LayerGroup.eachLayer(function (layer) {
