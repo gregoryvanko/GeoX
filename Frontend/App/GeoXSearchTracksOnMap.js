@@ -13,6 +13,12 @@ class GeoXSearchTracksOnMap {
         this._WeightTrack = (L.Browser.mobile) ? 10 : 3
         this._TrackStyle = {"color": "blue", "weight": this._WeightTrack}
         this._Arrowheads = {frequency: '100px', size: '15m', fill: true}
+        this._IconPointOption = null
+        this._IconPointStartOption = null
+        this._IconPointEndOption = null
+    }
+
+    Initiation(){
         this._IconPointOption = L.icon({
             iconUrl: MarkerIcon.MarkerBleu(),
             iconSize:     [40, 40],
@@ -31,6 +37,7 @@ class GeoXSearchTracksOnMap {
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
+        console.log("coucou Search Track")
     }
 
     MessageRecieved(Value){
@@ -503,4 +510,13 @@ class GeoXSearchTracksOnMap {
         }
     }
 
+    /** Get Img Src de l'application */
+    GetImgSrc(){
+        return "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNjQwLjAwMDAwMHB0IiBoZWlnaHQ9IjEyODAuMDAwMDAwcHQiIHZpZXdCb3g9IjAgMCA2NDAuMDAwMDAwIDEyODAuMDAwMDAwIgogcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQgbWVldCI+CjxtZXRhZGF0YT4KQ3JlYXRlZCBieSBwb3RyYWNlIDEuMTUsIHdyaXR0ZW4gYnkgUGV0ZXIgU2VsaW5nZXIgMjAwMS0yMDE3CjwvbWV0YWRhdGE+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAuMDAwMDAwLDEyODAuMDAwMDAwKSBzY2FsZSgwLjEwMDAwMCwtMC4xMDAwMDApIgpmaWxsPSIjMDAwMDAwIiBzdHJva2U9Im5vbmUiPgo8cGF0aCBkPSJNMzA3MyAxMDk1NyBsLTI5MTIgLTE4NDIgLTEgLTgwIDAgLTgwIDM3MSAtNjQ1IGMyMDMgLTM1NSA0NTQgLTc5MAo1NTYgLTk2OCBsMTg1IC0zMjMgNDQyIDIyNSBjMzc2IDE5MSAxMzE1IDY2NCAxMzM5IDY3NCA0IDIgNyAtMTc3OSA3IC0zOTU3CmwwIC0zOTYxIDEwMyAwIGM2NCAwIDE5NiAxMyAzNDggMzUgMjQzIDM0IDcwOCAxMDAgMTUxOSAyMTQgMjM0IDMzIDU4NyA4Mwo3ODUgMTExIDE5OCAyNyAzNzUgNTIgMzkzIDU1IGwzMiA2IDAgNjE4OSAwIDYxOTAgLTEyNyAtMSAtMTI4IC0xIC0yOTEyCi0xODQxeiIvPgo8L2c+Cjwvc3ZnPgo="
+    }
 }
+
+// Creation de l'application
+let MyGeoXSearchTracksOnMap = new GeoXSearchTracksOnMap(GlobalCoreXGetAppContentId())
+// Ajout de l'application
+GlobalCoreXAddApp("Search Tracks in GeoX", MyGeoXSearchTracksOnMap.GetImgSrc(), MyGeoXSearchTracksOnMap.Initiation.bind(MyGeoXSearchTracksOnMap))

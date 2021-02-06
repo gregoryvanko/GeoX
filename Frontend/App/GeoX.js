@@ -198,6 +198,6 @@ class GeoX{
     }
 }
 // Creation de l'application
-let MyClientApp = new GeoX(GlobalCoreXGetAppContentId())
+//let MyClientApp = new GeoX(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp(MyClientApp.GetTitre(), MyClientApp.GetImgSrc(), MyClientApp.Initiation.bind(MyClientApp))
+//GlobalCoreXAddApp(MyClientApp.GetTitre(), MyClientApp.GetImgSrc(), MyClientApp.Initiation.bind(MyClientApp))
