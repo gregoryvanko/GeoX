@@ -1,6 +1,6 @@
 class GeoXManageTracks {
     constructor(DivApp){
-        this._DivApp = DivApp
+        this._DivApp = document.getElementById(DivApp)
         this._FromCurrentView = null
     }
 
@@ -47,9 +47,9 @@ class GeoXManageTracks {
                 BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","TextSmall", "width: 18%;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","TextSmall", "width: 15%;"))
                 if (Track.Public){
-                    BoxTracks.appendChild(CoreXBuild.Image64(ButtonIcon.Shared(),"", "IconeInList", ""))
+                    BoxTracks.appendChild(CoreXBuild.Image64(Icon.Shared(),"", "IconeInList", ""))
                 } else {
-                    BoxTracks.appendChild(CoreXBuild.Image64(ButtonIcon.Key(),"", "IconeInList", ""))
+                    BoxTracks.appendChild(CoreXBuild.Image64(Icon.Key(),"", "IconeInList", ""))
                 }
                 
                 let DivButton = document.createElement("div")
@@ -273,14 +273,9 @@ class GeoXManageTracks {
         Data.FromCurrentView = this._FromCurrentView
         GlobalSendSocketIo("GeoX", "ManageTrack", Data)
     }
-
-    /** Get Img Src de l'application */
-    GetImgSrc(){
-        return "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNjQwLjAwMDAwMHB0IiBoZWlnaHQ9IjEyODAuMDAwMDAwcHQiIHZpZXdCb3g9IjAgMCA2NDAuMDAwMDAwIDEyODAuMDAwMDAwIgogcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQgbWVldCI+CjxtZXRhZGF0YT4KQ3JlYXRlZCBieSBwb3RyYWNlIDEuMTUsIHdyaXR0ZW4gYnkgUGV0ZXIgU2VsaW5nZXIgMjAwMS0yMDE3CjwvbWV0YWRhdGE+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAuMDAwMDAwLDEyODAuMDAwMDAwKSBzY2FsZSgwLjEwMDAwMCwtMC4xMDAwMDApIgpmaWxsPSIjMDAwMDAwIiBzdHJva2U9Im5vbmUiPgo8cGF0aCBkPSJNMzA3MyAxMDk1NyBsLTI5MTIgLTE4NDIgLTEgLTgwIDAgLTgwIDM3MSAtNjQ1IGMyMDMgLTM1NSA0NTQgLTc5MAo1NTYgLTk2OCBsMTg1IC0zMjMgNDQyIDIyNSBjMzc2IDE5MSAxMzE1IDY2NCAxMzM5IDY3NCA0IDIgNyAtMTc3OSA3IC0zOTU3CmwwIC0zOTYxIDEwMyAwIGM2NCAwIDE5NiAxMyAzNDggMzUgMjQzIDM0IDcwOCAxMDAgMTUxOSAyMTQgMjM0IDMzIDU4NyA4Mwo3ODUgMTExIDE5OCAyNyAzNzUgNTIgMzkzIDU1IGwzMiA2IDAgNjE4OSAwIDYxOTAgLTEyNyAtMSAtMTI4IC0xIC0yOTEyCi0xODQxeiIvPgo8L2c+Cjwvc3ZnPgo="
-    }
 }
 
 // Creation de l'application
 let MyGeoXManageTracks = new GeoXManageTracks(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Manage My Tracks", MyGeoXManageTracks.GetImgSrc(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))
+GlobalCoreXAddApp("Manage My Tracks", Icon.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))

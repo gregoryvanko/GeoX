@@ -17,9 +17,13 @@ class GeoXServer{
     */
     Api(Data, Socket, User, UserId){
         switch (Data.Action) {
+            case "GetUserGroup":
+                this._MyApp.LogAppliInfo("SoApi Data:" + JSON.stringify(Data), User, UserId)
+                this.GetUserGroup(Socket, User, UserId)
+                break
             case "LoadAppData":
-                this._MyApp.LogAppliInfo("SoApi GeoXServer Data:" + JSON.stringify(Data), User, UserId)
-                this.LoadAppData(Data.Value, Socket, User, UserId)
+                this._MyApp.LogAppliInfo("SoApi Data:" + JSON.stringify(Data), User, UserId)
+                this.LoadAppData(Socket, User, UserId)
 
                 // Modify Db
                 //let ModifyDb = require("./ModifyDb")
@@ -71,6 +75,26 @@ class GeoXServer{
         }
     }
 
+    GetUserGroup(Socket, User, UserId){
+        const Querry = {[this._MongoTracksCollection.Owner]: User}
+        const Projection = { projection:{[this._MongoTracksCollection.Group]: 1}}
+        const Sort = {[this._MongoTracksCollection.Date]: -1}
+        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+            let DataToSend = []
+            // Find all different group
+            if (reponse.length > 0){
+                DataToSend = [...new Set(reponse.map(item => item.Group))] 
+            }
+            //Send Data
+            Socket.emit("StartApp", DataToSend)
+            // Log socket action
+            this._MyApp.LogAppliInfo(`SoApi send User Groups`, User, UserId)
+        },(erreur)=>{
+            this._MyApp.LogAppliError("GetUserGroup error: " + erreur, User, UserId)
+            Socket.emit("GeoXError", "GetUserGroup error: " + erreur)
+        })
+    }
+
     /**
      * Load all Data of the App
      * @param {String} CurrentView Name of the current view
@@ -78,53 +102,53 @@ class GeoXServer{
      * @param {String} User Nom du user
      * @param {String} UserId Id du user
      */
-    async LoadAppData(CurrentView, Socket, User, UserId){
+    async LoadAppData(Socket, User, UserId){
         let Data = {AppData: null, AppGroup: null, AppInitMapData: null}
         // Get all tracks info (but no track data)
         let ReponseAllTracksInfo = await this.PromiseGetAllTracksInfo(User)
         if(!ReponseAllTracksInfo.Error){
             Data.AppData = ReponseAllTracksInfo.Data
+
+            // Find all different group
+            if (Data.AppData.length > 0){
+                Data.AppGroup= [...new Set(Data.AppData.map(item => item.Group))] 
+            } else {
+                Data.AppGroup=[]
+            }
+
+            // Build Tracks Data
+            Data.AppInitMapData = new Object()
+            Data.AppInitMapData.ListOfTracks = []
+            Data.AppInitMapData.CenterPoint = {Lat:50.709446, Long:4.543413}
+            Data.AppInitMapData.Zoom = 8
+            Data.AppInitMapData.FitBounds = null
+            
+            // Find all track data of the first group
+            if (Data.AppGroup.length > 0){
+                // Get Tracks
+                let ReponseListOfTracks = await this.PromiseGetTracksData(Data.AppGroup[0], User)
+                if(!ReponseListOfTracks.Error){
+                    Data.AppInitMapData.ListOfTracks = ReponseListOfTracks.Data
+                } else {
+                    this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
+                    Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksData error")
+                }
+                // Calcul des point extérieur et du centre de toutes les tracks
+                if (Data.AppInitMapData.ListOfTracks.length != 0){
+                    let MinMax = this.MinMaxOfTracks(Data.AppInitMapData.ListOfTracks)
+                    Data.AppInitMapData.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
+                    Data.AppInitMapData.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
+                    Data.AppInitMapData.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
+                }
+            } 
+            //Send Data
+            Socket.emit("StartApp", Data)
+            // Log socket action
+            this._MyApp.LogAppliInfo(`SoApi send StartApp`, User, UserId)
         } else {
             this._MyApp.LogAppliError(ReponseAllTracksInfo.ErrorMsg, User, UserId)
             Socket.emit("GeoXError", "GeoXServerApi PromiseGetAllTracksInfo error")
         }
-        // Find all different group
-        if (Data.AppData.length > 0){
-            Data.AppGroup= [...new Set(Data.AppData.map(item => item.Group))] 
-        } else {
-            Data.AppGroup=[]
-        }
-
-        // Build Tracks Data
-        Data.AppInitMapData = new Object()
-        Data.AppInitMapData.ListOfTracks = []
-        Data.AppInitMapData.CenterPoint = {Lat:50.709446, Long:4.543413}
-        Data.AppInitMapData.Zoom = 8
-        Data.AppInitMapData.FitBounds = null
-          
-        // Find all track data of the first group
-        if (Data.AppGroup.length > 0){
-            // Get Tracks
-            let ReponseListOfTracks = await this.PromiseGetTracksData(Data.AppGroup[0], User)
-            if(!ReponseListOfTracks.Error){
-                Data.AppInitMapData.ListOfTracks = ReponseListOfTracks.Data
-            } else {
-                this._MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
-                Socket.emit("GeoXError", "GeoXServerApi PromiseGetTracksData error")
-            }
-            // Calcul des point extérieur et du centre de toutes les tracks
-            if (Data.AppInitMapData.ListOfTracks.length != 0){
-                let MinMax = this.MinMaxOfTracks(Data.AppInitMapData.ListOfTracks)
-                Data.AppInitMapData.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
-                Data.AppInitMapData.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
-                Data.AppInitMapData.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
-            }
-        } 
-        //Send Data
-        let StartupData = {StartView:CurrentView, Data: Data}
-        Socket.emit("StartApp", StartupData)
-        // Log socket action
-        this._MyApp.LogAppliInfo(`SoApi send StartApp vue ${CurrentView}`, User, UserId)
     }
 
     /**
@@ -560,7 +584,7 @@ class GeoXServer{
         reponse += fs.readFileSync(__dirname + "/../Frontend/App/0-leaflet.js", 'utf8')
         reponse += fs.readFileSync(__dirname + "/../Frontend/App/1-leaflet.geometryutil.js", 'utf8')
         reponse += fs.readFileSync(__dirname + "/../Frontend/App/2-leaflet-arrowheads.js", 'utf8')
-        reponse += fs.readFileSync(__dirname + "/../Frontend/App/MarkerIcon.js", 'utf8')
+        reponse += fs.readFileSync(__dirname + "/../Frontend/App/App_0-Icon.js", 'utf8')
         reponse += `
                 </script>
             </head>
@@ -623,14 +647,14 @@ class GeoXServer{
                         };
                         // Style for Marker Start
                         var IconPointStartOption = L.icon({
-                            iconUrl: MarkerIcon.MarkerVert(),
+                            iconUrl: Icon.MarkerVert(),
                             iconSize:     [40, 40],
                             iconAnchor:   [20, 40],
                             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
                         });
                         // Style for Marker End
                         var IconPointEndOption = L.icon({
-                            iconUrl: MarkerIcon.MarkerRouge(),
+                            iconUrl: Icon.MarkerRouge(),
                             iconSize:     [40, 40],
                             iconAnchor:   [20, 40],
                             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor

@@ -1,6 +1,10 @@
 class GeoXSearchTracksOnMap {
     constructor(DivApp){
-        this._DivApp = DivApp
+        this._DivApp = document.getElementById(DivApp)
+        // App en full screen 
+        this._DivApp.style.padding = "0%"
+        this._DivApp.style.margin = "0% AUTO"
+
         this._MapId = "mapid"
         this._MapBoundPadding = 0
         this._ListeOfMarkers = null
@@ -13,31 +17,41 @@ class GeoXSearchTracksOnMap {
         this._WeightTrack = (L.Browser.mobile) ? 10 : 3
         this._TrackStyle = {"color": "blue", "weight": this._WeightTrack}
         this._Arrowheads = {frequency: '100px', size: '15m', fill: true}
-        this._IconPointOption = null
-        this._IconPointStartOption = null
-        this._IconPointEndOption = null
-    }
-
-    Initiation(){
         this._IconPointOption = L.icon({
-            iconUrl: MarkerIcon.MarkerBleu(),
+            iconUrl: Icon.MarkerBleu(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         this._IconPointStartOption = L.icon({
-            iconUrl: MarkerIcon.MarkerVert(),
+            iconUrl: Icon.MarkerVert(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         this._IconPointEndOption = L.icon({
-            iconUrl: MarkerIcon.MarkerRouge(),
+            iconUrl: Icon.MarkerRouge(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
-        console.log("coucou Search Track")
+    }
+
+    Initiation(){
+        // Show Action Button
+        GlobalDisplayAction('On')
+        // Clear view
+        this._DivApp.innerHTML=""
+        // SocketIO
+        let SocketIo = GlobalGetSocketIo()
+        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
+        SocketIo.on('StartApp', (Value) => {
+            debugger
+            this._MyGroups = Value
+            this.LoadView()
+        })
+        // Load Data
+        this.LoadViewGetAppData()
     }
 
     MessageRecieved(Value){
@@ -52,9 +66,43 @@ class GeoXSearchTracksOnMap {
         }
     }
 
-    LoadView(MyGroups){
-        // Enregister le MyGroups
-        this._MyGroups = MyGroups
+    /**
+     * Affichage du message d'erreur venant du serveur
+     * @param {String} ErrorMsg Message d'erreur envoyé du serveur
+     */
+    Error(ErrorMsg){
+        // Delete map
+        this.DeleteMap()
+        // Clear view
+        this._DivApp.innerHTML=""
+        // Add conteneur
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Add Error Text
+        Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red"))
+    }
+
+    /** Load des Data de l'application */
+    LoadViewGetAppData(){
+        // Clear view
+        this._DivApp.innerHTML=""
+        // Contener
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Titre de l'application
+        Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
+        // on construit le texte d'attente
+        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 10vh;"))
+        // Send status to serveur
+        // Data to send
+        let CallToServer = new Object()
+        CallToServer.Action = "GetUserGroup"
+        GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
+    }
+
+    LoadView(){
+        // Clear view
+        this._DivApp.innerHTML=""
         // mettre le backgroundColor du body à Black pour la vue Iphone
         if (L.Browser.mobile){document.body.style.backgroundColor= "black"}
         // Clear Conteneur
@@ -100,7 +148,7 @@ class GeoXSearchTracksOnMap {
         // Create Track Info Box
         this.TrackInfoBoxCreate()
         // Get all Markers
-        this.CallServerGetMarkers()
+        //this.CallServerGetMarkers()
     }
 
     WaitingBoxCreate(){
@@ -203,7 +251,7 @@ class GeoXSearchTracksOnMap {
                     // Longeur de la track
                     DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Marker.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; width: 30%; margin-left: 1vh;"))
                     // Save Marker
-                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Marker._id), "ButtonIcon"))
+                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${Icon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Marker._id), "ButtonIcon"))
                 }
             });
             if (NoTraclShowed){
@@ -388,7 +436,7 @@ class GeoXSearchTracksOnMap {
         // Longueur de la track
         Div.appendChild(CoreXBuild.DivTexte(Track.Length + "km","","TextSmall", ""))
         // Save Track
-        Div.appendChild(CoreXBuild.Button (`<img src="${ButtonIcon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Track._id), "ButtonIcon ButtonIconBlackBorder"))
+        Div.appendChild(CoreXBuild.Button (`<img src="${Icon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Track._id), "ButtonIcon ButtonIconBlackBorder"))
         return Div
     }
 
@@ -509,14 +557,9 @@ class GeoXSearchTracksOnMap {
             if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
         }
     }
-
-    /** Get Img Src de l'application */
-    GetImgSrc(){
-        return "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDIwMDEwOTA0Ly9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy1TVkctMjAwMTA5MDQvRFREL3N2ZzEwLmR0ZCI+CjxzdmcgdmVyc2lvbj0iMS4wIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiB3aWR0aD0iNjQwLjAwMDAwMHB0IiBoZWlnaHQ9IjEyODAuMDAwMDAwcHQiIHZpZXdCb3g9IjAgMCA2NDAuMDAwMDAwIDEyODAuMDAwMDAwIgogcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQgbWVldCI+CjxtZXRhZGF0YT4KQ3JlYXRlZCBieSBwb3RyYWNlIDEuMTUsIHdyaXR0ZW4gYnkgUGV0ZXIgU2VsaW5nZXIgMjAwMS0yMDE3CjwvbWV0YWRhdGE+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAuMDAwMDAwLDEyODAuMDAwMDAwKSBzY2FsZSgwLjEwMDAwMCwtMC4xMDAwMDApIgpmaWxsPSIjMDAwMDAwIiBzdHJva2U9Im5vbmUiPgo8cGF0aCBkPSJNMzA3MyAxMDk1NyBsLTI5MTIgLTE4NDIgLTEgLTgwIDAgLTgwIDM3MSAtNjQ1IGMyMDMgLTM1NSA0NTQgLTc5MAo1NTYgLTk2OCBsMTg1IC0zMjMgNDQyIDIyNSBjMzc2IDE5MSAxMzE1IDY2NCAxMzM5IDY3NCA0IDIgNyAtMTc3OSA3IC0zOTU3CmwwIC0zOTYxIDEwMyAwIGM2NCAwIDE5NiAxMyAzNDggMzUgMjQzIDM0IDcwOCAxMDAgMTUxOSAyMTQgMjM0IDMzIDU4NyA4Mwo3ODUgMTExIDE5OCAyNyAzNzUgNTIgMzkzIDU1IGwzMiA2IDAgNjE4OSAwIDYxOTAgLTEyNyAtMSAtMTI4IC0xIC0yOTEyCi0xODQxeiIvPgo8L2c+Cjwvc3ZnPgo="
-    }
 }
 
 // Creation de l'application
 let MyGeoXSearchTracksOnMap = new GeoXSearchTracksOnMap(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Search Tracks in GeoX", MyGeoXSearchTracksOnMap.GetImgSrc(), MyGeoXSearchTracksOnMap.Initiation.bind(MyGeoXSearchTracksOnMap))
+GlobalCoreXAddApp("Search Tracks in GeoX", Icon.GeoXSearchTracksOnMap(), MyGeoXSearchTracksOnMap.Initiation.bind(MyGeoXSearchTracksOnMap))
