@@ -1,6 +1,6 @@
 async function CallGetUserGroup(MyApp, Socket, User, UserId){
-    let SearchTracksOnMap = require("./SearchTracksOnMap")
-    let ReponseUserGroup = await SearchTracksOnMap.PromiseGetUserGroup(MyApp, User)
+    let Shared = require("./Shared")
+    let ReponseUserGroup = await Shared.PromiseGetUserGroup(MyApp, User)
     if(!ReponseUserGroup.Error){
         //Send Data
         let MyReponse = new Object()
@@ -14,8 +14,8 @@ async function CallGetUserGroup(MyApp, Socket, User, UserId){
 }
 
 async function CallGetMapData(GroupName, MyApp, Socket, User, UserId){
-    let ShowTracksOnMap = require("./ShowTracksOnMap")
-    let ReponseListOfTracks = await ShowTracksOnMap.PromiseGetTracksData(MyApp, GroupName, User)
+    let Shared = require("./Shared")
+    let ReponseListOfTracks = await Shared.PromiseGetTracksData(MyApp, GroupName, User)
     if(ReponseListOfTracks.Error){
         MyApp.LogAppliError(ReponseListOfTracks.ErrorMsg, User, UserId)
         Socket.emit("GeoXError", ReponseListOfTracks.ErrorMsg)

@@ -1,15 +1,67 @@
 class GeoXManageTracks {
     constructor(DivApp){
         this._DivApp = document.getElementById(DivApp)
-        this._FromCurrentView = null
+        this._AppData = null
+        this._AppGroup = null
     }
 
     Initiation(){
-        console.log("coucou Manage Track")
+        // Show Action Button
+        GlobalDisplayAction('On')
+        // Clear view
+        this._DivApp.innerHTML=""
+        // SocketIO
+        let SocketIo = GlobalGetSocketIo()
+        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
+        SocketIo.on('ManageTrack', (Value) => {this.MessageRecieved(Value)})
+        // Load Data
+        this.LoadViewGetAppData()
     }
 
-    LoadViewManageTracks(Data, CurrentView){
-        this._FromCurrentView = CurrentView
+    MessageRecieved(Value){
+        if (Value.Action == "SetUserData"){
+            this._AppData = Value.Data.AppData
+            this._AppGroup = Value.Data.AppGroup
+            this.LoadViewManageTracks()
+        } else if (Value.Action == "SetDownloadedFile" ){
+            this.DownloadedFileToClient(Value.Data)
+        } else {
+            console.log("error, Action not found: " + Value.Action)
+        }
+    }
+
+    /**
+     * Affichage du message d'erreur venant du serveur
+     * @param {String} ErrorMsg Message d'erreur envoyé du serveur
+     */
+    Error(ErrorMsg){
+        // Clear view
+        this._DivApp.innerHTML=""
+        // Add conteneur
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Add Error Text
+        Conteneur.appendChild(CoreXBuild.DivTexte(ErrorMsg,"","Text", "text-align: center; color: red; margin-top: 20vh;"))
+    }
+
+    /** Load des Data de l'application */
+    LoadViewGetAppData(){
+        // Clear view
+        this._DivApp.innerHTML=""
+        // Contener
+        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Conteneur)
+        // Titre de l'application
+        Conteneur.appendChild(CoreXBuild.DivTexte("GeoX", "", "Titre"))
+        // on construit le texte d'attente
+        Conteneur.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", "text-align: center; margin-top: 10vh;"))
+        // Send status to serveur
+        let CallToServer = new Object()
+        CallToServer.Action = "GetUserData"
+        GlobalSendSocketIo("GeoX", "ManageTrack", CallToServer)
+    }
+
+    LoadViewManageTracks(){
         // Clear view
         this._DivApp.innerHTML = ""
         // Contener
@@ -21,7 +73,7 @@ class GeoXManageTracks {
         let AppConteneur = CoreXBuild.Div("AppConteneur", "AppConteneur", "")
         Contener.appendChild(AppConteneur)
         // Boutton Add Track
-        AppConteneur.appendChild(CoreXBuild.Button("Add Track",this.LoadViewAddTrack.bind(this,Data.AppGroup, this._FromCurrentView),"Text Button ButtonTop"))
+        AppConteneur.appendChild(CoreXBuild.Button("Add Track",this.LoadViewAddTrack.bind(this,this._AppGroup),"Text Button ButtonTop"))
         // Div pour le titre des colonnes
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         AppConteneur.appendChild(BoxTitre)
@@ -33,12 +85,12 @@ class GeoXManageTracks {
         // Ajout d'une ligne
         AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5; margin: 1% 0% 0% 0%;"))
         // Ajout des lignes des tracks
-        if (Data.AppData.length == 0){
+        if (this._AppData.length == 0){
             let BoxTracks = CoreXBuild.DivFlexRowStart("")
             AppConteneur.appendChild(BoxTracks)
             BoxTracks.appendChild(CoreXBuild.DivTexte("No track saved","","Text","margin-top: 4vh; width: 100%; text-align: center;"))
         } else {
-            Data.AppData.forEach(Track => {
+            this._AppData.forEach(Track => {
                 let BoxTracks = CoreXBuild.DivFlexRowStart("")
                 BoxTracks.style.marginTop = "1vh"
                 BoxTracks.style.marginBottom = "1vh"
@@ -57,13 +109,13 @@ class GeoXManageTracks {
                 DivButton.setAttribute("class", "NotOnIphone")
                 DivButton.appendChild(CoreXBuild.Button ("&#8681", this.LoadViewDownload.bind(this,Track._id), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128279", this.LoadViewLink.bind(this,Track._id, false), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,Data.AppGroup, Track._id, Track.Name, Track.Group, Track.Public, false), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, false), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name, false), "ButtonIcon"))
                 BoxTracks.appendChild(DivButton)
                 let DivButtonIphone = document.createElement("div")
                 DivButtonIphone.setAttribute("style", "margin-left: auto; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
                 DivButtonIphone.setAttribute("class", "OnlyIphone")
-                DivButtonIphone.appendChild(CoreXBuild.Button ("&#8286", this.LoadViewIphone.bind(this,Data.AppGroup, Track), "ButtonIcon"))
+                DivButtonIphone.appendChild(CoreXBuild.Button ("&#8286", this.LoadViewIphone.bind(this,this._AppGroup, Track), "ButtonIcon"))
                 BoxTracks.appendChild(DivButtonIphone)
                 // Ajout d'une ligne
                 AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
@@ -93,11 +145,18 @@ class GeoXManageTracks {
     DownloadFile(Type, TrackId){
         CoreXWindow.DeleteWindow()
         // Data to send
-        let Data = new Object()
-        Data.Action = "Download"
-        Data.Data = {Id: TrackId, Type : Type}
-        Data.FromCurrentView = this._FromCurrentView
-        GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+        let CallToServer = new Object()
+        CallToServer.Action = "Download"
+        CallToServer.Data = {Id: TrackId, Type : Type}
+        GlobalSendSocketIo("GeoX", "ManageTrack", CallToServer)
+    }
+
+    DownloadedFileToClient(Data){
+        var link = document.createElement('a')
+        link.download = 'Track.' + Data.Type
+        var blob = new Blob([Data.File], {typde: 'text/plain'})
+        link.href = window.URL.createObjectURL(blob)
+        link.click()
     }
 
     SendDeleteTrack(TrackId, TrackName, IsCoreXWindow){
@@ -105,11 +164,10 @@ class GeoXManageTracks {
         // Send delete tracks to serveur
         if (confirm(`Do you want to delete track : ${TrackName}?`)){
             // Data to send
-            let Data = new Object()
-            Data.Action = "Delete"
-            Data.Data = TrackId
-            Data.FromCurrentView = this._FromCurrentView
-            GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+            let CallToServer = new Object()
+            CallToServer.Action = "Delete"
+            CallToServer.Data = TrackId
+            GlobalSendSocketIo("GeoX", "ManageTrack", CallToServer)
         }
     }
 
@@ -169,18 +227,16 @@ class GeoXManageTracks {
             Track.Group = document.getElementById("InputTrackGroup").value 
             Track.Public = document.getElementById("TogglePublic").checked 
             // Data to send
-            let Data = new Object()
-            Data.Action = "Update"
-            Data.Data = Track
-            Data.FromCurrentView = this._FromCurrentView
-            GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+            let CallToServer = new Object()
+            CallToServer.Action = "Update"
+            CallToServer.Data = Track
+            GlobalSendSocketIo("GeoX", "ManageTrack", CallToServer)
         } else {
             alert("Enter a name and a group before updating a track")
         }
     }
 
-    LoadViewAddTrack(Groups, CurrentView){
-        this._FromCurrentView = CurrentView
+    LoadViewAddTrack(Groups){
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Contener
@@ -267,11 +323,10 @@ class GeoXManageTracks {
         Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
         Track.FileContent = File
         // Data to send
-        let Data = new Object()
-        Data.Action = "Add"
-        Data.Data = Track
-        Data.FromCurrentView = this._FromCurrentView
-        GlobalSendSocketIo("GeoX", "ManageTrack", Data)
+        let CallToServer = new Object()
+        CallToServer.Action = "Add"
+        CallToServer.Data = Track
+        GlobalSendSocketIo("GeoX", "ManageTrack", CallToServer)
     }
 }
 

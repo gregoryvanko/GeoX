@@ -169,4 +169,147 @@ function CalculateTrackLength(GeoJson){
     return distance
 }
 
+function PromiseGetUserGroup(MyApp, User){
+    return new Promise(resolve => {
+        let ReponseUserGroup = {Error: true, ErrorMsg:"InitError", Data:null}
+
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+        // Querry
+        const Querry = {[MongoTracksCollection.Owner]: User}
+        const Projection = { projection:{[MongoTracksCollection.Group]: 1}}
+        const Sort = {[MongoTracksCollection.Date]: -1}
+        Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
+            let DataToSend = []
+            // Find all different group
+            if (reponse.length > 0){
+                DataToSend = [...new Set(reponse.map(item => item.Group))] 
+            }
+            ReponseUserGroup.Error = false
+            ReponseUserGroup.ErrorMsg = null
+            ReponseUserGroup.Data = DataToSend
+            resolve(ReponseUserGroup)
+        },(erreur)=>{
+            ReponseUserGroup.Error = true
+            ReponseUserGroup.ErrorMsg = "PromiseGetAllMarkers error: " + erreur
+            ReponseUserGroup.Data = []
+            resolve(ReponseUserGroup)
+        })
+    })
+}
+
+function PromiseUpdateTrack(Track, MyApp){
+    return new Promise(resolve => {
+        let ReponseUpdateTrack = {Error: true, ErrorMsg:"InitError", Data:null}
+
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+    
+        let DataToDb = new Object()
+        if(Track.Name){DataToDb[MongoTracksCollection.Name]= Track.Name}
+        if(Track.Group){DataToDb[MongoTracksCollection.Group]= Track.Group}
+        if(Track.Public != undefined){DataToDb[MongoTracksCollection.Public]= Track.Public}
+        if (Track.Color){DataToDb[MongoTracksCollection.Color]= Track.Color}
+        
+        Mongo.UpdateByIdPromise(Track.Id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
+            if (reponse.matchedCount == 0){
+                ReponseUpdateTrack.Error = true
+                ReponseUpdateTrack.ErrorMsg = "GeoXServerApi PromiseUpdateTrack Track Id not found: "
+                ReponseUpdateTrack.Data = []
+            } else {
+                ReponseUpdateTrack.Error = false
+                ReponseUpdateTrack.ErrorMsg = ""
+                ReponseUpdateTrack.Data = []
+            }
+            resolve(ReponseUpdateTrack)
+        },(erreur)=>{
+            ReponseUpdateTrack.Error = true
+            ReponseUpdateTrack.ErrorMsg = "GeoXServerApi PromiseUpdateTrack error: " + erreur
+            ReponseUpdateTrack.Data = []
+            resolve(ReponseUpdateTrack)
+        })
+    })
+}
+
+/**
+ * Get Tracks Data from DB (promise)
+ */
+function PromiseGetTracksData(MyApp, GroupName, User){
+    return new Promise(resolve => {
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let ReponseTracks = new Object()
+        ReponseTracks.Error = true
+        ReponseTracks.ErrorMsg = ""
+        ReponseTracks.Data = null
+        const Querry = {$and: [{[MongoTracksCollection.Group]: GroupName},{[MongoTracksCollection.Owner]: User}]}
+        const Projection = { projection:{[MongoTracksCollection.GpxData]: 0}}
+        const Sort = {[MongoTracksCollection.Date]: -1}
+        Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                ReponseTracks.Error = false
+                ReponseTracks.ErrorMsg = null
+                ReponseTracks.Data = []
+            } else {
+                ReponseTracks.Error = false
+                ReponseTracks.ErrorMsg = null
+                ReponseTracks.Data = reponse
+            }
+            resolve(ReponseTracks)
+        },(erreur)=>{
+            ReponseTracks.Error = true
+            ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksData error: " + erreur
+            ReponseTracks.Data = []
+            resolve(ReponseTracks)
+        })
+    })
+}
+
+/**
+ * Get Tracks info from DB for one User (promise)
+ */
+function PromiseGetAllTracksInfo(MyApp, User){
+    return new Promise(resolve => {
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
+
+        const Querry = {[MongoTracksCollection.Owner]: User}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Color]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.ExteriorPoint]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.Public]: 1}}
+        const Sort = {[MongoTracksCollection.Date]: -1}
+        Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                ReponseTracks.Error = false
+                ReponseTracks.ErrorMsg = null
+                ReponseTracks.Data = []
+            } else {
+                ReponseTracks.Error = false
+                ReponseTracks.ErrorMsg = null
+                ReponseTracks.Data = reponse
+            }
+            resolve(ReponseTracks)
+        },(erreur)=>{
+            ReponseTracks.Error = true
+            ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetAllTracksInfo error: " + erreur
+            ReponseTracks.Data = []
+            resolve(ReponseTracks)
+        })
+    })
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
+module.exports.PromiseGetUserGroup = PromiseGetUserGroup
+module.exports.PromiseUpdateTrack = PromiseUpdateTrack
+module.exports.PromiseGetTracksData = PromiseGetTracksData
+module.exports.PromiseGetAllTracksInfo = PromiseGetAllTracksInfo

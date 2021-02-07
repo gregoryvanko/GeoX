@@ -46,14 +46,16 @@ class GeoXServer{
                 break
             case "ManageTrack":
                 let ManageTrack = require("./ManageTrack")
-                if (Data.Value.Action == "Delete"){
-                    this.DeleteTrack(Data.Value, Socket, User, UserId)
+                if (Data.Value.Action == "GetUserData") {
+                    ManageTrack.CallGetUserData(this._MyApp,  Socket, User, UserId)
+                } else if (Data.Value.Action == "Delete"){
+                    ManageTrack.CallDeleteTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "Add"){
                     this.AddTrack(Data.Value, Socket, User, UserId)
                 } else if (Data.Value.Action == "Update"){
                     ManageTrack.CallUpdateTrack(Data.Value.Data, this._MyApp, Socket, User, UserId)
                 } else if (Data.Value.Action == "Download"){
-                    this.DownloadTrack(Data.Value.Data, Socket, User, UserId)
+                    ManageTrack.CallDownloadTrack(Data.Value.Data,this._MyApp,  Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
@@ -353,25 +355,6 @@ class GeoXServer{
     }
 
     /**
-     * Delete d'une track
-     * @param {Object} Value {Data: Id of track to delete, FromCurrentView: name of the current view}
-     * @param {Socket} Socket SocketIO
-     * @param {String} User Nom du user
-     * @param {String} UserId Id du user
-     */
-    DeleteTrack(Value, Socket, User, UserId){
-        this._Mongo.DeleteByIdPromise(Value.Data, this._MongoTracksCollection.Collection).then((reponse)=>{
-            // Log
-            this._MyApp.LogAppliInfo("Track deleted", User, UserId)
-            // Load App Data
-            this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
-        },(erreur)=>{
-            this._MyApp.LogAppliError("GeoXServerApi DeleteTrack DB error : " + erreur, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi DeleteTrack error")
-        })
-    }
-
-    /**
      * 
      * @param {Object} Value {Data: DataTrack to add, FromCurrentView: name of the current view}
      * @param {Socket} Socket SocketIO
@@ -449,76 +432,43 @@ class GeoXServer{
      * @param {String} User Nom du user
      * @param {String} UserId Id du user
      */
-    UpdateTrack(Value, Socket, User, UserId){
-        let Track = Value.Data
-        let DataToDb = new Object()
-        if(Track.Name){DataToDb[this._MongoTracksCollection.Name]= Track.Name}
-        if(Track.Group){DataToDb[this._MongoTracksCollection.Group]= Track.Group}
-        DataToDb[this._MongoTracksCollection.Public]= Track.Public
-        if (Track.Color){DataToDb[this._MongoTracksCollection.Color]= Track.Color}
+    // UpdateTrack(Value, Socket, User, UserId){
+    //     let Track = Value.Data
+    //     let DataToDb = new Object()
+    //     if(Track.Name){DataToDb[this._MongoTracksCollection.Name]= Track.Name}
+    //     if(Track.Group){DataToDb[this._MongoTracksCollection.Group]= Track.Group}
+    //     DataToDb[this._MongoTracksCollection.Public]= Track.Public
+    //     if (Track.Color){DataToDb[this._MongoTracksCollection.Color]= Track.Color}
         
-        this._Mongo.UpdateByIdPromise(Track.Id, DataToDb, this._MongoTracksCollection.Collection).then((reponse)=>{
-            if (reponse.matchedCount == 0){
-                this._MyApp.LogAppliError("GeoXServerApi UpdateTrack Track Id not found", User, UserId)
-                Socket.emit("GeoXError", "GeoXServerApi UpdateTrack Track Id not found")
-            } else {
-                // Log
-                this._MyApp.LogAppliInfo("Track Updated", User, UserId)
-                // Load App Data
-                if (Value.FromCurrentView != null){
-                    this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
-                }
-            }
-        },(erreur)=>{
-            this._MyApp.LogAppliError("GeoXServerApi UpdateTrack DB error : " + erreur, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi UpdateTrack DB error")
-        })
-    }
+    //     this._Mongo.UpdateByIdPromise(Track.Id, DataToDb, this._MongoTracksCollection.Collection).then((reponse)=>{
+    //         if (reponse.matchedCount == 0){
+    //             this._MyApp.LogAppliError("GeoXServerApi UpdateTrack Track Id not found", User, UserId)
+    //             Socket.emit("GeoXError", "GeoXServerApi UpdateTrack Track Id not found")
+    //         } else {
+    //             // Log
+    //             this._MyApp.LogAppliInfo("Track Updated", User, UserId)
+    //             // Load App Data
+    //             if (Value.FromCurrentView != null){
+    //                 this.LoadAppData(Value.FromCurrentView, Socket, User, UserId)
+    //             }
+    //         }
+    //     },(erreur)=>{
+    //         this._MyApp.LogAppliError("GeoXServerApi UpdateTrack DB error : " + erreur, User, UserId)
+    //         Socket.emit("GeoXError", "GeoXServerApi UpdateTrack DB error")
+    //     })
+    // }
 
     /**
      * Calcule la longeur en Km d'une track
      * @param {GeoJson} GeoJson GeoJson object de la track
      */
-    CalculateTrackLength(GeoJson){
-        var Turf = require('@turf/length').default
-        let distance = Math.round((Turf(GeoJson) + Number.EPSILON) * 1000) / 1000
-        return distance
-    }
+    // CalculateTrackLength(GeoJson){
+    //     var Turf = require('@turf/length').default
+    //     let distance = Math.round((Turf(GeoJson) + Number.EPSILON) * 1000) / 1000
+    //     return distance
+    // }
 
-    DownloadTrack(Value, Socket, User, UserId){
-        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
-        var Projection = {}
-        if (Value.Type == "gpx"){
-            Projection = { projection:{[this._MongoTracksCollection.GpxData]: 1}}
-        } else {
-            Projection = { projection:{[this._MongoTracksCollection.GeoJsonData]: 1}}
-        }
-        const Sort = {[this._MongoTracksCollection.Date]: -1}
-        const Querry = {'_id': new MongoObjectId(Value.Id)}
-        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                this._MyApp.LogAppliError("GeoXServerApi DownloadTrack Track Id not found", User, UserId)
-                Socket.emit("GeoXError", "GeoXServerApi DownloadTrack Track Id not found")
-            } else {
-                // Log
-                this._MyApp.LogAppliInfo("Track Downloaded", User, UserId)
-                let Data = new Object()
-                Data.Type = Value.Type
-                if (Value.Type == "gpx"){
-                    Data.File = reponse[0][this._MongoTracksCollection.GpxData]
-                } else {
-                    Data.File = JSON.stringify(reponse[0][this._MongoTracksCollection.GeoJsonData])
-                }
-                
-                // Send tracks
-                Socket.emit("DownloadFile", Data)
-            }
-
-        },(erreur)=>{
-            this._MyApp.LogAppliError("GeoXServerApi DownloadTrack DB error : " + erreur, User, UserId)
-            Socket.emit("GeoXError", "GeoXServerApi DownloadTrack DB error")
-        })
-    }
+    
 
     /**
      * Fonction executee lors d'un appel a la route GET getmap
