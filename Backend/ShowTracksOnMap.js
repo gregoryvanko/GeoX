@@ -33,7 +33,7 @@ async function CallGetUserData(MyApp, Socket, User, UserId){
             }
             // Calcul des point extérieur et du centre de toutes les tracks
             if (Data.AppInitMapData.ListOfTracks.length != 0){
-                let MinMax = MinMaxOfTracks(Data.AppInitMapData.ListOfTracks)
+                let MinMax = Shared.MinMaxOfTracks(Data.AppInitMapData.ListOfTracks)
                 Data.AppInitMapData.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
                 Data.AppInitMapData.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
                 Data.AppInitMapData.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
@@ -52,42 +52,6 @@ async function CallGetUserData(MyApp, Socket, User, UserId){
     }
 }
 
-
-/**
- * Calcul le lat et long min et max de toutes les tracks
- * @param {Array} ListOfTracks liste de toutes les tracks
- */
-function MinMaxOfTracks(ListOfTracks){
-    let reponse = new Object()
-    reponse.MinLat = null
-    reponse.MaxLat = null
-    reponse.MinLong = null
-    reponse.MaxLong = null
-    ListOfTracks.forEach(element => {
-        if(reponse.MinLat == null){
-            reponse.MinLat = element.ExteriorPoint.MinLat
-        } else {
-            if(element.ExteriorPoint.MinLat < reponse.MinLat){reponse.MinLat = element.ExteriorPoint.MinLat}
-        }
-        if(reponse.MaxLat == null){
-            reponse.MaxLat = element.ExteriorPoint.MaxLat
-        } else {
-            if(element.ExteriorPoint.MaxLat > reponse.MaxLat){reponse.MaxLat = element.ExteriorPoint.MaxLat}
-        }
-        if(reponse.MinLong == null){
-            reponse.MinLong = element.ExteriorPoint.MinLong
-        } else {
-            if(element.ExteriorPoint.MinLong < reponse.MinLong){reponse.MinLong = element.ExteriorPoint.MinLong}
-        }
-        if(reponse.MaxLong == null){
-            reponse.MaxLong = element.ExteriorPoint.MaxLong
-        } else {
-            if(element.ExteriorPoint.MaxLong > reponse.MaxLong){reponse.MaxLong = element.ExteriorPoint.MaxLong}
-        }
-    });
-    return reponse
-}
-
 async function CallGetMapData(GroupName, MyApp, Socket, User, UserId){
     // Build Tracks Data
     let Data = new Object()
@@ -101,7 +65,7 @@ async function CallGetMapData(GroupName, MyApp, Socket, User, UserId){
         Data.ListOfTracks = ReponseListOfTracks.Data
         // Calcul des point extérieur et du centre de toutes les tracks
         if (Data.ListOfTracks.length != 0){
-            let MinMax = MinMaxOfTracks(Data.ListOfTracks)
+            let MinMax = Shared.MinMaxOfTracks(Data.ListOfTracks)
             Data.CenterPoint.Long = (MinMax.MinLat + MinMax.MaxLat)/2
             Data.CenterPoint.Lat = (MinMax.MinLong + MinMax.MaxLong)/2
             Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
@@ -123,9 +87,6 @@ async function CallUpdateTrack(Track, MyApp, Socket, User, UserId){
     let Shared = require("./Shared")
     let ReponseUpdateTrack = await Shared.PromiseUpdateTrack(Track, MyApp)
     if(ReponseUpdateTrack.Error){
-        MyApp.LogAppliError(ReponseUpdateTrack.ErrorMsg, User, UserId)
-        Socket.emit("GeoXError", ReponseUpdateTrack.ErrorMsg)
-    } else {
         MyApp.LogAppliError(ReponseUpdateTrack.ErrorMsg, User, UserId)
         Socket.emit("GeoXError", ReponseUpdateTrack.ErrorMsg)
     }

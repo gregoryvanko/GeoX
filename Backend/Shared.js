@@ -308,8 +308,44 @@ function PromiseGetAllTracksInfo(MyApp, User){
     })
 }
 
+/**
+ * Calcul le lat et long min et max de toutes les tracks
+ * @param {Array} ListOfTracks liste de toutes les tracks
+ */
+function MinMaxOfTracks(ListOfTracks){
+    let reponse = new Object()
+    reponse.MinLat = null
+    reponse.MaxLat = null
+    reponse.MinLong = null
+    reponse.MaxLong = null
+    ListOfTracks.forEach(element => {
+        if(reponse.MinLat == null){
+            reponse.MinLat = element.ExteriorPoint.MinLat
+        } else {
+            if(element.ExteriorPoint.MinLat < reponse.MinLat){reponse.MinLat = element.ExteriorPoint.MinLat}
+        }
+        if(reponse.MaxLat == null){
+            reponse.MaxLat = element.ExteriorPoint.MaxLat
+        } else {
+            if(element.ExteriorPoint.MaxLat > reponse.MaxLat){reponse.MaxLat = element.ExteriorPoint.MaxLat}
+        }
+        if(reponse.MinLong == null){
+            reponse.MinLong = element.ExteriorPoint.MinLong
+        } else {
+            if(element.ExteriorPoint.MinLong < reponse.MinLong){reponse.MinLong = element.ExteriorPoint.MinLong}
+        }
+        if(reponse.MaxLong == null){
+            reponse.MaxLong = element.ExteriorPoint.MaxLong
+        } else {
+            if(element.ExteriorPoint.MaxLong > reponse.MaxLong){reponse.MaxLong = element.ExteriorPoint.MaxLong}
+        }
+    });
+    return reponse
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
 module.exports.PromiseGetTracksData = PromiseGetTracksData
 module.exports.PromiseGetAllTracksInfo = PromiseGetAllTracksInfo
+module.exports.MinMaxOfTracks = MinMaxOfTracks

@@ -99,7 +99,27 @@ function CallDeleteTrack(Id, MyApp, Socket, User, UserId){
     })
 }
 
+/**
+ * 
+ * @param {Object} Track Track to add
+ * @param {Socket} Socket SocketIO
+ * @param {String} User Nom du user
+ * @param {String} UserId Id du user
+ */
+function CallAddTrack(Track, MyApp, Socket, User, UserId){
+    let Shared = require("./Shared")
+    let ReponseAddTrack = Shared.PromiseAddTrack(Track, MyApp, User)
+    if(ReponseAddTrack.Error){
+        MyApp.LogAppliError(ReponseAddTrack.ErrorMsg, User, UserId)
+        Socket.emit("GeoXError", ReponseAddTrack.ErrorMsg)
+    } else {
+        CallGetUserData(MyApp, Socket, User, UserId)
+        MyApp.LogAppliInfo("New track saved from a Add track", User, UserId)
+    }
+}
+
 module.exports.CallUpdateTrack = CallUpdateTrack
 module.exports.CallGetUserData = CallGetUserData
 module.exports.CallDownloadTrack = CallDownloadTrack
 module.exports.CallDeleteTrack = CallDeleteTrack
+module.exports.CallAddTrack = CallAddTrack
