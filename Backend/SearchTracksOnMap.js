@@ -102,6 +102,7 @@ function PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User){
                 TrackData.Length = reponse[0].Length
                 TrackData.Center = reponse[0].Center
                 TrackData.Public = Public
+                TrackData.StartPoint = reponse[0].StartPoint
                 Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
                     ReponseSaveTrack.Error = false
                     resolve(ReponseSaveTrack)

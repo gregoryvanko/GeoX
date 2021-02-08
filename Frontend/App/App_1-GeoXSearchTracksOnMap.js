@@ -40,6 +40,7 @@ class GeoXSearchTracksOnMap {
     Initiation(){
         // Show Action Button
         GlobalDisplayAction('On')
+        GlobalClearActionList(this.DeleteMap.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // SocketIO
