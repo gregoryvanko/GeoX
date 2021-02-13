@@ -174,8 +174,8 @@ class GeoXSearchTracksOnMap {
             this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this.TrackInfoBoxShow.bind(this), "ButtonShowTrackInfo"))
             // show boutton action set track info visible
             this.SetButtonShowTrackInfoVisible(true)
-            // Add Close button
-            DivTrackInfoBox.appendChild(CoreXBuild.Button ("&#x21E6", this.TrackInfoBoxHide.bind(this), "ButtonClose", ""))
+            // Add Close Panel Panel button
+            DivTrackInfoBox.appendChild(CoreXBuild.Button (`<img src="${Icon.ClosePanel()}" alt="icon" width="30" height="30">`, this.TrackInfoBoxHide.bind(this), "ButtonClosePanel", ""))
             // Div empty
             DivTrackInfoBox.appendChild(CoreXBuild.Div("", "", "height:4vh;"))
         } else {
@@ -306,26 +306,13 @@ class GeoXSearchTracksOnMap {
         let South = this._Map.getBounds().pad(this._MapBoundPadding).getSouth()
         let West = this._Map.getBounds().pad(this._MapBoundPadding).getWest()
         let East = this._Map.getBounds().pad(this._MapBoundPadding).getEast()
-        let ScreenY = North - South
-        let ScreenX = East - West
 
         let TrackNorth = Track.ExteriorPoint.MaxLong
         let TrackSouth = Track.ExteriorPoint.MinLong
         let TrackWest = Track.ExteriorPoint.MinLat
         let TrackEast = Track.ExteriorPoint.MaxLat
-        let TrackY = TrackNorth - TrackSouth
-        let TrackX = TrackEast - TrackWest
-
-        let DivScreenTrackY = ScreenY - TrackY
-        let DivScreenTrackX = ScreenX - TrackX
 
         let min = 0
-        if (DivScreenTrackY < DivScreenTrackX){
-            min = DivScreenTrackY
-        } else {
-            min = DivScreenTrackX
-        }
-
         if((North - TrackNorth) < 0){min = -1}
         if((East - TrackEast) < 0){min = -2}
         if((South - TrackSouth) > 0){min = -3}
@@ -367,7 +354,7 @@ class GeoXSearchTracksOnMap {
 
     SetTrackOnMap(Track){
         let MinDistance = this.CalculMinDistanceBetweenTrackBoundAndScreen(Track) 
-        if ((MinDistance > 0.009) || (MinDistance < 0)){
+        if (MinDistance < 0){
             // Execute FitBound and after shox track
             this.FitboundOnTrack(Track)
         } else {
@@ -378,7 +365,7 @@ class GeoXSearchTracksOnMap {
 
     FitboundOnTrack(Track){
         let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
-        this._Map.flyToBounds(FitboundTrack,{'duration':2})
+        this._Map.flyToBounds(FitboundTrack,{'duration':1})
         let me = this
         this._Map.once('moveend', function(){
             me.DrawTrack(Track)

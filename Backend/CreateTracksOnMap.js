@@ -37,7 +37,7 @@ function CallSaveTrack(Track, MyApp, Socket, User, UserId){
     } else {
         //Send Data
         let MyReponse = new Object()
-        MyReponse.Action = "MapSaved"
+        MyReponse.Action = "TrackSaved"
         MyReponse.Data = null
         Socket.emit("CreateTracksOnMap", MyReponse)
         MyApp.LogAppliInfo("New track saved from a created track", User, UserId)

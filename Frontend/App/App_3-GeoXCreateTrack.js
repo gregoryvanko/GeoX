@@ -57,16 +57,11 @@ class GeoXCreateTrack {
         } else if (Value.Action == "SetMapData" ){
             this._DataMap = Value.Data
             this.ModifyTracksOnMap()
-        } else if (Value.Action == "MapSaved" ){
+        } else if (Value.Action == "TrackSaved" ){
             // Delete Map
             this.DeleteMap()
-            // Clear view
-            this._DivApp.innerHTML=""
-            // Add conteneur
-            let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
-            this._DivApp.appendChild(Conteneur)
-            // Add Error Text
-            Conteneur.appendChild(CoreXBuild.DivTexte("Map Saved.","","Text", "text-align: center; margin-top: 20vh;"))
+            // Go To Home
+            GlobalStart()
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -605,7 +600,7 @@ class GeoXCreateTrack {
 
     SaveTrack(){
         var latlngs = this._Polyline.getLatLngs();
-            if (latlngs.length > 0){
+        if (latlngs.length > 0){
             var timestamp = new Date().toLocaleString('fr-BE');
             var gpxtrack = `
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
