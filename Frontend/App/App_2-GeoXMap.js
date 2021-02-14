@@ -33,7 +33,7 @@ class GeoXMap {
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         // Track style
-        this._WeightTrack = (L.Browser.mobile) ? 10 : 3
+        this._WeightTrack = (L.Browser.mobile) ? 5 : 3
     }
 
     Initiation(){
@@ -477,7 +477,7 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": this._WeightTrack
                     };
-                    let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: (L.Browser.mobile) ? 5 : 3});}).addTo(this._LayerGroup)
+                    let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack});}).addTo(this._LayerGroup)
                     layerTrack1.id = Track._id
                     layerTrack1.Type= "Track"
                     // Get Start and end point
@@ -568,7 +568,7 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": me._WeightTrack
                     };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color)).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e){e.target.setStyle({weight:(L.Browser.mobile) ? 5 : 3});}).addTo(me._LayerGroup)
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color)).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e){e.target.setStyle({weight:me._WeightTrack});}).addTo(me._LayerGroup)
                     layerTrack1.id = Track._id
                     layerTrack1.Type= "Track"
                     // Get Start and end point
@@ -633,7 +633,11 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": this._WeightTrack
                     };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: (L.Browser.mobile) ? 5 : 3});}).addTo(me._LayerGroup)
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}})
+                    .bindPopup(Track.Name)
+                    .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
+                    .on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack});})
+                    .addTo(this._LayerGroup)
                     layerTrack1.id = Track._id
                     layerTrack1.Type= "Track"
                     // Get Start and end point
@@ -641,12 +645,12 @@ class GeoXMap {
                     var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
                     var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
                     // Marker Start
-                    var MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption}).addTo(me._LayerGroup)
+                    var MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption}).addTo(this._LayerGroup)
                     MarkerStart.id = Track._id + "start"
                     MarkerStart.Type = "Marker"
                     MarkerStart.dragging.disable();
                     // Marker End
-                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(me._LayerGroup)
+                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._LayerGroup)
                     MarkerEnd.id = Track._id + "end"
                     MarkerEnd.Type = "Marker"
                     MarkerEnd.dragging.disable();
@@ -671,7 +675,7 @@ class GeoXMap {
                             "color": Track.Color,
                             "weight": this._WeightTrack
                         };
-                        let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: (L.Browser.mobile) ? 5 : 3});}).addTo(me._LayerGroup)
+                        let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack});}).addTo(me._LayerGroup)
                         layerTrack1.id = Track._id
                         layerTrack1.Type= "Track"
                         // Get Start and end point

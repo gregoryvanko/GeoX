@@ -110,7 +110,7 @@ function BuildHtmlGetMap(DataMap){
                     // Style for tracks
                     var TrackWeight = 3
                     if (L.Browser.mobile){
-                        TrackWeight = 6
+                        TrackWeight = 5
                     }
                     var TrackStyle = {
                         "color": Track.Color,

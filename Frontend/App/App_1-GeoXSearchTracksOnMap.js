@@ -14,7 +14,7 @@ class GeoXSearchTracksOnMap {
         this._Map = null
         this._TrackGroup = null
         this._MyGroups = []
-        this._WeightTrack = (L.Browser.mobile) ? 10 : 3
+        this._WeightTrack = (L.Browser.mobile) ? 5 : 3
         this._TrackStyle = {"color": "blue", "weight": this._WeightTrack}
         this._Arrowheads = {frequency: '100px', size: '15m', fill: true}
         this._IconPointOption = L.icon({
