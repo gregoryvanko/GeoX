@@ -58,6 +58,8 @@ class GeoXCreateTrack {
             this._DataMap = Value.Data
             this.ModifyTracksOnMap()
         } else if (Value.Action == "TrackSaved" ){
+            // Delete save window
+            CoreXWindow.DeleteWindow()
             // Delete Map
             this.DeleteMap()
             // Go To Home
@@ -599,13 +601,58 @@ class GeoXCreateTrack {
     }
 
     SaveTrack(){
-        var latlngs = this._Polyline.getLatLngs();
+        let latlngs = this._Polyline.getLatLngs();
         if (latlngs.length > 0){
-            var timestamp = new Date().toLocaleString('fr-BE');
-            var gpxtrack = `
+            // Build save window
+            let Contener = CoreXBuild.DivFlexColumn("Conteneur")
+            // Titre
+            Contener.appendChild(CoreXBuild.DivTexte("Save Track", "", "Titre", ""))
+            // Input Name
+            Contener.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName",this._TrackName, "Input Text", "text", "Name",))
+            // Input `Group
+            Contener.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup","Planned", "Input Text", "text", "Group",))
+            // Toggle Public
+            let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+            Contener.appendChild(DivTooglePublic)
+            DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
+            DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
+            // Button save
+            Contener.appendChild(CoreXBuild.Button("Save",this.SendSaveTrack.bind(this),"Text Button"))
+            // Build window
+            CoreXWindow.BuildWindow(Contener)
+            // Add AutoComplete
+            let me = this
+            document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
+            autocomplete({
+                input: document.getElementById("InputTrackGroup"),
+                minLength: 1,
+                emptyMsg: 'No suggestion',
+                fetch: function(text, update) {
+                    text = text.toLowerCase();
+                    var GroupFiltred = me._UserGroup.filter(n => n.toLowerCase().startsWith(text))
+                    var suggestions = []
+                    GroupFiltred.forEach(element => {
+                        var MyObject = new Object()
+                        MyObject.label = element
+                        suggestions.push(MyObject)
+                    });
+                    update(suggestions);
+                },
+                onSelect: function(item) {
+                    document.getElementById("InputTrackGroup").value = item.label;
+                }
+            });
+        }
+    }
+
+    SendSaveTrack(){
+        if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            let latlngs = this._Polyline.getLatLngs();
+            let timestamp = new Date().toLocaleString('fr-BE');
+            let gpxtrack = `
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
     <gpx xmlns="https://www.topografix.com/GPX/1/1"  creator="vanko.be" version="1.1" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd">
-        <trk><name>${this._TrackName} ${timestamp}</name>
+        <trk><name>${document.getElementById("InputTrackName").value} ${timestamp}</name>
             <trkseg>`
             for (var i = 0; i < latlngs.length; i++) {
                 gpxtrack += `
@@ -615,18 +662,22 @@ class GeoXCreateTrack {
             </trkseg>
         </trk>
     </gpx>`
-            let Track = new Object()
-            Track.Name = this._TrackName
-            Track.Group = "Plannifié"
-            Track.MultiToOneLine = false
-            Track.FileContent = gpxtrack
-            Track.Public = true
+            
             // Data to send
+            let Track = new Object()
+            Track.Name = document.getElementById("InputTrackName").value 
+            Track.Group = document.getElementById("InputTrackGroup").value 
+            Track.MultiToOneLine = true
+            Track.FileContent = gpxtrack
+            Track.Public = document.getElementById("TogglePublic").checked
             let CallToServer = new Object()
             CallToServer.Action = "SaveTrack"
             CallToServer.Data = Track
             GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+        } else {
+            alert("Enter a name and a group before updating a track")
         }
+        
     }
 
     async GetRoute(PointA, PointB){

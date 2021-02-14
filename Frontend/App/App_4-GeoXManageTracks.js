@@ -73,7 +73,10 @@ class GeoXManageTracks {
         let AppConteneur = CoreXBuild.Div("AppConteneur", "AppConteneur", "")
         Contener.appendChild(AppConteneur)
         // Boutton Add Track
-        AppConteneur.appendChild(CoreXBuild.Button("Add Track",this.LoadViewAddTrack.bind(this,this._AppGroup),"Text Button ButtonTop"))
+        let ConteneurButton = CoreXBuild.DivFlexRowAr("ConteneurButton")
+        ConteneurButton.style.marginTop = "2vh"
+        AppConteneur.appendChild(ConteneurButton)
+        ConteneurButton.appendChild(CoreXBuild.Button("Add Track",this.LoadViewAddTrack.bind(this,this._AppGroup),"Text Button ButtonTop"))
         // Div pour le titre des colonnes
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         AppConteneur.appendChild(BoxTitre)

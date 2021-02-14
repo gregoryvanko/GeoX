@@ -74,12 +74,12 @@
 }
 
 .DivBoxTracks{
-    width: 48vh;
+    width: 30vw;
     max-width: 280px;
     height: 66vh;
     position: fixed;
     z-index: 998; 
-    left: -26%; 
+    left: -30vw; 
     top: 15vh; 
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 15px;
