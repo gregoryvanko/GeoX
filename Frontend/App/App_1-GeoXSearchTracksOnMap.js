@@ -243,14 +243,13 @@ class GeoXSearchTracksOnMap {
                     DivTrackInfoBox.append(DivBoxTrackInfoConteneur)
                     DivBoxTrackInfoConteneur.classList.add("DivBoxTrackInfo")
                     DivBoxTrackInfoConteneur.style.cursor = "pointer"
-                    //DivBoxTrackInfoConteneur.style.boxSizing= "border-box"
                     DivBoxTrackInfoConteneur.addEventListener('click', this.ToogleOneTrackOnMap.bind(this, Marker._id))
                     // Nom de la track
                     DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Marker.Name,"","TextTrackInfo", "color: white; width: 40%; margin-left: 2%;"))
                     // Longeur de la track
                     DivBoxTrackInfoConteneur.appendChild(CoreXBuild.DivTexte(Marker.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; width: 30%; margin-left: 1vh;"))
                     // Save Marker
-                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${Icon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveTrackToMyTracks.bind(this, Marker._id), "ButtonIcon"))
+                    DivBoxTrackInfoConteneur.appendChild(CoreXBuild.Button (`<img src="${Icon.SaveBlack()}" alt="icon" width="20" height="20">`, this.ClickSaveTrackToMyTracks.bind(this, Marker._id), "ButtonIcon"))
                 }
             });
             if (NoTraclShowed){

@@ -616,8 +616,17 @@ class GeoXCreateTrack {
             Contener.appendChild(DivTooglePublic)
             DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
             DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
+
+            // Div Button
+            let DivButton = CoreXBuild.DivFlexRowAr("")
+            Contener.appendChild(DivButton)
             // Button save
-            Contener.appendChild(CoreXBuild.Button("Save",this.SendSaveTrack.bind(this),"Text Button"))
+            DivButton.appendChild(CoreXBuild.Button("Save",this.SendSaveTrack.bind(this),"Text Button ButtonWidth30", "Save"))
+            // Button cancel
+            DivButton.appendChild(CoreXBuild.Button("Cancel",this.CancelSaveTrack.bind(this),"Text Button ButtonWidth30", "Cancel"))
+            // Empty space
+            Contener.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+
             // Build window
             CoreXWindow.BuildWindow(Contener)
             // Add AutoComplete
@@ -678,6 +687,10 @@ class GeoXCreateTrack {
             alert("Enter a name and a group before updating a track")
         }
         
+    }
+
+    CancelSaveTrack(){
+        CoreXWindow.DeleteWindow()
     }
 
     async GetRoute(PointA, PointB){
