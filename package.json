@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/gregoryvanko/GeoX#readme",
   "dependencies": {
-    "@gregvanko/corex": "^4.81.0",
+    "@gregvanko/corex": "^4.82.0",
     "@mapbox/togeojson": "^0.16.0",
     "@turf/length": "^6.3.0",
     "@turf/turf": "^6.3.0"

@@ -171,7 +171,7 @@ class GeoXSearchTracksOnMap {
         let DivTrackInfoBox = CoreXBuild.Div("DivTrackInfoBox", "DivBoxTracks", "padding: 1vh; -webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box;")
         if (L.Browser.mobile){
             // Ajout du bouton action left
-            this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this.TrackInfoBoxShow.bind(this), "ButtonShowTrackInfo"))
+            this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this.TrackInfoBoxShow.bind(this), "ButtonShowTrackInfo", `<img src="${Icon.OpenPanel()}" alt="icon" width="25" height="25">`))
             // show boutton action set track info visible
             this.SetButtonShowTrackInfoVisible(true)
             // Add Close Panel Panel button
