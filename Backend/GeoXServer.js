@@ -93,6 +93,16 @@ class GeoXServer{
     }
 
     /**
+     * Fonction executee lors d'un appel a la route GET Home
+     * @param {req} req request html GET
+     * @param {res} res response html GET
+     */
+    RouteGetHome(req, res){
+        let MyRouteGetHome = require("./RouteGetHome")
+        MyRouteGetHome.CallRouteGetHome(req, res, this._MyApp)
+    }
+
+    /**
      * Fonction executee lors d'un appel a la route GET getmap
      * @param {req} req request html GET
      * @param {res} res response html GET
