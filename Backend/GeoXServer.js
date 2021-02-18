@@ -132,5 +132,12 @@ class GeoXServer{
             })           
         })
     }
+
+    GetSplashScreen(){
+        let fs = require('fs')
+        let HtmlString = fs.readFileSync(__dirname + "/SplashScreen.html", 'utf8')
+        HtmlString = HtmlString.replace(/\r?\n|\r/g, " ")
+        return HtmlString
+    }
 }
 module.exports.GeoXServer = GeoXServer

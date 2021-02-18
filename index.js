@@ -57,6 +57,9 @@ class GeoX {
        // App link
        this._MyApp.AppLink = "App"
 
+       // Splash Screen
+       this._MyApp.SplashScreen = this._GeoXServer.GetSplashScreen()
+
        // Function to execute when a user is deleted
        this._MyApp.OnDeleteUser = this._GeoXServer.OnDeleteUser.bind(this._GeoXServer)
 
