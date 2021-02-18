@@ -176,7 +176,7 @@ class GeoXManageTracks {
 
     LoadViewLink(TrackId, IsCoreXWindow){
         if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
-        alert(window.location.href + "getmap/?trackid=" + TrackId)
+        alert(window.location.origin + "/getmap/?trackid=" + TrackId)
     }
 
     LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup, Public, IsCoreXWindow){
