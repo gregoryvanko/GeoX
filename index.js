@@ -59,6 +59,7 @@ class GeoX {
 
        // Splash Screen
        this._MyApp.SplashScreen = this._GeoXServer.GetSplashScreen()
+       this._MyApp.SplashScreenBackgroundColor = "Black"
 
        // Function to execute when a user is deleted
        this._MyApp.OnDeleteUser = this._GeoXServer.OnDeleteUser.bind(this._GeoXServer)
