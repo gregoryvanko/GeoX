@@ -477,7 +477,7 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": this._WeightTrack
                     };
-                    let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack});}).addTo(this._LayerGroup)
+                    let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack});}).addTo(this._LayerGroup)
                     layerTrack1.id = Track._id
                     layerTrack1.Type= "Track"
                     // Get Start and end point
@@ -568,7 +568,7 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": me._WeightTrack
                     };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color)).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e){e.target.setStyle({weight:me._WeightTrack});}).addTo(me._LayerGroup)
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '100px', size: '15m', fill: true}}).bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color)).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e){e.target.setStyle({weight:me._WeightTrack});}).addTo(me._LayerGroup)
                     layerTrack1.id = Track._id
                     layerTrack1.Type= "Track"
                     // Get Start and end point
@@ -633,7 +633,7 @@ class GeoXMap {
                         "color": Track.Color,
                         "weight": this._WeightTrack
                     };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}})
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '80px', size: '18m', fill: true}})
                     .bindPopup(Track.Name)
                     .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
                     .on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack});})
@@ -675,7 +675,7 @@ class GeoXMap {
                             "color": Track.Color,
                             "weight": this._WeightTrack
                         };
-                        let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack});}).addTo(me._LayerGroup)
+                        let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '80px', size: '18m', fill: true}}).bindPopup(Track.Name).on('mouseover', function(e) {e.target.setStyle({weight: 8})}).on('mouseout', function (e) {e.target.setStyle({weight: this._WeightTrack});}).addTo(me._LayerGroup)
                         layerTrack1.id = Track._id
                         layerTrack1.Type= "Track"
                         // Get Start and end point

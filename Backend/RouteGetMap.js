@@ -131,7 +131,7 @@ function BuildHtmlGetMap(DataMap){
                         popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
                     });
                     // Add track
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(MyLayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
+                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '80px', size: '18m', fill: true}}).addTo(MyLayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
                     layerTrack1.id = Track._id
                     // Get Start and end point
                     var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;

@@ -373,7 +373,7 @@ class GeoXSearchTracksOnMap {
 
     DrawTrack(Track){
         let WeightTrack = this._WeightTrack
-        var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: this._TrackStyle, arrowheads: this._Arrowheads})
+        var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: this._TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: this._Arrowheads})
         .bindPopup(this.BuildPopupContentTrack(Track))
         .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
         .on('mouseout', function (e) {e.target.setStyle({weight: WeightTrack });})

@@ -766,7 +766,7 @@ class GeoXCreateTrack {
                 "weight": TrackWeight
             };
             // Add track
-            var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(this._LayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
+            var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(this._LayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
             layerTrack1.id = Track._id
             // Get Start and end point
             var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
