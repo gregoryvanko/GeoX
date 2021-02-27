@@ -114,7 +114,7 @@ function CallAddTrack(Track, MyApp, Socket, User, UserId){
         Socket.emit("GeoXError", ReponseAddTrack.ErrorMsg)
     } else {
         CallGetUserData(MyApp, Socket, User, UserId)
-        MyApp.LogAppliInfo("New track saved from a Add track", User, UserId)
+        MyApp.LogAppliInfo("New track saved from a Added track", User, UserId)
     }
 }
 

@@ -71,7 +71,7 @@ async function CallSaveTrack(TrackId, Name, Group, Public, MyApp, Socket, User, 
         MyApp.LogAppliError("CallSaveTrack error: " + ReponseSaveTrack.ErrorMsg, User, UserId)
         Socket.emit("GeoXError", "CallSaveTrack error: " + ReponseSaveTrack.ErrorMsg)
     } else {
-        MyApp.LogAppliInfo("New track saved from existing track", User, UserId)
+        MyApp.LogAppliInfo("New track saved from an existing track", User, UserId)
     }
 }
 

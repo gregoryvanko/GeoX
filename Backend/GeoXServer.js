@@ -18,7 +18,9 @@ class GeoXServer{
     Api(Data, Socket, User, UserId){
         // On Log tout sauve quand on fait un Add Track
         if ((Data.Value.Action != "SaveTrack") && (Data.Value.Action != "Add")){
-            this._MyApp.LogAppliInfo("SoApi Data:" + JSON.stringify(Data), User, UserId)
+            this._MyApp.LogAppliInfo("SoApi Data: " + JSON.stringify(Data), User, UserId)
+        } else {
+            this._MyApp.LogAppliInfo(`SoApi Data: {"Action":"${Data.Action}","Value":{"Action":"${Data.Value.Action}"}}`, User, UserId)
         }
         switch (Data.Action) {
             case "ShowTracksOnMap":
