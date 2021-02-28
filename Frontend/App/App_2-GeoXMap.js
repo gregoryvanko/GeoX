@@ -415,9 +415,9 @@ class GeoXMap {
         let DivBoxTracks = CoreXBuild.Div("DivBoxTracks", "DivBoxTracks", "")
         this._DivApp.appendChild(DivBoxTracks)
         // Add Close Panel button
-        DivBoxTracks.appendChild(CoreXBuild.Button (`<img src="${Icon.ClosePanel()}" alt="icon" width="30" height="30">`, this.HideTrackInfoBox.bind(this), "ButtonClosePanel", ""))
+        DivBoxTracks.appendChild(CoreXBuild.Button (`<img src="${Icon.ClosePanel()}" alt="icon" width="30" height="30">`, this.HideTrackInfoBox.bind(this), "ButtonTrackInfoBoxLeft", ""))
         // Add Hide all button
-        DivBoxTracks.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="30" height="30">`, this.ToogleTrack.bind(this, null), "ButtonHideAll", ""))
+        DivBoxTracks.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="30" height="30">`, this.ToogleTrack.bind(this, null), "ButtonTrackInfoBoxRight", ""))
         // Div empty
         DivBoxTracks.appendChild(CoreXBuild.Div("", "", "height:4vh;"))
         // Add all tracks of the group

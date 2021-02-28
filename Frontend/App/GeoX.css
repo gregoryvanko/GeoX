@@ -124,7 +124,7 @@
     align-items: center;
 }
 
-.ButtonClosePanel{
+.ButtonTrackInfoBoxLeft{
     outline: none;
     padding: 0px;
     cursor: pointer;
@@ -137,7 +137,7 @@
     margin: 0%;
 }
 
-.ButtonHideAll{
+.ButtonTrackInfoBoxRight{
     outline: none;
     padding: 0px;
     cursor: pointer;

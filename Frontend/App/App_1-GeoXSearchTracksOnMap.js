@@ -13,6 +13,7 @@ class GeoXSearchTracksOnMap {
         this._InitLong = "4.543413"
         this._Map = null
         this._TrackGroup = null
+        this._MarkersCluster = null
         this._MyGroups = []
         this._WeightTrack = (L.Browser.mobile) ? 5 : 3
         this._TrackStyle = {"color": "blue", "weight": this._WeightTrack}
@@ -139,6 +140,18 @@ class GeoXSearchTracksOnMap {
         L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(this._Map);
         // Add layer
         this._TrackGroup = L.layerGroup().addTo(this._Map)
+        // Build markerClusterGroup
+        this._MarkersCluster = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({ 
+                    html: cluster.getChildCount(), 
+                    className: 'mycluster', 
+                    iconSize: null 
+                });
+            }
+        });
+        // Ajout du markerClusterGroup a la map
+        this._Map.addLayer(this._MarkersCluster);
         // Map event
         this._Map.on('zoomend', this.TrackInfoBoxUpdate.bind(this))
         this._Map.on('dragend', this.TrackInfoBoxUpdate.bind(this))
@@ -175,13 +188,16 @@ class GeoXSearchTracksOnMap {
             // show boutton action set track info visible
             this.SetButtonShowTrackInfoVisible(true)
             // Add Close Panel Panel button
-            DivTrackInfoBox.appendChild(CoreXBuild.Button (`<img src="${Icon.ClosePanel()}" alt="icon" width="30" height="30">`, this.TrackInfoBoxHide.bind(this), "ButtonClosePanel", ""))
-            // Div empty
-            DivTrackInfoBox.appendChild(CoreXBuild.Div("", "", "height:4vh;"))
+            DivTrackInfoBox.appendChild(CoreXBuild.Button (`<img src="${Icon.ClosePanel()}" alt="icon" width="30" height="30">`, this.TrackInfoBoxHide.bind(this), "ButtonTrackInfoBoxLeft", ""))
         } else {
             // Show TrackInfoBox
             DivTrackInfoBox.classList.add("DivBoxTracksShow")
         }
+        // Add filter button
+        DivTrackInfoBox.appendChild(CoreXBuild.Button (`<img src="${Icon.Filter()}" alt="icon" width="30" height="30">`, this.FilterTrack.bind(this, null), "ButtonTrackInfoBoxRight", ""))
+        // Div empty
+        DivTrackInfoBox.appendChild(CoreXBuild.Div("", "", "height:4vh;"))
+        // Add content
         let DivTrackInfoBoxContent = CoreXBuild.Div("DivTrackInfoBoxContent", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:start; align-content:center; align-items: center; -webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box; width: 100%;")
         DivTrackInfoBox.appendChild(DivTrackInfoBoxContent)
         // Add text no Track
@@ -259,6 +275,12 @@ class GeoXSearchTracksOnMap {
         }
     }
 
+    FilterTrack(){
+        // Create filter view
+        // ToDo
+        this.CallServerGetMarkers()
+    }
+
     GetCornerOfMap(){
         let Corner = new Object()
         Corner.NW = this._Map.getBounds().pad(this._MapBoundPadding).getNorthWest()
@@ -279,23 +301,16 @@ class GeoXSearchTracksOnMap {
     }
 
     AddMarkerOnMap(){
-        // Build markerClusterGroup
-        let markersCluster = L.markerClusterGroup({
-            iconCreateFunction: function(cluster) {
-                return L.divIcon({ 
-                    html: cluster.getChildCount(), 
-                    className: 'mycluster', 
-                    iconSize: null 
-                });
-            }
-        });
+        // On delete les marker si ils existent
+        let me = this
+        this._MarkersCluster.eachLayer(function(layer) {
+            me._MarkersCluster.removeLayer(layer)
+        })
         // On affiche les marker
         this._ListeOfMarkers.forEach(Marker => {
             let newMarker = new L.marker([Marker.StartPoint.Lat, Marker.StartPoint.Lng], {icon: this._IconPointOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleOneTrackOnMap(Marker._id)}})
-            markersCluster.addLayer(newMarker);
+            this._MarkersCluster.addLayer(newMarker);
         });
-        // Ajout du markerClusterGroup a la map
-        this._Map.addLayer(markersCluster);
         // Hide waiting Box
         this.WaitingBoxHide()
     }
@@ -537,6 +552,7 @@ class GeoXSearchTracksOnMap {
             this._InitLat = "50.709446"
             this._InitLong = "4.543413"
             this._TrackGroup = null
+            this._MarkersCluster = null
             this._MyGroups = []
             // mettre le backgroundColor du body à Black pour la vue Iphone
             if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
