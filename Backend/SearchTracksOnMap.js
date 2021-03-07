@@ -13,8 +13,8 @@ async function CallGetUserGroup(MyApp, Socket, User, UserId){
     }
 }
 
-async function CallGetMarkers(MyApp, Socket, User, UserId){
-    let ReponseAllTracksInfo = await PromiseGetAllMarkers(MyApp)
+async function CallGetMarkers(Filter, MyApp, Socket, User, UserId){
+    let ReponseAllTracksInfo = await PromiseGetAllMarkers(Filter, MyApp, User)
     if(!ReponseAllTracksInfo.Error){
         // Delete identical tracks
         let UniqueMarkers = ReponseAllTracksInfo.Data.filter((v,i,a)=>a.findIndex(t=>(JSON.stringify(t.StartPoint) === JSON.stringify(v.StartPoint)))===i)
@@ -34,7 +34,7 @@ async function CallGetMarkers(MyApp, Socket, User, UserId){
     }
 }
 
-function PromiseGetAllMarkers(MyApp){
+function PromiseGetAllMarkers(Filter, MyApp, User){
     return new Promise(resolve => {
         let MongoR = require('@gregvanko/corex').Mongo
         Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
@@ -43,7 +43,14 @@ function PromiseGetAllMarkers(MyApp){
 
         let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
-        const Querry = {[MongoTracksCollection.Public]: true}
+        let Querry = {[MongoTracksCollection.Public]: true}
+        if (Filter != null){
+            if (Filter.HideMyTrack){
+                Querry = {$and:[{[MongoTracksCollection.Public]: true}, {[MongoTracksCollection.Owner]: { $ne: User }}, {[MongoTracksCollection.Length]: { $gte: parseInt(Filter.MinKm) }}, {[MongoTracksCollection.Length]: { $lte: parseInt(Filter.MaxKm) }}]}
+            } else {
+                Querry = {$and:[{[MongoTracksCollection.Public]: true}, {[MongoTracksCollection.Length]: { $gte: parseInt(Filter.MinKm) }}, {[MongoTracksCollection.Length]: { $lte: parseInt(Filter.MaxKm) }}]}
+            }
+        }
         const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.StartPoint]: 1}}
         Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){

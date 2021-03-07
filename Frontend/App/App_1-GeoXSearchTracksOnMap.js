@@ -36,6 +36,7 @@ class GeoXSearchTracksOnMap {
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
+        this._Filter = {HideMyTrack: false, MinKm: 0, MaxKm: 1000}
     }
 
     Initiation(){
@@ -292,7 +293,7 @@ class GeoXSearchTracksOnMap {
         let DivToogleHideMyTrack = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Conteneur.appendChild(DivToogleHideMyTrack)
         DivToogleHideMyTrack.appendChild(CoreXBuild.DivTexte("Hide my track:", "", "", ""))
-        DivToogleHideMyTrack.appendChild(CoreXBuild.ToggleSwitch("ToggleHideMyTrack", false))
+        DivToogleHideMyTrack.appendChild(CoreXBuild.ToggleSwitch("ToggleHideMyTrack", this._Filter.HideMyTrack))
         // Min Km
         let DivMinKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Conteneur.appendChild(DivMinKm)
@@ -321,11 +322,15 @@ class GeoXSearchTracksOnMap {
     GetMinMaxKm(Type){
         let reponse = null
         this._ListeOfMarkers.forEach(element => {
-            if (reponse == null){
-                reponse = element.Length.toFixed(0)
+            if (Type == "Min"){
+                if (reponse == null){
+                    reponse = Math.floor(element.Length)
+                } else {
+                    if (element.Length < reponse){reponse = Math.floor(element.Length)}
+                }
             } else {
-                if (Type == "Min"){
-                    if (element.Length < reponse){reponse = element.Length.toFixed(0)}
+                if (reponse == null){
+                    reponse = Math.round(element.Length)
                 } else {
                     if (element.Length > reponse){reponse = element.Length.toFixed(0)}
                 }
@@ -333,17 +338,21 @@ class GeoXSearchTracksOnMap {
         });
         // si pas de marker alors la reponse est = 0
         if (reponse == null){
-            reponse = 0
+            reponse = "0"
         }
         return reponse
     }
 
     SetFilter(){
+        let MinKm = document.getElementById("MinKm").value
+        let MaxKmCorrected = document.getElementById("MaxKm").value
+        if (parseInt(MaxKmCorrected) <= parseInt(MinKm)){MaxKmCorrected = parseInt(MinKm) + 1 }
         // Get all filter data
-        // ToDo
-
+        this._Filter.HideMyTrack = document.getElementById("ToggleHideMyTrack").checked
+        this._Filter.MinKm = MinKm
+        this._Filter.MaxKm = MaxKmCorrected.toString()
         // Call Get all Marker
-        //this.CallServerGetMarkers()
+        this.CallServerGetMarkers(this._Filter)
         // close window
         CoreXWindow.DeleteWindow()
     }
@@ -362,12 +371,13 @@ class GeoXSearchTracksOnMap {
         return Corner
     }
 
-    CallServerGetMarkers(){
+    CallServerGetMarkers(Filter = null){
         // Show waiting box
         this.WaitingBoxShow()
         // Data to send
         let CallToServer = new Object()
         CallToServer.Action = "GetMarkers"
+        CallToServer.Filter = Filter
         // Call Server
         GlobalSendSocketIo("GeoX", "SearchTracksOnMap", CallToServer)
     }
@@ -628,6 +638,7 @@ class GeoXSearchTracksOnMap {
             this._MyGroups = []
             // mettre le backgroundColor du body à Black pour la vue Iphone
             if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
+            this._Filter = {HideMyTrack: false, MinKm: 0, MaxKm: 1000}
         }
     }
 }

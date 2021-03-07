@@ -64,7 +64,7 @@ class GeoXServer{
                 if (Data.Value.Action == "GetUserGroup"){
                     SearchTracksOnMap.CallGetUserGroup(this._MyApp,  Socket, User, UserId)
                 } else if(Data.Value.Action == "GetMarkers"){
-                    SearchTracksOnMap.CallGetMarkers(this._MyApp,  Socket, User, UserId)
+                    SearchTracksOnMap.CallGetMarkers(Data.Value.Filter, this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "SaveTrack"){
                     SearchTracksOnMap.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, Data.Value.Public, this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "GetTrack"){
