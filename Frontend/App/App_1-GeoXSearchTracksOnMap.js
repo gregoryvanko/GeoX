@@ -57,8 +57,16 @@ class GeoXSearchTracksOnMap {
             this._MyGroups = Value.Data
             this.LoadView()
         } else if (Value.Action == "SetAllMarkers" ){
+            // On delete les marker si ils existent
+            let me = this
+            this._MarkersCluster.eachLayer(function(layer) {
+                me._MarkersCluster.removeLayer(layer)
+            })
+            // Save Marker
             this._ListeOfMarkers = Value.Data
+            // Update track info box
             this.TrackInfoBoxUpdate()
+            // Add marker
             this.AddMarkerOnMap()
         } else if(Value.Action == "SetTrack" ){
             this.SetTrackOnMap(Value.Data)
@@ -194,7 +202,7 @@ class GeoXSearchTracksOnMap {
             DivTrackInfoBox.classList.add("DivBoxTracksShow")
         }
         // Add filter button
-        DivTrackInfoBox.appendChild(CoreXBuild.Button (`<img src="${Icon.Filter()}" alt="icon" width="30" height="30">`, this.FilterTrack.bind(this, null), "ButtonTrackInfoBoxRight", ""))
+        DivTrackInfoBox.appendChild(CoreXBuild.Button (`<img src="${Icon.Filter()}" alt="icon" width="30" height="30">`, this.FilterTrackBox.bind(this, null), "ButtonTrackInfoBoxRight", ""))
         // Div empty
         DivTrackInfoBox.appendChild(CoreXBuild.Div("", "", "height:4vh;"))
         // Add content
@@ -275,10 +283,74 @@ class GeoXSearchTracksOnMap {
         }
     }
 
-    FilterTrack(){
+    FilterTrackBox(){
         // Create filter view
+        let Conteneur = CoreXBuild.DivFlexColumn("")
+        // Titre
+        Conteneur.appendChild(CoreXBuild.DivTexte("Filter", "", "Titre", "width:100%; text-align: center;"))
+        // Toogle Hide my track
+        let DivToogleHideMyTrack = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Conteneur.appendChild(DivToogleHideMyTrack)
+        DivToogleHideMyTrack.appendChild(CoreXBuild.DivTexte("Hide my track:", "", "", ""))
+        DivToogleHideMyTrack.appendChild(CoreXBuild.ToggleSwitch("ToggleHideMyTrack", false))
+        // Min Km
+        let DivMinKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Conteneur.appendChild(DivMinKm)
+        DivMinKm.appendChild(CoreXBuild.DivTexte("Min Distance (Km):", "", "", ""))
+        DivMinKm.appendChild(CoreXBuild.Input("MinKm", this.GetMinMaxKm("Min"), "Input", "width: 20%;", "number", "MinKm"))
+        // Max Km
+        let DivMaxKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Conteneur.appendChild(DivMaxKm)
+        DivMaxKm.appendChild(CoreXBuild.DivTexte("Max Distance (Km):", "", "", ""))
+        DivMaxKm.appendChild(CoreXBuild.Input("MaxKm", this.GetMinMaxKm("Max"), "Input", "width: 20%;", "number", "MaxKm"))
+        // Empty space
+        Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Div Button
+        let DivButton = CoreXBuild.DivFlexRowAr("")
+        Conteneur.appendChild(DivButton)
+        // Button save
+        DivButton.appendChild(CoreXBuild.Button("Save",this.SetFilter.bind(this),"Text Button ButtonWidth30", "Save"))
+        // Button cancel
+        DivButton.appendChild(CoreXBuild.Button("Cancel",this.CancelSetFilter.bind(this),"Text Button ButtonWidth30", "Cancel"))
+        // Empty space
+        Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Build window
+        CoreXWindow.BuildWindow(Conteneur)
+    }
+
+    GetMinMaxKm(Type){
+        let reponse = null
+        this._ListeOfMarkers.forEach(element => {
+            if (reponse == null){
+                reponse = element.Length.toFixed(0)
+            } else {
+                if (Type == "Min"){
+                    if (element.Length < reponse){reponse = element.Length.toFixed(0)}
+                } else {
+                    if (element.Length > reponse){reponse = element.Length.toFixed(0)}
+                }
+            }
+        });
+        // si pas de marker alors la reponse est = 0
+        if (reponse == null){
+            reponse = 0
+        }
+        return reponse
+    }
+
+    SetFilter(){
+        // Get all filter data
         // ToDo
-        this.CallServerGetMarkers()
+
+        // Call Get all Marker
+        //this.CallServerGetMarkers()
+        // close window
+        CoreXWindow.DeleteWindow()
+    }
+
+    CancelSetFilter(){
+        // close window
+        CoreXWindow.DeleteWindow()
     }
 
     GetCornerOfMap(){
