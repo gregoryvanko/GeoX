@@ -658,19 +658,17 @@ class GeoXCreateTrack {
         if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
             let latlngs = this._Polyline.getLatLngs();
             let timestamp = new Date().toLocaleString('fr-BE');
-            let gpxtrack = `
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-    <gpx xmlns="https://www.topografix.com/GPX/1/1"  creator="vanko.be" version="1.1" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd">
-        <trk><name>${document.getElementById("InputTrackName").value} ${timestamp}</name>
-            <trkseg>`
+            let gpxtrack = `<gpx xmlns="https://www.topografix.com/GPX/1/1"  creator="vanko.be" version="1.1" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd">
+    <trk><name>${document.getElementById("InputTrackName").value} ${timestamp}</name>
+        <trkseg>`
             for (var i = 0; i < latlngs.length; i++) {
                 gpxtrack += `
-                <trkpt lat="${latlngs[i].lat}" lon="${latlngs[i].lng}"></trkpt>`
+            <trkpt lat="${latlngs[i].lat}" lon="${latlngs[i].lng}"></trkpt>`
             }
             gpxtrack += `
-            </trkseg>
-        </trk>
-    </gpx>`
+        </trkseg>
+    </trk>
+</gpx>`
             
             // Data to send
             let Track = new Object()
