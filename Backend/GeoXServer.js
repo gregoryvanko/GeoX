@@ -82,7 +82,10 @@ class GeoXServer{
                     CreateTracksOnMap.CallGetMapData(Data.Value.Data, this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "SaveTrack"){
                     CreateTracksOnMap.CallSaveTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else {
+                }else if (Data.Value.Action == "GetTrackData"){
+                    CreateTracksOnMap.CallGetTrackData(Data.Value.Data, this._MyApp,  Socket, User, UserId)
+                } 
+                else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)
                 }

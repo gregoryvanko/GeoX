@@ -15,7 +15,10 @@ class GeoXCreateTrack {
         this._DragPolyline = null
         this._DragPolylineNb = 0
         this._AllowClick = true
+        this._TrackId = null
         this._TrackName = "Rixensart"
+        this._TrackGroup = "Planned"
+        this._TrackPublic = true
         this._TrackMarkers = []
         this._AutoRouteBehavior = true
         this.CityFound = false
@@ -64,7 +67,10 @@ class GeoXCreateTrack {
             this.DeleteMap()
             // Go To Home
             GlobalStart()
-        } else {
+        }else if (Value.Action == "SetTrackFromGeoJson" ) {
+            this.AddTrackToModifyOnMap(Value.Data)
+        } 
+        else {
             console.log("error, Action not found: " + Value.Action)
         }
     }
@@ -610,12 +616,14 @@ class GeoXCreateTrack {
             // Input Name
             Contener.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName",this._TrackName, "Input Text", "text", "Name",))
             // Input `Group
-            Contener.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup","Planned", "Input Text", "text", "Group",))
+            Contener.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup",this._TrackGroup, "Input Text", "text", "Group",))
             // Toggle Public
             let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
             Contener.appendChild(DivTooglePublic)
             DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
-            DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
+            DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", this._TrackPublic))
+            // Empty space
+            Contener.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
 
             // Div Button
             let DivButton = CoreXBuild.DivFlexRowAr("")
@@ -677,6 +685,7 @@ class GeoXCreateTrack {
             Track.MultiToOneLine = true
             Track.FileContent = gpxtrack
             Track.Public = document.getElementById("TogglePublic").checked
+            Track.Id = this._TrackId
             let CallToServer = new Object()
             CallToServer.Action = "SaveTrack"
             CallToServer.Data = Track
@@ -764,7 +773,12 @@ class GeoXCreateTrack {
                 "weight": TrackWeight
             };
             // Add track
-            var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '100px', size: '15m', fill: true}}).addTo(this._LayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
+            var layerTrack1=L.geoJSON(Track.GeoJsonData, 
+                {style: TrackStyle, 
+                    filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
+                    arrowheads: {frequency: '100px', size: '15m', fill: true}
+                })
+                .addTo(this._LayerGroup).bindPopup(Track.Name + "<br>" + Track.Length + "km")
             layerTrack1.id = Track._id
             // Get Start and end point
             var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
@@ -779,6 +793,57 @@ class GeoXCreateTrack {
             MarkerEnd.id = Track._id + "end"
             MarkerEnd.dragging.disable();
         });
+    }
+
+    InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public){
+        // Show Action Button
+        GlobalDisplayAction('On')
+        GlobalClearActionList(this.DeleteMap.bind(this))
+        // Clear view
+        this._DivApp.innerHTML=""
+        // SocketIO
+        let SocketIo = GlobalGetSocketIo()
+        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
+        SocketIo.on('CreateTracksOnMap', (Value) => {this.MessageRecieved(Value)})
+        // Set Group
+        this._UserGroup = Groups
+        // Set Track Id
+        this._TrackId = TrackId
+        // Set Track Name
+        this._TrackName = TrackName
+        // Set Track Group
+        this._TrackGroup = TrackGroup
+        // Set Track Public
+        this._TrackPublic = Public
+        // Set Start view
+        let Conteneur = CoreXBuild.DivFlexColumn()
+        Conteneur.style.height = "70vh"
+        Conteneur.style.justifyContent = "center"
+        this._DivApp.appendChild(Conteneur)
+        // Texte
+        Conteneur.appendChild(CoreXBuild.DivTexte("Get track data...", "", "Text", ""))
+        // Get GeoJson Data of track
+        let CallToServer = new Object()
+        CallToServer.Action = "GetTrackData"
+        CallToServer.Data = TrackId
+        GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+    }
+
+    AddTrackToModifyOnMap(Data){
+        // Afficher la cart centree sur la track a modifier
+        this.LoadViewMap(Data.Center.Long, Data.Center.Lat)
+        // FitBound
+        let FitboundTrack = [ [Data.ExteriorPoint.MaxLong, Data.ExteriorPoint.MinLat], [Data.ExteriorPoint.MaxLong, Data.ExteriorPoint.MaxLat], [ Data.ExteriorPoint.MinLong, Data.ExteriorPoint.MaxLat ], [ Data.ExteriorPoint.MinLong, Data.ExteriorPoint.MinLat], [Data.ExteriorPoint.MaxLong, Data.ExteriorPoint.MinLat]] 
+        let me = this
+        this._Map.once('moveend', function(){
+            // Afficher la track a modifier
+            me.DrawTrackToModifyOnMap(Data.GeoJson)
+        })
+        this._Map.flyToBounds(FitboundTrack,{'duration':1})
+    }
+
+    DrawTrackToModifyOnMap(GeoJson){
+        // ToDo
     }
 
     /**
@@ -799,6 +864,10 @@ class GeoXCreateTrack {
             this._DragPolyline = null
             this._DragPolylineNb = 0
             this._AllowClick = true
+            this._TrackId = null
+            this._TrackName = "Rixensart"
+            this._TrackGroup = "Planned"
+            this._TrackPublic = true
             this._TrackMarkers = []
             this._AutoRouteBehavior = true
             this.CityFound = false

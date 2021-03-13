@@ -3,6 +3,7 @@ class GeoXManageTracks {
         this._DivApp = document.getElementById(DivApp)
         this._AppData = null
         this._AppGroup = null
+        this.GeoXCreateTrackView = MyGeoXCreateTrack
     }
 
     Initiation(){
@@ -113,6 +114,7 @@ class GeoXManageTracks {
                 DivButton.appendChild(CoreXBuild.Button ("&#8681", this.LoadViewDownload.bind(this,Track._id), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128279", this.LoadViewLink.bind(this,Track._id, false), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, false), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.ModifyTrack()}" alt="icon" width="25" height="25">`, this.ModifyTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, false), "ButtonIcon"))
                 DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name, false), "ButtonIcon"))
                 BoxTracks.appendChild(DivButton)
                 let DivButtonIphone = document.createElement("div")
@@ -131,6 +133,7 @@ class GeoXManageTracks {
         HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id, true), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group, Track.Public, true), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button (`<img src="${Icon.ModifyTrack()}" alt="icon" width="16" height="16"> Modify Track`, this.ModifyTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, true), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128465 Delete Track", this.SendDeleteTrack.bind(this, Track._id, Track.Name, true), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "gpx", Track._id), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "geojson", Track._id), "Text ButtonCoreXWindow"))
@@ -220,6 +223,11 @@ class GeoXManageTracks {
         DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", Public))
         // Button Update
         Contener.appendChild(CoreXBuild.Button("Update Track",this.SendUpdateTrack.bind(this, TrackId),"Text Button"))
+    }
+
+    ModifyTrack(Groups, TrackId, TrackName, TrackGroup, Public, IsCoreXWindow){
+        if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
+        this.GeoXCreateTrackView.InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public)
     }
 
     SendUpdateTrack(TrackId){
@@ -325,6 +333,7 @@ class GeoXManageTracks {
         Track.Public = document.getElementById("TogglePublic").checked 
         Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
         Track.FileContent = File
+        Track.Id = null
         // Data to send
         let CallToServer = new Object()
         CallToServer.Action = "Add"
