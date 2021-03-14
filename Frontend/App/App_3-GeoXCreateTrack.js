@@ -296,9 +296,19 @@ class GeoXCreateTrack {
 
     async OnMapClick(e) {
         // Creation d'un nouveau marker et l'ajouter à la carte
-        var newMarker = new L.marker(e.latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup)
+        await this.CreateNewPoint(e.latlng.lat, e.latlng.lng)
+        // Update du calcul de la distance
+        this.UpdateViewDistance()
+        // Centrer la carte sur le nouveau point
+        this._Map.setView((e.latlng));
+    }
+
+    async CreateNewPoint(Lat, Lng){
+        let latlng = {lat: Lat, lng: Lng}
+        // Creation d'un nouveau marker et l'ajouter à la carte
+        var newMarker = new L.marker(latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup)
         // Enregistement du marker 
-        await this.CreateNewTrackPoint(newMarker._leaflet_id, e.latlng)
+        await this.CreateNewTrackPoint(newMarker._leaflet_id, latlng)
         // Ajout du popup sur le marker
         newMarker.bindPopup(this.BuildPopupContent(newMarker._leaflet_id))
         // Ajout des event du le popup du marker
@@ -308,11 +318,6 @@ class GeoXCreateTrack {
             .on('dragstart', me.MarkerDragStartHandler.bind(this, newMarker))
             .on('drag', me.MarkerDragHandler.bind(this, newMarker))
             .on('dragend', me.MarkerDragEndHandler.bind(this, newMarker));
-
-        // Update du calcul de la distance
-        this.UpdateViewDistance()
-        // Centrer la carte sur le nouveau point
-        this._Map.setView((e.latlng));
     }
 
     async CreateNewTrackPoint(LeafletId, LatLng){
@@ -843,7 +848,74 @@ class GeoXCreateTrack {
     }
 
     DrawTrackToModifyOnMap(GeoJson){
-        // ToDo
+        GeoJson.features.forEach(feature => {
+            if (feature.geometry.type == "LineString"){
+                this.DrawTrackToModifyOnMapFirstPoint({lat: feature.geometry.coordinates[0][1], lng: feature.geometry.coordinates[0][0]})
+                let tempCoordinate = []
+                for (let index = 1; index < feature.geometry.coordinates.length; index++) {
+                    const coordinate = feature.geometry.coordinates[index];
+                    const latlng = {lat: coordinate[1], lng: coordinate[0]}
+                    if (tempCoordinate.length < 3){
+                        tempCoordinate.push(latlng)
+                    } else {
+                        // Creation d'un nouveau marker et l'ajouter à la carte
+                        var newMarker = new L.marker(latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup)
+                        // Enregistement du marker 
+                        var mypoint = new Object()
+                        mypoint.LatLng = latlng
+                        mypoint.LeafletId = newMarker._leaflet_id
+                        mypoint.SubPoints = []
+                        for (let Subpoint in tempCoordinate){
+                            mypoint.SubPoints.push(tempCoordinate[Subpoint])
+                            this._Polyline.addLatLng(L.latLng(tempCoordinate[Subpoint]))
+                        }
+                        mypoint.AutoRoute = true
+                        // Enregistement du point dans _TrackMarkers
+                        this._TrackMarkers.push(mypoint)
+                        // Ajout du popup sur le marker
+                        newMarker.bindPopup(this.BuildPopupContent(newMarker._leaflet_id))
+                        // Ajout des event du le popup du marker
+                        let me = this
+                        newMarker
+                            .on('click', me.MarkerOnClickHandler.bind(this, newMarker))
+                            .on('dragstart', me.MarkerDragStartHandler.bind(this, newMarker))
+                            .on('drag', me.MarkerDragHandler.bind(this, newMarker))
+                            .on('dragend', me.MarkerDragEndHandler.bind(this, newMarker));
+                        tempCoordinate = []
+                    }
+                }
+                // Si il reste des point dans tempCoordinate, on les ajoutes
+                if (tempCoordinate.length != 0){
+                    console.log(tempCoordinate.length)
+                }
+                // DrawTrack
+                this.RedrawTrack()
+            }
+        });
+    }
+
+    DrawTrackToModifyOnMapFirstPoint(latlng){
+        // Creation d'un nouveau marker et l'ajouter à la carte
+        var newMarker = new L.marker(latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup)
+        // Enregistement du point dans _Polyline
+        this._Polyline.addLatLng(L.latLng(latlng))
+        // Enregistement du marker 
+        var mypoint = new Object()
+        mypoint.LatLng = latlng
+        mypoint.LeafletId = newMarker._leaflet_id
+        mypoint.SubPoints = null
+        mypoint.AutoRoute = false
+        // Enregistement du point dans _TrackMarkers
+        this._TrackMarkers.push(mypoint)
+        // Ajout du popup sur le marker
+        newMarker.bindPopup(this.BuildPopupContent(newMarker._leaflet_id))
+        // Ajout des event du le popup du marker
+        let me = this
+        newMarker
+            .on('click', me.MarkerOnClickHandler.bind(this, newMarker))
+            .on('dragstart', me.MarkerDragStartHandler.bind(this, newMarker))
+            .on('drag', me.MarkerDragHandler.bind(this, newMarker))
+            .on('dragend', me.MarkerDragEndHandler.bind(this, newMarker));
     }
 
     /**
