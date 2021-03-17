@@ -334,6 +334,7 @@ class GeoXManageTracks {
         Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
         Track.FileContent = File
         Track.Id = null
+        Track.ModifyExistingTrack = false
         // Data to send
         let CallToServer = new Object()
         CallToServer.Action = "Add"

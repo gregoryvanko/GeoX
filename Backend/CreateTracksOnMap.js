@@ -40,7 +40,11 @@ async function CallSaveTrack(Track, MyApp, Socket, User, UserId){
         MyReponse.Action = "TrackSaved"
         MyReponse.Data = null
         Socket.emit("CreateTracksOnMap", MyReponse)
-        MyApp.LogAppliInfo("New track saved from a created track", User, UserId)
+        if ((Track.Id != null) && (Track.ModifyExistingTrack)){
+            MyApp.LogAppliInfo("Track updated from a created track", User, UserId)
+        } else {
+            MyApp.LogAppliInfo("New track saved from a created track", User, UserId)
+        }
     }
 }
 

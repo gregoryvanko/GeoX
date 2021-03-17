@@ -598,8 +598,8 @@ class GeoXCreateTrack {
         // Toggle MultiLine to OneLine
         let DivToogle = CoreXBuild.Div("","", "width: 100%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; margin: 1vh 0vh;")
         DivInfoBox.appendChild(DivToogle)
-        DivToogle.appendChild(CoreXBuild.DivTexte("Auto:", "", "TextTrackInfo", "color: white; margin-left: 1%"))
-        let ToogleAuto = CoreXBuild.ToggleSwitch("ToggleAuto", this._AutoRouteBehavior, "26")
+        DivToogle.appendChild(CoreXBuild.DivTexte("Auto:", "", "TextTrackInfo", "color: white; margin-left: 1%; margin-right: 1vh;"))
+        let ToogleAuto = CoreXBuild.ToggleSwitch("ToggleAuto", this._AutoRouteBehavior)
         DivToogle.appendChild(ToogleAuto)
         ToogleAuto.addEventListener('change', (event) => {
             if (event.target.checked) {
@@ -616,17 +616,29 @@ class GeoXCreateTrack {
         if (latlngs.length > 0){
             // Build save window
             let Contener = CoreXBuild.DivFlexColumn("Conteneur")
+            
             // Titre
             Contener.appendChild(CoreXBuild.DivTexte("Save Track", "", "Titre", ""))
+
+            // Toggle Modify Existing Track
+            let DivToogleModExistingTrack = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+            Contener.appendChild(DivToogleModExistingTrack)
+            DivToogleModExistingTrack.appendChild(CoreXBuild.DivTexte("Modify this track:", "", "", ""))
+            DivToogleModExistingTrack.appendChild(CoreXBuild.ToggleSwitch("ToggleExistingTrack", true))
+            
+            // Div Input
+            let DivInput = CoreXBuild.DivFlexColumn("DivInput")
+            Contener.appendChild(DivInput)
             // Input Name
-            Contener.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName",this._TrackName, "Input Text", "text", "Name",))
+            DivInput.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName",this._TrackName, "Input Text", "text", "Name",))
             // Input `Group
-            Contener.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup",this._TrackGroup, "Input Text", "text", "Group",))
+            DivInput.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup",this._TrackGroup, "Input Text", "text", "Group",))
             // Toggle Public
             let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
-            Contener.appendChild(DivTooglePublic)
+            DivInput.appendChild(DivTooglePublic)
             DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
             DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", this._TrackPublic))
+
             // Empty space
             Contener.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
 
@@ -664,6 +676,19 @@ class GeoXCreateTrack {
                     document.getElementById("InputTrackGroup").value = item.label;
                 }
             });
+            // Si on modifie une track existante
+            if (this._TrackId != null){
+                DivInput.style.display = "none";
+                document.getElementById("ToggleExistingTrack").addEventListener('change', function() {
+                    if (this.checked) {
+                        DivInput.style.display = "none";
+                    } else {
+                        DivInput.style.display = "flex";
+                    }
+                });
+            } else {
+                DivToogleModExistingTrack.style.display = "none";
+            }
         }
     }
 
@@ -691,6 +716,7 @@ class GeoXCreateTrack {
             Track.FileContent = gpxtrack
             Track.Public = document.getElementById("TogglePublic").checked
             Track.Id = this._TrackId
+            Track.ModifyExistingTrack = document.getElementById("ToggleExistingTrack").checked
             let CallToServer = new Object()
             CallToServer.Action = "SaveTrack"
             CallToServer.Data = Track
@@ -852,11 +878,26 @@ class GeoXCreateTrack {
             if (feature.geometry.type == "LineString"){
                 this.DrawTrackToModifyOnMapFirstPoint({lat: feature.geometry.coordinates[0][1], lng: feature.geometry.coordinates[0][0]})
                 let tempCoordinate = []
+                const NbTempPoint = 5
                 for (let index = 1; index < feature.geometry.coordinates.length; index++) {
+                    let isIntermediatePoint = false
+                    // Si le nombre de point intermediaire est plus petit que 3, on ajoute un point intermediaire
+                    if (tempCoordinate.length < NbTempPoint){
+                        isIntermediatePoint = true
+                    }
+                    // Si on est proche de la fin, on ajoute le point aux points intermediaires
+                    if ((feature.geometry.coordinates.length - (index+1)) <= Math.ceil(NbTempPoint/2)){
+                        isIntermediatePoint = true
+                    }
+                    // Si c'est le dernier point on ajoute un marker
+                    if ((index +1) == feature.geometry.coordinates.length){
+                        isIntermediatePoint = false
+                    }
                     const coordinate = feature.geometry.coordinates[index];
                     const latlng = {lat: coordinate[1], lng: coordinate[0]}
-                    if (tempCoordinate.length < 3){
+                    if (isIntermediatePoint){
                         tempCoordinate.push(latlng)
+                        // Si il reste moins de 2 alors aussi les ajouter
                     } else {
                         // Creation d'un nouveau marker et l'ajouter à la carte
                         var newMarker = new L.marker(latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup)
@@ -883,10 +924,6 @@ class GeoXCreateTrack {
                             .on('dragend', me.MarkerDragEndHandler.bind(this, newMarker));
                         tempCoordinate = []
                     }
-                }
-                // Si il reste des point dans tempCoordinate, on les ajoutes
-                if (tempCoordinate.length != 0){
-                    console.log(tempCoordinate.length)
                 }
                 // DrawTrack
                 this.RedrawTrack()

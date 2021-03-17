@@ -61,17 +61,52 @@ function PromiseAddTrack(Track, MyApp, User){
             }
             TrackData.StartPoint = latleng
             
-            Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
-                ReponseAddTracks.Error = false
-                ReponseAddTracks.ErrorMsg = ""
-                ReponseAddTracks.Data = null
-                resolve(ReponseAddTracks)
-            },(erreur)=>{
-                ReponseAddTracks.Error = true
-                ReponseAddTracks.ErrorMsg = "PromiseAddTrack error: " + erreur
-                ReponseAddTracks.Data = null
-                resolve(ReponseAddTracks)
-            })
+            let InsertTarck = true
+            if ((Track.Id != null) && (Track.ModifyExistingTrack)){
+                InsertTarck = false
+            }
+            // Si il faut inserer une nouvelle track en DB
+            if (InsertTarck){
+                Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
+                    ReponseAddTracks.Error = false
+                    ReponseAddTracks.ErrorMsg = ""
+                    ReponseAddTracks.Data = null
+                    resolve(ReponseAddTracks)
+                },(erreur)=>{
+                    ReponseAddTracks.Error = true
+                    ReponseAddTracks.ErrorMsg = "PromiseAddTrack error: " + erreur
+                    ReponseAddTracks.Data = null
+                    resolve(ReponseAddTracks)
+                })
+            } else {
+                // Update de la track existante
+                let DataToDb = new Object()
+                DataToDb[MongoTracksCollection.ExteriorPoint]= TrackData.ExteriorPoint
+                DataToDb[MongoTracksCollection.GeoJsonData]= TrackData.GeoJsonData
+                DataToDb[MongoTracksCollection.GpxData]= TrackData.GpxData
+                DataToDb[MongoTracksCollection.Length]= TrackData.Length
+                DataToDb[MongoTracksCollection.Center]= TrackData.Center
+                DataToDb[MongoTracksCollection.StartPoint]= TrackData.StartPoint
+                
+                Mongo.UpdateByIdPromise(Track.Id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
+                    if (reponse.matchedCount == 0){
+                        ReponseAddTracks.Error = true
+                        ReponseAddTracks.ErrorMsg = "GeoXServerApi PromiseUpdateTrack Track Id not found: "
+                        ReponseAddTracks.Data = []
+                    } else {
+                        ReponseAddTracks.Error = false
+                        ReponseAddTracks.ErrorMsg = ""
+                        ReponseAddTracks.Data = []
+                    }
+                    resolve(ReponseAddTracks)
+                },(erreur)=>{
+                    ReponseAddTracks.Error = true
+                    ReponseAddTracks.ErrorMsg = "GeoXServerApi PromiseUpdateTrack error: " + erreur
+                    ReponseAddTracks.Data = []
+                    resolve(ReponseAddTracks)
+                })
+            }
+            
         }
     })
 }
