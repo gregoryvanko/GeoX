@@ -42,7 +42,10 @@ class GeoXSearchTracksOnMap {
     Initiation(){
         // Show Action Button
         GlobalDisplayAction('On')
-        GlobalClearActionList(this.DeleteMap.bind(this))
+        // Execute before quit
+        GlobalExecuteBeforeQuit(this.DeleteMap.bind(this))
+        // Clear Action List
+        GlobalClearActionList()
         // Clear view
         this._DivApp.innerHTML=""
         // SocketIO

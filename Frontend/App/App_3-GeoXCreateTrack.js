@@ -39,7 +39,10 @@ class GeoXCreateTrack {
     Initiation(){
         // Show Action Button
         GlobalDisplayAction('On')
-        GlobalClearActionList(this.DeleteMap.bind(this))
+        // Execute before quit
+        GlobalExecuteBeforeQuit(this.DeleteMap.bind(this))
+        // Clear Action List
+        GlobalClearActionList()
         // Clear view
         this._DivApp.innerHTML=""
         // SocketIO
@@ -829,7 +832,10 @@ class GeoXCreateTrack {
     InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public){
         // Show Action Button
         GlobalDisplayAction('On')
-        GlobalClearActionList(this.DeleteMap.bind(this))
+        // Execute before quit
+        GlobalExecuteBeforeQuit(this.DeleteMap.bind(this))
+        // Clear Action List
+        GlobalClearActionList()
         // Clear view
         this._DivApp.innerHTML=""
         // SocketIO
