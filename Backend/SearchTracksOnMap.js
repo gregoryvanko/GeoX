@@ -18,11 +18,27 @@ async function CallGetMarkers(Filter, MyApp, Socket, User, UserId){
     if(!ReponseAllTracksInfo.Error){
         // Delete identical tracks
         let UniqueMarkers = ReponseAllTracksInfo.Data.filter((v,i,a)=>a.findIndex(t=>(JSON.stringify(t.StartPoint) === JSON.stringify(v.StartPoint)))===i)
-        // Sort By Distance
-        UniqueMarkers.sort((a,b)=>{
-            if (a.Length <= b.Length) return -1;
-            if (a.Length > b.Length) return 1;
-        })
+        if (Filter != null){
+            if (Filter.Sort == "Km"){
+                // Sort By Distance
+                UniqueMarkers.sort((a,b)=>{
+                    if (a.Length <= b.Length) return -1;
+                    if (a.Length > b.Length) return 1;
+                })
+            } else {
+                // Sort By Date
+                UniqueMarkers.sort((a,b)=>{
+                    if (a.Date <= b.Date) return 1;
+                    if (a.Date > b.Date) return -1;
+                })
+            }
+        } else {
+            // Sort By Distance
+            UniqueMarkers.sort((a,b)=>{
+                if (a.Length <= b.Length) return -1;
+                if (a.Length > b.Length) return 1;
+            })
+        }
         // Send Reponse
         let reponse = new Object()
         reponse.Action = "SetAllMarkers"
@@ -51,7 +67,7 @@ function PromiseGetAllMarkers(Filter, MyApp, User){
                 Querry = {$and:[{[MongoTracksCollection.Public]: true}, {[MongoTracksCollection.Length]: { $gte: parseInt(Filter.MinKm) }}, {[MongoTracksCollection.Length]: { $lte: parseInt(Filter.MaxKm) }}]}
             }
         }
-        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.StartPoint]: 1}}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Date]: 1}}
         Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){
                 ReponseTracks.Error = false

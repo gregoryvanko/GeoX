@@ -36,7 +36,7 @@ class GeoXSearchTracksOnMap {
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
-        this._Filter = {HideMyTrack: false, MinKm: 0, MaxKm: 1000}
+        this._Filter = {HideMyTrack: false, Sort:"Km", MinKm: 0, MaxKm: 1000}
     }
 
     Initiation(){
@@ -297,6 +297,26 @@ class GeoXSearchTracksOnMap {
         Conteneur.appendChild(DivToogleHideMyTrack)
         DivToogleHideMyTrack.appendChild(CoreXBuild.DivTexte("Hide my track:", "", "", ""))
         DivToogleHideMyTrack.appendChild(CoreXBuild.ToggleSwitch("ToggleHideMyTrack", this._Filter.HideMyTrack))
+        // Sort Type
+        let DivSort = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Conteneur.appendChild(DivSort)
+        DivSort.appendChild(CoreXBuild.DivTexte("Sort:", "", "", ""))
+        let DivDropDown = CoreXBuild.Div("", "", "width:50%")
+        DivSort.appendChild(DivDropDown)
+        let DropDown = document.createElement("select")
+        DropDown.setAttribute("id", "SortFilter")
+        DropDown.setAttribute("class", "Text MapGroupDropDown")
+        let option1 = document.createElement("option")
+        option1.setAttribute("value", "Km")
+        option1.innerHTML = "Km"
+        if (this._Filter.Sort == "Km"){option1.selected = true}
+        DropDown.appendChild(option1)
+        let option2 = document.createElement("option")
+        option2.setAttribute("value", "Date")
+        option2.innerHTML = "Date"
+        if (this._Filter.Sort == "Date"){option2.selected = true}
+        DropDown.appendChild(option2)
+        DivDropDown.appendChild(DropDown)
         // Min Km
         let DivMinKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Conteneur.appendChild(DivMinKm)
@@ -352,6 +372,7 @@ class GeoXSearchTracksOnMap {
         if (parseInt(MaxKmCorrected) <= parseInt(MinKm)){MaxKmCorrected = parseInt(MinKm) + 1 }
         // Get all filter data
         this._Filter.HideMyTrack = document.getElementById("ToggleHideMyTrack").checked
+        this._Filter.Sort = document.getElementById("SortFilter").value
         this._Filter.MinKm = MinKm
         this._Filter.MaxKm = MaxKmCorrected.toString()
         // Call Get all Marker
