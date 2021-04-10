@@ -23,6 +23,17 @@ class GeoXServer{
             this._MyApp.LogAppliInfo(`SoApi Data: {"Action":"${Data.Action}","Value":{"Action":"${Data.Value.Action}"}}`, User, UserId)
         }
         switch (Data.Action) {
+            case "ModuleGeoX":
+                let ModuleGeoX = require("./ModuleGeoX")
+                if (Data.Value.Action == "GetInitialData"){
+                    ModuleGeoX.CallGetInitialData(this._MyApp,  Socket, User, UserId)
+                } else if (Data.Value.Action == "UpdateTrackColor"){
+                    ModuleGeoX.CallUpdateTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
+                } else {
+                    this._MyApp.LogAppliError(`Api GeoXServer error, ModuleGeoX Action ${Data.Value.Action} not found`, User, UserId)
+                    Socket.emit("GeoXError", `Api GeoXServer error, ModuleGeoX Action ${Data.Value.Action} not found`)
+                }
+                break
             case "ShowTracksOnMap":
                 let ShowTracksOnMap = require("./ShowTracksOnMap")
                 if (Data.Value.Action == "GetUserData"){

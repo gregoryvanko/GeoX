@@ -750,6 +750,6 @@ class GeoXMap {
 }
 
 // Creation de l'application
-let MyGeoXMap = new GeoXMap(GlobalCoreXGetAppContentId())
+//let MyGeoXMap = new GeoXMap(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("View My Tracks", Icon.GeoXMapIcon(), MyGeoXMap.Initiation.bind(MyGeoXMap))
+//GlobalCoreXAddApp("View My Tracks", Icon.GeoXMapIcon(), MyGeoXMap.Initiation.bind(MyGeoXMap))

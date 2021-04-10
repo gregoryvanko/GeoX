@@ -668,6 +668,6 @@ class GeoXSearchTracksOnMap {
 }
 
 // Creation de l'application
-let MyGeoXSearchTracksOnMap = new GeoXSearchTracksOnMap(GlobalCoreXGetAppContentId())
+//let MyGeoXSearchTracksOnMap = new GeoXSearchTracksOnMap(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Search Tracks in GeoX", Icon.GeoXSearchTracksOnMap(), MyGeoXSearchTracksOnMap.Initiation.bind(MyGeoXSearchTracksOnMap))
+//GlobalCoreXAddApp("Search Tracks in GeoX", Icon.GeoXSearchTracksOnMap(), MyGeoXSearchTracksOnMap.Initiation.bind(MyGeoXSearchTracksOnMap))

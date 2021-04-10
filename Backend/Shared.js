@@ -208,7 +208,6 @@ function PromiseGetUserGroup(MyApp, User){
     return new Promise(resolve => {
         let ReponseUserGroup = {Error: true, ErrorMsg:"InitError", Data:null}
 
-        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
         let MongoR = require('@gregvanko/corex').Mongo
         Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
         let MongoConfig = require("./MongoConfig.json")
@@ -281,18 +280,14 @@ function PromiseGetTracksData(MyApp, GroupName, User){
         let MongoConfig = require("./MongoConfig.json")
         MongoTracksCollection = MongoConfig.TracksCollection
 
-        let ReponseTracks = new Object()
-        ReponseTracks.Error = true
-        ReponseTracks.ErrorMsg = ""
-        ReponseTracks.Data = null
+        let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
         const Querry = {$and: [{[MongoTracksCollection.Group]: GroupName},{[MongoTracksCollection.Owner]: User}]}
         const Projection = { projection:{[MongoTracksCollection.GpxData]: 0}}
         const Sort = {[MongoTracksCollection.Date]: -1}
         Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){
-                ReponseTracks.Error = false
-                ReponseTracks.ErrorMsg = null
-                ReponseTracks.Data = []
+                ReponseTracks.Error = true
+                ReponseTracks.ErrorMsg = "Group exist but without one track"
             } else {
                 ReponseTracks.Error = false
                 ReponseTracks.ErrorMsg = null
@@ -302,7 +297,6 @@ function PromiseGetTracksData(MyApp, GroupName, User){
         },(erreur)=>{
             ReponseTracks.Error = true
             ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksData error: " + erreur
-            ReponseTracks.Data = []
             resolve(ReponseTracks)
         })
     })
