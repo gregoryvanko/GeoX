@@ -1,9 +1,9 @@
 class InfoBox{
-    constructor(DivApp, ToogleTrack, ClickOnBoxTrack, ClickOnOtherTrackAction, ClickOnFollowTrack){
+    constructor(DivApp, ToogleTrack, ClickOnBoxTrack, ChangeTrackColor, ClickOnFollowTrack){
         this._DivApp = DivApp
         this.ToogleTrack = ToogleTrack
         this.ClickOnBoxTrack = ClickOnBoxTrack
-        this.ClickOnOtherTrackAction = ClickOnOtherTrackAction
+        this.ChangeTrackColor = ChangeTrackColor
         this.ClickOnFollowTrack = ClickOnFollowTrack
         // Statu de l'infobox
         this._InfoBowIsShown = false
@@ -11,6 +11,8 @@ class InfoBox{
         this._UserGroup = null
         // ListOfTrack
         this._ListOfTrack = null
+        // Filter
+        this._Filter = {Sort:"Date", MinKm: "0", MaxKm: "1000"}
     }
 
     /**
@@ -57,7 +59,7 @@ class InfoBox{
         // Div Action
         let DivAction = CoreXBuild.DivFlexRowAr("InfoBoxAction")
         DivBoxTracks.appendChild(DivAction)
-        DivAction.style.width = "90%"
+        DivAction.style.width = "86%"
         DivAction.style.margin = "0vh auto"
         DivAction.style.justifyContent = "space-between"
         // Div Content
@@ -150,40 +152,72 @@ class InfoBox{
         let content = document.getElementById("InfoBoxContent")
         // Clear content
         content.innerHTML = ""
-        // Add track in content
+        // Filter track
+        let ListOfTrackFiltered = []
         this._ListOfTrack.forEach(Track => {
-            // Box pour toutes les info d'un track
-            let DivBoxTrackInfo = CoreXBuild.Div("", "DivBoxTrackInfo", "")
-            content.appendChild(DivBoxTrackInfo)
-            // Conteneur flewRow
-            let Conteneur = CoreXBuild.DivFlexRowStart("")
-            DivBoxTrackInfo.appendChild(Conteneur)
-            // Box pour click sur le nom de la track et pour faire un zoom sur la track
-            let DivTrackinfo = CoreXBuild.Div("", "", "cursor: pointer; width: 56%; display: -webkit-flex; display: flex; flex-direction: column; justify-content:flex-start;")
-            Conteneur.appendChild(DivTrackinfo)
-            DivTrackinfo.addEventListener('click', this.ClickOnBoxTrack.bind(this, Track))
-            // Nom de la track
-            DivTrackinfo.appendChild(CoreXBuild.DivTexte(Track.Name,"","TextTrackInfo", "color: white; margin-left: 4%;"))
-            // Group de la track
-            DivTrackinfo.appendChild(CoreXBuild.DivTexte(Track.Group,"","TextTrackInfo", "color: white; margin-left: 4%;"))
-            // Conteur sub info des track
-            let DivSubInfo = CoreXBuild.Div("","","width: 100%; display: -webkit-flex; display: flex; flex-direction: row;  justify-content:space-between;")
-            DivTrackinfo.appendChild(DivSubInfo)
-            // Date de la track
-            DivSubInfo.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","TextTrackInfo", "color: white; margin-left: 4%;"))
-            // Longeur de la track
-            DivSubInfo.appendChild(CoreXBuild.DivTexte(Track.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; margin-left: 0%;"))
-            // Box pour les bouttons
-            let DivButton = document.createElement("div")
-            Conteneur.appendChild(DivButton)
-            DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
-            // Boutton Follow
-            DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Follow()}" alt="icon" width="25" height="25">`, this.ClickOnFollowTrack.bind(this,Track), "ButtonIcon"))
-            // Button show/hide track
-            DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleTrack.bind(this,Track._id), "ButtonIcon"))
-            // Button Other action
-            DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Menu()}" alt="icon" width="25" height="25">`, this.ClickOnOtherTrackAction.bind(this,Track), "ButtonIcon"))
-        });
+            if ((Track.Length > parseInt(this._Filter.MinKm))&&(Track.Length < parseInt(this._Filter.MaxKm))){
+                ListOfTrackFiltered.push(Track)
+            }
+        })
+        if (this._Filter.Sort == "Km"){
+            // Sort By Distance
+            ListOfTrackFiltered.sort((a,b)=>{
+                if (a.Length <= b.Length) return -1;
+                if (a.Length > b.Length) return 1;
+            })
+        } else {
+            // Sort By Date
+            ListOfTrackFiltered.sort((a,b)=>{
+                if (a.Date <= b.Date) return 1;
+                if (a.Date > b.Date) return -1;
+            })
+        }
+
+        // Add track in content
+        if (ListOfTrackFiltered.length == 0){
+            content.append(CoreXBuild.DivTexte("No Track", "", "TextTrackInfo", "color: white; text-align: center;"))
+        } else {
+            ListOfTrackFiltered.forEach(Track => {
+                // Box pour toutes les info d'un track
+                let DivBoxTrackInfo = CoreXBuild.Div("", "DivBoxTrackInfo", "")
+                content.appendChild(DivBoxTrackInfo)
+                // Conteneur flewRow
+                let Conteneur = CoreXBuild.DivFlexRowStart("")
+                DivBoxTrackInfo.appendChild(Conteneur)
+                // Box pour click sur le nom de la track et pour faire un zoom sur la track
+                let DivTrackinfo = CoreXBuild.Div("", "", "cursor: pointer; width: 56%; display: -webkit-flex; display: flex; flex-direction: column; justify-content:flex-start;")
+                Conteneur.appendChild(DivTrackinfo)
+                DivTrackinfo.addEventListener('click', this.ClickOnBoxTrack.bind(this, Track))
+                // Nom de la track
+                DivTrackinfo.appendChild(CoreXBuild.DivTexte(Track.Name,"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                // Group de la track
+                DivTrackinfo.appendChild(CoreXBuild.DivTexte(Track.Group,"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                // Conteur sub info des track
+                let DivSubInfo = CoreXBuild.Div("","","width: 100%; display: -webkit-flex; display: flex; flex-direction: row;  justify-content:space-between;")
+                DivTrackinfo.appendChild(DivSubInfo)
+                // Date de la track
+                DivSubInfo.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                // Longeur de la track
+                DivSubInfo.appendChild(CoreXBuild.DivTexte(Track.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; margin-left: 0%;"))
+                // Box pour les bouttons
+                let DivButton = document.createElement("div")
+                Conteneur.appendChild(DivButton)
+                DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
+                // Boutton Color track
+                let inputcolor = document.createElement("input")
+                inputcolor.setAttribute("id","color" + Track._id)
+                inputcolor.setAttribute("type","color")
+                inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px; border: 1px solid black;")
+                inputcolor.value = Track.Color
+                inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, Track.Name, Track.Length, Track._id)}
+                DivButton.appendChild(inputcolor)
+                // Boutton Follow
+                DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Follow()}" alt="icon" width="25" height="25">`, this.ClickOnFollowTrack.bind(this,Track), "ButtonIcon"))
+                // Button show/hide track
+                DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleTrack.bind(this,Track._id), "ButtonIcon"))
+            });
+        }
+        
 
     }
 
@@ -237,8 +271,44 @@ class InfoBox{
         CoreXWindow.BuildWindow(Conteneur)
     }
 
+    GetMinMaxKm(Type){
+        let reponse = null
+        this._ListOfTrack.forEach(element => {
+            if (Type == "Min"){
+                if (reponse == null){
+                    reponse = Math.floor(element.Length)
+                } else {
+                    if (element.Length < reponse){reponse = Math.floor(element.Length)}
+                }
+            } else {
+                if (reponse == null){
+                    reponse = Math.ceil(element.Length)
+                } else {
+                    if (element.Length > reponse){reponse = Math.ceil(element.Length)}
+                }
+            }
+        });
+        // si pas de marker alors la reponse est = 0
+        if (reponse == null){
+            reponse = "0"
+        }
+        return reponse
+    }
+
     SetFilter(){
-        // ToDo
+        // Get all filter data
+        this._Filter.Sort = document.getElementById("SortFilter").value
+        this._Filter.MinKm = document.getElementById("MinKm").value
+        this._Filter.MaxKm = document.getElementById("MaxKm").value
+        // Show track
+        this.AddTrackData()
+        // close window
+        CoreXWindow.DeleteWindow()
+    }
+
+    CancelSetFilter(){
+        // close window
+        CoreXWindow.DeleteWindow()
     }
 
     AddFolderData(){

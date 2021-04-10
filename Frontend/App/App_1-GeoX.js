@@ -46,7 +46,7 @@ class GeoX {
         // FitBounds
         this._FitBounds = null
         // InfoBox
-        this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ClickOnOtherTrackAction.bind(this), this.ClickOnFollowTrack.bind(this))
+        this._InfoBox = null
         
     }
 
@@ -66,6 +66,8 @@ class GeoX {
         let SocketIo = GlobalGetSocketIo()
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
         SocketIo.on('GeoX', (Value) => {this.MessageRecieved(Value)})
+        // InfoBox
+        this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ChangeTrackColor.bind(this), this.ClickOnFollowTrack.bind(this))
         // Load Data
         this.LoadViewGetAppData()
     }
@@ -118,6 +120,7 @@ class GeoX {
         this._ListOfTrack = []
         this._InitialMapData = null
         this._FitBounds = null
+        this._InfoBox = null
 
         if (this._Map && this._Map.remove) {
             this._Map.off();
@@ -307,15 +310,16 @@ class GeoX {
                 // Changer le popup de la track
                 layer.bindPopup(me.BuildPopupContentTrack(Name, Length, TrackId, Color))
                 // Changer la couleur du boutton change color dans le trackInfo
-                //let ButtonColorInTrackInfo = document.getElementById("color" + TrackId)
-                //if (ButtonColorInTrackInfo){
-                //    ButtonColorInTrackInfo.value = Color
-                //}
+                let ButtonColorInTrackInfo = document.getElementById("color" + TrackId)
+                if (ButtonColorInTrackInfo){
+                   ButtonColorInTrackInfo.value = Color
+                }
             }
         })
         this._ListOfTrack.forEach(Track => {
             if (Track._id == TrackId){
                 Track.Color = Color
+                
             }
         });
         // Data to send
@@ -446,11 +450,6 @@ class GeoX {
         }
         let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
         this._Map.flyToBounds(FitboundTrack,{'duration':2} )
-    }
-
-    ClickOnOtherTrackAction(Track){
-        debugger
-        //ToDo
     }
 
     ClickOnFollowTrack(Track){

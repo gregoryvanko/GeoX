@@ -128,10 +128,16 @@
     outline: none;
     padding: 0px;
     cursor: pointer;
-    border: 0px solid transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
     background-color: transparent;
     color: white;
     margin: 0%;
+}
+@media (hover: hover) {
+    .ButtonInfoBoxNav:hover{
+        border-color: white;
+    }
 }
 
 .ButtonTrackInfoBoxLeft{
