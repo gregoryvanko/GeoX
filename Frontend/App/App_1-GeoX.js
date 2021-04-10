@@ -67,7 +67,7 @@ class GeoX {
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
         SocketIo.on('GeoX', (Value) => {this.MessageRecieved(Value)})
         // InfoBox
-        this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ChangeTrackColor.bind(this), this.ClickOnFollowTrack.bind(this))
+        this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ChangeTrackColor.bind(this), this.ClickOnFollowTrack.bind(this), this.CheckboxGroupChange.bind(this))
         // Load Data
         this.LoadViewGetAppData()
     }
@@ -88,9 +88,11 @@ class GeoX {
             } else {
                 document.getElementById("WaitingText").innerHTML = "You don't have any track. Please create add or create a track..."
             }
-        } else if (Value.Action == "SetMapData" ){
-            // this._DataMap = Value.Data
-            // this.ModifyTracksOnMap()
+        } else if (Value.Action == "SetTracksOfGroup" ){
+            this._ListOfTrack = this._ListOfTrack.concat(Value.Data)
+            this._InfoBox.ListOfTrack = this._ListOfTrack
+            //this._FitBounds = ???
+            this.ModifyTracksOnMap()
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -455,6 +457,35 @@ class GeoX {
     ClickOnFollowTrack(Track){
         debugger
         //ToDo
+    }
+
+    CheckboxGroupChange(Group, checked){
+        if(checked){
+            // Add Group
+            let CallToServer = new Object()
+            CallToServer.Action = "GetTracksOfGroup"
+            CallToServer.Data = Group
+            GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
+        } else {
+            let me = this
+            // Remove track of this Group
+            this._ListOfTrack.forEach(Track => {
+                if (Track.Group == Group){
+                    // Remove from map
+                    this._LayerGroup.eachLayer(function (layer) {
+                        if ((layer.id == Track._id) || (layer.id == Track._id + "start") || (layer.id == Track._id + "end")){
+                            me._LayerGroup.removeLayer(layer);
+                        }
+                    })
+                }
+            })
+            // Remove track from _ListOfTrack
+            this._ListOfTrack = this._ListOfTrack.filter(function( obj ) {
+                return obj.Group !== Group;
+            });
+            // Update de InfoBox
+            this._InfoBox.ListOfTrack = this._ListOfTrack
+        }
     }
 
 }

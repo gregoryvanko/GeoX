@@ -1,10 +1,11 @@
 class InfoBox{
-    constructor(DivApp, ToogleTrack, ClickOnBoxTrack, ChangeTrackColor, ClickOnFollowTrack){
+    constructor(DivApp, ToogleTrack, ClickOnBoxTrack, ChangeTrackColor, ClickOnFollowTrack, CheckboxGroupChange){
         this._DivApp = DivApp
         this.ToogleTrack = ToogleTrack
         this.ClickOnBoxTrack = ClickOnBoxTrack
         this.ChangeTrackColor = ChangeTrackColor
         this.ClickOnFollowTrack = ClickOnFollowTrack
+        this.CheckboxGroupChange = CheckboxGroupChange
         // Statu de l'infobox
         this._InfoBowIsShown = false
         // UserGroup
@@ -14,6 +15,8 @@ class InfoBox{
         // Filter
         this._Filter = {Sort:"Date", MinKm: "0", MaxKm: "1000"}
     }
+
+    set ListOfTrack(val){this._ListOfTrack = val}
 
     /**
      * Toggle Show Hide Info Box
@@ -217,8 +220,6 @@ class InfoBox{
                 DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleTrack.bind(this,Track._id), "ButtonIcon"))
             });
         }
-        
-
     }
 
     FilterTrack(){
@@ -312,7 +313,42 @@ class InfoBox{
     }
 
     AddFolderData(){
-        // ToDo
+        // Get Action
+        let action = document.getElementById("InfoBoxAction")
+        // Clear Action
+        action.innerHTML = ""
+        // Get content
+        let content = document.getElementById("InfoBoxContent")
+        // Clear content
+        content.innerHTML = ""
+        // Get Group in all track
+        let groupused = []
+        groupused = [...new Set(this._ListOfTrack.map(item => item.Group))] 
+        // Add Folder Data
+        if (this._UserGroup.length == 0){
+            content.append(CoreXBuild.DivTexte("No Folder", "", "TextTrackInfo", "color: white; text-align: center;"))
+        } else {
+            this._UserGroup.forEach(element => {
+                // Box pour toutes les info du folder
+                let DivBoxTrackInfo = CoreXBuild.Div("", "DivBoxTrackInfo", "")
+                content.appendChild(DivBoxTrackInfo)
+                DivBoxTrackInfo.style.padding = "1vh"
+                DivBoxTrackInfo.style.width= "80%"
+                // Conteneur flewRow
+                let Conteneur = CoreXBuild.DivFlexRowStart("")
+                DivBoxTrackInfo.appendChild(Conteneur)
+                // checkbox du folder
+                let Checkbox = CoreXBuild.Input("CheckBox" + element, "", "", "", "checkbox", "CheckBox" + element, "")
+                Conteneur.appendChild(Checkbox)
+                let IsChecked = false
+                groupused.forEach(elementused => {
+                    if (elementused == element){IsChecked = true}
+                });
+                Checkbox.checked = IsChecked
+                Checkbox.addEventListener('change', (event)=>{this.CheckboxGroupChange(element, event.target.checked)})
+                Conteneur.append(CoreXBuild.DivTexte(element, "", "TextTrackInfo", "color: white; margin-left: 4%;"))
+            });
+        }
     }
 
 }

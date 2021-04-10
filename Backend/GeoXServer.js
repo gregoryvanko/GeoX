@@ -27,6 +27,8 @@ class GeoXServer{
                 let ModuleGeoX = require("./ModuleGeoX")
                 if (Data.Value.Action == "GetInitialData"){
                     ModuleGeoX.CallGetInitialData(this._MyApp,  Socket, User, UserId)
+                } else if (Data.Value.Action == "GetTracksOfGroup"){
+                    ModuleGeoX.CallGetTracksOfGroup(Data.Value.Data, this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "UpdateTrackColor"){
                     ModuleGeoX.CallUpdateTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
                 } else {

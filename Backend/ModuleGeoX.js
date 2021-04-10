@@ -69,6 +69,22 @@ async function CallGetInitialData(MyApp, Socket, User, UserId){
     }
 }
 
+async function CallGetTracksOfGroup(Group, MyApp, Socket, User, UserId){
+    let Shared = require("./Shared")
+    let ReponseTracksOfGroup = await Shared.PromiseGetTracksData(MyApp, Group, User)
+    if(!ReponseTracksOfGroup.Error){
+        let MyReponse = new Object()
+        MyReponse.Action = "SetTracksOfGroup"
+        MyReponse.Data = ReponseTracksOfGroup.Data
+        Socket.emit("GeoX", MyReponse)
+        // Log socket action
+        MyApp.LogAppliInfo(`SoApi send Tracks of group`, User, UserId)
+    } else {
+        MyApp.LogAppliError(ReponseTracksOfGroup.ErrorMsg, User, UserId)
+        Socket.emit("GeoXError", "CallGetTracksOfGroup error: " + ReponseTracksOfGroup.ErrorMsg)
+    }
+}
+
 async function CallUpdateTrack(Track, MyApp, Socket, User, UserId){
     let Shared = require("./Shared")
     let ReponseUpdateTrack = await Shared.PromiseUpdateTrack(Track, MyApp)
@@ -79,4 +95,5 @@ async function CallUpdateTrack(Track, MyApp, Socket, User, UserId){
 }
 
 module.exports.CallGetInitialData = CallGetInitialData
+module.exports.CallGetTracksOfGroup = CallGetTracksOfGroup
 module.exports.CallUpdateTrack = CallUpdateTrack
