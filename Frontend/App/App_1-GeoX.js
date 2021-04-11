@@ -89,9 +89,14 @@ class GeoX {
                 document.getElementById("WaitingText").innerHTML = "You don't have any track. Please create add or create a track..."
             }
         } else if (Value.Action == "SetTracksOfGroup" ){
+            // Ajouter les track a _ListOfTrack
             this._ListOfTrack = this._ListOfTrack.concat(Value.Data)
+            // Update des track de InfoBox
             this._InfoBox.ListOfTrack = this._ListOfTrack
-            //this._FitBounds = ???
+            // Calcul du Fitbound
+            let MinMax = this.MinMaxOfTracks(this._ListOfTrack)
+            this._FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]]
+            // Modifier les track sur la map
             this.ModifyTracksOnMap()
         } else {
             console.log("error, Action not found: " + Value.Action)
@@ -331,6 +336,10 @@ class GeoX {
         GlobalSendSocketIo("GeoX", "ModuleGeoX", Data)
     }
 
+    /**
+     * Affiche ou efface une track (ou toutes les tracks)
+     * @param {String} TrackId Id de la track (ou null pour toutes les tracks) à montrer/effacer
+     */
     ToogleTrack(TrackId){
         let me = this
         // Si TrackId different de null alons cela concerne un track en particulier
@@ -410,6 +419,11 @@ class GeoX {
         }
     }
 
+    /**
+     * Action effectuee lorsque l'on click sur la box d'un track dans InfoBox
+     * L'action est afficher la track si elle n'est pas présente puis zoomer sur la track
+     * @param {Object} Track Object contenant les information de la track
+     */
     ClickOnBoxTrack (Track){
         let me = this
         // Show Track if not on map
@@ -454,38 +468,88 @@ class GeoX {
         this._Map.flyToBounds(FitboundTrack,{'duration':2} )
     }
 
+    /**
+     * Action effectuee lorsque l'on clique sur le boutton follow de InfoBox
+     * @param {Object} Track Object contenant les information de la track
+     */
     ClickOnFollowTrack(Track){
-        debugger
-        //ToDo
+        // si InfoBox est affichee, il faut la cacher
+        if(this._InfoBox.InfoBowIsShown){
+            this._InfoBox.InfoBoxToggle(this._UserGroup, this._ListOfTrack)
+        }
+        // On efface les autres tracks de la map
+        let me = this
+        // Remove track from _ListOfTrack
+        this._LayerGroup.eachLayer(function (layer) {
+            if (!((layer.id == Track._id) || (layer.id == Track._id + "start") || (layer.id == Track._id + "end"))){
+                me._LayerGroup.removeLayer(layer);
+            }
+        })
+        // Start localisation
+        // ToDo
     }
 
+    /**
+     * Affiche ou efface les track d'un group sur la carte
+     * @param {String} Group nom du group
+     * @param {Boolean} checked Groupe a afficher ou a effacer sur la carte
+     */
     CheckboxGroupChange(Group, checked){
         if(checked){
-            // Add Group
+            // Call server to add track of new Group
             let CallToServer = new Object()
             CallToServer.Action = "GetTracksOfGroup"
             CallToServer.Data = Group
             GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
         } else {
-            let me = this
-            // Remove track of this Group
-            this._ListOfTrack.forEach(Track => {
-                if (Track.Group == Group){
-                    // Remove from map
-                    this._LayerGroup.eachLayer(function (layer) {
-                        if ((layer.id == Track._id) || (layer.id == Track._id + "start") || (layer.id == Track._id + "end")){
-                            me._LayerGroup.removeLayer(layer);
-                        }
-                    })
-                }
-            })
             // Remove track from _ListOfTrack
             this._ListOfTrack = this._ListOfTrack.filter(function( obj ) {
                 return obj.Group !== Group;
             });
             // Update de InfoBox
             this._InfoBox.ListOfTrack = this._ListOfTrack
+            // Calcul du Fitbound
+            let MinMax = this.MinMaxOfTracks(this._ListOfTrack)
+            this._FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]]
+            // Modifier les track sur la map
+            this.ModifyTracksOnMap()
         }
+    }
+
+    /**
+     * Calcule la Lat et Long Min et Max d'un liste de tracks
+     * @param {Array} ListOfTracks Liste de toutes les track
+     * @returns Object {Minlat, MaxLat, MinLong, MaxLong}
+     */
+    MinMaxOfTracks(ListOfTracks){
+        let reponse = new Object()
+        reponse.MinLat = null
+        reponse.MaxLat = null
+        reponse.MinLong = null
+        reponse.MaxLong = null
+        ListOfTracks.forEach(element => {
+            if(reponse.MinLat == null){
+                reponse.MinLat = element.ExteriorPoint.MinLat
+            } else {
+                if(element.ExteriorPoint.MinLat < reponse.MinLat){reponse.MinLat = element.ExteriorPoint.MinLat}
+            }
+            if(reponse.MaxLat == null){
+                reponse.MaxLat = element.ExteriorPoint.MaxLat
+            } else {
+                if(element.ExteriorPoint.MaxLat > reponse.MaxLat){reponse.MaxLat = element.ExteriorPoint.MaxLat}
+            }
+            if(reponse.MinLong == null){
+                reponse.MinLong = element.ExteriorPoint.MinLong
+            } else {
+                if(element.ExteriorPoint.MinLong < reponse.MinLong){reponse.MinLong = element.ExteriorPoint.MinLong}
+            }
+            if(reponse.MaxLong == null){
+                reponse.MaxLong = element.ExteriorPoint.MaxLong
+            } else {
+                if(element.ExteriorPoint.MaxLong > reponse.MaxLong){reponse.MaxLong = element.ExteriorPoint.MaxLong}
+            }
+        });
+        return reponse
     }
 
 }

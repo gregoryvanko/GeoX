@@ -160,7 +160,7 @@
     -moz-border-radius: 5px;
     border-radius: 5px;
     padding: 2%;
-    color: #666;
+    color: black;
 }
 .Input:focus,
 .Input.focus {

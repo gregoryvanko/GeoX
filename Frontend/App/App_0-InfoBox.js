@@ -17,6 +17,7 @@ class InfoBox{
     }
 
     set ListOfTrack(val){this._ListOfTrack = val}
+    get InfoBowIsShown() {return this._InfoBowIsShown}
 
     /**
      * Toggle Show Hide Info Box
