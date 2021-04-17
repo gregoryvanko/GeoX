@@ -106,7 +106,7 @@
 }
 
 .DivBoxDistance{
-    width: 15%;
+    width: 20%;
     height: 8vh;
     position: fixed;
     z-index: 998; 
@@ -307,7 +307,7 @@ screen and (max-width: 700px)
     .ButtonInfoBox{border-radius: 40px;}
     .MarkerPopupContent{margin:auto 20%;}
     .ButtonPopup{ padding: 8% 0%;}
-    .DivBoxDistance{width: 50%;}
+    .DivBoxDistance{width: 70%;}
     .DivBoxInfoTxt{width: 50%;}
 }
 

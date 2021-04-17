@@ -14,12 +14,11 @@ class GeoX {
         // this._DataMap = null
         // this._GeoXData = null
         // this._DataApp = null
-        // this._CurrentPosShowed = false
-        // this._GpsPointer = null
-        // this._GpsPointerTrack = null
-        // this._GpsRadius = null
-        // this._GpsLineToPosition = null
-        // this._GeoLocalisation = new GeoLocalisation(this.ShowPosition.bind(this), this.ErrorPosition.bind(this))
+        this._CurrentPosShowed = false
+        this._GpsPointer = null
+        this._GpsPointerTrack = null
+        this._GpsRadius = null
+        this._GpsLineToPosition = null
 
         // Style for Marker Start
         this._IconPointStartOption = L.icon({
@@ -47,6 +46,8 @@ class GeoX {
         this._FitBounds = null
         // InfoBox
         this._InfoBox = null
+        // Localisation
+        this._GeoLocalisation = null
         
     }
 
@@ -68,6 +69,8 @@ class GeoX {
         SocketIo.on('GeoX', (Value) => {this.MessageRecieved(Value)})
         // InfoBox
         this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ChangeTrackColor.bind(this), this.ClickOnFollowTrack.bind(this), this.CheckboxGroupChange.bind(this))
+        // Localisation 
+        this._GeoLocalisation = new GeoLocalisation(this.ShowPosition.bind(this), this.ErrorPosition.bind(this))
         // Load Data
         this.LoadViewGetAppData()
     }
@@ -128,6 +131,13 @@ class GeoX {
         this._InitialMapData = null
         this._FitBounds = null
         this._InfoBox = null
+        this._CurrentPosShowed = false
+        this._GpsPointer = null
+        this._GpsPointerTrack = null
+        this._GpsRadius = null
+        this._GpsLineToPosition = null
+        this._GeoLocalisation.StopLocalisation()
+        this._GeoLocalisation = null
 
         if (this._Map && this._Map.remove) {
             this._Map.off();
@@ -141,13 +151,9 @@ class GeoX {
             // this._DataMap = null
             // this._GeoXData = null
             // this._DataApp = null
-            // this._CurrentPosShowed = false
-            // this._GpsPointer = null
-            // this._GpsPointerTrack = null
-            // this._GpsRadius = null
-            // this._GpsLineToPosition = null
-            // if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
-            // this._GeoLocalisation.StopLocalisation()
+            
+
+            if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
         }
     }
 
@@ -473,20 +479,23 @@ class GeoX {
      * @param {Object} Track Object contenant les information de la track
      */
     ClickOnFollowTrack(Track){
-        // si InfoBox est affichee, il faut la cacher
-        if(this._InfoBox.InfoBowIsShown){
-            this._InfoBox.InfoBoxToggle(this._UserGroup, this._ListOfTrack)
-        }
-        // On efface les autres tracks de la map
         let me = this
-        // Remove track from _ListOfTrack
+        // On efface les autres tracks de la map
         this._LayerGroup.eachLayer(function (layer) {
             if (!((layer.id == Track._id) || (layer.id == Track._id + "start") || (layer.id == Track._id + "end"))){
                 me._LayerGroup.removeLayer(layer);
             }
         })
+        // Si la track n'est pas affichée, on l'affiche
+        this.ClickOnBoxTrack(Track)
+        // si InfoBox est affichee, il faut la cacher
+        if(this._InfoBox.InfoBowIsShown){
+            this._InfoBox.InfoBoxToggle(this._UserGroup, this._ListOfTrack)
+        }
+        // On cache le bouton InfoBox
+        this.SetButtonInfoBoxToggleVisible(false)
         // Start localisation
-        // ToDo
+        this.GpslocalisationToogle()
     }
 
     /**
@@ -550,6 +559,232 @@ class GeoX {
             }
         });
         return reponse
+    }
+
+    /**
+     * Show / Hide button InfoBoxToggle
+     * @param {Boolean} Visible show / Hide
+     */
+    SetButtonInfoBoxToggleVisible(Visible){
+        if (Visible){
+            document.getElementById("ButtonInfoBoxToggle").style.display = "block";
+        } else {
+            document.getElementById("ButtonInfoBoxToggle").style.display = "none";
+        }
+    }
+
+    /**
+     * Update de la position actuelle
+     * @param {Object} e GPS Object
+     */
+    ShowPosition(e){
+        if (this._CurrentPosShowed){
+            let radius = e.accuracy
+            if(this._GpsPointer){this._GpsPointer.setLatLng(e.latlng)}
+            if(this._GpsRadius){
+                this._GpsRadius.setLatLng(e.latlng)
+                this._GpsRadius.setRadius(radius)
+            }
+            this.CalculateLivePositionOnTrack(e)
+        }
+    }
+    
+    /**
+     * Show message d'erreur du relevé de la position GPS
+     * @param {String} ErrorTxt Message d'erreur
+     */
+    ErrorPosition(ErrorTxt){
+        document.getElementById("ConteneurTxt").style.display = "flex";
+        document.getElementById("ConteneurData").style.display = "none";
+        document.getElementById("DistanceTxt").innerText = ErrorTxt
+    }
+
+    /**
+     * View or hide Current position
+     */
+    GpslocalisationToogle(){
+        if (this._CurrentPosShowed){
+            // Hide current position
+            this._CurrentPosShowed = false
+            this._Map.removeLayer(this._GpsPointer)
+            this._GpsPointer = null
+            this._Map.removeLayer(this._GpsRadius)
+            this._GpsRadius = null
+            if(this._GpsPointerTrack){
+                this._Map.removeLayer(this._GpsPointerTrack)
+                this._GpsPointerTrack = null
+            }
+            if (this._GpsLineToPosition){
+                this._Map.removeLayer(this._GpsLineToPosition)
+                this._GpsLineToPosition = null
+            }
+            // Stop Localisation
+            this._GeoLocalisation.StopLocalisation()
+            // remove box info
+            this.HideDistanceInfoBox()
+            // On affiche le bouton InfoBox
+            this.SetButtonInfoBoxToggleVisible(true)
+        } else {
+            this._CurrentPosShowed = true
+            this._GpsRadius = L.circle([50.709446,4.543413], 1).addTo(this._Map)
+            this._GpsPointerTrack = L.circle([50.709446,4.543413], 3, {color: "red", fillColor:'red', fillOpacity:1}).addTo(this._Map)
+            this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'#0073f0', fillOpacity:1}).addTo(this._Map)
+            // Add box info
+            this.ShowDistanceInfoBox()
+            // Start Localisation
+            this._GeoLocalisation.StartLocalisation()
+        }
+    }
+
+    /**
+     * Show de la box avec les info de suivi d'une track
+     */
+    ShowDistanceInfoBox(){
+        // Div du box
+        let DivBoxTracks = CoreXBuild.Div("DivBoxDistance", "DivBoxDistance", "")
+        this._DivApp.appendChild(DivBoxTracks)
+        // Conteneur
+        let Conteneur = CoreXBuild.DivFlexRowAr("")
+        DivBoxTracks.appendChild(Conteneur)
+        // ConteneurTxt
+        let ConteneurTxt = CoreXBuild.Div("ConteneurTxt", "", "width: 78%; display:flex; justify-content:center;")
+        Conteneur.appendChild(ConteneurTxt)
+        ConteneurTxt.appendChild(CoreXBuild.DivTexte("Waiting for GPS position...","DistanceTxt","TextTrackInfo", "color: white; text-align: center;"))
+        // ConteneurData
+        let ConteneurData = CoreXBuild.DivFlexRowAr("ConteneurData")
+        ConteneurData.style.display = "none"
+        ConteneurData.style.width = "78%"
+        Conteneur.appendChild(ConteneurData)
+        // Boutton stop
+        let ConteneurStop = CoreXBuild.Div("ConteneurStop", "", "width: 20%; display: flex; flex-direction:column; justify-content:center;")
+        Conteneur.appendChild(ConteneurStop)
+        ConteneurStop.appendChild(CoreXBuild.Button (`<img src="${Icon.Stop()}" alt="icon" width="30" height="30">`, this.GpslocalisationToogle.bind(this), "ButtonInfoBoxNav", ""))
+        // Pourcentage
+        let DivProgressRing = CoreXBuild.Div("", "", "width: 38%; display: flex; flex-direction:column; justify-content:flex-start;")
+        ConteneurData.appendChild(DivProgressRing)
+        DivProgressRing.appendChild(CoreXBuild.ProgressRing({Id:"MyProgressRing", Radius:30, RadiusMobile:30, ScaleText:0.7, TextColor:"white", StrokeColor:"var(--CoreX-color)"}))
+        // Div Distance
+        let DivDistane = CoreXBuild.Div("", "", "width: 60%; display: flex; flex-direction:column; justify-content:center;")
+        ConteneurData.appendChild(DivDistane)
+        let DivDone = CoreXBuild.DivFlexRowStart("")
+        DivDistane.appendChild(DivDone)
+        DivDone.appendChild(CoreXBuild.DivTexte("Done:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
+        DivDone.appendChild(CoreXBuild.DivTexte("0km","DistaneDone","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
+        let DivTotal = CoreXBuild.DivFlexRowStart("")
+        DivDistane.appendChild(DivTotal)
+        DivTotal.appendChild(CoreXBuild.DivTexte("Total:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
+        DivTotal.appendChild(CoreXBuild.DivTexte("0km","DistanceTotal","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
+        let DivReste = CoreXBuild.DivFlexRowStart("")
+        DivDistane.appendChild(DivReste)
+        DivReste.appendChild(CoreXBuild.DivTexte("To End:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
+        DivReste.appendChild(CoreXBuild.DivTexte("0km","DistanceToEnd","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
+    }
+
+    /**
+     * Hide de la box avec les info de suivi d'une track
+     */
+    HideDistanceInfoBox(){
+        // If TracksInfo existe alors on le supprime
+        let DivBoxDistance = document.getElementById("DivBoxDistance")
+        if(DivBoxDistance){
+            DivBoxDistance.parentNode.removeChild(DivBoxDistance)
+        }
+    }
+
+    /**
+     * Calcul la position actuel sur la track
+     * @param {Object} Gps {longitude, latitude} Coordonnee lat et long de la position actuelle
+     */
+    CalculateLivePositionOnTrack(Gps){
+        // get all layer
+        var arrayOfLayers = this._LayerGroup.getLayers()
+        let MyLayer = arrayOfLayers.filter(x => x.Type== "Track")
+        // Verifier si il n'y a qu'une seule track sur la carte
+        if(MyLayer.length == 1){
+            var layer = MyLayer[0]._layers
+            var id = Object.keys(layer)[0]
+            var coord = layer[id].feature.geometry.coordinates
+            var line = turf.lineString(coord)
+            var pt = turf.point([Gps.longitude, Gps.latitude])
+            var snapped = turf.nearestPointOnLine(line, pt)
+            // Modifier la position du point _GpsPointerTrack
+            if (this._GpsPointerTrack){
+                this._GpsPointerTrack.setLatLng([snapped.geometry.coordinates[1],snapped.geometry.coordinates[0]])
+            } else {
+                this._GpsPointerTrack = L.circle([snapped.geometry.coordinates[1],snapped.geometry.coordinates[0]], 3, {color: "red", fillColor:'red', fillOpacity:1}).addTo(this._Map)
+            }
+            // Si la distance entre la position et la track est plus petite que 40m
+            if (snapped.properties.dist < 0.04){
+                var DistandceParcourue = Math.round((snapped.properties.location + Number.EPSILON) * 1000) / 1000
+                var DistranceTotale = Math.round((turf.length(line) + Number.EPSILON) * 1000) / 1000
+                var DistanceToEnd = DistranceTotale - DistandceParcourue
+                var DistancePourcent =Math.round(((DistandceParcourue/DistranceTotale) * 100 + Number.EPSILON) * 10) / 10
+                if (DistandceParcourue >= 1){
+                    DistandceParcourue = DistandceParcourue.toString() + "Km"
+                } else {
+                    DistandceParcourue = DistandceParcourue * 1000
+                    DistandceParcourue = DistandceParcourue.toString()  + "m"
+                }
+                if (DistranceTotale >= 1){
+                    DistranceTotale = DistranceTotale.toString() + "Km"
+                } else {
+                    DistranceTotale = DistranceTotale * 1000
+                    DistranceTotale = DistranceTotale.toString()  + "m"
+                }
+                if (DistanceToEnd >= 1){
+                    DistanceToEnd = DistanceToEnd.toString() + "Km"
+                } else {
+                    DistanceToEnd = DistanceToEnd * 1000
+                    DistanceToEnd = DistanceToEnd.toString()  + "m"
+                }
+                document.getElementById("ConteneurTxt").style.display = "none";
+                document.getElementById("ConteneurData").style.display = "flex";
+                document.getElementById("DistanceTxt").innerText = ``
+                document.getElementById("DistaneDone").innerText = DistandceParcourue
+                document.getElementById("DistanceTotal").innerText = DistranceTotale
+                document.getElementById("DistanceToEnd").innerText = DistanceToEnd
+                document.getElementById("MyProgressRing").setAttribute('progress', DistancePourcent);
+                // retirer la ligne entre la track et la position
+                if (this._GpsLineToPosition != null){
+                    this._Map.removeLayer(this._GpsLineToPosition)
+                    this._GpsLineToPosition = null
+                }
+            } else {
+                var DistandcePosAndTrack = Math.round((snapped.properties.dist + Number.EPSILON) * 1000) / 1000
+                if (DistandcePosAndTrack >= 1){
+                    DistandcePosAndTrack = DistandcePosAndTrack.toString() + "Km"
+                } else {
+                    DistandcePosAndTrack = DistandcePosAndTrack * 1000
+                    DistandcePosAndTrack = DistandcePosAndTrack.toString()  + "m"
+                }
+                // afficher que l'on est trop loin
+                document.getElementById("ConteneurTxt").style.display = "flex";
+                document.getElementById("ConteneurData").style.display = "none";
+                document.getElementById("DistanceTxt").innerText = `To fare from the track: ${DistandcePosAndTrack}`
+                // afficher la ligne entre la track et la position
+                if (this._GpsLineToPosition == null){
+                    this._GpsLineToPosition = L.polyline([],{color: 'red', weight: '2', dashArray: '20, 20', dashOffset: '0'}).addTo(this._Map)
+                }
+                this._GpsLineToPosition.setLatLngs([])
+                this._GpsLineToPosition.addLatLng(L.latLng([Gps.latitude,Gps.longitude]))
+                this._GpsLineToPosition.addLatLng(L.latLng([snapped.geometry.coordinates[1],snapped.geometry.coordinates[0]]))
+            }
+        } else {
+            // afficher qu'il y a plus que un layer
+            document.getElementById("ConteneurTxt").style.display = "flex";
+            document.getElementById("ConteneurData").style.display = "none";
+            document.getElementById("DistanceTxt").innerText = `Show only one track to follow on map`
+            // retirer la ligne entre la track et la position
+            if (this._GpsLineToPosition != null){
+                this._Map.removeLayer(this._GpsLineToPosition)
+                this._GpsLineToPosition = null
+            }
+            // retirer le _GpsPointerTrack
+            if (this._GpsPointerTrack != null){
+                this._Map.removeLayer(this._GpsPointerTrack)
+                this._GpsPointerTrack = null
+            }
+        }
     }
 
 }
