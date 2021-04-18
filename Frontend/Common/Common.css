@@ -57,6 +57,11 @@
     margin: 1vh 0vh 4vh 0vh;
 }
 
+.ButtonCenterTop{
+    margin: 0vh 0vh 0vh 0vh;
+    width: 24vh;
+}
+
 /* Button Icon */
 .ButtonIcon{
     font-size: calc(var(--TexteNomrale)*1.4);

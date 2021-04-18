@@ -29,6 +29,16 @@
     margin-top: 2vh;
 }
 
+.DivCenterTop{
+    width: 20%;
+    position: fixed;
+    z-index: 999; 
+    left: 50%; 
+    top: 1%; 
+    transform: translate(-50%, 0%);
+    text-align: center;
+}
+
 .DivMapGroupDropDown{
     width: 20%;
     position: fixed;
@@ -37,6 +47,7 @@
     top: 1%; 
     transform: translate(-50%, 0%);
 }
+
 
 /* Drop Down */
 .MapGroupDropDown{
@@ -299,6 +310,7 @@ screen and (max-width: 700px)
     .TextTrackInfo{font-size: var(--TexteIphone);}
     .DivDropDownPays{width: 90%;}
     .InputCity{width: 90%;}
+    .DivCenterTop{width: 45%; top: 0%; margin:4px;}
     .DivMapGroupDropDown{width: 45%; top: 0%; margin:4px;}
     .MapGroupDropDown{padding: 1.5vh;}
     .DivBoxTracks{width: 90%; left: -90%; max-width: 100%;}

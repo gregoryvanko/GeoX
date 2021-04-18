@@ -182,13 +182,17 @@ class GeoX {
     LoadViewMap(){
         // mettre le backgroundColor du body à Black pour la vue Iphone
         if (L.Browser.mobile){document.body.style.backgroundColor= "black"}
-        
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
         // Ajout du bouton action left
         this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this._InfoBox.InfoBoxToggle.bind(this._InfoBox, this._UserGroup, this._ListOfTrack), "ButtonInfoBoxToggle", `<img src="${Icon.OpenPanel()}" alt="icon" width="25" height="25">`))
+        // Ajout du bouton Show GeoX Tracks
+        let divButtonShow = CoreXBuild.Div("", "DivCenterTop", "")
+        this._DivApp.appendChild(divButtonShow)
+        divButtonShow.appendChild(CoreXBuild.Button("Show Geox Tracks", this.ClickShowGeoXTracks.bind(this), "Text Button ButtonCenterTop", "ButtonShowGeoXTracks"))
+
         // Parametre de la carte
         let CenterPoint = this._InitialMapData.CenterPoint
         let zoom = this._InitialMapData.Zoom
@@ -494,6 +498,8 @@ class GeoX {
         }
         // On cache le bouton InfoBox
         this.SetButtonInfoBoxToggleVisible(false)
+        // On cache le boutton ShowGeoXTracks
+        this.SetButtonShowGeoXTracksToggleVisible(false)
         // Start localisation
         this.GpslocalisationToogle()
     }
@@ -624,6 +630,8 @@ class GeoX {
             this.HideDistanceInfoBox()
             // On affiche le bouton InfoBox
             this.SetButtonInfoBoxToggleVisible(true)
+            // On affiche le bouton ShowGeoXTracks
+            this.SetButtonShowGeoXTracksToggleVisible(true)
         } else {
             this._CurrentPosShowed = true
             this._GpsRadius = L.circle([50.709446,4.543413], 1).addTo(this._Map)
@@ -785,6 +793,23 @@ class GeoX {
                 this._GpsPointerTrack = null
             }
         }
+    }
+
+    /**
+     * Show / Hide button ShowGeoXTracks
+     * @param {Boolean} Visible show / Hide
+     */
+     SetButtonShowGeoXTracksToggleVisible(Visible){
+        if (Visible){
+            document.getElementById("ButtonShowGeoXTracks").style.display = "block";
+        } else {
+            document.getElementById("ButtonShowGeoXTracks").style.display = "none";
+        }
+    }
+
+    ClickShowGeoXTracks(){
+        document.getElementById("ButtonShowGeoXTracks").innerHTML = "waiting"
+        // ToDo
     }
 
 }
