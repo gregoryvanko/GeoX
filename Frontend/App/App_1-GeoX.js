@@ -9,17 +9,21 @@ class GeoX {
         this._MapId = "mapid"
         this._Map = null
         this._LayerGroup = null
+        this._MarkersCluster = null
 
-        // this._GroupSelected = null
-        // this._DataMap = null
-        // this._GeoXData = null
-        // this._DataApp = null
         this._CurrentPosShowed = false
         this._GpsPointer = null
         this._GpsPointerTrack = null
         this._GpsRadius = null
         this._GpsLineToPosition = null
 
+        // Style for Marker Icon
+        this._IconPointOption = L.icon({
+            iconUrl: Icon.MarkerBleu(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+        });
         // Style for Marker Start
         this._IconPointStartOption = L.icon({
             iconUrl: Icon.MarkerVert(),
@@ -40,6 +44,8 @@ class GeoX {
         this._UserGroup = null
         // List Of Track
         this._ListOfTrack = []
+        // List Of Marker
+        this._ListeOfMarkers = []
         // Donnee de construction de la map
         this._InitialMapData = null
         // FitBounds
@@ -101,6 +107,17 @@ class GeoX {
             this._FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]]
             // Modifier les track sur la map
             this.ModifyTracksOnMap()
+        } else if (Value.Action == "SetAllMarkers" ){
+            // Changer le titre du boutton
+            document.getElementById("ButtonShowGeoXTracks").innerHTML = "Show Geox Tracks"
+            // Save Marker
+            this._ListeOfMarkers = Value.Data
+            // On delete les marker si ils existent
+            this.AddMarkerOnMap()
+        } else if(Value.Action == "SetTrack" ){
+            let Track = Value.Data
+            Track.Color = "black"
+            this.SetTrackOnMap(Track, false)
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -128,6 +145,7 @@ class GeoX {
     CloseModule(){
         this._UserGroup = null
         this._ListOfTrack = []
+        this._ListeOfMarkers = []
         this._InitialMapData = null
         this._FitBounds = null
         this._InfoBox = null
@@ -146,13 +164,7 @@ class GeoX {
             let mapDiv = document.getElementById(this._MapId)
             if(mapDiv) mapDiv.parentNode.removeChild(mapDiv)
             this._LayerGroup = null
-
-            // this._GroupSelected = null
-            // this._DataMap = null
-            // this._GeoXData = null
-            // this._DataApp = null
-            
-
+            this._MarkersCluster = null
             if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
         }
     }
@@ -225,11 +237,82 @@ class GeoX {
         // Creation du groupe de layer
         this._LayerGroup = new L.LayerGroup()
         this._LayerGroup.addTo(this._Map)
+        // Build markerClusterGroup
+        this._MarkersCluster = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({ 
+                    html: cluster.getChildCount(), 
+                    className: 'mycluster', 
+                    iconSize: null 
+                });
+            }
+        });
+        // Ajout du markerClusterGroup a la map
+        this._Map.addLayer(this._MarkersCluster);
         // Ajout des tracks sur la map
         let me = this
         setTimeout(function(){
             me.ModifyTracksOnMap()
         }, 500);
+    }
+
+    SetTrackOnMap(Track, MyTrack= true){
+        let WeightTrack = this._WeightTrack
+        var TrackStyle = {
+            "color": Track.Color,
+            "weight": WeightTrack
+        };
+        var layerTrack1 = null
+        if (MyTrack){
+            layerTrack1=L.geoJSON(Track.GeoJsonData, 
+                {
+                    style: TrackStyle, 
+                    filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
+                    arrowheads: {frequency: '100px', size: '15m', fill: true}
+                })
+                .bindPopup(this.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
+                .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
+                .on('mouseout', function (e){e.target.setStyle({weight:WeightTrack});})
+                .addTo(this._LayerGroup)
+        } else {
+            layerTrack1=L.geoJSON(Track.GeoJsonData, 
+                {
+                    style: TrackStyle, 
+                    filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
+                    arrowheads: {frequency: '100px', size: '15m', fill: true}
+                })
+                .bindPopup(this.BuildPopupContentGeoXTrack(Track.Name, Track.Length, Track._id, Track.Color))
+                .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
+                .on('mouseout', function (e){e.target.setStyle({weight:WeightTrack});})
+                .addTo(this._LayerGroup)
+        }
+        
+        layerTrack1.id = Track._id
+        layerTrack1.Type= "Track"
+        // Get Start and end point
+        var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
+        var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
+        var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
+        
+        if (MyTrack){
+            // Marker Start
+            var MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption}).addTo(this._LayerGroup)
+            MarkerStart.id = Track._id + "start"
+            MarkerStart.Type = "Marker"
+            MarkerStart.dragging.disable();
+            // Marker End
+            var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._LayerGroup)
+            MarkerEnd.id = Track._id + "end"
+            MarkerEnd.Type = "Marker"
+            MarkerEnd.dragging.disable();
+        } else {
+            // que Marker End pour les track GeoX
+            var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleMarkerOnMap(Track._id)}}).addTo(this._LayerGroup)
+            MarkerEnd.id = Track._id + "end"
+            MarkerEnd.Type = "Marker"
+            MarkerEnd.dragging.disable();
+        }
+        
     }
 
     /**
@@ -249,37 +332,7 @@ class GeoX {
             this._Map.once('moveend', function() {
                 // Add track
                 me._ListOfTrack.forEach(Track => {
-                    // Track
-                    var TrackStyle = {
-                        "color": Track.Color,
-                        "weight": me._WeightTrack
-                    };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, 
-                        {
-                            style: TrackStyle, 
-                            filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
-                            arrowheads: {frequency: '100px', size: '15m', fill: true}
-                        })
-                        .bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
-                        .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
-                        .on('mouseout', function (e){e.target.setStyle({weight:me._WeightTrack});})
-                        .addTo(me._LayerGroup)
-                    layerTrack1.id = Track._id
-                    layerTrack1.Type= "Track"
-                    // Get Start and end point
-                    var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
-                    var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
-                    var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
-                    // Marker Start
-                    var MarkerStart = new L.marker([beg[1],beg[0]], {icon: me._IconPointStartOption}).addTo(me._LayerGroup)
-                    MarkerStart.id = Track._id + "start"
-                    MarkerStart.Type = "Marker"
-                    MarkerStart.dragging.disable();
-                    // Marker End
-                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: me._IconPointEndOption}).addTo(me._LayerGroup)
-                    MarkerEnd.id = Track._id + "end"
-                    MarkerEnd.Type = "Marker"
-                    MarkerEnd.dragging.disable();
+                    me.SetTrackOnMap(Track, true)
                 })
             })
         }
@@ -308,6 +361,18 @@ class GeoX {
         inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px; border: 1px solid black; margin-top: 1vh;")
         inputcolor.value = Color
         inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, Name, Length, Id)}
+        return Div
+    }
+
+    BuildPopupContentGeoXTrack(Name, Length, Id){
+        let Div = document.createElement("div")
+        Div.setAttribute("Class", "TrackPopupContent")
+        // Nom de la track
+        Div.appendChild(CoreXBuild.DivTexte(Name,"","TextSmall", ""))
+        // Longueur de la track
+        Div.appendChild(CoreXBuild.DivTexte(Length + "km","","TextSmall", ""))
+        // Save Track
+        Div.appendChild(CoreXBuild.Button (`<img src="${Icon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveGeoXTrackToMyTracks.bind(this, Id), "ButtonIcon ButtonIconBlackBorder"))
         return Div
     }
 
@@ -356,31 +421,7 @@ class GeoX {
         if (TrackId == null){
             if (this._LayerGroup.getLayers().length == 0){
                 this._ListOfTrack.forEach(Track => {
-                    var TrackStyle = {
-                        "color": Track.Color,
-                        "weight": me._WeightTrack
-                    };
-                    var layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '80px', size: '18m', fill: true}})
-                    .bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
-                    .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
-                    .on('mouseout', function (e) {e.target.setStyle({weight: me._WeightTrack});})
-                    .addTo(this._LayerGroup)
-                    layerTrack1.id = Track._id
-                    layerTrack1.Type= "Track"
-                    // Get Start and end point
-                    var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
-                    var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
-                    var end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
-                    // Marker Start
-                    var MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption}).addTo(this._LayerGroup)
-                    MarkerStart.id = Track._id + "start"
-                    MarkerStart.Type = "Marker"
-                    MarkerStart.dragging.disable();
-                    // Marker End
-                    var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._LayerGroup)
-                    MarkerEnd.id = Track._id + "end"
-                    MarkerEnd.Type = "Marker"
-                    MarkerEnd.dragging.disable();
+                    me.SetTrackOnMap(Track, true)
                 });
             } else {
                 // On efface toute les tracks
@@ -398,31 +439,7 @@ class GeoX {
             if (AddTrack){
                 this._ListOfTrack.forEach(Track => {
                     if (Track._id == TrackId){
-                        let TrackStyle = {
-                            "color": Track.Color,
-                            "weight": me._WeightTrack
-                        };
-                        let layerTrack1=L.geoJSON(Track.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '80px', size: '18m', fill: true}})
-                        .bindPopup(me.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Color))
-                        .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
-                        .on('mouseout', function (e) {e.target.setStyle({weight: me._WeightTrack});})
-                        .addTo(me._LayerGroup)
-                        layerTrack1.id = Track._id
-                        layerTrack1.Type= "Track"
-                        // Get Start and end point
-                        let numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
-                        let beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
-                        let end = Track.GeoJsonData.features[0].geometry.coordinates[numPts-1];
-                        // Marker Start
-                        let MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption}).addTo(me._LayerGroup)
-                        MarkerStart.id = Track._id + "start"
-                        MarkerStart.Type = "Marker"
-                        MarkerStart.dragging.disable();
-                        // Marker End
-                        let MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(me._LayerGroup)
-                        MarkerEnd.id = Track._id + "end"
-                        MarkerEnd.Type = "Marker"
-                        MarkerEnd.dragging.disable();
+                        this.SetTrackOnMap(Track, true)
                     }
                 });
             }
@@ -435,7 +452,6 @@ class GeoX {
      * @param {Object} Track Object contenant les information de la track
      */
     ClickOnBoxTrack (Track){
-        let me = this
         // Show Track if not on map
         let TracknotOnMap = true
         this._LayerGroup.eachLayer(function (layer) {
@@ -446,31 +462,7 @@ class GeoX {
         if (TracknotOnMap){
             this._ListOfTrack.forEach(TheTrack => {
                 if (TheTrack._id == Track._id){
-                    let TrackStyle = {
-                        "color": TheTrack.Color,
-                        "weight": me._WeightTrack
-                    };
-                    let layerTrack1=L.geoJSON(TheTrack.GeoJsonData, {style: TrackStyle, filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, arrowheads: {frequency: '80px', size: '18m', fill: true}})
-                    .bindPopup(me.BuildPopupContentTrack(TheTrack.Name, TheTrack.Length, TheTrack._id, TheTrack.Color))
-                    .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
-                    .on('mouseout', function (e) {e.target.setStyle({weight: me._WeightTrack});})
-                    .addTo(this._LayerGroup)
-                    layerTrack1.id = TheTrack._id
-                    layerTrack1.Type= "Track"
-                    // Get Start and end point
-                    let numPts = TheTrack.GeoJsonData.features[0].geometry.coordinates.length;
-                    let beg = TheTrack.GeoJsonData.features[0].geometry.coordinates[0];
-                    let end = TheTrack.GeoJsonData.features[0].geometry.coordinates[numPts-1];
-                    // Marker Start
-                    let MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption}).addTo(this._LayerGroup)
-                    MarkerStart.id = TheTrack._id + "start"
-                    MarkerStart.Type = "Marker"
-                    MarkerStart.dragging.disable();
-                    // Marker End
-                    let MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._LayerGroup)
-                    MarkerEnd.id = TheTrack._id + "end"
-                    MarkerEnd.Type = "Marker"
-                    MarkerEnd.dragging.disable();
+                    this.SetTrackOnMap(TheTrack, true)
                 }
             });
         }
@@ -799,7 +791,7 @@ class GeoX {
      * Show / Hide button ShowGeoXTracks
      * @param {Boolean} Visible show / Hide
      */
-     SetButtonShowGeoXTracksToggleVisible(Visible){
+    SetButtonShowGeoXTracksToggleVisible(Visible){
         if (Visible){
             document.getElementById("ButtonShowGeoXTracks").style.display = "block";
         } else {
@@ -807,9 +799,64 @@ class GeoX {
         }
     }
 
+    /**
+     * Click on Show Geox Track button
+     */
     ClickShowGeoXTracks(){
-        document.getElementById("ButtonShowGeoXTracks").innerHTML = "waiting"
+        // Si les GeoX track sont affichee on les retire
         // ToDo
+        // Changer le titre du boutton
+        document.getElementById("ButtonShowGeoXTracks").innerHTML = "waiting"
+        // Data to send
+        let CallToServer = {Action: "GetMarkers"}
+        // Call Server
+        GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
+    }
+
+    /**
+     * Add Marker for GeoX Track
+     */
+    AddMarkerOnMap(){
+        // On delete les marker si ils existent
+        let me = this
+        this._MarkersCluster.eachLayer(function(layer) {
+            me._MarkersCluster.removeLayer(layer)
+        })
+        // On affiche les marker
+        this._ListeOfMarkers.forEach(Marker => {
+            let newMarker = new L.marker([Marker.StartPoint.Lat, Marker.StartPoint.Lng], {icon: this._IconPointOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleMarkerOnMap(Marker._id)}})
+            this._MarkersCluster.addLayer(newMarker);
+        });
+    }
+
+    /**
+     * Hide / Show Geox Track
+     * @param {String} TrackId Id of the track to show / hide
+     */
+    ToogleMarkerOnMap(TrackId){
+        let TrackNotOnMap = true
+        let me = this
+        this._LayerGroup.eachLayer(function (layer) {
+            if ((layer.id == TrackId) || (layer.id == TrackId + "end")){
+                me._LayerGroup.removeLayer(layer);
+                TrackNotOnMap = false
+            }
+        })
+        // Creation de la track si elle n'est pas sur la map
+        if (TrackNotOnMap){
+            // Data to send
+            let CallToServer = {Action : "GetTrack", TrackId : TrackId}
+            // Call Server
+            GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
+        }
+    }
+
+    /**
+     * Click on save GeoX Track to my track
+     * @param {String} TrackId Id of the track to show / hide
+     */
+    ClickSaveGeoXTrackToMyTracks(TrackId){
+        alert(TrackId) //ToDo
     }
 
 }

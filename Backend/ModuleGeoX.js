@@ -94,6 +94,82 @@ async function CallUpdateTrack(Track, MyApp, Socket, User, UserId){
     }
 }
 
+async function CallGetMarkers(MyApp, Socket, User, UserId){
+    let ReponseAllTracksInfo = await PromiseGetAllMarkers(MyApp, User)
+    if(!ReponseAllTracksInfo.Error){
+        // Delete identical tracks
+        let UniqueMarkers = ReponseAllTracksInfo.Data.filter((v,i,a)=>a.findIndex(t=>(JSON.stringify(t.StartPoint) === JSON.stringify(v.StartPoint)))===i)
+        // Send Reponse
+        let reponse = new Object()
+        reponse.Action = "SetAllMarkers"
+        reponse.Data = UniqueMarkers
+        Socket.emit("GeoX", reponse)
+    } else {
+        MyApp.LogAppliError("CallGetMarkers PromiseGetAllMarkers error: " + ReponseAllTracksInfo.ErrorMsg, User, UserId)
+        Socket.emit("GeoXError", "CallGetMarkers PromiseGetAllMarkers error")
+    }
+}
+
+function PromiseGetAllMarkers(MyApp, User){
+    return new Promise(resolve => {
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:[]}
+
+        let Querry = {$and:[{[MongoTracksCollection.Public]: true}, {[MongoTracksCollection.Owner]: { $ne: User }}]}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Date]: 1}}
+        Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
+                ReponseTracks.Error = false
+                ReponseTracks.ErrorMsg = null
+            if(reponse.length == 0){
+                ReponseTracks.Data = []
+            } else {
+                reponse.forEach(element => {
+                    element.Group = "GeoX"
+                    ReponseTracks.Data.push(element)
+                });
+            }
+            resolve(ReponseTracks)
+        },(erreur)=>{
+            ReponseTracks.Error = true
+            ReponseTracks.ErrorMsg = "CallGetMarkers PromiseGetAllMarkers error: " + erreur
+            ReponseTracks.Data = []
+            resolve(ReponseTracks)
+        })
+    })
+}
+
+function CallGetTrack(TrackId, MyApp, Socket, User, UserId){
+    let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+    let MongoR = require('@gregvanko/corex').Mongo
+    Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    MongoTracksCollection = MongoConfig.TracksCollection
+    // Query Mongodb
+    const Querry = {'_id': new MongoObjectId(TrackId)}
+    const Projection = { projection:{[MongoTracksCollection.GpxData]: 0, [MongoTracksCollection.Color]: 0, [MongoTracksCollection.Group]: 0, [MongoTracksCollection.Date]: 0, [MongoTracksCollection.Owner]: 0, [MongoTracksCollection.Public]: 0}}
+    Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
+        if(reponse.length == 1){
+            // Send Reponse
+            let Clientreponse = new Object()
+            Clientreponse.Action = "SetTrack"
+            Clientreponse.Data = reponse[0]
+            Socket.emit("GeoX", Clientreponse)
+        } else {
+            MyApp.LogAppliError("CallGetTrack error: Track not found", User, UserId)
+            Socket.emit("GeoXError", "CallGetTrack error: Track not found")
+        }
+    },(erreur)=>{
+        MyApp.LogAppliError("CallGetTrack error: " + erreur, User, UserId)
+        Socket.emit("GeoXError", "CallGetTrack error: " + erreur)
+    })
+}
+
 module.exports.CallGetInitialData = CallGetInitialData
 module.exports.CallGetTracksOfGroup = CallGetTracksOfGroup
 module.exports.CallUpdateTrack = CallUpdateTrack
+module.exports.CallGetMarkers = CallGetMarkers
+module.exports.CallGetTrack = CallGetTrack
