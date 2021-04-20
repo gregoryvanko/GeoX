@@ -54,6 +54,8 @@ class GeoX {
         this._InfoBox = null
         // Localisation
         this._GeoLocalisation = null
+        // GeoX Track are showed
+        this._GeoXTrackShowed = false
         
     }
 
@@ -109,11 +111,13 @@ class GeoX {
             this.ModifyTracksOnMap()
         } else if (Value.Action == "SetAllMarkers" ){
             // Changer le titre du boutton
-            document.getElementById("ButtonShowGeoXTracks").innerHTML = "Show Geox Tracks"
+            document.getElementById("ButtonShowGeoXTracks").innerHTML = "Hide Geox Tracks"
             // Save Marker
             this._ListeOfMarkers = Value.Data
-            // On delete les marker si ils existent
+            // On ajoute les marker
             this.AddMarkerOnMap()
+            // Changer le statu _GeoXTrackShowed
+            this._GeoXTrackShowed = true
         } else if(Value.Action == "SetTrack" ){
             let Track = Value.Data
             Track.Color = "black"
@@ -156,6 +160,7 @@ class GeoX {
         this._GpsLineToPosition = null
         this._GeoLocalisation.StopLocalisation()
         this._GeoLocalisation = null
+        this._GeoXTrackShowed = false
 
         if (this._Map && this._Map.remove) {
             this._Map.off();
@@ -203,7 +208,7 @@ class GeoX {
         // Ajout du bouton Show GeoX Tracks
         let divButtonShow = CoreXBuild.Div("", "DivCenterTop", "")
         this._DivApp.appendChild(divButtonShow)
-        divButtonShow.appendChild(CoreXBuild.Button("Show Geox Tracks", this.ClickShowGeoXTracks.bind(this), "Text Button ButtonCenterTop", "ButtonShowGeoXTracks"))
+        divButtonShow.appendChild(CoreXBuild.Button("Show Geox Tracks", this.ClickShowHideGeoXTracks.bind(this), "Text Button ButtonCenterTop", "ButtonShowGeoXTracks"))
 
         // Parametre de la carte
         let CenterPoint = this._InitialMapData.CenterPoint
@@ -274,6 +279,7 @@ class GeoX {
                 .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
                 .on('mouseout', function (e){e.target.setStyle({weight:WeightTrack});})
                 .addTo(this._LayerGroup)
+                layerTrack1.Type= "Track"
         } else {
             layerTrack1=L.geoJSON(Track.GeoJsonData, 
                 {
@@ -285,10 +291,11 @@ class GeoX {
                 .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
                 .on('mouseout', function (e){e.target.setStyle({weight:WeightTrack});})
                 .addTo(this._LayerGroup)
+                layerTrack1.Type= "GeoXTrack"
         }
         
         layerTrack1.id = Track._id
-        layerTrack1.Type= "Track"
+        
         // Get Start and end point
         var numPts = Track.GeoJsonData.features[0].geometry.coordinates.length;
         var beg = Track.GeoJsonData.features[0].geometry.coordinates[0];
@@ -309,7 +316,7 @@ class GeoX {
             // que Marker End pour les track GeoX
             var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleMarkerOnMap(Track._id)}}).addTo(this._LayerGroup)
             MarkerEnd.id = Track._id + "end"
-            MarkerEnd.Type = "Marker"
+            MarkerEnd.Type = "GeoXMarker"
             MarkerEnd.dragging.disable();
         }
         
@@ -339,7 +346,7 @@ class GeoX {
     }
 
     /**
-     * Construit le div du popup d'un track
+     * Construit le div du popup d'un track du user
      * @param {String} Name Nom de la track
      * @param {String} Length longeur de la track
      * @param {String} Id Id de la track
@@ -364,6 +371,13 @@ class GeoX {
         return Div
     }
 
+    /**
+     * Construit le div du popup d'un track de GeoX community
+     * @param {String} Name Nom de la track
+     * @param {String} Length longeur de la track
+     * @param {String} Id Id de la track
+     * @returns Html Div avec contenant l'information de la track
+     */
     BuildPopupContentGeoXTrack(Name, Length, Id){
         let Div = document.createElement("div")
         Div.setAttribute("Class", "TrackPopupContent")
@@ -800,17 +814,34 @@ class GeoX {
     }
 
     /**
-     * Click on Show Geox Track button
+     * Click on Show / Hide Geox community Track button
      */
-    ClickShowGeoXTracks(){
-        // Si les GeoX track sont affichee on les retire
-        // ToDo
+    ClickShowHideGeoXTracks(){
         // Changer le titre du boutton
         document.getElementById("ButtonShowGeoXTracks").innerHTML = "waiting"
-        // Data to send
-        let CallToServer = {Action: "GetMarkers"}
-        // Call Server
-        GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
+        // Si les GeoX track sont affichee on les retire
+        if (this._GeoXTrackShowed){
+            let me = this
+            // On delete les marker si ils existent
+            this._MarkersCluster.eachLayer(function(layer) {
+                me._MarkersCluster.removeLayer(layer)
+            })
+            // Remove all tracks
+            this._LayerGroup.eachLayer(function (layer) {
+                if ((layer.Type== "GeoXTrack")|| (layer.Type== "GeoXMarker")){
+                    me._LayerGroup.removeLayer(layer);
+                }
+            })
+            // Changer le statu _GeoXTrackShowed
+            this._GeoXTrackShowed = false
+            // Changer le titre du boutton
+            document.getElementById("ButtonShowGeoXTracks").innerHTML = "Show Geox Tracks"
+        } else {
+            // Data to send
+            let CallToServer = {Action: "GetMarkers"}
+            // Call Server
+            GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
+        }
     }
 
     /**
