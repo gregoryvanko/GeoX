@@ -76,7 +76,7 @@ class GeoX {
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
         SocketIo.on('GeoX', (Value) => {this.MessageRecieved(Value)})
         // InfoBox
-        this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ChangeTrackColor.bind(this), this.ClickOnFollowTrack.bind(this), this.CheckboxGroupChange.bind(this))
+        this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ChangeTrackColor.bind(this), this.ClickOnFollowTrack.bind(this), this.CheckboxGroupChange.bind(this), this.ClickOnBoxMarker.bind(this), this.ClickOnFollowMarker.bind(this), this.ToogleMarkerOnMap.bind(this), this.ClickSaveGeoXTrackToMyTracks.bind(this))
         // Localisation 
         this._GeoLocalisation = new GeoLocalisation(this.ShowPosition.bind(this), this.ErrorPosition.bind(this))
         // Load Data
@@ -114,6 +114,8 @@ class GeoX {
             document.getElementById("ButtonShowGeoXTracks").innerHTML = "Hide Geox Tracks"
             // Save Marker
             this._ListeOfMarkers = Value.Data
+            // Update des Marker de InfoBox
+            this._InfoBox.ListeOfMarkers = this._ListeOfMarkers
             // On ajoute les marker
             this.AddMarkerOnMap()
             // Changer le statu _GeoXTrackShowed
@@ -204,7 +206,9 @@ class GeoX {
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
         // Ajout du bouton action left
-        this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this._InfoBox.InfoBoxToggle.bind(this._InfoBox, this._UserGroup, this._ListOfTrack), "ButtonInfoBoxToggle", `<img src="${Icon.OpenPanel()}" alt="icon" width="25" height="25">`))
+        this._InfoBox.ListOfTrack = this._ListOfTrack
+        this._InfoBox.UserGroup = this._UserGroup
+        this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this._InfoBox.InfoBoxToggle.bind(this._InfoBox), "ButtonInfoBoxToggle", `<img src="${Icon.OpenPanel()}" alt="icon" width="25" height="25">`))
         // Ajout du bouton Show GeoX Tracks
         let divButtonShow = CoreXBuild.Div("", "DivCenterTop", "")
         this._DivApp.appendChild(divButtonShow)
@@ -484,6 +488,10 @@ class GeoX {
         this._Map.flyToBounds(FitboundTrack,{'duration':2} )
     }
 
+    ClickOnBoxMarker(MarkerId){
+        alert(MarkerId) // ToDo
+    }
+
     /**
      * Action effectuee lorsque l'on clique sur le boutton follow de InfoBox
      * @param {Object} Track Object contenant les information de la track
@@ -500,7 +508,7 @@ class GeoX {
         this.ClickOnBoxTrack(Track)
         // si InfoBox est affichee, il faut la cacher
         if(this._InfoBox.InfoBowIsShown){
-            this._InfoBox.InfoBoxToggle(this._UserGroup, this._ListOfTrack)
+            this._InfoBox.InfoBoxToggle()
         }
         // On cache le bouton InfoBox
         this.SetButtonInfoBoxToggleVisible(false)
@@ -508,6 +516,10 @@ class GeoX {
         this.SetButtonShowGeoXTracksToggleVisible(false)
         // Start localisation
         this.GpslocalisationToogle()
+    }
+
+    ClickOnFollowMarker(MarkerId){
+        alert(MarkerId) // ToDo
     }
 
     /**
@@ -832,11 +844,23 @@ class GeoX {
                     me._LayerGroup.removeLayer(layer);
                 }
             })
+            // Save Marker list
+            this._ListeOfMarkers = null
+            // Update des Marker de InfoBox
+            this._InfoBox.ListeOfMarkers = this._ListeOfMarkers
+            // If InfoBox showed on l'efface
+            if(this._InfoBox.InfoBowIsShown){
+                this._InfoBox.InfoBoxToggle()
+            }
             // Changer le statu _GeoXTrackShowed
             this._GeoXTrackShowed = false
             // Changer le titre du boutton
             document.getElementById("ButtonShowGeoXTracks").innerHTML = "Show Geox Tracks"
         } else {
+            // If InfoBox showed on l'efface
+            if(this._InfoBox.InfoBowIsShown){
+                this._InfoBox.InfoBoxToggle()
+            }
             // Data to send
             let CallToServer = {Action: "GetMarkers"}
             // Call Server
