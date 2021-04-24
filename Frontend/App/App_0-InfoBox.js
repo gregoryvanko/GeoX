@@ -1,15 +1,16 @@
 class InfoBox{
-    constructor(DivApp, ToogleTrack, ClickOnBoxTrack, ChangeTrackColor, ClickOnFollowTrack, CheckboxGroupChange, ClickOnBoxMarker, ClickOnFollowMarker, ToogleMarkerOnMap, ClickOnSaveMarker){
+    
+    constructor(DivApp, ToogleTrack, ClickOnBoxTrack, ChangeTrackColor, ClickOnFollowTrack, CheckboxGroupChange, ClickOnFollowMarker, ToogleMarkerOnMap, ClickOnSaveMarker, GetCornerOfMap){
         this._DivApp = DivApp
         this.ToogleTrack = ToogleTrack
         this.ToogleMarkerOnMap = ToogleMarkerOnMap
         this.ClickOnBoxTrack = ClickOnBoxTrack
-        this.ClickOnBoxMarker = ClickOnBoxMarker
         this.ChangeTrackColor = ChangeTrackColor
         this.ClickOnFollowTrack = ClickOnFollowTrack
         this.ClickOnFollowMarker = ClickOnFollowMarker
         this.CheckboxGroupChange = CheckboxGroupChange
         this.ClickOnSaveMarker = ClickOnSaveMarker
+        this.GetCornerOfMap = GetCornerOfMap
         // Statu de l'infobox
         this._InfoBowIsShown = false
         // UserGroup
@@ -75,7 +76,7 @@ class InfoBox{
         // Div Content
         DivBoxTracks.appendChild(CoreXBuild.Div("InfoBoxContent", "", ""))
         // Add track data
-        this.AddTrackDataInView()
+        this.UpdateTrackDataInView()
         // Start transition
         setTimeout(function(){
             //let DivBoxTracks = document.getElementById("DivBoxTracks")
@@ -142,14 +143,14 @@ class InfoBox{
         // Vider le content
         document.getElementById("InfoBoxContent").innerHTML=""
         // Add track data
-        this.AddTrackDataInView()
+        this.UpdateTrackDataInView()
     }
 
     /**
      * Construit la vue track
      * @param {String} DivId Id du div du conteneur
      */
-     AddTrackDataInView(){
+    UpdateTrackDataInView(){
         // Get Action
         let action = document.getElementById("InfoBoxAction")
         // Clear Action
@@ -173,10 +174,23 @@ class InfoBox{
         })
         // Add Geox Marker
         if (this._ListeOfMarkers != null){
+            // Get Corner of map
+            let Corner = this.GetCornerOfMap()
+            // Create Polygone
+            let polyCorner = turf.polygon([[
+                [Corner.NW.lat, Corner.NW.lng],
+                [Corner.NE.lat, Corner.NE.lng],
+                [Corner.SE.lat, Corner.SE.lng],
+                [Corner.SW.lat, Corner.SW.lng],
+                [Corner.NW.lat, Corner.NW.lng]]]);
+            
             this._ListeOfMarkers.forEach(element => {
-                let InfoTrackObject = {Type: "GeoxMarker", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: null}
-                if ((element.Length > parseInt(this._Filter.MinKm))&&(element.Length < parseInt(this._Filter.MaxKm))){
-                    ListOfTrackFiltered.push(InfoTrackObject)
+                let point = turf.point([element.StartPoint.Lat, element.StartPoint.Lng])
+                if (turf.booleanWithin(point, polyCorner)){
+                    let InfoTrackObject = {Type: "GeoxMarker", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: null}
+                    if ((element.Length > parseInt(this._Filter.MinKm))&&(element.Length < parseInt(this._Filter.MaxKm))){
+                        ListOfTrackFiltered.push(InfoTrackObject)
+                    }
                 }
             });
         }
@@ -201,6 +215,9 @@ class InfoBox{
             ListOfTrackFiltered.forEach(element => {
                 // Box pour toutes les info d'un track
                 let DivBoxTrackInfo = CoreXBuild.Div("", "DivBoxTrackInfo", "")
+                if (element.Type == "GeoxMarker"){
+                    DivBoxTrackInfo.style.borderColor = "var(--CoreX-color)"
+                }
                 content.appendChild(DivBoxTrackInfo)
                 // Conteneur flewRow
                 let Conteneur = CoreXBuild.DivFlexRowStart("")
@@ -211,12 +228,17 @@ class InfoBox{
                 if (element.Type == "MyTrack"){
                     DivTrackinfo.addEventListener('click', this.ClickOnBoxTrack.bind(this, element.Track))
                 } else {
-                    DivTrackinfo.addEventListener('click', this.ClickOnBoxMarker.bind(this, element.Id))
+                    DivTrackinfo.addEventListener('click', this.ToogleMarkerOnMap.bind(this, element.Id, true))
                 }
                 // Nom de la track
                 DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "color: white; margin-left: 4%;"))
                 // Group de la track
-                DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Group,"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                if (element.Type == "MyTrack"){
+                    DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Group,"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                } else {
+                    DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Group,"","TextTrackInfo", "color: var(--CoreX-color); margin-left: 4%;"))
+                }
+                
                 // Conteur sub info des track
                 let DivSubInfo = CoreXBuild.Div("","","width: 100%; display: -webkit-flex; display: flex; flex-direction: row;  justify-content:space-between;")
                 DivTrackinfo.appendChild(DivSubInfo)
@@ -253,7 +275,7 @@ class InfoBox{
                 if (element.Type == "MyTrack"){
                     DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleTrack.bind(this, element.Id), "ButtonIcon"))
                 } else {
-                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleMarkerOnMap.bind(this, element.Id), "ButtonIcon"))
+                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleMarkerOnMap.bind(this, element.Id, false), "ButtonIcon"))
                 }
             });
         }
@@ -356,7 +378,7 @@ class InfoBox{
         this._Filter.MinKm = document.getElementById("MinKm").value
         this._Filter.MaxKm = document.getElementById("MaxKm").value
         // Show track
-        this.AddTrackDataInView()
+        this.UpdateTrackDataInView()
         // close window
         CoreXWindow.DeleteWindow()
     }
@@ -399,13 +421,13 @@ class InfoBox{
                     if (elementused == element){IsChecked = true}
                 });
                 Checkbox.checked = IsChecked
-                Checkbox.addEventListener('change', (event)=>{this.ResetFilterMinMac(); this.CheckboxGroupChange(element, event.target.checked)})
+                Checkbox.addEventListener('change', (event)=>{this.ResetFilterMinMax(); this.CheckboxGroupChange(element, event.target.checked)})
                 Conteneur.append(CoreXBuild.DivTexte(element, "", "TextTrackInfo", "color: white; margin-left: 4%;"))
             });
         }
     }
 
-    ResetFilterMinMac(){
+    ResetFilterMinMax(){
         this._Filter.MinKm = "0"
         this._Filter.MaxKm = '1000'
     }

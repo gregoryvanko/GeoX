@@ -142,14 +142,14 @@ function PromiseGetAllMarkers(MyApp, User){
     })
 }
 
-function CallGetTrack(TrackId, MyApp, Socket, User, UserId){
+function CallGetTrack(Data, MyApp, Socket, User, UserId){
     let MongoObjectId = require('@gregvanko/corex').MongoObjectId
     let MongoR = require('@gregvanko/corex').Mongo
     Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
     let MongoConfig = require("./MongoConfig.json")
     MongoTracksCollection = MongoConfig.TracksCollection
     // Query Mongodb
-    const Querry = {'_id': new MongoObjectId(TrackId)}
+    const Querry = {'_id': new MongoObjectId(Data.TrackId)}
     const Projection = { projection:{[MongoTracksCollection.GpxData]: 0, [MongoTracksCollection.Color]: 0, [MongoTracksCollection.Group]: 0, [MongoTracksCollection.Date]: 0, [MongoTracksCollection.Owner]: 0, [MongoTracksCollection.Public]: 0}}
     Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
         if(reponse.length == 1){
@@ -157,6 +157,7 @@ function CallGetTrack(TrackId, MyApp, Socket, User, UserId){
             let Clientreponse = new Object()
             Clientreponse.Action = "SetTrack"
             Clientreponse.Data = reponse[0]
+            Clientreponse.WithBound = Data.WithBound
             Socket.emit("GeoX", Clientreponse)
         } else {
             MyApp.LogAppliError("CallGetTrack error: Track not found", User, UserId)

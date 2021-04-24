@@ -56,7 +56,8 @@ class GeoX {
         this._GeoLocalisation = null
         // GeoX Track are showed
         this._GeoXTrackShowed = false
-        
+        // Padding for corner of map
+        this._MapBoundPadding = 0
     }
 
     /**
@@ -76,7 +77,7 @@ class GeoX {
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
         SocketIo.on('GeoX', (Value) => {this.MessageRecieved(Value)})
         // InfoBox
-        this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ChangeTrackColor.bind(this), this.ClickOnFollowTrack.bind(this), this.CheckboxGroupChange.bind(this), this.ClickOnBoxMarker.bind(this), this.ClickOnFollowMarker.bind(this), this.ToogleMarkerOnMap.bind(this), this.ClickSaveGeoXTrackToMyTracks.bind(this))
+        this._InfoBox = new InfoBox(this._DivApp, this.ToogleTrack.bind(this), this.ClickOnBoxTrack.bind(this), this.ChangeTrackColor.bind(this), this.ClickOnFollowTrack.bind(this), this.CheckboxGroupChange.bind(this), this.ClickOnFollowMarker.bind(this), this.ToogleMarkerOnMap.bind(this), this.ClickSaveGeoXTrackToMyTracks.bind(this), this.GetCornerOfMap.bind(this))
         // Localisation 
         this._GeoLocalisation = new GeoLocalisation(this.ShowPosition.bind(this), this.ErrorPosition.bind(this))
         // Load Data
@@ -116,6 +117,8 @@ class GeoX {
             this._ListeOfMarkers = Value.Data
             // Update des Marker de InfoBox
             this._InfoBox.ListeOfMarkers = this._ListeOfMarkers
+            // If InfoBox showed on l'efface
+            this.UpdateInfoBoxTrackData()
             // On ajoute les marker
             this.AddMarkerOnMap()
             // Changer le statu _GeoXTrackShowed
@@ -123,7 +126,11 @@ class GeoX {
         } else if(Value.Action == "SetTrack" ){
             let Track = Value.Data
             Track.Color = "black"
-            this.SetTrackOnMap(Track, false)
+            if (Value.WithBound){
+                this.FitboundOnTrack(Track, false)
+            } else {
+                this.SetTrackOnMap(Track, false)
+            }
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -163,6 +170,7 @@ class GeoX {
         this._GeoLocalisation.StopLocalisation()
         this._GeoLocalisation = null
         this._GeoXTrackShowed = false
+        this._MapBoundPadding = 0
 
         if (this._Map && this._Map.remove) {
             this._Map.off();
@@ -258,6 +266,9 @@ class GeoX {
         });
         // Ajout du markerClusterGroup a la map
         this._Map.addLayer(this._MarkersCluster);
+        // Map event
+        this._Map.on('zoomend', this.UpdateInfoBoxTrackData.bind(this))
+        this._Map.on('dragend', this.UpdateInfoBoxTrackData.bind(this))
         // Ajout des tracks sur la map
         let me = this
         setTimeout(function(){
@@ -318,12 +329,21 @@ class GeoX {
             MarkerEnd.dragging.disable();
         } else {
             // que Marker End pour les track GeoX
-            var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleMarkerOnMap(Track._id)}}).addTo(this._LayerGroup)
+            var MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleMarkerOnMap(Track._id, false)}}).addTo(this._LayerGroup)
             MarkerEnd.id = Track._id + "end"
             MarkerEnd.Type = "GeoXMarker"
             MarkerEnd.dragging.disable();
         }
         
+    }
+
+    FitboundOnTrack(Track, MyTrack){
+        let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
+        this._Map.flyToBounds(FitboundTrack,{'duration':1})
+        let me = this
+        this._Map.once('moveend', function(){
+            me.SetTrackOnMap(Track, MyTrack)
+        })
     }
 
     /**
@@ -486,10 +506,6 @@ class GeoX {
         }
         let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
         this._Map.flyToBounds(FitboundTrack,{'duration':2} )
-    }
-
-    ClickOnBoxMarker(MarkerId){
-        alert(MarkerId) // ToDo
     }
 
     /**
@@ -849,18 +865,12 @@ class GeoX {
             // Update des Marker de InfoBox
             this._InfoBox.ListeOfMarkers = this._ListeOfMarkers
             // If InfoBox showed on l'efface
-            if(this._InfoBox.InfoBowIsShown){
-                this._InfoBox.InfoBoxToggle()
-            }
+            this.UpdateInfoBoxTrackData()
             // Changer le statu _GeoXTrackShowed
             this._GeoXTrackShowed = false
             // Changer le titre du boutton
             document.getElementById("ButtonShowGeoXTracks").innerHTML = "Show Geox Tracks"
         } else {
-            // If InfoBox showed on l'efface
-            if(this._InfoBox.InfoBowIsShown){
-                this._InfoBox.InfoBoxToggle()
-            }
             // Data to send
             let CallToServer = {Action: "GetMarkers"}
             // Call Server
@@ -879,7 +889,7 @@ class GeoX {
         })
         // On affiche les marker
         this._ListeOfMarkers.forEach(Marker => {
-            let newMarker = new L.marker([Marker.StartPoint.Lat, Marker.StartPoint.Lng], {icon: this._IconPointOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleMarkerOnMap(Marker._id)}})
+            let newMarker = new L.marker([Marker.StartPoint.Lat, Marker.StartPoint.Lng], {icon: this._IconPointOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ToogleMarkerOnMap(Marker._id, false)}})
             this._MarkersCluster.addLayer(newMarker);
         });
     }
@@ -888,7 +898,7 @@ class GeoX {
      * Hide / Show Geox Track
      * @param {String} TrackId Id of the track to show / hide
      */
-    ToogleMarkerOnMap(TrackId){
+    ToogleMarkerOnMap(TrackId, WithBound = false){
         let TrackNotOnMap = true
         let me = this
         this._LayerGroup.eachLayer(function (layer) {
@@ -900,7 +910,7 @@ class GeoX {
         // Creation de la track si elle n'est pas sur la map
         if (TrackNotOnMap){
             // Data to send
-            let CallToServer = {Action : "GetTrack", TrackId : TrackId}
+            let CallToServer = {Action : "GetTrack", TrackId : TrackId, WithBound : WithBound}
             // Call Server
             GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
         }
@@ -912,6 +922,25 @@ class GeoX {
      */
     ClickSaveGeoXTrackToMyTracks(TrackId){
         alert(TrackId) //ToDo
+    }
+
+    /**
+     * Get Corener of map
+     * @returns Object Corener
+     */
+    GetCornerOfMap(){
+        let Corner = new Object()
+        Corner.NW = this._Map.getBounds().pad(this._MapBoundPadding).getNorthWest()
+        Corner.NE = this._Map.getBounds().pad(this._MapBoundPadding).getNorthEast()
+        Corner.SE = this._Map.getBounds().pad(this._MapBoundPadding).getSouthEast()
+        Corner.SW = this._Map.getBounds().pad(this._MapBoundPadding).getSouthWest()
+        return Corner
+    }
+
+    UpdateInfoBoxTrackData(){
+        if(this._InfoBox.InfoBowIsShown){
+            this._InfoBox.UpdateTrackDataInView()
+        }
     }
 
 }
