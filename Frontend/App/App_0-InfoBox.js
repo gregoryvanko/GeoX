@@ -226,7 +226,7 @@ class InfoBox{
                 let DivTrackinfo = CoreXBuild.Div("", "", "cursor: pointer; width: 56%; display: -webkit-flex; display: flex; flex-direction: column; justify-content:flex-start;")
                 Conteneur.appendChild(DivTrackinfo)
                 if (element.Type == "MyTrack"){
-                    DivTrackinfo.addEventListener('click', this.ClickOnBoxTrack.bind(this, element.Track))
+                    DivTrackinfo.addEventListener('click', this.ClickOnBoxTrack.bind(this, element.Track, true))
                 } else {
                     DivTrackinfo.addEventListener('click', this.ToogleMarkerOnMap.bind(this, element.Id, true))
                 }
@@ -266,7 +266,7 @@ class InfoBox{
                 }
                 // Boutton Follow
                 if (element.Type == "MyTrack"){
-                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Follow()}" alt="icon" width="25" height="25">`, this.ClickOnFollowTrack.bind(this,element.Track), "ButtonIcon"))
+                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Follow()}" alt="icon" width="25" height="25">`, this.ClickOnFollowTrack.bind(this,element.Track, true), "ButtonIcon"))
                 } else {
                     DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Follow()}" alt="icon" width="25" height="25">`, this.ClickOnFollowMarker.bind(this,element.Id), "ButtonIcon"))
                 }

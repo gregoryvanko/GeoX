@@ -158,6 +158,7 @@ function CallGetTrack(Data, MyApp, Socket, User, UserId){
             Clientreponse.Action = "SetTrack"
             Clientreponse.Data = reponse[0]
             Clientreponse.WithBound = Data.WithBound
+            Clientreponse.FollowTrack = Data.FollowTrack
             Socket.emit("GeoX", Clientreponse)
         } else {
             MyApp.LogAppliError("CallGetTrack error: Track not found", User, UserId)
@@ -169,8 +170,68 @@ function CallGetTrack(Data, MyApp, Socket, User, UserId){
     })
 }
 
+async function CallSaveTrack(TrackId, Name, Group, Public, MyApp, Socket, User, UserId){
+    let ReponseSaveTrack = await PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User)
+    if (ReponseSaveTrack.Error) {
+        MyApp.LogAppliError("CallSaveTrack error: " + ReponseSaveTrack.ErrorMsg, User, UserId)
+        Socket.emit("GeoXError", "CallSaveTrack error: " + ReponseSaveTrack.ErrorMsg)
+    } else {
+        MyApp.LogAppliInfo("New track saved from an existing track", User, UserId)
+    }
+}
+
+function PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User){
+    return new Promise (resolve =>{``
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let ReponseSaveTrack = {Error: true, ErrorMsg:"InitError"}
+
+        // Query Mongodb
+        const Querry = {'_id': new MongoObjectId(TrackId)}
+        const Projection = {}
+        Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 1){
+                let TrackData = new Object()
+                TrackData.Name = Name
+                TrackData.Group = Group
+                TrackData.Color = "#0000FF"
+                TrackData.Date = new Date()
+                TrackData.Owner = User
+                TrackData.ExteriorPoint = reponse[0].ExteriorPoint
+                TrackData.GeoJsonData = reponse[0].GeoJsonData
+                TrackData.GpxData = reponse[0].GpxData
+                TrackData.Length = reponse[0].Length
+                TrackData.Center = reponse[0].Center
+                TrackData.Public = Public
+                TrackData.StartPoint = reponse[0].StartPoint
+                Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
+                    ReponseSaveTrack.Error = false
+                    resolve(ReponseSaveTrack)
+                },(erreur)=>{
+                    ReponseSaveTrack.Error = true
+                    ReponseSaveTrack.ErrorMsg = erreur
+                    resolve(ReponseSaveTrack)
+                })
+            } else {
+                ReponseSaveTrack.Error = true
+                ReponseSaveTrack.ErrorMsg = "Track id not found"
+                resolve(ReponseSaveTrack)
+            }
+        },(erreur)=>{
+            ReponseSaveTrack.Error = true
+            ReponseSaveTrack.ErrorMsg = erreur
+            resolve(ReponseSaveTrack)
+        })
+    })
+}
+
 module.exports.CallGetInitialData = CallGetInitialData
 module.exports.CallGetTracksOfGroup = CallGetTracksOfGroup
 module.exports.CallUpdateTrack = CallUpdateTrack
 module.exports.CallGetMarkers = CallGetMarkers
 module.exports.CallGetTrack = CallGetTrack
+module.exports.CallSaveTrack = CallSaveTrack

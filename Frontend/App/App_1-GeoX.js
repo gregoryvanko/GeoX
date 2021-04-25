@@ -126,10 +126,14 @@ class GeoX {
         } else if(Value.Action == "SetTrack" ){
             let Track = Value.Data
             Track.Color = "black"
-            if (Value.WithBound){
-                this.FitboundOnTrack(Track, false)
+            if (Value.FollowTrack){
+                this.ClickOnFollowTrack(Track, false)
             } else {
-                this.SetTrackOnMap(Track, false)
+                if (Value.WithBound){
+                    this.FitboundOnTrack(Track, false)
+                } else {
+                    this.SetTrackOnMap(Track, false)
+                }
             }
         } else {
             console.log("error, Action not found: " + Value.Action)
@@ -276,6 +280,11 @@ class GeoX {
         }, 500);
     }
 
+    /**
+     * Draw track on map
+     * @param {Object} Track Object contenant les data d'une track
+     * @param {Boolean} MyTrack True si la track est une track du user, false si c'est une track de GeoX
+     */
     SetTrackOnMap(Track, MyTrack= true){
         let WeightTrack = this._WeightTrack
         var TrackStyle = {
@@ -334,9 +343,13 @@ class GeoX {
             MarkerEnd.Type = "GeoXMarker"
             MarkerEnd.dragging.disable();
         }
-        
     }
 
+    /**
+     * Fait un FitBound puis draw track on map
+     * @param {Object} Track Object contenant les data d'une track
+     * @param {Boolean} MyTrack True si la track est une track du user, false si c'est une track de GeoX
+     */
     FitboundOnTrack(Track, MyTrack){
         let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
         this._Map.flyToBounds(FitboundTrack,{'duration':1})
@@ -489,7 +502,7 @@ class GeoX {
      * L'action est afficher la track si elle n'est pas présente puis zoomer sur la track
      * @param {Object} Track Object contenant les information de la track
      */
-    ClickOnBoxTrack (Track){
+    ClickOnBoxTrack (Track, IsMyTrack){
         // Show Track if not on map
         let TracknotOnMap = true
         this._LayerGroup.eachLayer(function (layer) {
@@ -498,11 +511,7 @@ class GeoX {
             }
         })
         if (TracknotOnMap){
-            this._ListOfTrack.forEach(TheTrack => {
-                if (TheTrack._id == Track._id){
-                    this.SetTrackOnMap(TheTrack, true)
-                }
-            });
+            this.SetTrackOnMap(Track, IsMyTrack)
         }
         let FitboundTrack = [ [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MaxLat], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MaxLat ], [ Track.ExteriorPoint.MinLong, Track.ExteriorPoint.MinLat], [Track.ExteriorPoint.MaxLong, Track.ExteriorPoint.MinLat]] 
         this._Map.flyToBounds(FitboundTrack,{'duration':2} )
@@ -512,7 +521,7 @@ class GeoX {
      * Action effectuee lorsque l'on clique sur le boutton follow de InfoBox
      * @param {Object} Track Object contenant les information de la track
      */
-    ClickOnFollowTrack(Track){
+    ClickOnFollowTrack(Track, IsMyTrack){
         let me = this
         // On efface les autres tracks de la map
         this._LayerGroup.eachLayer(function (layer) {
@@ -520,8 +529,6 @@ class GeoX {
                 me._LayerGroup.removeLayer(layer);
             }
         })
-        // Si la track n'est pas affichée, on l'affiche
-        this.ClickOnBoxTrack(Track)
         // si InfoBox est affichee, il faut la cacher
         if(this._InfoBox.InfoBowIsShown){
             this._InfoBox.InfoBoxToggle()
@@ -530,12 +537,28 @@ class GeoX {
         this.SetButtonInfoBoxToggleVisible(false)
         // On cache le boutton ShowGeoXTracks
         this.SetButtonShowGeoXTracksToggleVisible(false)
+        // Si la track n'est pas affichée, on l'affiche
+        this.ClickOnBoxTrack(Track, IsMyTrack)
         // Start localisation
         this.GpslocalisationToogle()
     }
 
+    /**
+     * Action effectuee lorsque l'on clique sur le boutton follow d'un marker
+     * @param {String} MarkerId Id du marker à suivre
+     */
     ClickOnFollowMarker(MarkerId){
-        alert(MarkerId) // ToDo
+        // Si la track existe on la supprime
+        let me = this
+        this._LayerGroup.eachLayer(function (layer) {
+            if ((layer.id == MarkerId) || (layer.id == MarkerId + "end")){
+                me._LayerGroup.removeLayer(layer);
+            }
+        })
+        // Data to send to serveur
+        let CallToServer = {Action : "GetTrack", TrackId : MarkerId, WithBound : false, FollowTrack : true}
+        // Call Server
+        GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
     }
 
     /**
@@ -740,7 +763,11 @@ class GeoX {
     CalculateLivePositionOnTrack(Gps){
         // get all layer
         var arrayOfLayers = this._LayerGroup.getLayers()
-        let MyLayer = arrayOfLayers.filter(x => x.Type== "Track")
+        let MyLayer = arrayOfLayers.filter((x) => {
+            if((x.Type== "Track") || (x.Type== "GeoXTrack")){
+                return true
+            }
+        })
         // Verifier si il n'y a qu'une seule track sur la carte
         if(MyLayer.length == 1){
             var layer = MyLayer[0]._layers
@@ -910,7 +937,7 @@ class GeoX {
         // Creation de la track si elle n'est pas sur la map
         if (TrackNotOnMap){
             // Data to send
-            let CallToServer = {Action : "GetTrack", TrackId : TrackId, WithBound : WithBound}
+            let CallToServer = {Action : "GetTrack", TrackId : TrackId, WithBound : WithBound, FollowTrack : false}
             // Call Server
             GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
         }
@@ -921,7 +948,94 @@ class GeoX {
      * @param {String} TrackId Id of the track to show / hide
      */
     ClickSaveGeoXTrackToMyTracks(TrackId){
-        alert(TrackId) //ToDo
+        event.stopPropagation()
+        this._Map.closePopup()
+        this.BuildSaveTrackVue(TrackId)
+    }
+
+    /**
+     * Build save track view
+     * @param {String} TrackId Id de la track a souver
+     */
+    BuildSaveTrackVue(TrackId){
+        let Content = CoreXBuild.DivFlexColumn("")
+        // Empty space
+        Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Titre
+        Content.append(CoreXBuild.DivTexte("Save Track", "", "SousTitre"))
+        // Input Name
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name","",true))
+        // Input `Group
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group","",true))
+        // Toggle Public
+        let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWondow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Content.appendChild(DivTooglePublic)
+        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
+        DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
+        // Error Text
+        Content.appendChild(CoreXBuild.DivTexte("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh; height: 4vh;"))
+        // Div Button
+        let DivButton = CoreXBuild.DivFlexRowAr("")
+        Content.appendChild(DivButton)
+        // Button save
+        DivButton.appendChild(CoreXBuild.Button("Save",this.SaveTrackToMyTracks.bind(this, TrackId),"Text Button ButtonWidth30", "SaveTrack"))
+        // Button cancel
+        DivButton.appendChild(CoreXBuild.Button("Cancel",this.CancelTrackToMyTracks.bind(this),"Text Button ButtonWidth30", "Cancel"))
+        // Empty space
+        Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Open Window
+        CoreXWindow.BuildWindow(Content)
+        // Add AutoComplete
+        let me = this
+        autocomplete({
+            input: document.getElementById("InputTrackGroup"),
+            minLength: 1,
+            emptyMsg: 'No suggestion',
+            fetch: function(text, update) {
+                text = text.toLowerCase();
+                var GroupFiltred = me._UserGroup.filter(n => n.toLowerCase().startsWith(text))
+                var suggestions = []
+                GroupFiltred.forEach(element => {
+                    var MyObject = new Object()
+                    MyObject.label = element
+                    suggestions.push(MyObject)
+                });
+                update(suggestions);
+            },
+            onSelect: function(item) {
+                document.getElementById("InputTrackGroup").value = item.label;
+            }
+        });
+    }
+
+    /**
+     * Cancel Save track view
+     */
+    CancelTrackToMyTracks(){
+        CoreXWindow.DeleteWindow()
+    }
+
+    /**
+     * Send save GeoX track to my track action
+     * @param {String} TrackId Id de la track a sauver
+     */
+    SaveTrackToMyTracks(TrackId){
+        if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            document.getElementById("ErrorSaveTrack").innerText = ""
+            // Data to send
+            let CallToServer = new Object()
+            CallToServer.Action = "SaveTrack"
+            CallToServer.TrackId = TrackId
+            CallToServer.Name = document.getElementById("InputTrackName").value 
+            CallToServer.Group = document.getElementById("InputTrackGroup").value 
+            CallToServer.Public = document.getElementById("TogglePublic").checked 
+            // Call Server
+            GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
+            // Delete Window
+            CoreXWindow.DeleteWindow()
+        } else {
+            document.getElementById("ErrorSaveTrack").innerText = "Enter a name and a group before saving"
+        }
     }
 
     /**
@@ -937,6 +1051,9 @@ class GeoX {
         return Corner
     }
 
+    /**
+     * Update des InfoBox data concernant les track si l'infobox est montree sur la map
+     */
     UpdateInfoBoxTrackData(){
         if(this._InfoBox.InfoBowIsShown){
             this._InfoBox.UpdateTrackDataInView()
