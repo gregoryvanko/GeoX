@@ -13,6 +13,8 @@ class InfoBox{
         this.GetCornerOfMap = GetCornerOfMap
         // Statu de l'infobox
         this._InfoBowIsShown = false
+        // Statu de la vue dans infobox
+        this.TrackDataIsShown = true
         // UserGroup
         this._UserGroup = null
         // ListOfTrack
@@ -126,6 +128,7 @@ class InfoBox{
         // Vider le content
         document.getElementById("InfoBoxContent").innerHTML=""
         // Add folder data
+        this.TrackDataIsShown = false
         this.AddFolderData()
     }
 
@@ -143,6 +146,7 @@ class InfoBox{
         // Vider le content
         document.getElementById("InfoBoxContent").innerHTML=""
         // Add track data
+        this.TrackDataIsShown = true
         this.UpdateTrackDataInView()
     }
 
@@ -231,7 +235,11 @@ class InfoBox{
                     DivTrackinfo.addEventListener('click', this.ToogleMarkerOnMap.bind(this, element.Id, true))
                 }
                 // Nom de la track
-                DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                if (element.Type == "MyTrack"){
+                    DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                } else {
+                    DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "color: var(--CoreX-color); margin-left: 4%;"))
+                }
                 // Group de la track
                 if (element.Type == "MyTrack"){
                     DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Group,"","TextTrackInfo", "color: white; margin-left: 4%;"))
@@ -430,6 +438,14 @@ class InfoBox{
     ResetFilterMinMax(){
         this._Filter.MinKm = "0"
         this._Filter.MaxKm = '1000'
+    }
+
+    UpdateInfoboxTrackData(){
+        if (this.InfoBowIsShown){
+            if (this.TrackDataIsShown){
+                this.UpdateTrackDataInView()
+            }
+        }
     }
 
 }

@@ -117,7 +117,7 @@ class GeoX {
             this._ListeOfMarkers = Value.Data
             // Update des Marker de InfoBox
             this._InfoBox.ListeOfMarkers = this._ListeOfMarkers
-            // If InfoBox showed on l'efface
+            // On update l'infobox
             this.UpdateInfoBoxTrackData()
             // On ajoute les marker
             this.AddMarkerOnMap()
@@ -125,7 +125,7 @@ class GeoX {
             this._GeoXTrackShowed = true
         } else if(Value.Action == "SetTrack" ){
             let Track = Value.Data
-            Track.Color = "black"
+            Track.Color = "blue"
             if (Value.FollowTrack){
                 this.ClickOnFollowTrack(Track, false)
             } else {
@@ -537,6 +537,8 @@ class GeoX {
         this.SetButtonInfoBoxToggleVisible(false)
         // On cache le boutton ShowGeoXTracks
         this.SetButtonShowGeoXTracksToggleVisible(false)
+        // On affiche le menu action
+        GlobalDisplayAction('Off')
         // Si la track n'est pas affichée, on l'affiche
         this.ClickOnBoxTrack(Track, IsMyTrack)
         // Start localisation
@@ -689,6 +691,8 @@ class GeoX {
             this.SetButtonInfoBoxToggleVisible(true)
             // On affiche le bouton ShowGeoXTracks
             this.SetButtonShowGeoXTracksToggleVisible(true)
+            // On affiche le menu action
+            GlobalDisplayAction('On')
         } else {
             this._CurrentPosShowed = true
             this._GpsRadius = L.circle([50.709446,4.543413], 1).addTo(this._Map)
@@ -1055,9 +1059,7 @@ class GeoX {
      * Update des InfoBox data concernant les track si l'infobox est montree sur la map
      */
     UpdateInfoBoxTrackData(){
-        if(this._InfoBox.InfoBowIsShown){
-            this._InfoBox.UpdateTrackDataInView()
-        }
+        this._InfoBox.UpdateInfoboxTrackData()
     }
 
 }
