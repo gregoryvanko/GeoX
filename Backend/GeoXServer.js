@@ -42,25 +42,6 @@ class GeoXServer{
                     Socket.emit("GeoXError", `Api GeoXServer error, ModuleGeoX Action ${Data.Value.Action} not found`)
                 }
                 break
-            case "ShowTracksOnMap":
-                let ShowTracksOnMap = require("./ShowTracksOnMap")
-                if (Data.Value.Action == "GetUserData"){
-                    ShowTracksOnMap.CallGetUserData(this._MyApp,  Socket, User, UserId)
-
-                    // Modify Db
-                    //let ModifyDb = require("./ModifyDb")
-                    //ModifyDb.CalculCenterofAlTracks(this._MyApp)
-                    //ModifyDb.AddPublicToAlTracks(this._MyApp)
-                    //ModifyDb.AddStartPointToAlTracks(this._MyApp)
-                } else if (Data.Value.Action == "GetMapData"){
-                    ShowTracksOnMap.CallGetMapData(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "UpdateTrackColor"){
-                    ShowTracksOnMap.CallUpdateTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else {
-                    this._MyApp.LogAppliError(`Api GeoXServer error, ShowTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
-                    Socket.emit("GeoXError", `Api GeoXServer error, ShowTracksOnMap Action ${Data.Value.Action} not found`)
-                }
-                break
             case "ManageTrack":
                 let ManageTrack = require("./ManageTrack")
                 if (Data.Value.Action == "GetUserData") {
@@ -76,21 +57,6 @@ class GeoXServer{
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
-                }
-                break
-            case "SearchTracksOnMap":
-                let SearchTracksOnMap = require("./SearchTracksOnMap")
-                if (Data.Value.Action == "GetUserGroup"){
-                    SearchTracksOnMap.CallGetUserGroup(this._MyApp,  Socket, User, UserId)
-                } else if(Data.Value.Action == "GetMarkers"){
-                    SearchTracksOnMap.CallGetMarkers(Data.Value.Filter, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "SaveTrack"){
-                    SearchTracksOnMap.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, Data.Value.Public, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetTrack"){
-                    SearchTracksOnMap.CallGetTrack(Data.Value.TrackId, this._MyApp,  Socket, User, UserId)
-                } else {
-                    this._MyApp.LogAppliError(`Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
-                    Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)
                 }
                 break
             case "CreateTracksOnMap":

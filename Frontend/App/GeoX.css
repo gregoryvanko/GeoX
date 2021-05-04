@@ -3,7 +3,7 @@
 }
 
 .AppConteneur{
-    width: 70%;
+    width: 85%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -263,30 +263,6 @@
     min-width: 40px;
 }
 
-.DivBoxInfoTxt{
-    width: 15%;
-    height: 4vh;
-    position: fixed;
-    z-index: 998; 
-    top: 1vh; 
-    background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 15px;
-    left: 50%;
-    transform: translate(-50%, 0%);
-    display: -webkit-flex;
-    display: none;
-    flex-direction: row;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-
-    -moz-transition: top 1s ease-in-out; 
-    -webkit-transition: top 1s ease-in-out;  
-    -ms-transition: top 1s ease-in-out;  
-    -o-transition: top 1s ease-in-out;  
-    transition: top 1s ease-in-out;
-}
-
 .mycluster {
     height: 40px;
     width: 40px;
@@ -320,7 +296,6 @@ screen and (max-width: 700px)
     .MarkerPopupContent{margin:auto 20%;}
     .ButtonPopup{ padding: 8% 0%;}
     .DivBoxDistance{width: 70%;}
-    .DivBoxInfoTxt{width: 50%;}
 }
 
 @media screen and (min-width: 1200px)

@@ -736,13 +736,26 @@ class GeoXCreateTrack {
 
     async GetRoute(PointA, PointB){
         //const reponse = await fetch(`https://router.project-osrm.org/route/v1/footing/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
-        const reponse = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
-        const data = await reponse.json()
-        var ListOfPoint = []
-        data.routes[0].geometry.coordinates.forEach(element => {
-            ListOfPoint.push({lat: element[1], lng: element[0]})
+        const data = await this.FetchGetRoute(PointA, PointB).catch(error => {
+            alert("Error during fetch of intermediate point : " + error.message)
         });
+        var ListOfPoint = []
+        if (data){
+            data.routes[0].geometry.coordinates.forEach(element => {
+                ListOfPoint.push({lat: element[1], lng: element[0]})
+            });
+        }
         return ListOfPoint
+    }
+
+    async FetchGetRoute(PointA, PointB){
+        const response = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
+        if (!response.ok) {
+            const message = `An error has occured: ${response.status}`;
+            throw new Error(message);
+        }
+        const data = await response.json()
+        return data
     }
 
     /**
