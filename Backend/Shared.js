@@ -116,7 +116,7 @@ function PromiseAddTrack(Track, MyApp, User){
  * @param {String} FilePathandName path et name du fichier Gpx
  */
 function ConvertGpxToGeoJson(FileContent){
-    var tj = require('togeojson')
+    var tj = require('@mapbox/togeojson')
     var DOMParser = require('xmldom').DOMParser
     var Mygpx = new DOMParser().parseFromString(FileContent)
     var converted = tj.gpx(Mygpx)
