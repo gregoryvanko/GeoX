@@ -123,7 +123,6 @@ function ConvertGpxToGeoJson(FileContent){
     return converted
 }
 
-
 /**
  * Calcul les lat et long min et max d'une track contenue dans un object GeoJson
  * @param {geojson object} geojson Object GeaoJson d'une track
