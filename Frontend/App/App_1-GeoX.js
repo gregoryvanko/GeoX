@@ -471,8 +471,16 @@ class GeoX {
         // Si TrackId different de null alons cela concerne un track en particulier
         if (TrackId == null){
             if (this._LayerGroup.getLayers().length == 0){
+                // On affiche les track du user
                 this._ListOfTrack.forEach(Track => {
                     me.SetTrackOnMap(Track, true)
+                });
+                // on affiche les track de Geox visible // ToDo
+                this._ListeOfMarkers.forEach(element => {
+                    // Data to send
+                    let CallToServer = {Action : "GetTrack", TrackId : element._id, WithBound : false, FollowTrack : false}
+                    // Call Server
+                    GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
                 });
             } else {
                 // On efface toute les tracks
