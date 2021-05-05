@@ -9,6 +9,8 @@ class GeoXManageTracks {
     Initiation(){
         // Show Action Button
         GlobalDisplayAction('On')
+        // Clear Action List
+        GlobalClearActionList()
         // Clear view
         this._DivApp.innerHTML=""
         // SocketIO

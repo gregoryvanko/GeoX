@@ -70,6 +70,9 @@ class GeoX {
         GlobalExecuteBeforeQuit(this.CloseModule.bind(this))
         // Clear Action List
         GlobalClearActionList()
+        // Add action
+        GlobalAddActionInList("Create Track", this.GoToCreateTrack.bind(this))
+        GlobalAddActionInList("Manage Track", this.GoToManageTrack.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // SocketIO
@@ -171,8 +174,10 @@ class GeoX {
         this._GpsPointerTrack = null
         this._GpsRadius = null
         this._GpsLineToPosition = null
-        this._GeoLocalisation.StopLocalisation()
-        this._GeoLocalisation = null
+        if (this._GeoLocalisation != null){
+            this._GeoLocalisation.StopLocalisation()
+            this._GeoLocalisation = null
+        }
         this._GeoXTrackShowed = false
         this._MapBoundPadding = 0
 
@@ -475,12 +480,23 @@ class GeoX {
                 this._ListOfTrack.forEach(Track => {
                     me.SetTrackOnMap(Track, true)
                 });
-                // on affiche les track de Geox visible // ToDo
+                // on affiche les track de Geox visible sur l'écran
+                let Corner = this.GetCornerOfMap()
+                // Create Polygone
+                let polyCorner = turf.polygon([[
+                    [Corner.NW.lat, Corner.NW.lng],
+                    [Corner.NE.lat, Corner.NE.lng],
+                    [Corner.SE.lat, Corner.SE.lng],
+                    [Corner.SW.lat, Corner.SW.lng],
+                    [Corner.NW.lat, Corner.NW.lng]]]);
                 this._ListeOfMarkers.forEach(element => {
-                    // Data to send
-                    let CallToServer = {Action : "GetTrack", TrackId : element._id, WithBound : false, FollowTrack : false}
-                    // Call Server
-                    GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
+                    let point = turf.point([element.StartPoint.Lat, element.StartPoint.Lng])
+                    if (turf.booleanWithin(point, polyCorner)){
+                        // Data to send
+                        let CallToServer = {Action : "GetTrack", TrackId : element._id, WithBound : false, FollowTrack : false}
+                        // Call Server
+                        GlobalSendSocketIo("GeoX", "ModuleGeoX", CallToServer)
+                    }
                 });
             } else {
                 // On efface toute les tracks
@@ -799,6 +815,7 @@ class GeoX {
                 var DistandceParcourue = Math.round((snapped.properties.location + Number.EPSILON) * 1000) / 1000
                 var DistranceTotale = Math.round((turf.length(line) + Number.EPSILON) * 1000) / 1000
                 var DistanceToEnd = DistranceTotale - DistandceParcourue
+                DistanceToEnd = DistanceToEnd.toFixed(3)
                 var DistancePourcent =Math.round(((DistandceParcourue/DistranceTotale) * 100 + Number.EPSILON) * 10) / 10
                 if (DistandceParcourue >= 1){
                     DistandceParcourue = DistandceParcourue.toString() + "Km"
@@ -1068,6 +1085,22 @@ class GeoX {
      */
     UpdateInfoBoxTrackData(){
         this._InfoBox.UpdateInfoboxTrackData()
+    }
+
+    /**
+     * Action pour aller au module de creation de track
+     */
+    GoToCreateTrack(){
+        this.CloseModule()
+        MyGeoXCreateTrack.Initiation()
+    }
+
+    /**
+     * Action pour aller au module de modification des track
+     */
+    GoToManageTrack(){
+        this.CloseModule()
+        MyGeoXManageTracks.Initiation()
     }
 
 }
