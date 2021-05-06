@@ -38,12 +38,9 @@ class GeoXManageTracks {
      * @param {Object} Value Object du message : {Action, Data}
      */
     MessageRecieved(Value){
-        if (Value.Action == "SetUserData"){
-            this._AppData = Value.Data.AppData
-            this._AppGroup = Value.Data.AppGroup
+        if (Value.Action == "SetData"){
+            this._AppData = Value.AppData
             this.LoadViewManageTracks()
-        } else if (Value.Action == "SetDownloadedFile" ){
-            this.DownloadedFileToClient(Value.Data)
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -66,6 +63,60 @@ class GeoXManageTracks {
         let CallToServer = new Object()
         CallToServer.Action = "GetData"
         GlobalSendSocketIo("GeoX", "AdminManageTrack", CallToServer)
+    }
+
+    LoadViewManageTracks(){
+        // Clear view
+        this._DivApp.innerHTML = ""
+        // Contener
+        let Contener = CoreXBuild.DivFlexColumn("Conteneur")
+        this._DivApp.appendChild(Contener)
+        // Titre
+        Contener.appendChild(CoreXBuild.DivTexte("Manage GeoX Tracks", "", "Titre", "margin-bottom:0%"))
+        // Conteneur de la liste des tracks
+        let AppConteneur = CoreXBuild.Div("AppConteneur", "AppConteneur", "")
+        Contener.appendChild(AppConteneur)
+        // Div pour le titre des colonnes
+        let BoxTitre = CoreXBuild.DivFlexRowStart("")
+        BoxTitre.style.marginTop = "4vh"
+        AppConteneur.appendChild(BoxTitre)
+        // Titre des colonnes
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 33%; margin-left:1%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 20%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 15%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Owner","","TextBoxTitre", "width: 21%;"))
+        // Ajout d'une ligne
+        AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5; margin: 1% 0% 0% 0%;"))
+        // Ajout des lignes des tracks
+        if (this._AppData.length == 0){
+            let BoxTracks = CoreXBuild.DivFlexRowStart("")
+            AppConteneur.appendChild(BoxTracks)
+            BoxTracks.appendChild(CoreXBuild.DivTexte("No track saved","","Text","margin-top: 4vh; width: 100%; text-align: center;"))
+        } else {
+            this._AppData.forEach(Track => {
+                let BoxTracks = CoreXBuild.DivFlexRowStart("")
+                BoxTracks.style.marginTop = "1vh"
+                BoxTracks.style.marginBottom = "1vh"
+                if (!Track.Public){
+                    BoxTracks.style.color = "red"
+                }
+                AppConteneur.appendChild(BoxTracks)
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 33%; margin-left:1%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","TextSmall", "width: 20%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","TextSmall", "width: 15%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Owner,"","TextSmall", "width: 21%;"))
+                let DivButton = CoreXBuild.Div("", "", "margin-left:auto;")
+                BoxTracks.appendChild(DivButton)
+                DivButton.appendChild(CoreXBuild.Button("&#128279", this.LoadViewLink.bind(this,Track._id), "ButtonIcon"))
+                
+                // Ajout d'une ligne
+                AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
+            });
+        }
+    }
+
+    LoadViewLink(TrackId){
+        window.open(window.location.origin + "/getmap/?trackid=" + TrackId, '_blank').focus();
     }
 }
 

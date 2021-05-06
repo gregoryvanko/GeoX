@@ -6,6 +6,7 @@
     color: var(--CoreX-color);
     word-wrap: break-word;
 }
+
 /* Sous Titre */
 .SousTitre{
     font-size: calc(var(--TitreNormale)*0.6);
@@ -18,6 +19,12 @@
 .TextSmall{
     font-size: calc(var(--TexteNomrale)*0.7);
     word-wrap: break-word;
+}
+
+.TextBoxTitre{
+    font-size: calc(var(--TexteNomrale)*1.3);
+    font-family: "nyt-cheltenham", georgia, "times new roman", times, serif;
+    color: black;
 }
 
 /* Button */
@@ -190,6 +197,12 @@
     display: flex;
 }
 
+.AppConteneur{
+    width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)
@@ -198,6 +211,7 @@ screen and (max-width: 700px)
     .SousTitre{font-size: calc(var(--TitreIphone)*0.6);}
     .Text{font-size: var(--TexteIphone);}
     .TextSmall{font-size: calc(var(--TexteIphone)*0.8);}
+    .TextBoxTitre{font-size: calc(var(--TexteIphone)*1.3);}
     .Button{border-radius: 40px;}
     .ButtonIcon{font-size: calc(var(--TexteIphone)*2);}
     .ButtonCoreXWindow{width: 60%;}
@@ -206,6 +220,7 @@ screen and (max-width: 700px)
     .OnlyIphone{display: flex;}
     .NotOnIphone{display: none;}
     .IconeInList{height:2vh; margin-left: 2vh;}
+    .AppConteneur{width: 95%;}
 }
 
 @media screen and (min-width: 1200px)
@@ -214,6 +229,7 @@ screen and (max-width: 700px)
     .SousTitre{font-size: calc(var(--TitreMax)*0.6);}
     .Text{font-size: var(--TexteMax);}
     .TextSmall{font-size: calc(var(--TexteMax)*0.8);}
+    .TextBoxTitre{font-size: calc(var(--TexteMax)*1.3);}
     .Button{border-radius: 40px;}
     .ButtonIcon{font-size: calc(var(--TexteMax)*1.4);}
 }

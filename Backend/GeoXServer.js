@@ -75,6 +75,15 @@ class GeoXServer{
                     Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)
                 }
                 break
+            case "AdminManageTrack":
+                let ModuleAdminManageTrack = require("./ModuleAdminManageTrack")
+                if (Data.Value.Action == "GetData") {
+                    ModuleAdminManageTrack.CallGetData(this._MyApp,  Socket, User, UserId)
+                } else {
+                    this._MyApp.LogAppliError(`Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`, User, UserId)
+                    Socket.emit("GeoXError", `Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`)
+                }
+                break
             default:
                 this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
                 Socket.emit("GeoXError", `Api GeoXServer error, Action ${Data.Action} not found`)
