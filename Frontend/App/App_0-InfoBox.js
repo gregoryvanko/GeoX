@@ -228,6 +228,11 @@ class InfoBox{
                 DivBoxTrackInfo.appendChild(Conteneur)
                 // Box pour click sur le nom de la track et pour faire un zoom sur la track
                 let DivTrackinfo = CoreXBuild.Div("", "", "cursor: pointer; width: 56%; display: -webkit-flex; display: flex; flex-direction: column; justify-content:flex-start;")
+                if (element.Type == "MyTrack"){
+                    DivTrackinfo.style.color = "white"
+                } else {
+                    DivTrackinfo.style.color = "var(--CoreX-color)"
+                }
                 Conteneur.appendChild(DivTrackinfo)
                 if (element.Type == "MyTrack"){
                     DivTrackinfo.addEventListener('click', this.ClickOnBoxTrack.bind(this, element.Track, true))
@@ -235,25 +240,16 @@ class InfoBox{
                     DivTrackinfo.addEventListener('click', this.ToogleMarkerOnMap.bind(this, element.Id, true))
                 }
                 // Nom de la track
-                if (element.Type == "MyTrack"){
-                    DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "color: white; margin-left: 4%;"))
-                } else {
-                    DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "color: var(--CoreX-color); margin-left: 4%;"))
-                }
+                DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Name,"","TextTrackInfo", "margin-left: 4%;"))
                 // Group de la track
-                if (element.Type == "MyTrack"){
-                    DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Group,"","TextTrackInfo", "color: white; margin-left: 4%;"))
-                } else {
-                    DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Group,"","TextTrackInfo", "color: var(--CoreX-color); margin-left: 4%;"))
-                }
-                
+                DivTrackinfo.appendChild(CoreXBuild.DivTexte(element.Group,"","TextTrackInfo", "margin-left: 4%;"))
                 // Conteur sub info des track
                 let DivSubInfo = CoreXBuild.Div("","","width: 100%; display: -webkit-flex; display: flex; flex-direction: row;  justify-content:space-between;")
                 DivTrackinfo.appendChild(DivSubInfo)
                 // Date de la track
-                DivSubInfo.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(element.Date),"","TextTrackInfo", "color: white; margin-left: 4%;"))
+                DivSubInfo.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(element.Date),"","TextTrackInfo", "margin-left: 4%;"))
                 // Longeur de la track
-                DivSubInfo.appendChild(CoreXBuild.DivTexte(element.Length.toFixed(1) + "Km","","TextTrackInfo", "color: white; margin-left: 0%;"))
+                DivSubInfo.appendChild(CoreXBuild.DivTexte(element.Length.toFixed(1) + "Km","","TextTrackInfo", "margin-left: 0%;"))
                 // Box pour les bouttons
                 let DivButton = document.createElement("div")
                 Conteneur.appendChild(DivButton)

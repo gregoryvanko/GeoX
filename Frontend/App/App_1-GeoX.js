@@ -71,6 +71,7 @@ class GeoX {
         // Clear Action List
         GlobalClearActionList()
         // Add action
+        GlobalAddActionInList("Add Track", this.GoToAddTrack.bind(this))
         GlobalAddActionInList("Create Track", this.GoToCreateTrack.bind(this))
         GlobalAddActionInList("Manage Track", this.GoToManageTrack.bind(this))
         // Clear view
@@ -93,16 +94,11 @@ class GeoX {
      */
     MessageRecieved(Value){
         if (Value.Action == "SetInitialData"){
-            // Si le user possède au moins un groupe
-            if (Value.Data.UserGroup.length > 0){
                 this._UserGroup = Value.Data.UserGroup
                 this._ListOfTrack = this._ListOfTrack.concat(Value.Data.InitialTracks)
                 this._InitialMapData = Value.Data.InitialMapData
                 this._FitBounds = Value.Data.FitBounds
                 this.LoadViewMap()
-            } else {
-                document.getElementById("WaitingText").innerHTML = "You don't have any track. Please create add or create a track..."
-            }
         } else if (Value.Action == "SetTracksOfGroup" ){
             // Ajouter les track a _ListOfTrack
             this._ListOfTrack = this._ListOfTrack.concat(Value.Data)
@@ -1091,7 +1087,7 @@ class GeoX {
      * Action pour aller au module de creation de track
      */
     GoToCreateTrack(){
-        this.CloseModule()
+        GlobalReset()
         MyGeoXCreateTrack.Initiation()
     }
 
@@ -1099,12 +1095,20 @@ class GeoX {
      * Action pour aller au module de modification des track
      */
     GoToManageTrack(){
-        this.CloseModule()
-        MyGeoXManageTracks.Initiation()
+        GlobalReset()
+        MyGeoXManageTracks.Initiation(true)
+    }
+
+    /**
+     * Action pour aller au module d'ajout de track
+     */
+    GoToAddTrack(){
+        GlobalReset()
+        MyGeoXManageTracks.Initiation(false)
     }
 
 }
 // Creation de l'application
 let MyGeoX = new GeoX(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Tracks", Icon.GeoXMapIcon(), MyGeoX.Initiation.bind(MyGeoX))
+GlobalCoreXAddApp("Tracks", Icon.GeoXMapIcon(), MyGeoX.Initiation.bind(MyGeoX), true)

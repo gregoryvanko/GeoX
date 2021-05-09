@@ -4,9 +4,11 @@ class GeoXManageTracks {
         this._AppData = null
         this._AppGroup = null
         this.GeoXCreateTrackView = MyGeoXCreateTrack
+        this._StartWithLoadViewManageTrack = true
     }
 
-    Initiation(){
+    Initiation(StartWithLoadViewManageTrack = true){
+        this._StartWithLoadViewManageTrack = StartWithLoadViewManageTrack
         // Show Action Button
         GlobalDisplayAction('On')
         // Clear Action List
@@ -25,7 +27,11 @@ class GeoXManageTracks {
         if (Value.Action == "SetUserData"){
             this._AppData = Value.Data.AppData
             this._AppGroup = Value.Data.AppGroup
-            this.LoadViewManageTracks()
+            if (this._StartWithLoadViewManageTrack){
+                this.LoadViewManageTracks()
+            } else {
+                this.LoadViewAddTrack(this._AppGroup)
+            }
         } else if (Value.Action == "SetDownloadedFile" ){
             this.DownloadedFileToClient(Value.Data)
         } else {
@@ -229,6 +235,7 @@ class GeoXManageTracks {
 
     ModifyTrack(Groups, TrackId, TrackName, TrackGroup, Public, IsCoreXWindow){
         if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
+        GlobalReset()
         this.GeoXCreateTrackView.InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public)
     }
 
