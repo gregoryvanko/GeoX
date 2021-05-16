@@ -78,7 +78,7 @@ function CallDownloadTrack(Value, MyApp, Socket, User, UserId){
 
 /**
 * Delete d'une track
-* @param {Object} Value {Data: Id of track to delete, FromCurrentView: name of the current view}
+* @param {string} Id {Id of track to delete}
 * @param {Socket} Socket SocketIO
 * @param {String} User Nom du user
 * @param {String} UserId Id du user
@@ -118,8 +118,31 @@ function CallAddTrack(Track, MyApp, Socket, User, UserId){
     }
 }
 
+/**
+* Delete d'une track
+* @param {string} Id {Id of track}
+* @param {Socket} Socket SocketIO
+* @param {String} User Nom du user
+* @param {String} UserId Id du user
+*/
+async function CallGetTrackInfo(Id, MyApp, Socket, User, UserId){
+    // Get all tracks info (but no track data)
+    let Shared = require("./Shared")
+    let ReponseTracksInfo = await Shared.PromiseGetTracksInfo(Id, MyApp, User)
+    if(!ReponseTracksInfo.Error){
+        //Send Data
+        Socket.emit("ManageTrack", {Action: "SetTrackInfo", Data: ReponseTracksInfo.Data})
+        // Log socket action
+        MyApp.LogAppliInfo(`SoApi send Track Info Data`, User, UserId)
+    } else {
+        MyApp.LogAppliError(ReponseTracksInfo.ErrorMsg, User, UserId)
+        Socket.emit("GeoXError", ReponseTracksInfo.ErrorMsg)
+    }
+}
+
 module.exports.CallUpdateTrack = CallUpdateTrack
 module.exports.CallGetUserData = CallGetUserData
 module.exports.CallDownloadTrack = CallDownloadTrack
 module.exports.CallDeleteTrack = CallDeleteTrack
 module.exports.CallAddTrack = CallAddTrack
+module.exports.CallGetTrackInfo = CallGetTrackInfo

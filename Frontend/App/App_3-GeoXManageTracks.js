@@ -34,6 +34,9 @@ class GeoXManageTracks {
             }
         } else if (Value.Action == "SetDownloadedFile" ){
             this.DownloadedFileToClient(Value.Data)
+        } else if (Value.Action == "SetTrackInfo" ){
+            // Load Info Track view
+            let InfoTrackView = new InfoOnTrack(Value.Data, "ContentInfoTrack")
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -90,8 +93,8 @@ class GeoXManageTracks {
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         AppConteneur.appendChild(BoxTitre)
         // Titre des colonnes
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 36%; margin-left:1%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 18%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 40%; margin-left:1%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 20%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 15%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Shared","","TextBoxTitre", "width: 12%;"))
         // Ajout d'une ligne
@@ -104,31 +107,23 @@ class GeoXManageTracks {
         } else {
             this._AppData.forEach(Track => {
                 let BoxTracks = CoreXBuild.DivFlexRowStart("")
-                BoxTracks.style.marginTop = "1vh"
-                BoxTracks.style.marginBottom = "1vh"
+                BoxTracks.style.marginTop = "0.5vh"
+                BoxTracks.style.marginBottom = "0.5vh"
                 AppConteneur.appendChild(BoxTracks)
-                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 36%; margin-left:1%;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","TextSmall", "width: 18%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 40%; margin-left:1%;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","TextSmall", "width: 20%;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","TextSmall", "width: 15%;"))
+                let DivPublic = CoreXBuild.Div("", "", "width: 12%;")
+                BoxTracks.appendChild(DivPublic)
                 if (Track.Public){
-                    BoxTracks.appendChild(CoreXBuild.Image64(Icon.Shared(),"", "IconeInList", ""))
+                    DivPublic.appendChild(CoreXBuild.Image64(Icon.Shared(),"", "IconeInList", ""))
                 } else {
-                    BoxTracks.appendChild(CoreXBuild.Image64(Icon.Key(),"", "IconeInList", ""))
+                    DivPublic.appendChild(CoreXBuild.Image64(Icon.Key(),"", "IconeInList", ""))
                 }
-                
-                let DivButton = document.createElement("div")
-                DivButton.setAttribute("style", "margin-left: auto; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
-                DivButton.setAttribute("class", "NotOnIphone")
-                DivButton.appendChild(CoreXBuild.Button ("&#8681", this.LoadViewDownload.bind(this,Track._id), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128279", this.LoadViewLink.bind(this,Track._id, false), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128394", this.LoadViewUpdateTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, false), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.ModifyTrack()}" alt="icon" width="25" height="25">`, this.ModifyTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, false), "ButtonIcon"))
-                DivButton.appendChild(CoreXBuild.Button ("&#128465", this.SendDeleteTrack.bind(this, Track._id, Track.Name, false), "ButtonIcon"))
-                BoxTracks.appendChild(DivButton)
+
                 let DivButtonIphone = document.createElement("div")
-                DivButtonIphone.setAttribute("style", "margin-left: auto; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
-                DivButtonIphone.setAttribute("class", "OnlyIphone")
-                DivButtonIphone.appendChild(CoreXBuild.Button ("&#8286", this.LoadViewIphone.bind(this,this._AppGroup, Track), "ButtonIcon"))
+                DivButtonIphone.setAttribute("style", "width: 8%; display: flex; flex-direction: row; justify-content:center; align-content:center; align-items: center; flex-wrap: wrap;")
+                DivButtonIphone.appendChild(CoreXBuild.Button (`<img src="${Icon.Engrenage()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this,this._AppGroup, Track), "ButtonIcon"))
                 BoxTracks.appendChild(DivButtonIphone)
                 // Ajout d'une ligne
                 AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
@@ -136,12 +131,13 @@ class GeoXManageTracks {
         }
     }
 
-    LoadViewIphone(AppGroup, Track){
+    LoadViewAction(AppGroup, Track){
         let HTMLContent = CoreXBuild.DivFlexColumn()
         HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id, true), "Text ButtonCoreXWindow"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group, Track.Public, true), "Text ButtonCoreXWindow"))
-        HTMLContent.appendChild(CoreXBuild.Button (`<img src="${Icon.ModifyTrack()}" alt="icon" width="16" height="16"> Modify Track`, this.ModifyTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, true), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group, Track.Public), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button (`<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Icon.Information()}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">Info Track</div></div>`, this.LoadViewInfoTrack.bind(this,Track._id), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button (`<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Icon.ModifyTrack()}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">Modify Track</div></div>`, this.ModifyTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128465 Delete Track", this.SendDeleteTrack.bind(this, Track._id, Track.Name, true), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "gpx", Track._id), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "geojson", Track._id), "Text ButtonCoreXWindow"))
@@ -185,13 +181,13 @@ class GeoXManageTracks {
         }
     }
 
-    LoadViewLink(TrackId, IsCoreXWindow){
-        if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
+    LoadViewLink(TrackId){
+        CoreXWindow.DeleteWindow()
         alert(window.location.origin + "/getmap/?trackid=" + TrackId)
     }
 
-    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup, Public, IsCoreXWindow){
-        if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
+    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup, Public){
+        CoreXWindow.DeleteWindow()
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Contener
@@ -233,8 +229,30 @@ class GeoXManageTracks {
         Contener.appendChild(CoreXBuild.Button("Update Track",this.SendUpdateTrack.bind(this, TrackId),"Text Button"))
     }
 
-    ModifyTrack(Groups, TrackId, TrackName, TrackGroup, Public, IsCoreXWindow){
-        if (IsCoreXWindow){CoreXWindow.DeleteWindow()}
+    LoadViewInfoTrack(TrackId){
+        CoreXWindow.DeleteWindow()
+        // Clear Conteneur
+        this._DivApp.innerHTML = ""
+        // Contener
+        let Contener = CoreXBuild.DivFlexColumn("Conteneur")
+        Contener.style.width = "90%"
+        Contener.style.marginLeft = "auto"
+        Contener.style.marginRight = "auto"
+        Contener.style.maxWidth = "900px"
+        this._DivApp.appendChild(Contener)
+        // Content Info Track
+        let ContentInfoTrack = CoreXBuild.DivFlexColumn("ContentInfoTrack")
+        Contener.appendChild(ContentInfoTrack)
+        // waitinf data txt
+        ContentInfoTrack.appendChild(CoreXBuild.DivTexte("Waiting track data...","","Text", "text-align: center; margin-top: 10vh;"))
+        // Button select file
+        Contener.appendChild(CoreXBuild.Button("Go to manage track",this.LoadViewManageTracks.bind(this),"Text Button", "GoToManageTrack"))
+        // Send status to serveur
+        GlobalSendSocketIo("GeoX", "ManageTrack", {Action: "GetTrackInfo", Data: TrackId})
+    }
+
+    ModifyTrack(Groups, TrackId, TrackName, TrackGroup, Public){
+        CoreXWindow.DeleteWindow()
         GlobalReset()
         this.GeoXCreateTrackView.InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public)
     }
@@ -257,6 +275,8 @@ class GeoXManageTracks {
     }
 
     LoadViewAddTrack(Groups){
+        // Start with the view LoadViewManageTrack
+        this._StartWithLoadViewManageTrack = true
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Contener
@@ -355,4 +375,4 @@ class GeoXManageTracks {
 // Creation de l'application
 let MyGeoXManageTracks = new GeoXManageTracks(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Manage My Tracks", Icon.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))
+GlobalCoreXAddApp("Manage My Tracks", Icon.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks), true)

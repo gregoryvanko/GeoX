@@ -372,9 +372,46 @@ function MinMaxOfTracks(ListOfTracks){
     return reponse
 }
 
+/**
+ * Get Tracks info with ID
+ */
+ function PromiseGetTracksInfo(Id, MyApp, User){
+    return new Promise(resolve => {
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+
+        let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
+
+        const Querry = {'_id': new MongoObjectId(Id)}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.ExteriorPoint]: 1, [MongoTracksCollection.GeoJsonData]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Elevation]: 1}}
+
+        Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                ReponseTracks.Error = true
+                ReponseTracks.ErrorMsg = "Track with Id = " + Id + " not found!"
+                ReponseTracks.Data = []
+            } else {
+                ReponseTracks.Error = false
+                ReponseTracks.ErrorMsg = null
+                ReponseTracks.Data = reponse[0]
+            }
+            resolve(ReponseTracks)
+        },(erreur)=>{
+            ReponseTracks.Error = true
+            ReponseTracks.ErrorMsg = "PromiseGetTracksInfo error: " + erreur
+            ReponseTracks.Data = []
+            resolve(ReponseTracks)
+        })
+    })
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
 module.exports.PromiseGetTracksData = PromiseGetTracksData
 module.exports.PromiseGetAllTracksInfo = PromiseGetAllTracksInfo
 module.exports.MinMaxOfTracks = MinMaxOfTracks
+module.exports.PromiseGetTracksInfo = PromiseGetTracksInfo

@@ -43,7 +43,7 @@ class GeoXServer{
                 }
                 break
             case "ManageTrack":
-                let ManageTrack = require("./ManageTrack")
+                let ManageTrack = require("./ModuleManageTrack")
                 if (Data.Value.Action == "GetUserData") {
                     ManageTrack.CallGetUserData(this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "Delete"){
@@ -54,13 +54,15 @@ class GeoXServer{
                     ManageTrack.CallUpdateTrack(Data.Value.Data, this._MyApp, Socket, User, UserId)
                 } else if (Data.Value.Action == "Download"){
                     ManageTrack.CallDownloadTrack(Data.Value.Data,this._MyApp,  Socket, User, UserId)
+                } else if (Data.Value.Action == "GetTrackInfo"){
+                    ManageTrack.CallGetTrackInfo(Data.Value.Data,this._MyApp,  Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
                 }
                 break
             case "CreateTracksOnMap":
-                let CreateTracksOnMap = require('./CreateTracksOnMap.js')
+                let CreateTracksOnMap = require('./ModuleCreateTracksOnMap.js')
                 if (Data.Value.Action == "GetUserGroup"){
                     CreateTracksOnMap.CallGetUserGroup(this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "GetMapData"){
@@ -78,7 +80,11 @@ class GeoXServer{
             case "AdminManageTrack":
                 let ModuleAdminManageTrack = require("./ModuleAdminManageTrack")
                 if (Data.Value.Action == "GetData") {
-                    ModuleAdminManageTrack.CallGetData(this._MyApp,  Socket, User, UserId)
+                    //ModuleAdminManageTrack.CallGetData(this._MyApp,  Socket, User, UserId)
+
+                    // Modification de la DB
+                    let ModifyDB = require("./ModifyDb")
+                    ModifyDB.AddElevationToAlTracks(this._MyApp)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`)

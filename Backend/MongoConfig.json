@@ -12,6 +12,7 @@
         "Owner": "Owner",
         "Center": "Center",
         "Public": "Public",
-        "StartPoint": "StartPoint"
+        "StartPoint": "StartPoint",
+        "Elevation": "Elevation"
     } 
 }
