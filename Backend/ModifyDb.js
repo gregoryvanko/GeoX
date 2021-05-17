@@ -278,7 +278,7 @@ function PromiseGetElevation({ lat, lng }){
         const tileset = new TileSet(path.resolve(__dirname, "TempHgt"))
         tileset.getElevation([lat, lng], (err, ele) => {
             if (!err){
-                resolve(ele)
+                resolve(ele.toFixed(0))
             } else {
                 reject(err)
             }
