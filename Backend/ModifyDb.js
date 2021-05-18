@@ -185,9 +185,16 @@ async function AddElevationToAlTracks (MyApp){
 
     let ReponseAllData = await PromiseGetAllGeojson(Mongo, MongoTracksCollection)
     if(!ReponseAllData.Error){
-        //ReponseAllData.Data.forEach(element => {
-            let element = ReponseAllData.Data[0]
+        let Total = ReponseAllData.Data.length
+        let Current = 0
+
+        for (let index = 0; index < ReponseAllData.Data.length; index++) {
+            //const element = ReponseAllData.Data[0]
+
+            const element = ReponseAllData.Data[index]
+            Current +=1
             let Id = element._id
+            console.log("Start AddElevationToAlTracks")
 
             if (element.GeoJsonData.features[0].geometry.type == "LineString"){
                 let Coord = element.GeoJsonData.features[0].geometry.coordinates
@@ -196,7 +203,7 @@ async function AddElevationToAlTracks (MyApp){
                 let distance = 0
                 const [lng, lat] = Coord[0]
                 const ele = await PromiseGetElevation({ lat, lng })
-                AllElevation.push({ x: distance, y: ele})
+                AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
 
                 const { getDistance } = require("geolib")
                 for (let i = 1; i < Coord.length; i++){
@@ -207,12 +214,16 @@ async function AddElevationToAlTracks (MyApp){
                         { latitude: prelat, longitude: prelng },
                         { latitude: lat, longitude: lng }
                     )
-                    AllElevation.push({ x: distance, y: ele})
+                    AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
                 }
                 let DataToDb = new Object()
                 DataToDb[MongoTracksCollection.Elevation] = AllElevation
-                UpdateDataInDb (Id, DataToDb, MyApp, Mongo,  MongoTracksCollection)
-                
+                let ReponseUpdate = await PromiseUpdateDataInDb (Id, DataToDb, Mongo,  MongoTracksCollection)
+                if(ReponseUpdate.Error){
+                    console.log(ReponseUpdate.ErrorMsg)
+                } else {
+                    console.log(Current+ "/" + Total + " done")
+                }
     
                 // let locations = []
                 // Coord.forEach(OneCoord => {
@@ -232,23 +243,18 @@ async function AddElevationToAlTracks (MyApp){
                 // }
 
             } else {
-                MyApp.LogAppliError("error Id= " + element._id + " is not a LineString", "Server", "Server")
+                console.log("error Id= " + element._id + " is not a LineString")
             }
     
-        //})
+        }
     }else {
-        MyApp.LogAppliError("AddElevationToAlTracks error: " + ReponseAllData.ErrorMsg, "Server", "Server")
+        console.log("AddElevationToAlTracks error: " + ReponseAllData.ErrorMsg)
     }
-    MyApp.LogAppliInfo("==> End of AddElevationToAlTracks", "Server", "Server")
+    console.log("==> End of AddElevationToAlTracks")
 }
 
 function PromiseGetAllGeojson(Mongo, MongoTracksCollection){
     return new Promise(resolve => {
-        //let MongoR = require('@gregvanko/corex').Mongo
-        //Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-        //let MongoConfig = require("./MongoConfig.json")
-        //MongoTracksCollection = MongoConfig.TracksCollection
-
         let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:[]}
 
         const Querry = {}
@@ -274,12 +280,19 @@ function PromiseGetAllGeojson(Mongo, MongoTracksCollection){
 function PromiseGetElevation({ lat, lng }){
     return new Promise ((resolve, reject) => {
         const path = require('path')
+        let fs = require('fs')
+        var dir = path.resolve(__dirname, "TempHgt")
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+            console.log("create")
+        }
         const { TileSet } = require("node-hgt")
         const tileset = new TileSet(path.resolve(__dirname, "TempHgt"))
         tileset.getElevation([lat, lng], (err, ele) => {
             if (!err){
                 resolve(ele.toFixed(0))
             } else {
+                console.log(err)
                 reject(err)
             }
         })
@@ -307,16 +320,23 @@ function PromiseGetElevation({ lat, lng }){
 //     }   
 // }
 
-function UpdateDataInDb (Id, Data,MyApp, Mongo, MongoTracksCollection){
-    
-    Mongo.UpdateByIdPromise(Id, Data, MongoTracksCollection.Collection).then((reponse)=>{
-        if (reponse.matchedCount == 0){
-            MyApp.LogAppliError("Track Id not found: "+ Id, "Server", "Server")
-        } else {
-            MyApp.LogAppliInfo("Track Updated", "Server", "Server")
-        }
-    },(erreur)=>{
-        MyApp.LogAppliError("UpdateTrack DB error : " + erreur, "Server", "Server")
+function PromiseUpdateDataInDb (Id, Data, Mongo, MongoTracksCollection){
+    return new Promise(resolve => {
+        let ReponseUpdate = {Error: true, ErrorMsg:"InitError"}
+        Mongo.UpdateByIdPromise(Id, Data, MongoTracksCollection.Collection).then((reponse)=>{
+            if (reponse.matchedCount == 0){
+                ReponseUpdate.Error = true
+                ReponseUpdate.ErrorMsg = "Track Id not found: " + Id
+            } else {
+                ReponseUpdate.Error = false
+                ReponseUpdate.ErrorMsg = null
+            }
+            resolve(ReponseUpdate)
+        },(erreur)=>{
+            ReponseUpdate.Error = true
+            ReponseUpdate.ErrorMsg = "UpdateTrack DB error : " + erreur
+            resolve(ReponseUpdate)
+        })
     })
 }
 
