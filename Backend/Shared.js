@@ -386,7 +386,7 @@ function MinMaxOfTracks(ListOfTracks){
         let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
         const Querry = {'_id': new MongoObjectId(Id)}
-        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.ExteriorPoint]: 1, [MongoTracksCollection.GeoJsonData]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Elevation]: 1}}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.GeoJsonData]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Owner]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Elevation]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1}}
 
         Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){

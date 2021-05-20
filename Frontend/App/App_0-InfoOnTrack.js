@@ -3,12 +3,17 @@ class InfoOnTrack {
         this._Id = Data._id
         this._Name = Data.Name
         this._Date = Data.Date
-        this._ExteriorPoint = Data.ExteriorPoint
         this._GeoJsonData = Data.GeoJsonData
         this._Length = Data.Length
+        this._Owner = Data.Owner
         this._Center = Data.Center
         this._StartPoint = Data.StartPoint
         this._Elevation = Data.Elevation
+        this._Description = Data.Description
+        this._ElevMax = Data.InfoElevation.ElevMax
+        this._ElevMin = Data.InfoElevation.ElevMin
+        this._ElevCumul = Data.InfoElevation.ElevCumul
+
         this._HtmlDiv = document.getElementById(HtmlDiv)
         this._Map = null
         this._MapId = "mapid"
@@ -34,14 +39,18 @@ class InfoOnTrack {
 
     LoadView(){
         this._HtmlDiv.innerHTML=""
-        // Titre
-        this._HtmlDiv.appendChild(CoreXBuild.DivTexte(this._Name,"","TitreInfoOneTrack", "width: 100%;"))
+        // Blank
+        this._HtmlDiv.appendChild(CoreXBuild.Div("","","height: 6.5vh;"))
+        // Info
+        let DivInfo = CoreXBuild.Div("DivTitre","DivInfoOneTrack", "width: 100%;")
+        this._HtmlDiv.appendChild(DivInfo)
+        this.DrawInfo(DivInfo)
         // Div Data
         let DivData = CoreXBuild.Div("DivData","DivInfoOneTrack", "width: 100%;")
         this._HtmlDiv.appendChild(DivData)
         this.DrawData(DivData)
         // Div Carte
-        let DivCarte = CoreXBuild.Div("DivCarte","DivInfoOneTrack", "padding: 0vh; width: 100%;")
+        let DivCarte = CoreXBuild.Div("DivCarte","DivInfoOneTrack", "width: 100%;")
         this._HtmlDiv.appendChild(DivCarte)
         this.DrawMap(DivCarte)
         // Div Elevation
@@ -50,8 +59,48 @@ class InfoOnTrack {
         this.DrawElevation(DivElevation)
     }
 
+    DrawInfo(DivInfo){
+        // Name
+        DivInfo.appendChild(CoreXBuild.DivTexte(this._Name,"","TitreInfoOneTrack", "width: 100%;"))
+        // Owner
+        DivInfo.appendChild(CoreXBuild.DivTexte(this._Owner,"","TextSmall", "width: 100%; padding-left: 2vh;"))
+        // Date
+        DivInfo.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(this._Date),"","TextSmall", "width: 100%; padding-left: 2vh; margin-bottom: 2vh;"))
+        // Description
+        if (this._Description != ""){
+            DivInfo.appendChild(CoreXBuild.DivTexte(this._Description,"","Text", "width: 100%;  padding-left: 2vh;"))
+        }
+    }
+
     DrawData(DivData){
-        DivData.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", ""))
+        //DivData.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", ""))
+        let conteneur = CoreXBuild.DivFlexRowAr("")
+        DivData.appendChild(conteneur)
+        conteneur.appendChild(this.DrawDataInfo(this._Length, "Km", "Lenght"))
+        conteneur.appendChild(this.DrawVerticalLine())
+        conteneur.appendChild(this.DrawDataInfo(this._ElevCumul, "m", "Elev +"))
+        conteneur.appendChild(this.DrawVerticalLine())
+        conteneur.appendChild(this.DrawDataInfo(this._ElevMax, "m", "Elev max"))
+        conteneur.appendChild(this.DrawVerticalLine())
+        conteneur.appendChild(this.DrawDataInfo(this._ElevMin, "m", "Elev min"))
+    }
+
+    DrawDataInfo(Value, Unite, Description){
+        let conteneur = CoreXBuild.Div("", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
+        let conteneurvalue = CoreXBuild.DivFlexRowStart("")
+        conteneurvalue.appendChild(CoreXBuild.DivTexte(Value,"","Text", "padding-right: 0.5vw; font-weight: bold;"))
+        conteneurvalue.appendChild(CoreXBuild.DivTexte(Unite,"","TextSmall", "font-weight: bold;"))
+        conteneur.appendChild(conteneurvalue)
+
+        let conteneurdescription = CoreXBuild.DivFlexRowStart("")
+        conteneurdescription.appendChild(CoreXBuild.DivTexte(Description,"","TextSmall", ""))
+        conteneur.appendChild(conteneurdescription)
+        return conteneur
+    }
+
+    DrawVerticalLine(){
+        let conteneur = CoreXBuild.Div("" , "", "border-left: 2px solid #dfdfe8; height: 6vh;")
+        return conteneur
     }
 
     DrawMap(DivCarte){
@@ -100,8 +149,7 @@ class InfoOnTrack {
                     style: TrackStyle, 
                     filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
                     arrowheads: {frequency: '100px', size: '15m', fill: true}
-                })
-                .addTo(this._LayerGroup)
+                }).addTo(this._LayerGroup)
             layerTrack1.Type= "Track"
             layerTrack1.id = this._Id
             

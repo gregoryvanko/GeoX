@@ -247,6 +247,8 @@ class GeoXManageTracks {
         ContentInfoTrack.appendChild(CoreXBuild.DivTexte("Waiting track data...","","Text", "text-align: center; margin-top: 10vh;"))
         // Button select file
         Contener.appendChild(CoreXBuild.Button("Go to manage track",this.LoadViewManageTracks.bind(this),"Text Button", "GoToManageTrack"))
+        // Blank div
+        Contener.appendChild(CoreXBuild.Div("","","height: 6vh;"))
         // Send status to serveur
         GlobalSendSocketIo("GeoX", "ManageTrack", {Action: "GetTrackInfo", Data: TrackId})
     }

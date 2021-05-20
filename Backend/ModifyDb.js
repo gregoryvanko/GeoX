@@ -188,23 +188,25 @@ async function AddElevationToAlTracks (MyApp){
         let Total = ReponseAllData.Data.length
         let Current = 0
 
-        for (let index = 0; index < ReponseAllData.Data.length; index++) {
-            //const element = ReponseAllData.Data[0]
+        //for (let index = 0; index < ReponseAllData.Data.length; index++) {
+            const element = ReponseAllData.Data[0]
 
-            const element = ReponseAllData.Data[index]
+            //const element = ReponseAllData.Data[index]
             Current +=1
             let Id = element._id
             console.log("Start AddElevationToAlTracks")
-
             if (element.GeoJsonData.features[0].geometry.type == "LineString"){
                 let Coord = element.GeoJsonData.features[0].geometry.coordinates
 
+                
                 let AllElevation = []
                 let distance = 0
                 const [lng, lat] = Coord[0]
                 const ele = await PromiseGetElevation({ lat, lng })
                 AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
 
+                let InfoElevation = {ElevMax:ele, ElevMin:ele, ElevCumul:0}
+                
                 const { getDistance } = require("geolib")
                 for (let i = 1; i < Coord.length; i++){
                     const [prelng, prelat] = Coord[i - 1]
@@ -218,6 +220,8 @@ async function AddElevationToAlTracks (MyApp){
                 }
                 let DataToDb = new Object()
                 DataToDb[MongoTracksCollection.Elevation] = AllElevation
+                DataToDb[MongoTracksCollection.Description] = ""
+                DataToDb[MongoTracksCollection.InfoElevation] = InfoElevation
                 let ReponseUpdate = await PromiseUpdateDataInDb (Id, DataToDb, Mongo,  MongoTracksCollection)
                 if(ReponseUpdate.Error){
                     console.log(ReponseUpdate.ErrorMsg)
@@ -245,8 +249,7 @@ async function AddElevationToAlTracks (MyApp){
             } else {
                 console.log("error Id= " + element._id + " is not a LineString")
             }
-    
-        }
+        //}
     }else {
         console.log("AddElevationToAlTracks error: " + ReponseAllData.ErrorMsg)
     }

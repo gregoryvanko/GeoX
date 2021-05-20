@@ -13,6 +13,8 @@
         "Center": "Center",
         "Public": "Public",
         "StartPoint": "StartPoint",
-        "Elevation": "Elevation"
+        "Elevation": "Elevation",
+        "Description": "Description",
+        "InfoElevation": "InfoElevation"
     } 
 }
