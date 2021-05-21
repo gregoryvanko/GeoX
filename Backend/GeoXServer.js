@@ -82,9 +82,11 @@ class GeoXServer{
                 if (Data.Value.Action == "GetData") {
                     //ModuleAdminManageTrack.CallGetData(this._MyApp,  Socket, User, UserId)
 
-                    // Modification de la DB
+                    //***Modification de la DB
                     let ModifyDB = require("./ModifyDb")
                     ModifyDB.AddElevationToAlTracks(this._MyApp)
+                } else if (Data.Value.Action == "GetTrackInfo"){
+                    ModuleAdminManageTrack.CallGetTrackInfo(Data.Value.Data,this._MyApp,  Socket, User, UserId)
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`)

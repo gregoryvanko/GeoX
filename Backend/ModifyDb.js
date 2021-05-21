@@ -188,68 +188,80 @@ async function AddElevationToAlTracks (MyApp){
         let Total = ReponseAllData.Data.length
         let Current = 0
 
-        //for (let index = 0; index < ReponseAllData.Data.length; index++) {
-            const element = ReponseAllData.Data[0]
+        let ElevationMin = 0
+        let ElevationMax = 0
+        let ElevationCumulP = 0
+        let ElevationCumulM = 0
+        let ElevationPrevious = 0
 
-            //const element = ReponseAllData.Data[index]
+        console.log("Start AddElevationToAlTracks")
+        for (let index = 0; index < ReponseAllData.Data.length; index++) {
+            //const element = ReponseAllData.Data[1]
+            const element = ReponseAllData.Data[index]
             Current +=1
             let Id = element._id
-            console.log("Start AddElevationToAlTracks")
+           
             if (element.GeoJsonData.features[0].geometry.type == "LineString"){
                 let Coord = element.GeoJsonData.features[0].geometry.coordinates
 
-                
                 let AllElevation = []
                 let distance = 0
                 const [lng, lat] = Coord[0]
-                const ele = await PromiseGetElevation({ lat, lng })
+                let ele = await PromiseGetElevation({ lat, lng })
+                ele = parseInt(ele)
                 AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
 
-                let InfoElevation = {ElevMax:ele, ElevMin:ele, ElevCumul:0}
+                ElevationMin = ele
+                ElevationMax = ele
+                ElevationCumulP = 0
+                ElevationCumulM = 0
+                ElevationPrevious = ele
+                
                 
                 const { getDistance } = require("geolib")
                 for (let i = 1; i < Coord.length; i++){
                     const [prelng, prelat] = Coord[i - 1]
                     const [lng, lat] = Coord[i]
-                    const ele = await PromiseGetElevation({lat, lng})
+                    // Get elevation
+                    let eleP = await PromiseGetElevation({lat, lng})
+                    eleP = parseInt(eleP)
+                    // Get distance from first point
                     distance += getDistance(
                         { latitude: prelat, longitude: prelng },
                         { latitude: lat, longitude: lng }
                     )
-                    AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
+                    AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
+                    // Get ElevationMin
+                    if (eleP < ElevationMin){
+                        ElevationMin = eleP
+                    }
+                    // Get ElevationMax
+                    if (eleP > ElevationMax){
+                        ElevationMax = eleP
+                    }
+                    // Get ElevationCumulP ElevationCumulM
+                    const Delta = eleP - ElevationPrevious
+                    if ((Delta)>0){
+                        ElevationCumulP += Delta
+                    } else {
+                        ElevationCumulM += Delta
+                    }
+                    ElevationPrevious = eleP
                 }
                 let DataToDb = new Object()
                 DataToDb[MongoTracksCollection.Elevation] = AllElevation
                 DataToDb[MongoTracksCollection.Description] = ""
-                DataToDb[MongoTracksCollection.InfoElevation] = InfoElevation
+                DataToDb[MongoTracksCollection.InfoElevation] = {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:ElevationCumulM}
                 let ReponseUpdate = await PromiseUpdateDataInDb (Id, DataToDb, Mongo,  MongoTracksCollection)
                 if(ReponseUpdate.Error){
                     console.log(ReponseUpdate.ErrorMsg)
                 } else {
                     console.log(Current+ "/" + Total + " done")
                 }
-    
-                // let locations = []
-                // Coord.forEach(OneCoord => {
-                //     let lat = OneCoord[1]
-                //     let long = OneCoord[0]
-                //     let latlong = {"latitude": lat,"longitude": long}
-                //     locations.push(latlong)
-                // });
-                // let data = {"locations":locations}
-                // let reponse = await FetchElevation(data)
-                // if (reponse.Valide){
-                //     let DataToDb = new Object()
-                //     DataToDb[MongoTracksCollection.Elevation] = reponse.Data
-                //     MyApp.LogAppliInfo("OK", "Server", "Server")
-                // } else {
-                //     MyApp.LogAppliError("error Id= " + element._id + " => Fetch elevation error: " + reponse.Data, "Server", "Server")
-                // }
-
             } else {
                 console.log("error Id= " + element._id + " is not a LineString")
             }
-        //}
+        }
     }else {
         console.log("AddElevationToAlTracks error: " + ReponseAllData.ErrorMsg)
     }

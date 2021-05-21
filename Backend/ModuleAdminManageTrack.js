@@ -50,4 +50,27 @@ function PromiseGetAllTracksInfo(MyApp){
     })
 }
 
+/**
+* Delete d'une track
+* @param {string} Id {Id of track}
+* @param {Socket} Socket SocketIO
+* @param {String} User Nom du user
+* @param {String} UserId Id du user
+*/
+async function CallGetTrackInfo(Id, MyApp, Socket, User, UserId){
+    // Get all tracks info (but no track data)
+    let Shared = require("./Shared")
+    let ReponseTracksInfo = await Shared.PromiseGetTracksInfo(Id, MyApp, User)
+    if(!ReponseTracksInfo.Error){
+        //Send Data
+        Socket.emit("AdminManageTrack", {Action: "SetTrackInfo", Data: ReponseTracksInfo.Data})
+        // Log socket action
+        MyApp.LogAppliInfo(`SoApi send Admin Track Info Data`, User, UserId)
+    } else {
+        MyApp.LogAppliError(ReponseTracksInfo.ErrorMsg, User, UserId)
+        Socket.emit("GeoXError", ReponseTracksInfo.ErrorMsg)
+    }
+}
+
 module.exports.CallGetData = CallGetData
+module.exports.CallGetTrackInfo = CallGetTrackInfo

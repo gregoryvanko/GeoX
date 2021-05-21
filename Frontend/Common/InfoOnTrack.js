@@ -12,7 +12,8 @@ class InfoOnTrack {
         this._Description = Data.Description
         this._ElevMax = Data.InfoElevation.ElevMax
         this._ElevMin = Data.InfoElevation.ElevMin
-        this._ElevCumul = Data.InfoElevation.ElevCumul
+        this._ElevCumulP = Data.InfoElevation.ElevCumulP
+        this._ElevCumulM = Data.InfoElevation.ElevCumulM
 
         this._HtmlDiv = document.getElementById(HtmlDiv)
         this._Map = null
@@ -73,27 +74,28 @@ class InfoOnTrack {
     }
 
     DrawData(DivData){
-        //DivData.appendChild(CoreXBuild.DivTexte("Waiting server data...","","Text", ""))
         let conteneur = CoreXBuild.DivFlexRowAr("")
         DivData.appendChild(conteneur)
-        conteneur.appendChild(this.DrawDataInfo(this._Length, "Km", "Lenght"))
+        conteneur.appendChild(this.DrawDataInfo(this._Length, "Km", CommonIcon.Lenght()))
         conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._ElevCumul, "m", "Elev +"))
+        conteneur.appendChild(this.DrawDataInfo(this._ElevCumulP, "m", CommonIcon.ElevationPlus()))
         conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._ElevMax, "m", "Elev max"))
+        conteneur.appendChild(this.DrawDataInfo(this._ElevCumulM, "m", CommonIcon.ElevationMoins()))
         conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._ElevMin, "m", "Elev min"))
+        conteneur.appendChild(this.DrawDataInfo(this._ElevMax, "m", CommonIcon.ElevationMax()))
+        conteneur.appendChild(this.DrawVerticalLine())
+        conteneur.appendChild(this.DrawDataInfo(this._ElevMin, "m", CommonIcon.ElevationMin()))
     }
 
     DrawDataInfo(Value, Unite, Description){
         let conteneur = CoreXBuild.Div("", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
-        let conteneurvalue = CoreXBuild.DivFlexRowStart("")
+        let conteneurvalue = CoreXBuild.DivFlexRowAr("")
         conteneurvalue.appendChild(CoreXBuild.DivTexte(Value,"","Text", "padding-right: 0.5vw; font-weight: bold;"))
         conteneurvalue.appendChild(CoreXBuild.DivTexte(Unite,"","TextSmall", "font-weight: bold;"))
         conteneur.appendChild(conteneurvalue)
 
-        let conteneurdescription = CoreXBuild.DivFlexRowStart("")
-        conteneurdescription.appendChild(CoreXBuild.DivTexte(Description,"","TextSmall", ""))
+        let conteneurdescription = CoreXBuild.DivFlexRowAr("")
+        conteneurdescription.appendChild(CoreXBuild.Image64(Description,"", "", "height: 3vh;"))
         conteneur.appendChild(conteneurdescription)
         return conteneur
     }
@@ -294,7 +296,8 @@ class InfoOnTrack {
         let ElevationPoint = this._Elevation[Index]
         let latlng = [ElevationPoint.coord.lat, ElevationPoint.coord.long]
         if (this._GpsPointer == null){
-            this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'#0073f0', fillOpacity:1}).addTo(this._Map)
+            //this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'#0073f0', fillOpacity:1}).addTo(this._Map)
+            this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'red', fillOpacity:1}).addTo(this._Map)
         }
         this._GpsPointer.setLatLng(latlng)
     }

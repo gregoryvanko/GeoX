@@ -41,6 +41,9 @@ class GeoXManageTracks {
         if (Value.Action == "SetData"){
             this._AppData = Value.AppData
             this.LoadViewManageTracks()
+        } else if (Value.Action == "SetTrackInfo" ){
+            // Load Info Track view
+            let InfoTrackView = new InfoOnTrack(Value.Data, "ContentInfoTrack")
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -107,7 +110,7 @@ class GeoXManageTracks {
                 BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Owner,"","TextSmall", "width: 21%;"))
                 let DivButton = CoreXBuild.Div("", "", "margin-left:auto;")
                 BoxTracks.appendChild(DivButton)
-                DivButton.appendChild(CoreXBuild.Button("&#128279", this.LoadViewLink.bind(this,Track._id), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button(`<img src="${Icon.Information()}" alt="icon" width="30" height="30">`, this.LoadViewInfoTrack.bind(this,Track._id), "ButtonIcon"))
                 
                 // Ajout d'une ligne
                 AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
@@ -115,12 +118,33 @@ class GeoXManageTracks {
         }
     }
 
-    LoadViewLink(TrackId){
-        window.open(window.location.origin + "/getmap/?trackid=" + TrackId, '_blank').focus();
+    LoadViewInfoTrack(TrackId){
+        //window.open(window.location.origin + "/getmap/?trackid=" + TrackId, '_blank').focus();
+
+        // Clear Conteneur
+        this._DivApp.innerHTML = ""
+        // Contener
+        let Contener = CoreXBuild.DivFlexColumn("Conteneur")
+        Contener.style.width = "90%"
+        Contener.style.marginLeft = "auto"
+        Contener.style.marginRight = "auto"
+        Contener.style.maxWidth = "900px"
+        this._DivApp.appendChild(Contener)
+        // Content Info Track
+        let ContentInfoTrack = CoreXBuild.DivFlexColumn("ContentInfoTrack")
+        Contener.appendChild(ContentInfoTrack)
+        // waitinf data txt
+        ContentInfoTrack.appendChild(CoreXBuild.DivTexte("Waiting track data...","","Text", "text-align: center; margin-top: 10vh;"))
+        // Button select file
+        Contener.appendChild(CoreXBuild.Button("Go to manage track",this.LoadViewManageTracks.bind(this),"Text Button", "GoToManageTrack"))
+        // Blank div
+        Contener.appendChild(CoreXBuild.Div("","","height: 6vh;"))
+        // Send status to serveur
+        GlobalSendSocketIo("GeoX", "AdminManageTrack", {Action: "GetTrackInfo", Data: TrackId})
     }
 }
 
 // Creation de l'application
 let MyManageTracks = new GeoXManageTracks(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Manage My Tracks", Icon.ManageTracks(), MyManageTracks.Initiation.bind(MyManageTracks))
+GlobalCoreXAddApp("Manage My Tracks", Icon.GeoXManageTracks(), MyManageTracks.Initiation.bind(MyManageTracks))

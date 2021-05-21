@@ -274,7 +274,6 @@ class InfoBox{
                 } else {
                     DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Follow()}" alt="icon" width="25" height="25">`, this.ClickOnFollowMarker.bind(this,element.Id), "ButtonIcon"))
                 }
-                
                 // Button show/hide track
                 if (element.Type == "MyTrack"){
                     DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleTrack.bind(this, element.Id), "ButtonIcon"))

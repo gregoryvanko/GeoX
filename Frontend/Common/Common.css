@@ -1,3 +1,7 @@
+.leaflet-retina .leaflet-control-layers-toggle {
+    background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/layers-2x.png");
+}
+
 /* Titre */
 .Titre{
     margin-top: 1vh;
@@ -195,6 +199,24 @@
     margin-right: auto;
 }
 
+.TitreInfoOneTrack{
+    font-size: calc(var(--TitreNormale)*0.6);
+    word-wrap: break-word;
+    letter-spacing: -0.01em;
+    font-weight: bold;
+    padding-left: 1vh;
+    /*background: #f7f7fa;
+    border: 1px solid #dfdfe8;*/
+    box-sizing: border-box
+}
+
+.DivInfoOneTrack{
+    margin-bottom: 2vh;
+    border: 1px solid #dfdfe8;
+    padding: 1vh;
+    box-sizing: border-box
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)
@@ -211,6 +233,7 @@ screen and (max-width: 700px)
     .Input {padding: 3%;}
     .IconeInList{height:2vh; margin-left: 2vh;}
     .AppConteneur{width: 95%;}
+    .TitreInfoOneTrack{font-size: calc(var(--TitreIphone)*0.6);}
 }
 
 @media screen and (min-width: 1200px)
