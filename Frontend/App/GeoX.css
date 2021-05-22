@@ -70,7 +70,7 @@
 
 .DivBoxTracks{
     width: 35vw;
-    max-width: 350px;
+    max-width: 300px;
     height: 66vh;
     position: fixed;
     z-index: 998; 
@@ -131,6 +131,22 @@
 }
 @media (hover: hover) {
     .ButtonInfoBoxNav:hover{
+        border-color: white;
+    }
+}
+
+.ButtonInfoBoxNavRight{
+    outline: none;
+    padding: 0px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background-color: transparent;
+    color: white;
+    margin-left: auto;
+}
+@media (hover: hover) {
+    .ButtonInfoBoxNavRight:hover{
         border-color: white;
     }
 }

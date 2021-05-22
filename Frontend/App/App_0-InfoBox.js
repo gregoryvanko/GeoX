@@ -160,9 +160,9 @@ class InfoBox{
         // Clear Action
         action.innerHTML = ""
         // Add filter button
-        action.appendChild(CoreXBuild.Button (`<img src="${Icon.Filter()}" alt="icon" width="30" height="30">`, this.FilterTrack.bind(this), "ButtonInfoBoxNav", ""))
+        action.appendChild(CoreXBuild.Button (`<img src="${Icon.Filter()}" alt="icon" width="30" height="30">`, this.FilterTrack.bind(this), "ButtonInfoBoxNavRight", ""))
         // Add button Hide all
-        action.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="30" height="30">`, this.ToogleTrack.bind(this, null), "ButtonInfoBoxNav", ""))
+        //action.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="30" height="30">`, this.ToogleTrack.bind(this, null), "ButtonInfoBoxNav", ""))
         // Get content
         let content = document.getElementById("InfoBoxContent")
         // Clear content
@@ -227,7 +227,7 @@ class InfoBox{
                 let Conteneur = CoreXBuild.DivFlexRowStart("")
                 DivBoxTrackInfo.appendChild(Conteneur)
                 // Box pour click sur le nom de la track et pour faire un zoom sur la track
-                let DivTrackinfo = CoreXBuild.Div("", "", "cursor: pointer; width: 56%; display: -webkit-flex; display: flex; flex-direction: column; justify-content:flex-start;")
+                let DivTrackinfo = CoreXBuild.Div("", "", "cursor: pointer; width: 65%; display: -webkit-flex; display: flex; flex-direction: column; justify-content:flex-start;")
                 if (element.Type == "MyTrack"){
                     DivTrackinfo.style.color = "white"
                 } else {
@@ -254,34 +254,106 @@ class InfoBox{
                 let DivButton = document.createElement("div")
                 Conteneur.appendChild(DivButton)
                 DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
-                // Boutton Color track pour My Track
-                if (element.Type == "MyTrack"){
-                    let inputcolor = document.createElement("input")
-                    inputcolor.setAttribute("id","color" + element.Id)
-                    inputcolor.setAttribute("type","color")
-                    inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px; border: 1px solid black;")
-                    inputcolor.value = element.Track.Color
-                    inputcolor.onchange = (event)=>{this.ChangeTrackColor(event.target.value, element.Name, element.Length, element.Id)}
-                    DivButton.appendChild(inputcolor)
-                }
-                // Button Save pour GeoX Track
-                if (element.Type == "GeoxMarker"){
-                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.SaveWhite()}" alt="icon" width="25" height="25">`, this.ClickOnSaveMarker.bind(this,element.Id), "ButtonIcon"))
-                }
-                // Boutton Follow
-                if (element.Type == "MyTrack"){
-                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Follow()}" alt="icon" width="25" height="25">`, this.ClickOnFollowTrack.bind(this,element.Track, true), "ButtonIcon"))
-                } else {
-                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Follow()}" alt="icon" width="25" height="25">`, this.ClickOnFollowMarker.bind(this,element.Id), "ButtonIcon"))
-                }
-                // Button show/hide track
-                if (element.Type == "MyTrack"){
-                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleTrack.bind(this, element.Id), "ButtonIcon"))
-                } else {
-                    DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="25" height="25">`, this.ToogleMarkerOnMap.bind(this, element.Id, false), "ButtonIcon"))
-                }
+
+                DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.EngrenageWhite()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this,element), "ButtonIcon"))
+
             });
         }
+    }
+
+    LoadViewAction(element){
+        let HTMLContent = CoreXBuild.DivFlexColumn()
+        HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
+        // Blank div
+        HTMLContent.appendChild(CoreXBuild.Div("","","height: 3vh;"))
+
+        // Boutton Color track pour My Track
+        if (element.Type == "MyTrack"){
+            let divColor = CoreXBuild.Div("", "", "width: 50%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
+
+            let TextColor = CoreXBuild.DivTexte("Change Color", "", "Text", "")
+
+            let inputcolor = document.createElement("input")
+            inputcolor.setAttribute("id","color" + element.Id)
+            inputcolor.setAttribute("type","color")
+            inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px; border: 1px solid black;")
+            inputcolor.value = element.Track.Color
+            inputcolor.onchange = (event)=>{CoreXWindow.DeleteWindow(); this.ChangeTrackColor(event.target.value, element.Name, element.Length, element.Id)}
+            divColor.appendChild(TextColor)
+            divColor.appendChild(inputcolor)
+            HTMLContent.appendChild(divColor)
+        }
+
+        // Button TrackInfo
+        HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Information(), "Info Track"), this.InfoTrack.bind(this,element.Id), "Text ButtonCoreXWindow"))
+
+        // Button Save pour GeoX Track
+        if (element.Type == "GeoxMarker"){
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.SaveBlack(), "Save Track"), this.SaveMarker.bind(this,element.Id), "Text ButtonCoreXWindow"))
+        }
+
+        // Boutton Follow
+        if (element.Type == "MyTrack"){
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.FollowTrack.bind(this,element.Track, true), "Text ButtonCoreXWindow"))
+        } else {
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.FollowMarker.bind(this,element.Id), "Text ButtonCoreXWindow"))
+        }
+
+        // Button Zoom on track
+        if (element.Type == "MyTrack"){
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.FitBound(), "Zoom on Track"), this.ZoomOnTrack.bind(this, element.Track, true), "Text ButtonCoreXWindow"))
+        } else {
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.FitBound(), "Zoom on Track"), this.ZoomOnMarker.bind(this, element.Id, true), "Text ButtonCoreXWindow"))
+        }
+
+        // Button show/hide track
+        if (element.Type == "MyTrack"){
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide Track"), this.ToogleT.bind(this, element.Id), "Text ButtonCoreXWindow"))
+        } else {
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide Track"), this.ToogleM.bind(this, element.Id, false), "Text ButtonCoreXWindow"))
+        }
+
+        // Button Show/hide all
+        HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide All"), this.ToogleT.bind(this, null), "Text ButtonCoreXWindow"))
+        
+        CoreXWindow.BuildWindow(HTMLContent)
+    }
+
+    InfoTrack(Id){
+        CoreXWindow.DeleteWindow()
+        // ToDo
+    }
+    FollowTrack(A, B){
+        CoreXWindow.DeleteWindow()
+        this.ClickOnFollowTrack(A, B)
+    }
+    FollowMarker(A){
+        CoreXWindow.DeleteWindow()
+        this.ClickOnFollowMarker(A)
+    }
+    SaveMarker(A){
+        CoreXWindow.DeleteWindow()
+        this.ClickOnSaveMarker(A)
+    }
+    ZoomOnTrack(A, B){
+        CoreXWindow.DeleteWindow()
+        this.ClickOnBoxTrack(A, B)
+    }
+    ZoomOnMarker(A, B){
+        CoreXWindow.DeleteWindow()
+        this.ToogleMarkerOnMap(A, B)
+    }
+    ToogleT(A){
+        CoreXWindow.DeleteWindow()
+        this.ToogleTrack(A)
+    }
+    ToogleM(A, B){
+        CoreXWindow.DeleteWindow()
+        this.ToogleMarkerOnMap(A, B)
+    }
+
+    BuildImageAndTextButtonContent(Image, Text){
+        return `<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Image}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">${Text}</div></div>`
     }
 
     FilterTrack(){

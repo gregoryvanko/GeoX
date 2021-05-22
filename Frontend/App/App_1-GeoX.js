@@ -444,10 +444,10 @@ class GeoX {
                 // Changer le popup de la track
                 layer.bindPopup(me.BuildPopupContentTrack(Name, Length, TrackId, Color))
                 // Changer la couleur du boutton change color dans le trackInfo
-                let ButtonColorInTrackInfo = document.getElementById("color" + TrackId)
-                if (ButtonColorInTrackInfo){
-                   ButtonColorInTrackInfo.value = Color
-                }
+                //let ButtonColorInTrackInfo = document.getElementById("color" + TrackId)
+                //if (ButtonColorInTrackInfo){
+                //   ButtonColorInTrackInfo.value = Color
+                //}
             }
         })
         this._ListOfTrack.forEach(Track => {

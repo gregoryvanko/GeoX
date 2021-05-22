@@ -75,7 +75,7 @@
 
 /* Button Icon */
 .ButtonIcon{
-    font-size: calc(var(--TexteNomrale)*1.4);
+    font-size: 0px;
     outline: none;
     border: 1px solid transparent;
     border-radius: 8px;
@@ -227,7 +227,6 @@ screen and (max-width: 700px)
     .TextSmall{font-size: calc(var(--TexteIphone)*0.8);}
     .TextBoxTitre{font-size: calc(var(--TexteIphone)*1.3);}
     .Button{border-radius: 40px;}
-    .ButtonIcon{font-size: calc(var(--TexteIphone)*2);}
     .ButtonCoreXWindow{width: 60%;}
     .InputBox{width: 90%;}
     .Input {padding: 3%;}
@@ -244,5 +243,4 @@ screen and (max-width: 700px)
     .TextSmall{font-size: calc(var(--TexteMax)*0.8);}
     .TextBoxTitre{font-size: calc(var(--TexteMax)*1.3);}
     .Button{border-radius: 40px;}
-    .ButtonIcon{font-size: calc(var(--TexteMax)*1.4);}
 }
