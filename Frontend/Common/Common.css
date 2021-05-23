@@ -91,9 +91,9 @@
     .ButtonIcon:hover:enabled{
         border-color: white;
     }
-    .ButtonIconBlackBorder:hover:enabled{
-        border-color: black;
-    }
+}
+.ButtonIconBlackBorder{
+    border-color: black;
 }
 
 /* Button CorexWindow */
