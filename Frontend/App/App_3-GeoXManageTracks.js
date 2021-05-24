@@ -123,7 +123,7 @@ class GeoXManageTracks {
 
                 let DivButtonIphone = document.createElement("div")
                 DivButtonIphone.setAttribute("style", "width: 8%; display: flex; flex-direction: row; justify-content:center; align-content:center; align-items: center; flex-wrap: wrap;")
-                DivButtonIphone.appendChild(CoreXBuild.Button (`<img src="${Icon.Engrenage()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this,this._AppGroup, Track), "ButtonIcon"))
+                DivButtonIphone.appendChild(CoreXBuild.Button (`<img src="${Icon.Engrenage()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this,this._AppGroup, Track), "ButtonIcon ButtonIconWhiteBorder"))
                 BoxTracks.appendChild(DivButtonIphone)
                 // Ajout d'une ligne
                 AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))

@@ -84,11 +84,11 @@
     background-color: transparent;
     cursor: pointer;
 }
-.ButtonIcon:focus{
+/* .ButtonIcon:focus{
     border-color: transparent;
-}
+} */
 @media (hover: hover) {
-    .ButtonIcon:hover:enabled{
+    .ButtonIconWhiteBorder:hover:enabled{
         border-color: white;
     }
 }

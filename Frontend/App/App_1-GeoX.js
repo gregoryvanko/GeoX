@@ -294,25 +294,27 @@ class GeoX {
         };
         var layerTrack1 = null
         if (MyTrack){
+            let InfoTrackObject = {Type: "MyTrack", From:"PopupTrack", Name: Track.Name, Group: Track.Group, Date: Track.Date, Length: Track.Length, Id: Track._id, Track: Track}
             layerTrack1=L.geoJSON(Track.GeoJsonData, 
                 {
                     style: TrackStyle, 
                     filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
                     arrowheads: {frequency: '100px', size: '15m', fill: true}
                 })
-                .bindPopup(this.BuildPopupContentTrack(Track.Name, Track.Length, Track._id, Track.Group, Track.Date, Track))
+                .bindPopup(this.BuildPopupContentTrack(InfoTrackObject))
                 .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
                 .on('mouseout', function (e){e.target.setStyle({weight:WeightTrack});})
                 .addTo(this._LayerGroup)
                 layerTrack1.Type= "Track"
         } else {
+            let InfoTrackObject = {Type: "GeoxMarker", Name: Track.Name, Group: Track.Group, Date: Track.Date, Length: Track.Length, Id: Track._id, Track: Track}
             layerTrack1=L.geoJSON(Track.GeoJsonData, 
                 {
                     style: TrackStyle, 
                     filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
                     arrowheads: {frequency: '100px', size: '15m', fill: true}
                 })
-                .bindPopup(this.BuildPopupContentGeoXTrack(Track.Name, Track.Length, Track._id, Track.Group, Track.Date))
+                .bindPopup(this.BuildPopupContentTrack(InfoTrackObject))
                 .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
                 .on('mouseout', function (e){e.target.setStyle({weight:WeightTrack});})
                 .addTo(this._LayerGroup)
@@ -391,40 +393,16 @@ class GeoX {
      * @param {String} Color Color de la track
      * @returns Html Div avec contenant l'information de la track
      */
-    BuildPopupContentTrack(Name, Length, Id, Group, Date, Track){
-        let InfoTrackObject = {Type: "MyTrack", Name: Name, Group: Group, Date: Date, Length: Length, Id: Id, Track: Track}
+    BuildPopupContentTrack(InfoTrackObject){
         let Div = document.createElement("div")
         Div.setAttribute("Class", "TrackPopupContent")
         // Nom de la track
-        Div.appendChild(CoreXBuild.DivTexte(Name,"","TextSmall", ""))
+        Div.appendChild(CoreXBuild.DivTexte(InfoTrackObject.Name,"","TextSmall", ""))
         // Longueur de la track
-        Div.appendChild(CoreXBuild.DivTexte(Length + "km","","TextSmall", ""))
+        Div.appendChild(CoreXBuild.DivTexte(InfoTrackObject.Length + "km","","TextSmall", ""))
         
         // Button Info
         Div.appendChild(CoreXBuild.Button (`<img src="${Icon.Information()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this, InfoTrackObject), "ButtonIcon ButtonIconBlackBorder"))
-        return Div
-    }
-
-    /**
-     * Construit le div du popup d'un track de GeoX community
-     * @param {String} Name Nom de la track
-     * @param {String} Length longeur de la track
-     * @param {String} Id Id de la track
-     * @returns Html Div avec contenant l'information de la track
-     */
-    BuildPopupContentGeoXTrack(Name, Length, Id, Group, Date){
-        let InfoTrackObject = {Type: "GeoxMarker", Name: Name, Group: Group, Date: Date, Length: Length, Id: Id, Track: null}
-        let Div = document.createElement("div")
-        Div.setAttribute("Class", "TrackPopupContent")
-        // Nom de la track
-        Div.appendChild(CoreXBuild.DivTexte(Name,"","TextSmall", ""))
-        // Longueur de la track
-        Div.appendChild(CoreXBuild.DivTexte(Length + "km","","TextSmall", ""))
-        // Biutton Info 
-        Div.appendChild(CoreXBuild.Button (`<img src="${Icon.Information()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this, InfoTrackObject), "ButtonIcon ButtonIconBlackBorder"))
-
-        //// Save Track
-        //Div.appendChild(CoreXBuild.Button (`<img src="${Icon.SaveBlack()}" alt="icon" width="25" height="25">`, this.ClickSaveGeoXTrackToMyTracks.bind(this, Id), "ButtonIcon ButtonIconBlackBorder"))
         return Div
     }
 
@@ -437,19 +415,13 @@ class GeoX {
      */
     ChangeTrackColor(Color, Name, Length, TrackId){
         let me = this
+        // Changer la couleur de la track sur la map
         this._LayerGroup.eachLayer(function (layer) {
             if (layer.id == TrackId){
-                // Changer la couleur de la track
                 layer.setStyle({color: Color});
-                // Changer le popup de la track
-                //layer.bindPopup(me.BuildPopupContentTrack(Name, Length, TrackId, Color))
-                // Changer la couleur du boutton change color dans le trackInfo
-                //let ButtonColorInTrackInfo = document.getElementById("color" + TrackId)
-                //if (ButtonColorInTrackInfo){
-                //   ButtonColorInTrackInfo.value = Color
-                //}
             }
         })
+        // Changer la couleur dans _ListOfTrack
         this._ListOfTrack.forEach(Track => {
             if (Track._id == TrackId){
                 Track.Color = Color
@@ -514,6 +486,15 @@ class GeoX {
                 });
             }
         }
+    }
+
+    HideOtherTrackExceptOne(TrackId){
+        let me = this
+        this._LayerGroup.eachLayer(function (layer) {
+            if (!((layer.id == TrackId) || (layer.id == TrackId + "start") || (layer.id == TrackId + "end"))){
+                me._LayerGroup.removeLayer(layer);
+            }
+        })
     }
 
     /**
@@ -1107,6 +1088,7 @@ class GeoX {
     }
 
     LoadViewAction(element){
+        this._Map.closePopup()
         let HTMLContent = CoreXBuild.DivFlexColumn()
         HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
         // Blank div
@@ -1148,18 +1130,26 @@ class GeoX {
         if (element.Type == "MyTrack"){
             HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.FitBound(), "Zoom on Track"), this.ZoomOnTrack.bind(this, element.Track, true), "Text ButtonCoreXWindow"))
         } else {
-            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.FitBound(), "Zoom on Track"), this.ZoomOnMarker.bind(this, element.Id, true), "Text ButtonCoreXWindow"))
+            if (element.From == "InfoBox"){
+                HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.FitBound(), "Zoom on Track"), this.ZoomOnMarker.bind(this, element.Id, true), "Text ButtonCoreXWindow"))
+            } else {
+                HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.FitBound(), "Zoom on Track"), this.ZoomOnTrack.bind(this, element.Track, true), "Text ButtonCoreXWindow"))
+            }
+            
         }
 
         // Button show/hide track
-        if (element.Type == "MyTrack"){
-            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide Track"), this.ToogleT.bind(this, element.Id), "Text ButtonCoreXWindow"))
-        } else {
-            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide Track"), this.ToogleM.bind(this, element.Id, false), "Text ButtonCoreXWindow"))
+        if (element.From == "InfoBox"){
+            if (element.Type == "MyTrack"){
+                HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide Track"), this.ToogleT.bind(this, element.Id), "Text ButtonCoreXWindow"))
+            } else {
+                HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide Track"), this.ToogleM.bind(this, element.Id, false), "Text ButtonCoreXWindow"))
+            }
         }
+        
 
-        // Button Show/hide all
-        HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide All"), this.ToogleT.bind(this, null), "Text ButtonCoreXWindow"))
+        // Button Hide Other Track
+        HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Hide other track"), this.HideOtherTExceptOne.bind(this, element.Id), "Text ButtonCoreXWindow"))
         
         CoreXWindow.BuildWindow(HTMLContent)
     }
@@ -1194,6 +1184,10 @@ class GeoX {
     ToogleM(A, B){
         CoreXWindow.DeleteWindow()
         this.ToogleMarkerOnMap(A, B)
+    }
+    HideOtherTExceptOne(A){
+        CoreXWindow.DeleteWindow()
+        this.HideOtherTrackExceptOne(A)
     }
     BuildImageAndTextButtonContent(Image, Text){
         return `<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Image}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">${Text}</div></div>`

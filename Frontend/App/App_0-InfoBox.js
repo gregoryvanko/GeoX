@@ -167,7 +167,7 @@ class InfoBox{
         let ListOfTrackFiltered = []
         // Add my track
         this._ListOfTrack.forEach(element => {
-            let InfoTrackObject = {Type: "MyTrack", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: element}
+            let InfoTrackObject = {Type: "MyTrack", From:"InfoBox", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: element}
             if ((element.Length > parseInt(this._Filter.MinKm))&&(element.Length < parseInt(this._Filter.MaxKm))){
                 ListOfTrackFiltered.push(InfoTrackObject)
             }
@@ -187,7 +187,7 @@ class InfoBox{
             this._ListeOfMarkers.forEach(element => {
                 let point = turf.point([element.StartPoint.Lat, element.StartPoint.Lng])
                 if (turf.booleanWithin(point, polyCorner)){
-                    let InfoTrackObject = {Type: "GeoxMarker", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: null}
+                    let InfoTrackObject = {Type: "GeoxMarker", From:"InfoBox", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: null}
                     if ((element.Length > parseInt(this._Filter.MinKm))&&(element.Length < parseInt(this._Filter.MaxKm))){
                         ListOfTrackFiltered.push(InfoTrackObject)
                     }
@@ -251,7 +251,7 @@ class InfoBox{
                 Conteneur.appendChild(DivButton)
                 DivButton.setAttribute("style", "margin-left: auto; display: -webkit-flex; display: flex; flex-direction: row; justify-content:flex-end; align-content:center; align-items: center; flex-wrap: wrap;")
 
-                DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.EngrenageWhite()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this,element), "ButtonIcon"))
+                DivButton.appendChild(CoreXBuild.Button (`<img src="${Icon.EngrenageWhite()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this,element), "ButtonIcon ButtonIconWhiteBorder"))
             });
         }
     }
