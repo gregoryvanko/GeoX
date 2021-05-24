@@ -251,7 +251,7 @@ async function AddElevationToAlTracks (MyApp){
                 let DataToDb = new Object()
                 DataToDb[MongoTracksCollection.Elevation] = AllElevation
                 DataToDb[MongoTracksCollection.Description] = ""
-                DataToDb[MongoTracksCollection.InfoElevation] = {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:ElevationCumulM}
+                DataToDb[MongoTracksCollection.InfoElevation] = {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}
                 let ReponseUpdate = await PromiseUpdateDataInDb (Id, DataToDb, Mongo,  MongoTracksCollection)
                 if(ReponseUpdate.Error){
                     console.log(ReponseUpdate.ErrorMsg)

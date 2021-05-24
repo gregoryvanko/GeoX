@@ -58,6 +58,9 @@ class GeoX {
         this._GeoXTrackShowed = false
         // Padding for corner of map
         this._MapBoundPadding = 0
+        // Saved data for remove map
+        this._SavedCenter = null
+        this._SavedZoom = null
     }
 
     /**
@@ -134,6 +137,9 @@ class GeoX {
                     this.SetTrackOnMap(Track, false)
                 }
             }
+        } else if (Value.Action == "SetTrackInfo" ){
+            // Load Info Track view
+            let InfoTrackView = new InfoOnTrack(Value.Data, "ContentInfoTrack")
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -176,6 +182,8 @@ class GeoX {
         }
         this._GeoXTrackShowed = false
         this._MapBoundPadding = 0
+        this._SavedCenter = null
+        this._SavedZoom = null
 
         if (this._Map && this._Map.remove) {
             this._Map.off();
@@ -218,9 +226,9 @@ class GeoX {
         this._DivApp.innerHTML = ""
         // Ajout du div qui va contenir la map
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
-        // Ajout du bouton action left
         this._InfoBox.ListOfTrack = this._ListOfTrack
         this._InfoBox.UserGroup = this._UserGroup
+        // Ajout du bouton action left
         this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this._InfoBox.InfoBoxToggle.bind(this._InfoBox), "ButtonInfoBoxToggle", `<img src="${Icon.OpenPanel()}" alt="icon" width="25" height="25">`))
         // Ajout du bouton Show GeoX Tracks
         let divButtonShow = CoreXBuild.Div("", "DivCenterTop", "")
@@ -490,11 +498,21 @@ class GeoX {
 
     HideOtherTrackExceptOne(TrackId){
         let me = this
+        let AddTrack = true
         this._LayerGroup.eachLayer(function (layer) {
             if (!((layer.id == TrackId) || (layer.id == TrackId + "start") || (layer.id == TrackId + "end"))){
                 me._LayerGroup.removeLayer(layer);
+            } else {
+                AddTrack = false
             }
         })
+        if (AddTrack){
+            this._ListOfTrack.forEach(Track => {
+                if (Track._id == TrackId){
+                    this.SetTrackOnMap(Track, true)
+                }
+            });
+        }
     }
 
     /**
@@ -1094,23 +1112,6 @@ class GeoX {
         // Blank div
         HTMLContent.appendChild(CoreXBuild.Div("","","height: 3vh;"))
 
-        // Boutton Color track pour My Track
-        if (element.Type == "MyTrack"){
-            let divColor = CoreXBuild.Div("", "", "width: 50%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
-
-            let TextColor = CoreXBuild.DivTexte("Change Color", "", "Text", "")
-
-            let inputcolor = document.createElement("input")
-            inputcolor.setAttribute("id","color" + element.Id)
-            inputcolor.setAttribute("type","color")
-            inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px; border: 1px solid black;")
-            inputcolor.value = element.Track.Color
-            inputcolor.onchange = (event)=>{CoreXWindow.DeleteWindow(); this.ChangeTrackColor(event.target.value, element.Name, element.Length, element.Id)}
-            divColor.appendChild(TextColor)
-            divColor.appendChild(inputcolor)
-            HTMLContent.appendChild(divColor)
-        }
-
         // Button TrackInfo
         HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Information(), "Info Track"), this.InfoTrack.bind(this,element.Id), "Text ButtonCoreXWindow"))
 
@@ -1138,24 +1139,36 @@ class GeoX {
             
         }
 
-        // Button show/hide track
-        if (element.From == "InfoBox"){
-            if (element.Type == "MyTrack"){
-                HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide Track"), this.ToogleT.bind(this, element.Id), "Text ButtonCoreXWindow"))
-            } else {
-                HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Show/Hide Track"), this.ToogleM.bind(this, element.Id, false), "Text ButtonCoreXWindow"))
-            }
-        }
-        
-
         // Button Hide Other Track
         HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Oeil(), "Hide other track"), this.HideOtherTExceptOne.bind(this, element.Id), "Text ButtonCoreXWindow"))
+
+        // Boutton Color track pour My Track
+        if (element.Type == "MyTrack"){
+            let divColor = CoreXBuild.Div("", "", "width: 50%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
+
+            let TextColor = CoreXBuild.DivTexte("Change Color", "", "Text", "")
+
+            let inputcolor = document.createElement("input")
+            inputcolor.setAttribute("id","color" + element.Id)
+            inputcolor.setAttribute("type","color")
+            inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; width: 34px; border: 1px solid black;")
+            inputcolor.value = element.Track.Color
+            inputcolor.onchange = (event)=>{CoreXWindow.DeleteWindow(); this.ChangeTrackColor(event.target.value, element.Name, element.Length, element.Id)}
+            divColor.appendChild(TextColor)
+            divColor.appendChild(inputcolor)
+            HTMLContent.appendChild(divColor)
+        }
         
         CoreXWindow.BuildWindow(HTMLContent)
     }
-    InfoTrack(Id){
+    InfoTrack(TrackId){
         CoreXWindow.DeleteWindow()
-        // ToDo
+        // Remove mao
+        this.RemoveMap()
+        // Add info div
+        this.AddInfoTrackConteneur()
+        // Send status to serveur
+        GlobalSendSocketIo("GeoX", "ModuleGeoX", {Action: "GetTrackInfo", Data: TrackId})
     }
     FollowTrack(A, B){
         CoreXWindow.DeleteWindow()
@@ -1177,20 +1190,108 @@ class GeoX {
         CoreXWindow.DeleteWindow()
         this.ToogleMarkerOnMap(A, B)
     }
-    ToogleT(A){
-        CoreXWindow.DeleteWindow()
-        this.ToogleTrack(A)
-    }
-    ToogleM(A, B){
-        CoreXWindow.DeleteWindow()
-        this.ToogleMarkerOnMap(A, B)
-    }
     HideOtherTExceptOne(A){
         CoreXWindow.DeleteWindow()
         this.HideOtherTrackExceptOne(A)
     }
     BuildImageAndTextButtonContent(Image, Text){
         return `<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Image}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">${Text}</div></div>`
+    }
+
+    RemoveMap(){
+        // Save Center of map
+        this._SavedCenter = this._Map.getCenter()
+        this._SavedZoom = this._Map.getZoom()
+        // Remove Map
+        this._Map.off();
+        this._Map.remove();
+        this._Map = null
+        let mapDiv = document.getElementById(this._MapId)
+        if(mapDiv) mapDiv.parentNode.removeChild(mapDiv)
+        if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
+        // si InfoBox est affichee, il faut la cacher
+        if(this._InfoBox.InfoBowIsShown){
+            this._InfoBox.InfoBoxToggle()
+        }
+        // On cache le bouton InfoBox
+        this.SetButtonInfoBoxToggleVisible(false)
+        // On cache le boutton ShowGeoXTracks
+        this.SetButtonShowGeoXTracksToggleVisible(false)
+        // On affiche le menu action
+        GlobalDisplayAction('Off')
+    }
+
+    RestoreMap(){
+        // Remove info track conteneur
+        this.RemoveTrackConteneur()
+        // mettre le backgroundColor du body à Black pour la vue Iphone
+        if (L.Browser.mobile){document.body.style.backgroundColor= "black"}
+        // Add Map
+        this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
+        this._InfoBox.ListOfTrack = this._ListOfTrack
+        this._InfoBox.UserGroup = this._UserGroup
+        // Creation de la carte
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        })
+        const Openstreetmap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+        })
+        const OpenStreetMap_France = L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+            maxZoom: 20,
+            attribution: '&copy; Openstreetmap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+        const OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+        });
+        const baseLayers = {
+            "OpenStreet": Openstreetmap,
+            "OpenStreetFrance" : OpenStreetMap_France,
+            "OpenTopMap" : OpenTopoMap,
+            "Satellite": satellite
+        };
+        this._Map = L.map(this._MapId , {zoomControl: false, layers: [Openstreetmap]}).setView(this._SavedCenter, this._SavedZoom);
+        L.control.zoom({position: 'bottomright'}).addTo(this._Map);
+        L.control.layers(baseLayers,null,{position: 'bottomright'}).addTo(this._Map);
+        this._LayerGroup.addTo(this._Map)
+        this._Map.addLayer(this._MarkersCluster);
+        // Map event
+        this._Map.on('zoomend', this.UpdateInfoBoxTrackData.bind(this))
+        this._Map.on('dragend', this.UpdateInfoBoxTrackData.bind(this))
+
+        // On affiche le bouton InfoBox
+        this.SetButtonInfoBoxToggleVisible(true)
+        // On affiche le bouton ShowGeoXTracks
+        this.SetButtonShowGeoXTracksToggleVisible(true)
+        // On affiche le menu action
+        GlobalDisplayAction('On')
+    }
+
+    AddInfoTrackConteneur(){
+        // Contener
+        let Contener = CoreXBuild.DivFlexColumn("ConteneurInfoTrack")
+        Contener.style.width = "90%"
+        Contener.style.marginLeft = "auto"
+        Contener.style.marginRight = "auto"
+        Contener.style.maxWidth = "900px"
+        this._DivApp.appendChild(Contener)
+        // Content Info Track
+        let ContentInfoTrack = CoreXBuild.DivFlexColumn("ContentInfoTrack")
+        Contener.appendChild(ContentInfoTrack)
+        // waitinf data txt
+        ContentInfoTrack.appendChild(CoreXBuild.DivTexte("Waiting track data...","","Text", "text-align: center; margin-top: 10vh;"))
+        // Button select file
+        Contener.appendChild(CoreXBuild.Button("Back",this.RestoreMap.bind(this),"Text Button", "GoToManageTrack"))
+        // Blank div
+        Contener.appendChild(CoreXBuild.Div("","","height: 6vh;"))
+    }
+
+    RemoveTrackConteneur(){
+        let ConteneurInfoTrack = document.getElementById("ConteneurInfoTrack")
+        if(ConteneurInfoTrack) ConteneurInfoTrack.parentNode.removeChild(ConteneurInfoTrack)
     }
 
 }
