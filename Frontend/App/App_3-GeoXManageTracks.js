@@ -144,14 +144,6 @@ class GeoXManageTracks {
         CoreXWindow.BuildWindow(HTMLContent)
     }
 
-    LoadViewDownload(TrackId){
-        let HTMLContent = CoreXBuild.DivFlexColumn()
-        HTMLContent.appendChild(CoreXBuild.DivTexte("Download file", "", "Text", ""))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "gpx", TrackId), "Text ButtonCoreXWindow"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "geojson", TrackId), "Text ButtonCoreXWindow"))
-        CoreXWindow.BuildWindow(HTMLContent)
-    }
-
     DownloadFile(Type, TrackId){
         CoreXWindow.DeleteWindow()
         // Data to send
@@ -266,6 +258,7 @@ class GeoXManageTracks {
             Track.Name = document.getElementById("InputTrackName").value 
             Track.Group = document.getElementById("InputTrackGroup").value 
             Track.Public = document.getElementById("TogglePublic").checked 
+            Track.Description = "ToDo"
             // Data to send
             let CallToServer = new Object()
             CallToServer.Action = "Update"
@@ -295,7 +288,6 @@ class GeoXManageTracks {
         autocomplete({
             input: document.getElementById("InputTrackGroup"),
             minLength: 1,
-            emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 text = text.toLowerCase();
                 var GroupFiltred = Groups.filter(n => n.toLowerCase().startsWith(text))
@@ -316,11 +308,11 @@ class GeoXManageTracks {
         Contener.appendChild(DivTooglePublic)
         DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
         DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
-        // Toggle MultiLine to OneLine
-        let DivToogle = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
-        Contener.appendChild(DivToogle)
-        DivToogle.appendChild(CoreXBuild.DivTexte("MultiLine to OneLine Track:", "", "", ""))
-        DivToogle.appendChild(CoreXBuild.ToggleSwitch("ToggleMultiToOneLine", true))
+        // // Toggle MultiLine to OneLine
+        // let DivToogle = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        // Contener.appendChild(DivToogle)
+        // DivToogle.appendChild(CoreXBuild.DivTexte("MultiLine to OneLine Track:", "", "", ""))
+        // DivToogle.appendChild(CoreXBuild.ToggleSwitch("ToggleMultiToOneLine", true))
         
         // Button select file
         Contener.appendChild(CoreXBuild.Button("Select and upload File",this.SelectFile.bind(this),"Text Button", "SelectAndSend"))
@@ -362,10 +354,12 @@ class GeoXManageTracks {
         Track.Name = document.getElementById("InputTrackName").value 
         Track.Group = document.getElementById("InputTrackGroup").value 
         Track.Public = document.getElementById("TogglePublic").checked 
-        Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
+        //Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
+        Track.MultiToOneLine = true
         Track.FileContent = File
         Track.Id = null
         Track.ModifyExistingTrack = false
+        Track.Description = "ToDo"
         // Data to send
         let CallToServer = new Object()
         CallToServer.Action = "Add"

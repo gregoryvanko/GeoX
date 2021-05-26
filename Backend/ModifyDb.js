@@ -182,18 +182,12 @@ async function AddElevationToAlTracks (MyApp){
     let Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
     let MongoConfig = require("./MongoConfig.json")
     let MongoTracksCollection = MongoConfig.TracksCollection
+    let Shared = require("./Shared")
 
     let ReponseAllData = await PromiseGetAllGeojson(Mongo, MongoTracksCollection)
     if(!ReponseAllData.Error){
         let Total = ReponseAllData.Data.length
         let Current = 0
-
-        let ElevationMin = 0
-        let ElevationMax = 0
-        let ElevationCumulP = 0
-        let ElevationCumulM = 0
-        let ElevationPrevious = 0
-
         console.log("Start AddElevationToAlTracks")
         for (let index = 0; index < ReponseAllData.Data.length; index++) {
             //const element = ReponseAllData.Data[1]
@@ -202,56 +196,11 @@ async function AddElevationToAlTracks (MyApp){
             let Id = element._id
            
             if (element.GeoJsonData.features[0].geometry.type == "LineString"){
-                let Coord = element.GeoJsonData.features[0].geometry.coordinates
-
-                let AllElevation = []
-                let distance = 0
-                const [lng, lat] = Coord[0]
-                let ele = await PromiseGetElevation({ lat, lng })
-                ele = parseInt(ele)
-                AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
-
-                ElevationMin = ele
-                ElevationMax = ele
-                ElevationCumulP = 0
-                ElevationCumulM = 0
-                ElevationPrevious = ele
-                
-                
-                const { getDistance } = require("geolib")
-                for (let i = 1; i < Coord.length; i++){
-                    const [prelng, prelat] = Coord[i - 1]
-                    const [lng, lat] = Coord[i]
-                    // Get elevation
-                    let eleP = await PromiseGetElevation({lat, lng})
-                    eleP = parseInt(eleP)
-                    // Get distance from first point
-                    distance += getDistance(
-                        { latitude: prelat, longitude: prelng },
-                        { latitude: lat, longitude: lng }
-                    )
-                    AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
-                    // Get ElevationMin
-                    if (eleP < ElevationMin){
-                        ElevationMin = eleP
-                    }
-                    // Get ElevationMax
-                    if (eleP > ElevationMax){
-                        ElevationMax = eleP
-                    }
-                    // Get ElevationCumulP ElevationCumulM
-                    const Delta = eleP - ElevationPrevious
-                    if ((Delta)>0){
-                        ElevationCumulP += Delta
-                    } else {
-                        ElevationCumulM += Delta
-                    }
-                    ElevationPrevious = eleP
-                }
+                const ElevationData = await Shared.GetElevationOfTrack(element.GeoJsonData)
                 let DataToDb = new Object()
-                DataToDb[MongoTracksCollection.Elevation] = AllElevation
+                DataToDb[MongoTracksCollection.Elevation] = ElevationData.AllElevation
+                DataToDb[MongoTracksCollection.InfoElevation] = ElevationData.InfoElevation
                 DataToDb[MongoTracksCollection.Description] = ""
-                DataToDb[MongoTracksCollection.InfoElevation] = {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}
                 let ReponseUpdate = await PromiseUpdateDataInDb (Id, DataToDb, Mongo,  MongoTracksCollection)
                 if(ReponseUpdate.Error){
                     console.log(ReponseUpdate.ErrorMsg)
@@ -292,27 +241,6 @@ function PromiseGetAllGeojson(Mongo, MongoTracksCollection){
     })
 }
 
-function PromiseGetElevation({ lat, lng }){
-    return new Promise ((resolve, reject) => {
-        const path = require('path')
-        let fs = require('fs')
-        var dir = path.resolve(__dirname, "TempHgt")
-        if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir);
-            console.log("create")
-        }
-        const { TileSet } = require("node-hgt")
-        const tileset = new TileSet(path.resolve(__dirname, "TempHgt"))
-        tileset.getElevation([lat, lng], (err, ele) => {
-            if (!err){
-                resolve(ele.toFixed(0))
-            } else {
-                console.log(err)
-                reject(err)
-            }
-        })
-    })
-}
 
 // async function FetchElevation(data){
 //     let reponse ={Valide: false, Data: []}

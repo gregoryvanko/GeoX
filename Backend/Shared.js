@@ -1,5 +1,5 @@
 function PromiseAddTrack(Track, MyApp, User){
-    return new Promise(resolve => {
+    return new Promise(async(resolve) => {
         let MongoR = require('@gregvanko/corex').Mongo
         Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
         let MongoConfig = require("./MongoConfig.json")
@@ -7,6 +7,7 @@ function PromiseAddTrack(Track, MyApp, User){
 
         let ReponseAddTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
+        // Convert GPX to GeoJson
         let GeoJson = ConvertGpxToGeoJson(Track.FileContent)
         // Si on a un GeoJson avec plusieurs line pour une track on le modifie
         if ((Track.MultiToOneLine) && (GeoJson.features[0].geometry.type == "MultiLineString")){
@@ -22,12 +23,16 @@ function PromiseAddTrack(Track, MyApp, User){
             });
             GeoJson.features[0].geometry.coordinates = NewListofcoordonate
         }
+
+        // Create track data
         let TrackData = new Object()
         TrackData.Name = Track.Name
         TrackData.Group = Track.Group
         TrackData.Color = "#0000FF"
         TrackData.Date = new Date()
         TrackData.Owner = User
+        TrackData.Description = Track.Description
+        // Calculate exterior point
         let ReponseMinMaxGeoJsonTrack = MinMaxGeoJsonTrack(GeoJson)
         if (ReponseMinMaxGeoJsonTrack.IsError){
             ReponseAddTracks.Error = true
@@ -61,6 +66,11 @@ function PromiseAddTrack(Track, MyApp, User){
             }
             TrackData.StartPoint = latleng
             
+            // Add elevation
+            const ElevationData = await GetElevationOfTrack(GeoJson)
+            TrackData.Elevation = ElevationData.AllElevation
+            TrackData.InfoElevation = ElevationData.InfoElevation
+
             let InsertTarck = true
             if ((Track.Id != null) && (Track.ModifyExistingTrack)){
                 InsertTarck = false
@@ -87,6 +97,9 @@ function PromiseAddTrack(Track, MyApp, User){
                 DataToDb[MongoTracksCollection.Length]= TrackData.Length
                 DataToDb[MongoTracksCollection.Center]= TrackData.Center
                 DataToDb[MongoTracksCollection.StartPoint]= TrackData.StartPoint
+                DataToDb[MongoTracksCollection.Elevation]= TrackData.Elevation
+                DataToDb[MongoTracksCollection.InfoElevation]= TrackData.InfoElevation
+                DataToDb[MongoTracksCollection.Description]= TrackData.Description
                 
                 Mongo.UpdateByIdPromise(Track.Id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
                     if (reponse.matchedCount == 0){
@@ -204,6 +217,61 @@ function CalculateTrackLength(GeoJson){
     return distance
 }
 
+async function GetElevationOfTrack(GeoJson){
+    let Coord = GeoJson.features[0].geometry.coordinates
+    let ElevationMin = 0
+    let ElevationMax = 0
+    let ElevationCumulP = 0
+    let ElevationCumulM = 0
+    let ElevationPrevious = 0
+
+    let AllElevation = []
+    let distance = 0
+    const [lng, lat] = Coord[0]
+    let ele = await PromiseGetElevation({ lat, lng })
+    ele = parseInt(ele)
+    AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
+
+    ElevationMin = ele
+    ElevationMax = ele
+    ElevationCumulP = 0
+    ElevationCumulM = 0
+    ElevationPrevious = ele
+    
+    
+    const { getDistance } = require("geolib")
+    for (let i = 1; i < Coord.length; i++){
+        const [prelng, prelat] = Coord[i - 1]
+        const [lng, lat] = Coord[i]
+        // Get elevation
+        let eleP = await PromiseGetElevation({lat, lng})
+        eleP = parseInt(eleP)
+        // Get distance from first point
+        distance += getDistance(
+            { latitude: prelat, longitude: prelng },
+            { latitude: lat, longitude: lng }
+        )
+        AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
+        // Get ElevationMin
+        if (eleP < ElevationMin){
+            ElevationMin = eleP
+        }
+        // Get ElevationMax
+        if (eleP > ElevationMax){
+            ElevationMax = eleP
+        }
+        // Get ElevationCumulP ElevationCumulM
+        const Delta = eleP - ElevationPrevious
+        if ((Delta)>0){
+            ElevationCumulP += Delta
+        } else {
+            ElevationCumulM += Delta
+        }
+        ElevationPrevious = eleP
+    }
+    return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
+}
+
 function PromiseGetUserGroup(MyApp, User){
     return new Promise(resolve => {
         let ReponseUserGroup = {Error: true, ErrorMsg:"InitError", Data:null}
@@ -249,6 +317,7 @@ function PromiseUpdateTrack(Track, MyApp){
         if(Track.Group){DataToDb[MongoTracksCollection.Group]= Track.Group}
         if(Track.Public != undefined){DataToDb[MongoTracksCollection.Public]= Track.Public}
         if (Track.Color){DataToDb[MongoTracksCollection.Color]= Track.Color}
+        if (Track.Description){DataToDb[MongoTracksCollection.Description]= Track.Description}
         
         Mongo.UpdateByIdPromise(Track.Id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
             if (reponse.matchedCount == 0){
@@ -408,6 +477,31 @@ function MinMaxOfTracks(ListOfTracks){
     })
 }
 
+/**
+ * Get Elevation of a point
+ */
+function PromiseGetElevation({ lat, lng }){
+    return new Promise ((resolve, reject) => {
+        const path = require('path')
+        let fs = require('fs')
+        var dir = path.resolve(__dirname, "TempHgt")
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+            console.log("create")
+        }
+        const { TileSet } = require("node-hgt")
+        const tileset = new TileSet(path.resolve(__dirname, "TempHgt"))
+        tileset.getElevation([lat, lng], (err, ele) => {
+            if (!err){
+                resolve(ele.toFixed(0))
+            } else {
+                console.log(err)
+                reject(err)
+            }
+        })
+    })
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
@@ -415,3 +509,4 @@ module.exports.PromiseGetTracksData = PromiseGetTracksData
 module.exports.PromiseGetAllTracksInfo = PromiseGetAllTracksInfo
 module.exports.MinMaxOfTracks = MinMaxOfTracks
 module.exports.PromiseGetTracksInfo = PromiseGetTracksInfo
+module.exports.GetElevationOfTrack = GetElevationOfTrack

@@ -106,9 +106,9 @@ function CallDeleteTrack(Id, MyApp, Socket, User, UserId){
  * @param {String} User Nom du user
  * @param {String} UserId Id du user
  */
-function CallAddTrack(Track, MyApp, Socket, User, UserId){
+async function CallAddTrack(Track, MyApp, Socket, User, UserId){
     let Shared = require("./Shared")
-    let ReponseAddTrack = Shared.PromiseAddTrack(Track, MyApp, User)
+    let ReponseAddTrack = await Shared.PromiseAddTrack(Track, MyApp, User)
     if(ReponseAddTrack.Error){
         MyApp.LogAppliError(ReponseAddTrack.ErrorMsg, User, UserId)
         Socket.emit("GeoXError", ReponseAddTrack.ErrorMsg)
