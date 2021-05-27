@@ -384,7 +384,7 @@ function PromiseGetAllTracksInfo(MyApp, User){
         let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
         const Querry = {[MongoTracksCollection.Owner]: User}
-        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Color]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.ExteriorPoint]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.Public]: 1}}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Color]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.ExteriorPoint]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.Public]: 1, [MongoTracksCollection.Description]: 1}}
         const Sort = {[MongoTracksCollection.Date]: -1}
         Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){

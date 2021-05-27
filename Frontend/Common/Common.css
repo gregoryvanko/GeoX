@@ -59,7 +59,7 @@
 
 .ButtonWidth30{
     margin: 1vh 0vh 1vh 0vh;
-    width: 30%;
+    min-width: 30%;
     padding: 1vh;
 }
 
@@ -188,6 +188,23 @@
     }
 }
 
+.DivContentEdit{
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    border: solid 1px #dcdcdc;
+    background-color: white;
+    -webkit-box-shadow: inset 0 1px 3px 0 rgba(0,0,0,.08);
+    -moz-box-shadow: inset 0 1px 3px 0 rgba(0,0,0,.08);
+    box-shadow: inset 0 1px 3px 0 rgba(0,0,0,.08);
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    padding: 2%;
+    color: #666;
+    min-height: 10vh;
+}
+
 
 .IconeInList{
     height:2.5vw;
@@ -233,6 +250,7 @@ screen and (max-width: 700px)
     .IconeInList{height:2vh; margin-left: 2vh;}
     .AppConteneur{width: 95%;}
     .TitreInfoOneTrack{font-size: calc(var(--TitreIphone)*0.6);}
+    .DivContentEdit{width: 90%;}
 }
 
 @media screen and (min-width: 1200px)
