@@ -1,4 +1,5 @@
 class GeoXCreateTrack {
+
     constructor(DivApp){
         this._DivApp = document.getElementById(DivApp)
         // App en full screen 
@@ -602,7 +603,7 @@ class GeoXCreateTrack {
         let DivToogle = CoreXBuild.Div("","", "width: 100%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; margin: 1vh 0vh;")
         DivInfoBox.appendChild(DivToogle)
         DivToogle.appendChild(CoreXBuild.DivTexte("Auto:", "", "TextTrackInfo", "color: white; margin-left: 1%; margin-right: 1vh;"))
-        let ToogleAuto = CoreXBuild.ToggleSwitch("ToggleAuto", this._AutoRouteBehavior)
+        let ToogleAuto = CoreXBuild.ToggleSwitch("ToggleAuto", this._AutoRouteBehavior,25)
         DivToogle.appendChild(ToogleAuto)
         ToogleAuto.addEventListener('change', (event) => {
             if (event.target.checked) {

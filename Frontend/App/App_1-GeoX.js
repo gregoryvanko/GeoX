@@ -84,7 +84,7 @@ class GeoX {
         SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
         SocketIo.on('GeoX', (Value) => {this.MessageRecieved(Value)})
         // InfoBox
-        this._InfoBox = new InfoBox(this._DivApp, this.ClickOnBoxTrack.bind(this), this.CheckboxGroupChange.bind(this), this.ToogleMarkerOnMap.bind(this), this.GetCornerOfMap.bind(this), this.LoadViewAction.bind(this))
+        this._InfoBox = new InfoBox(this._DivApp, this.ClickOnBoxTrack.bind(this), this.CheckboxGroupChange.bind(this), this.ToogleMarkerOnMap.bind(this), this.GetCornerOfMap.bind(this), this.LoadViewAction.bind(this), this.SetFitBound.bind(this))
         // Localisation 
         this._GeoLocalisation = new GeoLocalisation(this.ShowPosition.bind(this), this.ErrorPosition.bind(this))
         // Load Data
@@ -110,6 +110,7 @@ class GeoX {
             // Calcul du Fitbound
             let MinMax = this.MinMaxOfTracks(this._ListOfTrack)
             this._FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]]
+            this._InfoBox.InitFitBound = this._FitBounds
             // Modifier les track sur la map
             this.ModifyTracksOnMap()
         } else if (Value.Action == "SetAllMarkers" ){
@@ -228,6 +229,7 @@ class GeoX {
         this._DivApp.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
         this._InfoBox.ListOfTrack = this._ListOfTrack
         this._InfoBox.UserGroup = this._UserGroup
+        this._InfoBox.InitFitBound = this._FitBounds
         // Ajout du bouton action left
         this._DivApp.appendChild(CoreXBuild.ButtonLeftAction(this._InfoBox.InfoBoxToggle.bind(this._InfoBox), "ButtonInfoBoxToggle", `<img src="${Icon.OpenPanel()}" alt="icon" width="25" height="25">`))
         // Ajout du bouton Show GeoX Tracks
@@ -410,7 +412,7 @@ class GeoX {
         Div.appendChild(CoreXBuild.DivTexte(InfoTrackObject.Length + "km","","TextSmall", ""))
         
         // Button Info
-        Div.appendChild(CoreXBuild.Button (`<img src="${Icon.Information()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this, InfoTrackObject), "ButtonIcon ButtonIconBlackBorder"))
+        Div.appendChild(CoreXBuild.Button (`<img src="${Icon.Engrenage()}" alt="icon" width="25" height="25">`, this.LoadViewAction.bind(this, InfoTrackObject), "ButtonIcon ButtonIconBlackBorder"))
         return Div
     }
 
@@ -603,9 +605,14 @@ class GeoX {
             // Calcul du Fitbound
             let MinMax = this.MinMaxOfTracks(this._ListOfTrack)
             this._FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]]
+            this._InfoBox.InitFitBound = this._FitBounds
             // Modifier les track sur la map
             this.ModifyTracksOnMap()
         }
+    }
+
+    SetFitBound(Ftibound){
+        this._Map.flyToBounds(Ftibound,{'duration':2} )
     }
 
     /**

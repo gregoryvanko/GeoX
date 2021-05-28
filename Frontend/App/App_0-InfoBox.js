@@ -1,12 +1,13 @@
 class InfoBox{
     
-    constructor(DivApp, ClickOnBoxTrack, CheckboxGroupChange, ToogleMarkerOnMap, GetCornerOfMap, LoadViewAction){
+    constructor(DivApp, ClickOnBoxTrack, CheckboxGroupChange, ToogleMarkerOnMap, GetCornerOfMap, LoadViewAction, SetFitBound){
         this._DivApp = DivApp
         this.ToogleMarkerOnMap = ToogleMarkerOnMap
         this.ClickOnBoxTrack = ClickOnBoxTrack
         this.CheckboxGroupChange = CheckboxGroupChange
         this.GetCornerOfMap = GetCornerOfMap
         this.LoadViewAction = LoadViewAction
+        this.SetFitBound = SetFitBound
         // Statu de l'infobox
         this._InfoBowIsShown = false
         // Statu de la vue dans infobox
@@ -19,11 +20,14 @@ class InfoBox{
         this._ListeOfMarkers = null
         // Filter
         this._Filter = {Sort:"Date", MinKm: "0", MaxKm: "1000"}
+        // Initial FitBound
+        this._InitFitBound = null
     }
 
     set UserGroup(val){this._UserGroup = val}
     set ListOfTrack(val){this._ListOfTrack = val}
     set ListeOfMarkers(val){this._ListeOfMarkers = val}
+    set InitFitBound(val){this._InitFitBound = val}
     get InfoBowIsShown() {return this._InfoBowIsShown}
 
     /**
@@ -77,7 +81,6 @@ class InfoBox{
         this.UpdateTrackDataInView()
         // Start transition
         setTimeout(function(){
-            //let DivBoxTracks = document.getElementById("DivBoxTracks")
             DivBoxTracks.classList.add("DivBoxTracksShow")
         }, 100);
     }
@@ -155,35 +158,44 @@ class InfoBox{
         let action = document.getElementById("InfoBoxAction")
         // Clear Action
         action.innerHTML = ""
+        // Add button Init Fitbound
+        action.appendChild(CoreXBuild.Button (`<img src="${Icon.FitBoundWhite()}" alt="icon" width="30" height="30">`, this.SetFitBound.bind(this, this._InitFitBound), "ButtonInfoBoxNav", ""))
         // Add filter button
-        action.appendChild(CoreXBuild.Button (`<img src="${Icon.Filter()}" alt="icon" width="30" height="30">`, this.FilterTrack.bind(this), "ButtonInfoBoxNavRight", ""))
-        // Add button Hide all
-        //action.appendChild(CoreXBuild.Button (`<img src="${Icon.Oeil()}" alt="icon" width="30" height="30">`, this.ToogleTrack.bind(this, null), "ButtonInfoBoxNav", ""))
+        action.appendChild(CoreXBuild.Button (`<img src="${Icon.Filter()}" alt="icon" width="30" height="30">`, this.FilterTrack.bind(this), "ButtonInfoBoxNav", ""))
+        
         // Get content
         let content = document.getElementById("InfoBoxContent")
         // Clear content
         content.innerHTML = ""
         
+        // List of track filtered
         let ListOfTrackFiltered = []
+        // Get Corner of map
+        let Corner = this.GetCornerOfMap()
+        // Create Polygone
+        let polyCorner = turf.polygon([[
+            [Corner.NW.lat, Corner.NW.lng],
+            [Corner.NE.lat, Corner.NE.lng],
+            [Corner.SE.lat, Corner.SE.lng],
+            [Corner.SW.lat, Corner.SW.lng],
+            [Corner.NW.lat, Corner.NW.lng]]]);
         // Add my track
         this._ListOfTrack.forEach(element => {
-            let InfoTrackObject = {Type: "MyTrack", From:"InfoBox", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: element}
-            if ((element.Length > parseInt(this._Filter.MinKm))&&(element.Length < parseInt(this._Filter.MaxKm))){
-                ListOfTrackFiltered.push(InfoTrackObject)
+            let PolyBorder = turf.polygon([[ 
+                [element.ExteriorPoint.MinLong, element.ExteriorPoint.MinLat],
+                [element.ExteriorPoint.MaxLong, element.ExteriorPoint.MinLat],
+                [element.ExteriorPoint.MaxLong, element.ExteriorPoint.MaxLat],
+                [element.ExteriorPoint.MinLong, element.ExteriorPoint.MaxLat],
+                [element.ExteriorPoint.MinLong, element.ExteriorPoint.MinLat]]]);
+            if ((turf.booleanWithin(PolyBorder, polyCorner)) || (turf.booleanOverlap(PolyBorder, polyCorner)) ){
+                let InfoTrackObject = {Type: "MyTrack", From:"InfoBox", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: element}
+                if ((element.Length > parseInt(this._Filter.MinKm))&&(element.Length < parseInt(this._Filter.MaxKm))){
+                    ListOfTrackFiltered.push(InfoTrackObject)
+                }
             }
         })
         // Add Geox Marker
         if (this._ListeOfMarkers != null){
-            // Get Corner of map
-            let Corner = this.GetCornerOfMap()
-            // Create Polygone
-            let polyCorner = turf.polygon([[
-                [Corner.NW.lat, Corner.NW.lng],
-                [Corner.NE.lat, Corner.NE.lng],
-                [Corner.SE.lat, Corner.SE.lng],
-                [Corner.SW.lat, Corner.SW.lng],
-                [Corner.NW.lat, Corner.NW.lng]]]);
-            
             this._ListeOfMarkers.forEach(element => {
                 let point = turf.point([element.StartPoint.Lat, element.StartPoint.Lng])
                 if (turf.booleanWithin(point, polyCorner)){
