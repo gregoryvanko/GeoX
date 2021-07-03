@@ -1,20 +1,33 @@
 class ElevationBox {
     constructor(DivApp){
         this._DivApp = DivApp
+        this._DivBox = null
+        this._scatterChart = null
 
-        this.Build()
+        this.BuildBox()
     }
 
-    Build(){
+    BuildBox(){
         // Div du box
         let DivBox = CoreXBuild.Div("DivElevationBox", "DivElevationBox", "")
+        this._DivBox = DivBox
         this._DivApp.appendChild(DivBox)
+        // Add Txt
+        let DivFlexTxt = CoreXBuild.DivFlexColumn()
+        DivFlexTxt.style.height= "100%"
+        DivFlexTxt.style.justifyContent = "center"
+        this._DivBox.appendChild(DivFlexTxt)
+        DivFlexTxt.appendChild(CoreXBuild.DivTexte("No Elevation", "", "Text", "color:white;"))
+    }
+
+    BuildGraph(Elevation){
+        this._DivBox.innerHTML = ""
         // Graph
         let me = this
         let canvas = document.createElement("canvas")
         canvas.setAttribute("id", "myChart")
         canvas.addEventListener ("mouseout", this.CanvansMouseOutEvent.bind(this), false);
-        DivBox.appendChild(canvas)
+        this._DivBox.appendChild(canvas)
         let ctx = document.getElementById('myChart').getContext('2d')
         Chart.plugins.register ( {
             afterDatasetsDraw: function(chart) {
@@ -29,7 +42,7 @@ class ElevationBox {
                     bottomY = y_axis.bottom;
                     ctx.save();
                     ctx.beginPath();
-                    ctx.moveTo(x, topY+2);
+                    ctx.moveTo(x, topY+1);
                     ctx.lineTo(x, bottomY+1);
                     //ctx.setLineDash([2,3]);
                     ctx.lineWidth = 2;
@@ -39,22 +52,11 @@ class ElevationBox {
            }
         }
         });
-        var scatterChart = new Chart(ctx, {
+        this._scatterChart = new Chart(ctx, {
             type: 'scatter',
             data: {
                 datasets: [{
-                    //data: this._Elevation,
-
-                    data: [{
-                        x: 0,
-                        y: 4
-                    }, {
-                        x: 1,
-                        y: 17
-                    }, {
-                        x: 2,
-                        y: 10
-                    }],
+                    data: Elevation,
                     showLine: true,
                     fill: false,
                     borderColor: 'white',
@@ -95,6 +97,7 @@ class ElevationBox {
                         type: 'linear',
                         position: 'bottom',
                         ticks: {
+                            beginAtZero: true,
                             fontColor: "white",
                             callback: function(value, index, values) {
                                 if (value >= 1000){
@@ -111,6 +114,7 @@ class ElevationBox {
                     }],
                     yAxes: [{
                         ticks: {
+                            beginAtZero: true,
                             fontColor: "white",
                             stepSize: 10,
                             callback: function(value, index, values) {
@@ -137,7 +141,18 @@ class ElevationBox {
     }
 
     CanvansMouseOutEvent(){
-        //ToDo
+        // if (this._GpsPointer){
+        //     this._Map.removeLayer(this._GpsPointer)
+        //     this._GpsPointer = null
+        // }
     }
 
+    UpdateGraph(Elevation){
+        if (this._scatterChart == null){
+            this.BuildGraph(Elevation)
+        } else {
+            this._scatterChart.data.datasets[0].data = Elevation
+            this._scatterChart.update()
+        }
+    }
 }

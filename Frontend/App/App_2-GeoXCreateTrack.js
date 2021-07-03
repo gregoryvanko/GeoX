@@ -594,16 +594,9 @@ class GeoXCreateTrack {
     }
 
     BuildInfoBox(){
-        var Dist = this.CalculDistance()
-        if (Dist < 1){
-            Dist = Dist * 1000
-            Dist = Dist.toString() + "m"
-        } else {
-            Dist = Dist.toString() + "Km"
-        }
         let DivInfoBox = CoreXBuild.Div("DivInfoBox", "DivInfoBox", "")
         this._DivApp.appendChild(DivInfoBox)
-        DivInfoBox.appendChild(CoreXBuild.DivTexte("Distance: " + Dist,"DivDistance","TextTrackInfo", "color: white; margin-left: 1%;"))
+        DivInfoBox.appendChild(CoreXBuild.DivTexte("Distance: 0m","DivDistance","TextTrackInfo", "color: white; margin-left: 1%;"))
         // Toggle MultiLine to OneLine
         let DivToogle = CoreXBuild.Div("","", "width: 100%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; margin: 1vh 0vh;")
         DivInfoBox.appendChild(DivToogle)
