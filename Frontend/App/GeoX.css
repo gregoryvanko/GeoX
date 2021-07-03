@@ -68,6 +68,19 @@
     }
 }
 
+.DivElevationBox{
+    width: 33vw;
+    height: 22vh;
+    position: fixed;
+    z-index: 998; 
+    left: 1vh; 
+    bottom: 1vh; 
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    overflow:hidden;
+    padding: 1vh;
+}
+
 .DivBoxTracks{
     width: 35vw;
     max-width: 300px;
@@ -186,11 +199,11 @@
     align-items: center; 
     position: fixed;
     z-index: 998; 
-    left: 1%; 
+    left: 1vh; 
     top: 1vh; 
     background-color: rgba(0, 0, 0, 0.7);
     border-radius: 15px;
-    overflow-y:auto;
+    overflow:hidden;
     white-space: nowrap;
     padding: 1vh 2vh;
 }

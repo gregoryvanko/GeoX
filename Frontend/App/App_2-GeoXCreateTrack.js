@@ -25,7 +25,7 @@ class GeoXCreateTrack {
         this.CityFound = false
         this._UserGroup = null
         this._GroupSelected = null
-        this._NoTrack = "No Track"
+        this._NoTrack = "No Folder selected"
         this._DataMap = null
         this._LayerGroup = null
 
@@ -35,6 +35,9 @@ class GeoXCreateTrack {
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
+
+        // ElevationBox
+        this._ElevationBox = null
     }
 
     Initiation(){
@@ -296,6 +299,8 @@ class GeoXCreateTrack {
         })
         // Construction de la vue text info box
         this.BuildInfoBox()
+        // ElevationBox
+        this._ElevationBox = new ElevationBox(this._DivApp)
     }
 
     async OnMapClick(e) {
@@ -1004,6 +1009,7 @@ class GeoXCreateTrack {
             this._GroupSelected = null
             this._DataMap = null
             this._LayerGroup = null
+            this._ElevationBox = null
             // mettre le backgroundColor du body à Black pour la vue Iphone
             if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
         }
