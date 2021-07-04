@@ -1,3 +1,5 @@
+const { default: length } = require('@turf/length')
+
 function PromiseAddTrack(Track, MyApp, User){
     return new Promise(async(resolve) => {
         let MongoR = require('@gregvanko/corex').Mongo
@@ -67,7 +69,7 @@ function PromiseAddTrack(Track, MyApp, User){
             TrackData.StartPoint = latleng
             
             // Add elevation
-            const ElevationData = await GetElevationOfTrack(GeoJson)
+            const ElevationData = await GetElevationOfGeoJson(GeoJson)
             TrackData.Elevation = ElevationData.AllElevation
             TrackData.InfoElevation = ElevationData.InfoElevation
 
@@ -217,7 +219,7 @@ function CalculateTrackLength(GeoJson){
     return distance
 }
 
-async function GetElevationOfTrack(GeoJson){
+async function GetElevationOfGeoJson(GeoJson){
     let Coord = GeoJson.features[0].geometry.coordinates
     let ElevationMin = 0
     let ElevationMax = 0
@@ -243,6 +245,69 @@ async function GetElevationOfTrack(GeoJson){
     for (let i = 1; i < Coord.length; i++){
         const [prelng, prelat] = Coord[i - 1]
         const [lng, lat] = Coord[i]
+        // Get elevation
+        let eleP = await PromiseGetElevation({lat, lng})
+        eleP = parseInt(eleP)
+        // Get distance from first point
+        distance += getDistance(
+            { latitude: prelat, longitude: prelng },
+            { latitude: lat, longitude: lng }
+        )
+        AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
+        // Get ElevationMin
+        if (eleP < ElevationMin){
+            ElevationMin = eleP
+        }
+        // Get ElevationMax
+        if (eleP > ElevationMax){
+            ElevationMax = eleP
+        }
+        // Get ElevationCumulP ElevationCumulM
+        const Delta = eleP - ElevationPrevious
+        if ((Delta)>0){
+            ElevationCumulP += Delta
+        } else {
+            ElevationCumulM += Delta
+        }
+        ElevationPrevious = eleP
+    }
+    return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
+}
+
+async function GetElevationOfLatLng(LatLng){
+    let ElevationMin = 0
+    let ElevationMax = 0
+    let ElevationCumulP = 0
+    let ElevationCumulM = 0
+    let ElevationPrevious = 0
+
+    let AllElevation = []
+    let distance = 0
+    let LatLngnull = LatLng[0]
+    let lat = LatLngnull.lat
+    let lng = LatLngnull.lng
+    //const [lat, lng] = LatLng[0]
+    let ele = await PromiseGetElevation({ lat, lng })
+    ele = parseInt(ele)
+    AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
+
+    ElevationMin = ele
+    ElevationMax = ele
+    ElevationCumulP = 0
+    ElevationCumulM = 0
+    ElevationPrevious = ele
+    
+    
+    const { getDistance } = require("geolib")
+    for (let i = 1; i < LatLng.length; i++){
+        let LatLngMinusOne = LatLng[i - 1]
+        let prelat = LatLngMinusOne.lat
+        let prelng =LatLngMinusOne.lng
+
+        let LatLngI = LatLng[i]
+        let lat = LatLngI.lat
+        let lng = LatLngI.lng
+
         // Get elevation
         let eleP = await PromiseGetElevation({lat, lng})
         eleP = parseInt(eleP)
@@ -509,4 +574,5 @@ module.exports.PromiseGetTracksData = PromiseGetTracksData
 module.exports.PromiseGetAllTracksInfo = PromiseGetAllTracksInfo
 module.exports.MinMaxOfTracks = MinMaxOfTracks
 module.exports.PromiseGetTracksInfo = PromiseGetTracksInfo
-module.exports.GetElevationOfTrack = GetElevationOfTrack
+module.exports.GetElevationOfGeoJson = GetElevationOfGeoJson
+module.exports.GetElevationOfLatLng = GetElevationOfLatLng

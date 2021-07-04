@@ -38,6 +38,7 @@ class GeoXCreateTrack {
 
         // ElevationBox
         this._ElevationBox = null
+        this._GpsPointer = null
     }
 
     Initiation(){
@@ -74,10 +75,11 @@ class GeoXCreateTrack {
             this.DeleteMap()
             // Go To Home
             GlobalStart()
-        }else if (Value.Action == "SetTrackFromGeoJson" ) {
+        } else if (Value.Action == "SetTrackFromGeoJson" ) {
             this.AddTrackToModifyOnMap(Value.Data)
-        } 
-        else {
+        } else if (Value.Action == "SetElevation" ) {
+            this._ElevationBox.UpdateGraph(Value.Data.AllElevation)
+        } else {
             console.log("error, Action not found: " + Value.Action)
         }
     }
@@ -300,7 +302,7 @@ class GeoXCreateTrack {
         // Construction de la vue text info box
         this.BuildInfoBox()
         // ElevationBox
-        this._ElevationBox = new ElevationBox(this._DivApp)
+        this._ElevationBox = new ElevationBox(this._DivApp, this.DrawElevationPointOnMap.bind(this), this.HideElevationPointOnMap.bind(this))
     }
 
     async OnMapClick(e) {
@@ -575,6 +577,31 @@ class GeoXCreateTrack {
             Dist = Dist.toString() + "Km"
         }
         document.getElementById("DivDistance").innerText = "Distance: " + Dist
+        // Update graph elevation
+        this.UpdateElevation()
+    }
+
+    UpdateElevation(){
+        let latlngs = this._Polyline.getLatLngs()
+        // Send to server
+        let CallToServer = new Object()
+        CallToServer.Action = "GetElevation"
+        CallToServer.Data = latlngs
+        GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+    }
+
+    DrawElevationPointOnMap(latlng){
+        if (this._GpsPointer == null){
+            this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'red', fillOpacity:1}).addTo(this._Map)
+        }
+        this._GpsPointer.setLatLng(latlng)
+    }
+
+    HideElevationPointOnMap(){
+        if (this._GpsPointer){
+            this._Map.removeLayer(this._GpsPointer)
+            this._GpsPointer = null
+        }
     }
 
     CalculDistance(){
@@ -1003,6 +1030,7 @@ class GeoXCreateTrack {
             this._DataMap = null
             this._LayerGroup = null
             this._ElevationBox = null
+            this._GpsPointer = null
             // mettre le backgroundColor du body à Black pour la vue Iphone
             if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
         }

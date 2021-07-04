@@ -111,7 +111,19 @@ function PromiseGetTrackData(TrackID, MyApp, User){
 })
 }
 
+async function CallGetElevation(latlngs, MyApp,  Socket, User, UserId){
+    let Shared = require("./Shared")
+    const ElevationData = await Shared.GetElevationOfLatLng(latlngs)
+    //Send Data
+    let MyReponse = new Object()
+    MyReponse.Action = "SetElevation"
+    MyReponse.Data = ElevationData
+    Socket.emit("CreateTracksOnMap", MyReponse)
+    MyApp.LogAppliInfo("Send Elevation", User, UserId)
+}
+
 module.exports.CallGetUserGroup = CallGetUserGroup
 module.exports.CallGetMapData = CallGetMapData
 module.exports.CallSaveTrack = CallSaveTrack
 module.exports.CallGetTrackData = CallGetTrackData
+module.exports.CallGetElevation = CallGetElevation

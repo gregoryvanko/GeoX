@@ -196,7 +196,7 @@ async function AddElevationToAlTracks (MyApp){
             let Id = element._id
            
             if (element.GeoJsonData.features[0].geometry.type == "LineString"){
-                const ElevationData = await Shared.GetElevationOfTrack(element.GeoJsonData)
+                const ElevationData = await Shared.GetElevationOfGeoJson(element.GeoJsonData)
                 let DataToDb = new Object()
                 DataToDb[MongoTracksCollection.Elevation] = ElevationData.AllElevation
                 DataToDb[MongoTracksCollection.InfoElevation] = ElevationData.InfoElevation

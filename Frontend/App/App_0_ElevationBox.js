@@ -1,8 +1,12 @@
 class ElevationBox {
-    constructor(DivApp){
+    constructor(DivApp, DrawElevationPointOnMap, HideElevationPointOnMap){
         this._DivApp = DivApp
+        this.DrawElevationPointOnMap = DrawElevationPointOnMap
+        this.HideElevationPointOnMap = HideElevationPointOnMap
+
         this._DivBox = null
         this._scatterChart = null
+        this._Elevation = null
 
         this.BuildBox()
     }
@@ -20,7 +24,7 @@ class ElevationBox {
         DivFlexTxt.appendChild(CoreXBuild.DivTexte("No Elevation", "", "Text", "color:white;"))
     }
 
-    BuildGraph(Elevation){
+    BuildGraph(){
         this._DivBox.innerHTML = ""
         // Graph
         let me = this
@@ -56,7 +60,7 @@ class ElevationBox {
             type: 'scatter',
             data: {
                 datasets: [{
-                    data: Elevation,
+                    data: this._Elevation,
                     showLine: true,
                     fill: false,
                     borderColor: 'white',
@@ -80,7 +84,7 @@ class ElevationBox {
                     },
                     callbacks: {
                       label: function(tooltipItem, data) {
-                          me.DrawElevationPointOnMap(tooltipItem.index, tooltipItem.label, tooltipItem.value)
+                          me.DrawElevationPoint(tooltipItem.index)
                           let x = "Distance: " + tooltipItem.label + "m"
                           let multistringText = [x]
                           let y = "Elevation: " + tooltipItem.value + "m"
@@ -114,7 +118,6 @@ class ElevationBox {
                     }],
                     yAxes: [{
                         ticks: {
-                            beginAtZero: true,
                             fontColor: "white",
                             stepSize: 10,
                             callback: function(value, index, values) {
@@ -131,27 +134,22 @@ class ElevationBox {
         });
     }
 
-    DrawElevationPointOnMap(Index, x, elevation){
-        // let ElevationPoint = this._Elevation[Index]
-        // let latlng = [ElevationPoint.coord.lat, ElevationPoint.coord.long]
-        // if (this._GpsPointer == null){
-        //     this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'red', fillOpacity:1}).addTo(this._Map)
-        // }
-        // this._GpsPointer.setLatLng(latlng)
+    DrawElevationPoint(Index){
+        let ElevationPoint = this._Elevation[Index]
+        let latlng = [ElevationPoint.coord.lat, ElevationPoint.coord.long]
+        this.DrawElevationPointOnMap(latlng)
     }
 
     CanvansMouseOutEvent(){
-        // if (this._GpsPointer){
-        //     this._Map.removeLayer(this._GpsPointer)
-        //     this._GpsPointer = null
-        // }
+        this.HideElevationPointOnMap()
     }
 
     UpdateGraph(Elevation){
+        this._Elevation = Elevation
         if (this._scatterChart == null){
-            this.BuildGraph(Elevation)
+            this.BuildGraph()
         } else {
-            this._scatterChart.data.datasets[0].data = Elevation
+            this._scatterChart.data.datasets[0].data = this._Elevation
             this._scatterChart.update()
         }
     }
