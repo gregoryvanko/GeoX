@@ -199,7 +199,7 @@ class InfoBox{
             this._ListeOfMarkers.forEach(element => {
                 let point = turf.point([element.StartPoint.Lat, element.StartPoint.Lng])
                 if (turf.booleanWithin(point, polyCorner)){
-                    let InfoTrackObject = {Type: "GeoxMarker", From:"InfoBox", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: null}
+                    let InfoTrackObject = {Type: "GeoxMarker", From:"InfoBox", Name: element.Name, Group: element.Group, Date: element.Date, Length: element.Length, Id: element._id, Track: null, StartPoint:element.StartPoint}
                     if ((element.Length > parseInt(this._Filter.MinKm))&&(element.Length < parseInt(this._Filter.MaxKm))){
                         ListOfTrackFiltered.push(InfoTrackObject)
                     }

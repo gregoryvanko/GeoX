@@ -1122,6 +1122,14 @@ class GeoX {
         // Button TrackInfo
         HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.Information(), "Info Track"), this.InfoTrack.bind(this,element.Id), "Text ButtonCoreXWindow"))
 
+        // Button GoToStartPoint
+        if (element.Type == "MyTrack"){
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go To Start"), this.GoToStartPoint.bind(this,element.Track.StartPoint), "Text ButtonCoreXWindow"))
+        } else {
+            HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go To Start"), this.GoToStartPoint.bind(this,element.StartPoint), "Text ButtonCoreXWindow"))
+        }
+        
+
         // Button Save pour GeoX Track
         if (element.Type == "GeoxMarker"){
             HTMLContent.appendChild(CoreXBuild.Button (this.BuildImageAndTextButtonContent(Icon.SaveBlack(), "Save Track"), this.SaveMarker.bind(this,element.Id), "Text ButtonCoreXWindow"))
@@ -1176,6 +1184,14 @@ class GeoX {
         this.AddInfoTrackConteneur()
         // Send status to serveur
         GlobalSendSocketIo("GeoX", "ModuleGeoX", {Action: "GetTrackInfo", Data: TrackId})
+    }
+    GoToStartPoint(StartPoint){
+        CoreXWindow.DeleteWindow()
+        if ((navigator.platform.indexOf("iPhone") != -1) || (navigator.platform.indexOf("iPad") != -1) || (navigator.platform.indexOf("iPod") != -1)){
+            window.open(`maps://maps.google.com/maps?daddr=${StartPoint.Lat},${StartPoint.Lng}&amp;ll=`);
+        } else {
+            window.open(`https://maps.google.com/maps?daddr=${StartPoint.Lat},${StartPoint.Lng}&amp;ll=`)
+        }
     }
     FollowTrack(A, B){
         CoreXWindow.DeleteWindow()
