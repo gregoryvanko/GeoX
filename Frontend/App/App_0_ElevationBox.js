@@ -4,9 +4,16 @@ class ElevationBox {
         this.DrawElevationPointOnMap = DrawElevationPointOnMap
         this.HideElevationPointOnMap = HideElevationPointOnMap
 
-        this._DivBox = null
         this._scatterChart = null
-        this._Elevation = null
+        this._Elevation = [{x: 0,y: 0}]
+
+        this._IdElevationBoxtext = "ElevationBoxtext"
+        this._IdElevationBoxGraph = "ElevationBoxGraph"
+        this._IdElevLength = "ElevLength"
+        this._IdElevCumulP = "ElevCumulP"
+        this._IdElevCumulM = "ElevCumulM"
+        this._IdElevMax = "ElevMax"
+        this._IdElevMin = "ElevMin"
 
         this.BuildBox()
     }
@@ -14,24 +21,32 @@ class ElevationBox {
     BuildBox(){
         // Div du box
         let DivBox = CoreXBuild.Div("DivElevationBox", "DivElevationBox", "")
-        this._DivBox = DivBox
         this._DivApp.appendChild(DivBox)
+        // DivFlex
+        let DivFlexBox = CoreXBuild.DivFlexColumn()
+        DivFlexBox.style.height= "100%"
+        DivBox.appendChild(DivFlexBox)
         // Add Txt
-        let DivFlexTxt = CoreXBuild.DivFlexColumn()
-        DivFlexTxt.style.height= "100%"
-        DivFlexTxt.style.justifyContent = "center"
-        this._DivBox.appendChild(DivFlexTxt)
-        DivFlexTxt.appendChild(CoreXBuild.DivTexte("No Elevation", "", "Text", "color:white;"))
+        this.BuildText(DivFlexBox)
+        // Add Graph
+        this.BuildGraph(DivFlexBox)
     }
 
-    BuildGraph(){
-        this._DivBox.innerHTML = ""
-        // Graph
+    BuildText(Div){
+        Div.appendChild(CoreXBuild.DivTexte("No Elevation", this._IdElevationBoxtext, "Text", "color:white;"))
+    }
+
+    BuildGraph(Div){        
+        let DivGraph = CoreXBuild.Div(this._IdElevationBoxGraph, "", "width:100%; display:none")
+        Div.appendChild(DivGraph)
+        // Build elevation data
+        this.BuildElevationData(DivGraph)
+        // Build graph
         let me = this
         let canvas = document.createElement("canvas")
         canvas.setAttribute("id", "myChart")
         canvas.addEventListener ("mouseout", this.CanvansMouseOutEvent.bind(this), false);
-        this._DivBox.appendChild(canvas)
+        DivGraph.appendChild(canvas)
         let ctx = document.getElementById('myChart').getContext('2d')
         Chart.plugins.register ( {
             afterDatasetsDraw: function(chart) {
@@ -69,7 +84,7 @@ class ElevationBox {
             },
             options: {
                 animation: false,
-                aspectRatio: 2.5,
+                aspectRatio: 4,
                 legend: {
                     position: 'bottom',
                     display: false
@@ -134,6 +149,41 @@ class ElevationBox {
         });
     }
 
+    BuildElevationData(DivData){
+        let conteneur = CoreXBuild.DivFlexRowAr("")
+        conteneur.style.marginBottom = "1vh"
+        DivData.appendChild(conteneur)
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevLength, "0", "Km", CommonIcon.Lenght()))
+        conteneur.appendChild(this.DrawVerticalLine())
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevCumulP, "0", "m", CommonIcon.ElevationPlus()))
+        conteneur.appendChild(this.DrawVerticalLine())
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevCumulM, "0", "m", CommonIcon.ElevationMoins()))
+        conteneur.appendChild(this.DrawVerticalLine())
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevMax, "0", "m", CommonIcon.ElevationMax()))
+        conteneur.appendChild(this.DrawVerticalLine())
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevMin, "0", "m", CommonIcon.ElevationMin()))
+    }
+
+    DrawDataInfo(Id, Value, Unite, Description){
+        let conteneur = CoreXBuild.Div("", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
+
+        let conteneurdescription = CoreXBuild.DivFlexRowAr("")
+        conteneurdescription.appendChild(CoreXBuild.Image64(Description,"", "", "height: 2.5vh;"))
+        conteneur.appendChild(conteneurdescription)
+
+        let conteneurvalue = CoreXBuild.DivFlexRowAr("")
+        conteneurvalue.appendChild(CoreXBuild.DivTexte(Value,Id,"Text", "padding-right: 0.5vw; color:white;"))
+        conteneurvalue.appendChild(CoreXBuild.DivTexte(Unite,"","TextSmall", "color:white;"))
+        conteneur.appendChild(conteneurvalue)
+
+        return conteneur
+    }
+
+    DrawVerticalLine(){
+        let conteneur = CoreXBuild.Div("" , "", "border-left: 2px solid #dfdfe8; height: 4vh;")
+        return conteneur
+    }
+
     DrawElevationPoint(Index){
         let ElevationPoint = this._Elevation[Index]
         let latlng = [ElevationPoint.coord.lat, ElevationPoint.coord.long]
@@ -145,12 +195,32 @@ class ElevationBox {
     }
 
     UpdateGraph(Elevation){
-        this._Elevation = Elevation
-        if (this._scatterChart == null){
-            this.BuildGraph()
-        } else {
-            this._scatterChart.data.datasets[0].data = this._Elevation
-            this._scatterChart.update()
-        }
+        // Save Data
+        this._Elevation = Elevation.AllElevation
+        // Hide Text
+        document.getElementById(this._IdElevationBoxtext).style.display = "none"
+        // Show Graph
+        document.getElementById(this._IdElevationBoxGraph).style.display = "block"
+        // Update Graph
+        this._scatterChart.data.datasets[0].data = this._Elevation
+        this._scatterChart.update()
+        // Update data
+        let lenght = this._Elevation[this._Elevation.length-1].x
+        lenght = lenght/1000
+        lenght = lenght.toFixed(1)
+        document.getElementById(this._IdElevLength).innerHTML = lenght
+        document.getElementById(this._IdElevCumulP).innerHTML = Elevation.InfoElevation.ElevCumulP
+        document.getElementById(this._IdElevCumulM).innerHTML = Elevation.InfoElevation.ElevCumulM
+        document.getElementById(this._IdElevMax).innerHTML = Elevation.InfoElevation.ElevMax
+        document.getElementById(this._IdElevMin).innerHTML = Elevation.InfoElevation.ElevMin
+    }
+
+    UpdateText(Text){
+        // Hide Graph
+        document.getElementById(this._IdElevationBoxGraph).style.display = "none"
+        // Show Text
+        document.getElementById(this._IdElevationBoxtext).style.display = "block"
+        // Update Text
+        document.getElementById(this._IdElevationBoxtext).innerHTML = Text
     }
 }

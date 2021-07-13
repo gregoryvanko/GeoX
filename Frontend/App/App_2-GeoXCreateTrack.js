@@ -78,7 +78,7 @@ class GeoXCreateTrack {
         } else if (Value.Action == "SetTrackFromGeoJson" ) {
             this.AddTrackToModifyOnMap(Value.Data)
         } else if (Value.Action == "SetElevation" ) {
-            this._ElevationBox.UpdateGraph(Value.Data.AllElevation)
+            this._ElevationBox.UpdateGraph(Value.Data)
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -582,7 +582,10 @@ class GeoXCreateTrack {
     }
 
     UpdateElevation(){
+        // Get localisation of track points
         let latlngs = this._Polyline.getLatLngs()
+        // Show waiting text
+        this._ElevationBox.UpdateText("Waiting data...")
         // Send to server
         let CallToServer = new Object()
         CallToServer.Action = "GetElevation"

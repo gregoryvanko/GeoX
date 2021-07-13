@@ -69,8 +69,8 @@
 }
 
 .DivElevationBox{
-    width: 33vw;
-    height: 22vh;
+    width: 40vw;
+    height: 24vh;
     position: fixed;
     z-index: 998; 
     left: 1vh; 
