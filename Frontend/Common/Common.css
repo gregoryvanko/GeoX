@@ -234,6 +234,16 @@
     box-sizing: border-box
 }
 
+.InfoOnTrackMap{
+    height: 50vh; 
+    width: 100%
+}
+
+.InfoOnTrackChart{
+    height:30vh; 
+    width:100%;
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)
@@ -250,7 +260,8 @@ screen and (max-width: 700px)
     .IconeInList{height:2vh; margin-left: 2vh;}
     .AppConteneur{width: 95%;}
     .TitreInfoOneTrack{font-size: calc(var(--TitreIphone)*0.6);}
-    .DivContentEdit{width: 90%;}
+    .InfoOnTrackMap{height: 40vh;}
+    .InfoOnTrackChart{height:20vh;}
 }
 
 @media screen and (min-width: 1200px)

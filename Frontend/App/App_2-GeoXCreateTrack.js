@@ -914,26 +914,32 @@ class GeoXCreateTrack {
             if (feature.geometry.type == "LineString"){
                 this.DrawTrackToModifyOnMapFirstPoint({lat: feature.geometry.coordinates[0][1], lng: feature.geometry.coordinates[0][0]})
                 let tempCoordinate = []
-                const NbTempPoint = 5
+                // Distance entre 2 markeur
+                let dist = 0
+                // Premier point pour le calcul de la distance
+                let from = turf.point([feature.geometry.coordinates[0][0], feature.geometry.coordinates[0][1]]);
+                
                 for (let index = 1; index < feature.geometry.coordinates.length; index++) {
+                    const coordinate = feature.geometry.coordinates[index];
+                    const latlng = {lat: coordinate[1], lng: coordinate[0]}
                     let isIntermediatePoint = false
-                    // Si le nombre de point intermediaire est plus petit que 3, on ajoute un point intermediaire
-                    if (tempCoordinate.length < NbTempPoint){
+
+                    let to = turf.point([coordinate[0], coordinate[1]]);
+                    dist += turf.distance(from, to)
+                    from = to
+                    if (dist < 0.5){
                         isIntermediatePoint = true
-                    }
-                    // Si on est proche de la fin, on ajoute le point aux points intermediaires
-                    if ((feature.geometry.coordinates.length - (index+1)) <= Math.ceil(NbTempPoint/2)){
-                        isIntermediatePoint = true
+                    } else {
+                        dist = 0
                     }
                     // Si c'est le dernier point on ajoute un marker
                     if ((index +1) == feature.geometry.coordinates.length){
                         isIntermediatePoint = false
                     }
-                    const coordinate = feature.geometry.coordinates[index];
-                    const latlng = {lat: coordinate[1], lng: coordinate[0]}
+                    
+
                     if (isIntermediatePoint){
                         tempCoordinate.push(latlng)
-                        // Si il reste moins de 2 alors aussi les ajouter
                     } else {
                         // Creation d'un nouveau marker et l'ajouter à la carte
                         var newMarker = new L.marker(latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup)

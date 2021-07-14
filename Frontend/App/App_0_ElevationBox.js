@@ -1,4 +1,5 @@
 class ElevationBox {
+    
     constructor(DivApp, DrawElevationPointOnMap, HideElevationPointOnMap){
         this._DivApp = DivApp
         this.DrawElevationPointOnMap = DrawElevationPointOnMap
@@ -43,10 +44,13 @@ class ElevationBox {
         this.BuildElevationData(DivGraph)
         // Build graph
         let me = this
+        let chartdiv = document.createElement("div")
+        chartdiv.setAttribute("Class", "ElevationBoxChart")
+        DivGraph.appendChild(chartdiv)
         let canvas = document.createElement("canvas")
         canvas.setAttribute("id", "myChart")
         canvas.addEventListener ("mouseout", this.CanvansMouseOutEvent.bind(this), false);
-        DivGraph.appendChild(canvas)
+        chartdiv.appendChild(canvas)
         let ctx = document.getElementById('myChart').getContext('2d')
         Chart.plugins.register ( {
             afterDatasetsDraw: function(chart) {
@@ -63,7 +67,6 @@ class ElevationBox {
                     ctx.beginPath();
                     ctx.moveTo(x, topY+1);
                     ctx.lineTo(x, bottomY+1);
-                    //ctx.setLineDash([2,3]);
                     ctx.lineWidth = 2;
                     ctx.strokeStyle = 'red';
                     ctx.stroke();
@@ -84,7 +87,7 @@ class ElevationBox {
             },
             options: {
                 animation: false,
-                aspectRatio: 4,
+                maintainAspectRatio: false,
                 legend: {
                     position: 'bottom',
                     display: false

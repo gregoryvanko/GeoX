@@ -1,4 +1,5 @@
 class InfoOnTrack {
+    
     constructor(Data, HtmlDiv){
         this._Id = Data._id
         this._Name = Data.Name
@@ -107,7 +108,7 @@ class InfoOnTrack {
 
     DrawMap(DivCarte){
         if (this._GeoJsonData){
-            DivCarte.appendChild(CoreXBuild.Div(this._MapId, "", "height: 50vh; width: 100%"))
+            DivCarte.appendChild(CoreXBuild.Div(this._MapId, "InfoOnTrackMap", ""))
             // Parametre de la carte
             let CenterPoint = {Lat: this._Center.Lat, Long: this._Center.Long}
             let Zoom = 14
@@ -182,10 +183,14 @@ class InfoOnTrack {
     DrawElevation(DivElevation){
         if (this._Elevation){
             let me = this
+            let chartdiv = document.createElement("div")
+            chartdiv.setAttribute("Class", "InfoOnTrackChart")
+            DivElevation.appendChild(chartdiv)
+
             let canvas = document.createElement("canvas")
             canvas.setAttribute("id", "myChart")
             canvas.addEventListener ("mouseout", this.CanvansMouseOutEvent.bind(this), false);
-            DivElevation.appendChild(canvas)
+            chartdiv.appendChild(canvas)
             let ctx = document.getElementById('myChart').getContext('2d')
 
             Chart.plugins.register ( {
@@ -201,7 +206,7 @@ class InfoOnTrack {
                         bottomY = y_axis.bottom;
                         ctx.save();
                         ctx.beginPath();
-                        ctx.moveTo(x, topY+7);
+                        ctx.moveTo(x, topY+1);
                         ctx.lineTo(x, bottomY+1);
                         ctx.setLineDash([2,3]);
                         ctx.lineWidth = 1;
@@ -237,7 +242,7 @@ class InfoOnTrack {
                 },
                 options: {
                     animation: false,
-                    aspectRatio: 2.5,
+                    maintainAspectRatio: false,
                     legend: {
                         position: 'bottom'
                     },tooltips: {

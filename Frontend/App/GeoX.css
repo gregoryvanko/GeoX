@@ -289,13 +289,17 @@
     margin-left: -20px;
 }
 
+.ElevationBoxChart{
+    height:16vh;
+    width:100%;
+}
+
 
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)
 {
     .AppConteneur{width: 90%;}
-    
     .TextTrackInfo{font-size: var(--TexteIphone);}
     .DivDropDownPays{width: 90%;}
     .InputCity{width: 90%;}
@@ -309,6 +313,8 @@ screen and (max-width: 700px)
     .MarkerPopupContent{margin:auto 20%;}
     .ButtonPopup{ padding: 8% 0%;}
     .DivBoxDistance{width: 70%;}
+    .DivElevationBox{width: 78vw; height: 18vh;}
+    .ElevationBoxChart{height:12vh;}
 }
 
 @media screen and (min-width: 1200px)
