@@ -309,7 +309,7 @@ class GeoXCreateTrack {
         // Creation d'un nouveau marker et l'ajouter à la carte
         await this.CreateNewPoint(e.latlng.lat, e.latlng.lng)
         // Update du calcul de la distance
-        this.UpdateViewDistance()
+        this.UpdateElevation()
         // Centrer la carte sur le nouveau point
         this._Map.setView((e.latlng));
     }
@@ -565,19 +565,6 @@ class GeoXCreateTrack {
         }
         this._Polyline.setLatLngs(AllLatLng)
         // Update distance
-        this.UpdateViewDistance()
-    }
-
-    UpdateViewDistance(){
-        var Dist = this.CalculDistance()
-        if (Dist < 1){
-            Dist = Dist * 1000
-            Dist = Dist.toString() + "m"
-        } else {
-            Dist = Dist.toString() + "Km"
-        }
-        document.getElementById("DivDistance").innerText = "Distance: " + Dist
-        // Update graph elevation
         this.UpdateElevation()
     }
 
@@ -626,7 +613,7 @@ class GeoXCreateTrack {
     BuildInfoBox(){
         let DivInfoBox = CoreXBuild.Div("DivInfoBox", "DivInfoBox", "")
         this._DivApp.appendChild(DivInfoBox)
-        DivInfoBox.appendChild(CoreXBuild.DivTexte("Distance: 0m","DivDistance","TextTrackInfo", "color: white; margin-left: 1%;"))
+
         // Toggle MultiLine to OneLine
         let DivToogle = CoreXBuild.Div("","", "width: 100%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; margin: 1vh 0vh;")
         DivInfoBox.appendChild(DivToogle)
@@ -640,6 +627,7 @@ class GeoXCreateTrack {
                 this._AutoRouteBehavior = false
             }
         })
+        // Save button
         DivInfoBox.appendChild(CoreXBuild.Button("Save", this.SaveTrack.bind(this), "ButtonInfoBox"))
     }
 

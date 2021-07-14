@@ -153,26 +153,26 @@ class ElevationBox {
         let conteneur = CoreXBuild.DivFlexRowAr("")
         conteneur.style.marginBottom = "1vh"
         DivData.appendChild(conteneur)
-        conteneur.appendChild(this.DrawDataInfo(this._IdElevLength, "0", "Km", CommonIcon.Lenght()))
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevLength, "0", "Km", CommonIcon.LenghtWhite()))
         conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._IdElevCumulP, "0", "m", CommonIcon.ElevationPlus()))
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevCumulP, "0", "m", CommonIcon.ElevationPlusWhite()))
         conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._IdElevCumulM, "0", "m", CommonIcon.ElevationMoins()))
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevCumulM, "0", "m", CommonIcon.ElevationMoinsWhite()))
         conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._IdElevMax, "0", "m", CommonIcon.ElevationMax()))
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevMax, "0", "m", CommonIcon.ElevationMaxWhite()))
         conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._IdElevMin, "0", "m", CommonIcon.ElevationMin()))
+        conteneur.appendChild(this.DrawDataInfo(this._IdElevMin, "0", "m", CommonIcon.ElevationMinWhite()))
     }
 
     DrawDataInfo(Id, Value, Unite, Description){
         let conteneur = CoreXBuild.Div("", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
 
         let conteneurdescription = CoreXBuild.DivFlexRowAr("")
-        conteneurdescription.appendChild(CoreXBuild.Image64(Description,"", "", "height: 2.5vh;"))
+        conteneurdescription.appendChild(CoreXBuild.Image64(Description,"", "", "height: 2.5vh; margin-bottom:0.5vh"))
         conteneur.appendChild(conteneurdescription)
 
         let conteneurvalue = CoreXBuild.DivFlexRowAr("")
-        conteneurvalue.appendChild(CoreXBuild.DivTexte(Value,Id,"Text", "padding-right: 0.5vw; color:white;"))
+        conteneurvalue.appendChild(CoreXBuild.DivTexte(Value,Id,"TextSmall", "padding-right: 0.5vw; color:white;"))
         conteneurvalue.appendChild(CoreXBuild.DivTexte(Unite,"","TextSmall", "color:white;"))
         conteneur.appendChild(conteneurvalue)
 
