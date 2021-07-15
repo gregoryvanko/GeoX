@@ -1,5 +1,3 @@
-const { default: length } = require('@turf/length')
-
 function PromiseAddTrack(Track, MyApp, User){
     return new Promise(async(resolve) => {
         let MongoR = require('@gregvanko/corex').Mongo
@@ -67,7 +65,6 @@ function PromiseAddTrack(Track, MyApp, User){
                 latleng.Lng = beg[0]
             }
             TrackData.StartPoint = latleng
-            
             // Add elevation
             const ElevationData = await GetElevationOfGeoJson(GeoJson)
             TrackData.Elevation = ElevationData.AllElevation
@@ -209,14 +206,21 @@ function MinMaxGeoJsonTrack(geojson){
     return reponse
 }
 
-/**
- * Calcule la longeur en Km d'une track
- * @param {GeoJson} GeoJson GeoJson object de la track
- */
 function CalculateTrackLength(GeoJson){
-    var Turf = require('@turf/length').default
-    let distance = Math.round((Turf(GeoJson) + Number.EPSILON) * 1000) / 1000
-    return distance
+    let distance = 0
+    let Coord = GeoJson.features[0].geometry.coordinates
+    const { getDistance } = require("geolib")
+    for (let i = 1; i < Coord.length; i++){
+        const [prelng, prelat] = Coord[i - 1]
+        const [lng, lat] = Coord[i]
+        // Get distance from first point
+        let DistBetweenTwoPoint = getDistance(
+            { latitude: prelat, longitude: prelng },
+            { latitude: lat, longitude: lng }
+        )
+        distance += DistBetweenTwoPoint
+    }
+    return distance/1000
 }
 
 async function GetElevationOfGeoJson(GeoJson){
@@ -229,6 +233,8 @@ async function GetElevationOfGeoJson(GeoJson){
 
     let AllElevation = []
     let distance = 0
+    let IntermediereDist = 0
+    const MinDistBetweenTwoPoint = 50
     const [lng, lat] = Coord[0]
     let ele = await PromiseGetElevation({ lat, lng })
     ele = parseInt(ele)
@@ -245,31 +251,39 @@ async function GetElevationOfGeoJson(GeoJson){
     for (let i = 1; i < Coord.length; i++){
         const [prelng, prelat] = Coord[i - 1]
         const [lng, lat] = Coord[i]
-        // Get elevation
-        let eleP = await PromiseGetElevation({lat, lng})
-        eleP = parseInt(eleP)
         // Get distance from first point
-        distance += getDistance(
+        let DistBetweenTwoPoint = getDistance(
             { latitude: prelat, longitude: prelng },
             { latitude: lat, longitude: lng }
         )
-        AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
-        // Get ElevationMin
-        if (eleP < ElevationMin){
-            ElevationMin = eleP
+        distance += DistBetweenTwoPoint
+        IntermediereDist += DistBetweenTwoPoint
+
+        if ((IntermediereDist > MinDistBetweenTwoPoint) || (i == Coord.length -1)){
+            IntermediereDist = 0
+            // Get elevation
+            let eleP = await PromiseGetElevation({lat, lng})
+            eleP = parseInt(eleP)
+            // Add Elevation point
+            AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
+            // Get ElevationMin
+            if (eleP < ElevationMin){
+                ElevationMin = eleP
+            }
+            // Get ElevationMax
+            if (eleP > ElevationMax){
+                ElevationMax = eleP
+            }
+            // Get ElevationCumulP ElevationCumulM
+            const Delta = eleP - ElevationPrevious
+            if ((Delta)>0){
+                ElevationCumulP += Delta
+            } else {
+                ElevationCumulM += Delta
+            }
+            ElevationPrevious = eleP
         }
-        // Get ElevationMax
-        if (eleP > ElevationMax){
-            ElevationMax = eleP
-        }
-        // Get ElevationCumulP ElevationCumulM
-        const Delta = eleP - ElevationPrevious
-        if ((Delta)>0){
-            ElevationCumulP += Delta
-        } else {
-            ElevationCumulM += Delta
-        }
-        ElevationPrevious = eleP
+        
     }
     return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
 }
