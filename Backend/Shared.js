@@ -288,6 +288,7 @@ async function GetElevationOfGeoJson(GeoJson){
     return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
 }
 
+// ToDo Modify
 async function GetElevationOfLatLng(LatLng){
     let ElevationMin = 0
     let ElevationMax = 0
@@ -590,3 +591,4 @@ module.exports.MinMaxOfTracks = MinMaxOfTracks
 module.exports.PromiseGetTracksInfo = PromiseGetTracksInfo
 module.exports.GetElevationOfGeoJson = GetElevationOfGeoJson
 module.exports.GetElevationOfLatLng = GetElevationOfLatLng
+module.exports.CalculateTrackLength = CalculateTrackLength

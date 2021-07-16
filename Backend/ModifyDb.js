@@ -151,16 +151,18 @@ async function AddElevationToAlTracks (MyApp){
             let Id = element._id
            
             if (element.GeoJsonData.features[0].geometry.type == "LineString"){
+                const dist = Shared.CalculateTrackLength(element.GeoJsonData)
                 const ElevationData = await Shared.GetElevationOfGeoJson(element.GeoJsonData)
                 let DataToDb = new Object()
                 DataToDb[MongoTracksCollection.Elevation] = ElevationData.AllElevation
                 DataToDb[MongoTracksCollection.InfoElevation] = ElevationData.InfoElevation
                 DataToDb[MongoTracksCollection.Description] = ""
+                DataToDb[MongoTracksCollection.Length] = dist
                 let ReponseUpdate = await PromiseUpdateDataInDb (Id, DataToDb, Mongo,  MongoTracksCollection)
                 if(ReponseUpdate.Error){
                     console.log(ReponseUpdate.ErrorMsg)
                 } else {
-                    console.log(Current+ "/" + Total + " done")
+                    console.log(Current+ "/" + Total + " done" + " dist="+ dist)
                 }
             } else {
                 console.log("error Id= " + element._id + " is not a LineString")
