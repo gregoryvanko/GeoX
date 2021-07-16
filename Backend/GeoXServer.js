@@ -83,11 +83,11 @@ class GeoXServer{
             case "AdminManageTrack":
                 let ModuleAdminManageTrack = require("./ModuleAdminManageTrack")
                 if (Data.Value.Action == "GetData") {
-                    //ModuleAdminManageTrack.CallGetData(this._MyApp,  Socket, User, UserId)
+                    ModuleAdminManageTrack.CallGetData(this._MyApp,  Socket, User, UserId)
 
                     //***Modification de la DB
-                    let ModifyDB = require("./ModifyDb")
-                    ModifyDB.AddElevationToAlTracks(this._MyApp)
+                    //let ModifyDB = require("./ModifyDb")
+                    //ModifyDB.AddElevationToAlTracks(this._MyApp)
                 } else if (Data.Value.Action == "GetTrackInfo"){
                     ModuleAdminManageTrack.CallGetTrackInfo(Data.Value.Data,this._MyApp,  Socket, User, UserId)
                 } else {
