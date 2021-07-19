@@ -45,17 +45,17 @@ function BuildHtmlGetMap(DataMap){
                     height: 100%;
                 }
                 `
-    reponse += fs.readFileSync(__dirname + "/../Frontend/App/0-leaflet.css", 'utf8')
+    reponse += fs.readFileSync(__dirname + "/../Frontend/Common/0-leaflet.css", 'utf8')
     reponse +=`
                 .leaflet-retina .leaflet-control-layers-toggle {
                     background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/layers-2x.png");
                 }
             </style>
             <script>`
-    reponse += fs.readFileSync(__dirname + "/../Frontend/App/0-leaflet.js", 'utf8')
-    reponse += fs.readFileSync(__dirname + "/../Frontend/App/1-leaflet.geometryutil.js", 'utf8')
-    reponse += fs.readFileSync(__dirname + "/../Frontend/App/2-leaflet-arrowheads.js", 'utf8')
-    reponse += fs.readFileSync(__dirname + "/../Frontend/App/App_0-Icon.js", 'utf8')
+    reponse += fs.readFileSync(__dirname + "/../Frontend/Common/0-leaflet.js", 'utf8')
+    reponse += fs.readFileSync(__dirname + "/../Frontend/Common/1-leaflet.geometryutil.js", 'utf8')
+    reponse += fs.readFileSync(__dirname + "/../Frontend/Common/2-leaflet-arrowheads.js", 'utf8')
+    reponse += fs.readFileSync(__dirname + "/../Frontend/Common/Icon.js", 'utf8')
     reponse += `
             </script>
         </head>
