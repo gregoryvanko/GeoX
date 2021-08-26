@@ -218,7 +218,7 @@ class GeoXManageTracks {
         DivDescription.appendChild(CoreXBuild.DivTexte("Description", "", "Text", ""))
         let DivContDesc = CoreXBuild.Div("DivContDesc", "DivContentEdit TextSmall", "")
         DivContDesc.innerText = Description
-        DivContDesc.contentEditable = "true"
+        DivContDesc.contentEditable = "True"
         DivDescription.appendChild(DivContDesc)
         // Toggle Public
         let DivTooglePublic = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
@@ -325,7 +325,7 @@ class GeoXManageTracks {
         Contener.appendChild(DivDescription)
         DivDescription.appendChild(CoreXBuild.DivTexte("Description", "", "Text", ""))
         let DivContDesc = CoreXBuild.Div("DivContDesc", "DivContentEdit TextSmall", "")
-        DivContDesc.contentEditable = "true"
+        DivContDesc.contentEditable = "True"
         DivDescription.appendChild(DivContDesc)
         // Toggle Public
         let DivTooglePublic = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")

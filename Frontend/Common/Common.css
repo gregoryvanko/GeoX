@@ -203,6 +203,8 @@
     padding: 2%;
     color: #666;
     min-height: 10vh;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 
