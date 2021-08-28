@@ -288,7 +288,6 @@ async function GetElevationOfGeoJson(GeoJson){
     return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
 }
 
-// ToDo Modify
 async function GetElevationOfLatLng(LatLng){
     let ElevationMin = 0
     let ElevationMax = 0
