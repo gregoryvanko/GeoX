@@ -916,6 +916,7 @@ class GeoXCreateTrack {
                 let tempCoordinate = []
                 // Distance entre 2 markeur
                 let dist = 0
+                let distSavePoint = 0
                 // Premier point pour le calcul de la distance
                 let from = turf.point([feature.geometry.coordinates[0][0], feature.geometry.coordinates[0][1]]);
                 
@@ -926,45 +927,49 @@ class GeoXCreateTrack {
 
                     let to = turf.point([coordinate[0], coordinate[1]]);
                     dist += turf.distance(from, to)
+                    distSavePoint += turf.distance(from, to)
                     from = to
-                    if (dist < 0.5){
-                        isIntermediatePoint = true
-                    } else {
-                        dist = 0
-                    }
-                    // Si c'est le dernier point on ajoute un marker
-                    if ((index +1) == feature.geometry.coordinates.length){
-                        isIntermediatePoint = false
-                    }
-                    
 
-                    if (isIntermediatePoint){
-                        tempCoordinate.push(latlng)
-                    } else {
-                        // Creation d'un nouveau marker et l'ajouter à la carte
-                        var newMarker = new L.marker(latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup)
-                        // Enregistement du marker 
-                        var mypoint = new Object()
-                        mypoint.LatLng = latlng
-                        mypoint.LeafletId = newMarker._leaflet_id
-                        mypoint.SubPoints = []
-                        for (let Subpoint in tempCoordinate){
-                            mypoint.SubPoints.push(tempCoordinate[Subpoint])
-                            this._Polyline.addLatLng(L.latLng(tempCoordinate[Subpoint]))
+                    // On ne garde que les points espacé d'une distance de 0.02km
+                    if ((distSavePoint > 0.02) || ((index +1) == feature.geometry.coordinates.length) ){
+                        distSavePoint = 0
+                        if (dist < 0.5){
+                            isIntermediatePoint = true
+                        } else {
+                            dist = 0
                         }
-                        mypoint.AutoRoute = true
-                        // Enregistement du point dans _TrackMarkers
-                        this._TrackMarkers.push(mypoint)
-                        // Ajout du popup sur le marker
-                        newMarker.bindPopup(this.BuildPopupContent(newMarker._leaflet_id))
-                        // Ajout des event du le popup du marker
-                        let me = this
-                        newMarker
-                            .on('click', me.MarkerOnClickHandler.bind(this, newMarker))
-                            .on('dragstart', me.MarkerDragStartHandler.bind(this, newMarker))
-                            .on('drag', me.MarkerDragHandler.bind(this, newMarker))
-                            .on('dragend', me.MarkerDragEndHandler.bind(this, newMarker));
-                        tempCoordinate = []
+                        // Si c'est le dernier point on ajoute un marker
+                        if ((index +1) == feature.geometry.coordinates.length){
+                            isIntermediatePoint = false
+                        }                    
+                        if (isIntermediatePoint){
+                            tempCoordinate.push(latlng)
+                        } else {
+                            // Creation d'un nouveau marker et l'ajouter à la carte
+                            var newMarker = new L.marker(latlng, {icon: this._IconPointOption, draggable: 'true',}).addTo(this._MarkerGroup)
+                            // Enregistement du marker 
+                            var mypoint = new Object()
+                            mypoint.LatLng = latlng
+                            mypoint.LeafletId = newMarker._leaflet_id
+                            mypoint.SubPoints = []
+                            for (let Subpoint in tempCoordinate){
+                                mypoint.SubPoints.push(tempCoordinate[Subpoint])
+                                this._Polyline.addLatLng(L.latLng(tempCoordinate[Subpoint]))
+                            }
+                            mypoint.AutoRoute = true
+                            // Enregistement du point dans _TrackMarkers
+                            this._TrackMarkers.push(mypoint)
+                            // Ajout du popup sur le marker
+                            newMarker.bindPopup(this.BuildPopupContent(newMarker._leaflet_id))
+                            // Ajout des event du le popup du marker
+                            let me = this
+                            newMarker
+                                .on('click', me.MarkerOnClickHandler.bind(this, newMarker))
+                                .on('dragstart', me.MarkerDragStartHandler.bind(this, newMarker))
+                                .on('drag', me.MarkerDragHandler.bind(this, newMarker))
+                                .on('dragend', me.MarkerDragEndHandler.bind(this, newMarker));
+                            tempCoordinate = []
+                        }
                     }
                 }
                 // DrawTrack

@@ -298,10 +298,11 @@ async function GetElevationOfLatLng(LatLng){
 
     let AllElevation = []
     let distance = 0
+    let IntermediereDist = 0
+    const MinDistBetweenTwoPoint = 50
     let LatLngnull = LatLng[0]
     let lat = LatLngnull.lat
     let lng = LatLngnull.lng
-    //const [lat, lng] = LatLng[0]
     let ele = await PromiseGetElevation({ lat, lng })
     ele = parseInt(ele)
     AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
@@ -323,31 +324,37 @@ async function GetElevationOfLatLng(LatLng){
         let lat = LatLngI.lat
         let lng = LatLngI.lng
 
-        // Get elevation
-        let eleP = await PromiseGetElevation({lat, lng})
-        eleP = parseInt(eleP)
         // Get distance from first point
-        distance += getDistance(
+        let DistBetweenTwoPoint = getDistance(
             { latitude: prelat, longitude: prelng },
             { latitude: lat, longitude: lng }
         )
-        AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
-        // Get ElevationMin
-        if (eleP < ElevationMin){
-            ElevationMin = eleP
+        distance += DistBetweenTwoPoint
+        IntermediereDist += DistBetweenTwoPoint
+
+        if ((IntermediereDist > MinDistBetweenTwoPoint) || (i == LatLng.length -1)){
+            IntermediereDist = 0
+             // Get elevation
+            let eleP = await PromiseGetElevation({lat, lng})
+            eleP = parseInt(eleP)
+            AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
+            // Get ElevationMin
+            if (eleP < ElevationMin){
+                ElevationMin = eleP
+            }
+            // Get ElevationMax
+            if (eleP > ElevationMax){
+                ElevationMax = eleP
+            }
+            // Get ElevationCumulP ElevationCumulM
+            const Delta = eleP - ElevationPrevious
+            if ((Delta)>0){
+                ElevationCumulP += Delta
+            } else {
+                ElevationCumulM += Delta
+            }
+            ElevationPrevious = eleP
         }
-        // Get ElevationMax
-        if (eleP > ElevationMax){
-            ElevationMax = eleP
-        }
-        // Get ElevationCumulP ElevationCumulM
-        const Delta = eleP - ElevationPrevious
-        if ((Delta)>0){
-            ElevationCumulP += Delta
-        } else {
-            ElevationCumulM += Delta
-        }
-        ElevationPrevious = eleP
     }
     return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
 }
