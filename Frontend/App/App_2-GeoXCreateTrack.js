@@ -20,6 +20,7 @@ class GeoXCreateTrack {
         this._TrackName = "Rixensart"
         this._TrackGroup = "Planned"
         this._TrackPublic = true
+        this._Description = ""
         this._TrackMarkers = []
         this._AutoRouteBehavior = true
         this.CityFound = false
@@ -653,6 +654,14 @@ class GeoXCreateTrack {
             DivInput.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName",this._TrackName, "Input Text", "text", "Name",))
             // Input `Group
             DivInput.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup",this._TrackGroup, "Input Text", "text", "Group",))
+            // Description
+            let DivDescription = CoreXBuild.Div("", "InputBoxCoreXWindow Text", "")
+            DivInput.appendChild(DivDescription)
+            DivDescription.appendChild(CoreXBuild.DivTexte("Description", "", "Text", ""))
+            let DivContDesc = CoreXBuild.Div("DivContDesc", "DivContentEdit TextSmall", "")
+            DivContDesc.contentEditable = "True"
+            DivContDesc.innerText= this._Description
+            DivDescription.appendChild(DivContDesc)
             // Toggle Public
             let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
             DivInput.appendChild(DivTooglePublic)
@@ -735,6 +744,7 @@ class GeoXCreateTrack {
             Track.MultiToOneLine = true
             Track.FileContent = gpxtrack
             Track.Public = document.getElementById("TogglePublic").checked
+            Track.Description = document.getElementById("DivContDesc").innerText
             Track.Id = this._TrackId
             Track.ModifyExistingTrack = document.getElementById("ToggleExistingTrack").checked
             let CallToServer = new Object()
@@ -859,7 +869,7 @@ class GeoXCreateTrack {
         });
     }
 
-    InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public){
+    InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public, Description){
         // Show Action Button
         GlobalDisplayAction('On')
         // Execute before quit
@@ -882,6 +892,8 @@ class GeoXCreateTrack {
         this._TrackGroup = TrackGroup
         // Set Track Public
         this._TrackPublic = Public
+        // Set Track Descripton
+        this._Description = Description
         // Set Start view
         let Conteneur = CoreXBuild.DivFlexColumn()
         Conteneur.style.height = "70vh"
@@ -1024,6 +1036,7 @@ class GeoXCreateTrack {
             this._TrackName = "Rixensart"
             this._TrackGroup = "Planned"
             this._TrackPublic = true
+            this._Description = ""
             this._TrackMarkers = []
             this._AutoRouteBehavior = true
             this.CityFound = false
