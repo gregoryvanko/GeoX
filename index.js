@@ -71,6 +71,8 @@ class GeoX {
        this._MyApp.AddRouteGet("", this._GeoXServer.RouteGetHome.bind(this._GeoXServer))
        // Route GetMap
        this._MyApp.AddRouteGet("getmap", this._GeoXServer.RouteGetMap.bind(this._GeoXServer))
+       // Route Get page of post
+       this._MyApp.AddRouteGet("getpageofpost/:page", this._GeoXServer.GetPageOfPost.bind(this._GeoXServer))
 
        // Start
        this._MyApp.Start()
