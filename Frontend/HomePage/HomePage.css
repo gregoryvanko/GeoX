@@ -1,0 +1,23 @@
+body{
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none;   
+    -khtml-user-select: none;    
+    -moz-user-select: none;      
+    -ms-user-select: none;      
+    user-select: none;  
+    cursor: default;
+    font-family: Arial, Verdana, sans-serif;
+    font-synthesis: none;
+    letter-spacing: normal;
+    text-rendering: optimizelegibility;
+    background-color: white;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
