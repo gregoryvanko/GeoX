@@ -21,3 +21,32 @@ body{
     align-items: center;
     align-content: center;
 }
+
+.OpenButton{
+    margin: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border: 1px solid black;
+    border-radius: 1rem;
+    text-align: center;
+    display: inline-block;
+    color: balck;
+    background: transparent;
+    outline: none;
+    font-size: 1rem;
+    right: 0rem;
+    top: 1.5rem;
+    position: fixed;
+    z-index: 999;
+}
+
+.DivApp{
+    width:60rem;
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    margin-top: 2rem;
+}
