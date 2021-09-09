@@ -15,6 +15,7 @@
         "StartPoint": "StartPoint",
         "Elevation": "Elevation",
         "Description": "Description",
-        "InfoElevation": "InfoElevation"
+        "InfoElevation": "InfoElevation",
+        "Image": "Image"
     } 
 }

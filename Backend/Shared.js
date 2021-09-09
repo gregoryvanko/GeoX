@@ -8,7 +8,8 @@ function PromiseAddTrack(Track, MyApp, User){
         let ReponseAddTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
         // Convert GPX to GeoJson
-        let GeoJson = ConvertGpxToGeoJson(Track.FileContent)
+        //let GeoJson = ConvertGpxToGeoJson(Track.FileContent)
+        let GeoJson = Track.GeoJson
         // Si on a un GeoJson avec plusieurs line pour une track on le modifie
         if ((Track.MultiToOneLine) && (GeoJson.features[0].geometry.type == "MultiLineString")){
             // Changer le type en LineString
@@ -32,6 +33,7 @@ function PromiseAddTrack(Track, MyApp, User){
         TrackData.Date = new Date()
         TrackData.Owner = User
         TrackData.Description = Track.Description
+        TrackData.Image = Track.Image
         // Calculate exterior point
         let ReponseMinMaxGeoJsonTrack = MinMaxGeoJsonTrack(GeoJson)
         if (ReponseMinMaxGeoJsonTrack.IsError){
@@ -127,13 +129,13 @@ function PromiseAddTrack(Track, MyApp, User){
  * Convertir un fichier GPX en GeoJson
  * @param {String} FilePathandName path et name du fichier Gpx
  */
-function ConvertGpxToGeoJson(FileContent){
-    var tj = require('@mapbox/togeojson')
-    var DOMParser = require('xmldom').DOMParser
-    var Mygpx = new DOMParser().parseFromString(FileContent)
-    var converted = tj.gpx(Mygpx)
-    return converted
-}
+// function ConvertGpxToGeoJson(FileContent){
+//     var tj = require('@mapbox/togeojson')
+//     var DOMParser = require('xmldom').DOMParser
+//     var Mygpx = new DOMParser().parseFromString(FileContent)
+//     var converted = tj.gpx(Mygpx)
+//     return converted
+// }
 
 /**
  * Calcul les lat et long min et max d'une track contenue dans un object GeoJson

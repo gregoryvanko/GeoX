@@ -80,7 +80,7 @@ class HomePage{
             if (responseJson.Error){
                 document.getElementById(this._IdDivApp).appendChild(this.GetDivError(responseJson.ErrorMsg))
             } else {
-                this.RenderPost(responseJson.Data)
+                this.RenderPosts(responseJson.Data)
             }
         })
         .catch((error) => {
@@ -95,10 +95,29 @@ class HomePage{
         return diverror
     }
 
-    RenderPost (Data){
+    RenderPosts (Data){
         Data.forEach(element => {
-            console.log(element)
+
+            // Add image
+            document.getElementById(this._IdDivApp).appendChild(this.RenderMapImage(element.Image))
         });
+    }
+
+    RenderMapImage(Image){
+        if(Image){
+            var img = document.createElement('img');
+            img.style.maxWidth = "100%"
+            //img.width = 600;
+            //img.height = 338;
+            img.src = Image
+            let divimg = document.createElement('div');
+            divimg.appendChild(img)
+            return divimg
+        } else {
+            let divtext = document.createElement('div')
+            divtext.innerText = "No Image"
+            return divtext
+        }
     }
 }
 
