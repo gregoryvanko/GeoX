@@ -721,8 +721,10 @@ class GeoXCreateTrack {
         }
     }
 
-    SendSaveTrack(){
+    async SendSaveTrack(){
         if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            // Change button to waiting
+            document.getElementById("Save").innerHTML="Build..."
             let latlngs = this._Polyline.getLatLngs();
             let timestamp = new Date().toLocaleString('fr-BE');
             let gpxtrack = `<gpx xmlns="https://www.topografix.com/GPX/1/1"  creator="vanko.be" version="1.1" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd">
@@ -737,20 +739,36 @@ class GeoXCreateTrack {
     </trk>
 </gpx>`
             
-            // Data to send
-            let Track = new Object()
-            Track.Name = document.getElementById("InputTrackName").value 
-            Track.Group = document.getElementById("InputTrackGroup").value 
-            Track.MultiToOneLine = true
-            Track.FileContent = gpxtrack
-            Track.Public = document.getElementById("TogglePublic").checked
-            Track.Description = document.getElementById("DivContDesc").innerText
-            Track.Id = this._TrackId
-            Track.ModifyExistingTrack = document.getElementById("ToggleExistingTrack").checked
-            let CallToServer = new Object()
-            CallToServer.Action = "SaveTrack"
-            CallToServer.Data = Track
-            GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+            // Build Image
+            let MyGpxToImg = new GpxToImg(gpxtrack)
+            let ReponseGpxToImg = await MyGpxToImg.Convert()
+            if (ReponseGpxToImg.Error){
+                // changer le nom du boutton
+                document.getElementById("Save").innerHTML="Error"
+                console.error(ReponseGpxToImg.ErrorMsg)
+            } else {
+                let ImageTrack = ReponseGpxToImg.Img
+                let GeoJson = ReponseGpxToImg.GeoJson
+                // Change button to waiting
+                document.getElementById("Save").innerHTML="Send..."
+                // Data to send
+                let Track = new Object()
+                Track.Name = document.getElementById("InputTrackName").value 
+                Track.Group = document.getElementById("InputTrackGroup").value 
+                Track.MultiToOneLine = true
+                Track.FileContent = gpxtrack
+                Track.GeoJson = GeoJson
+                Track.Image = ImageTrack
+                Track.Public = document.getElementById("TogglePublic").checked
+                Track.Description = document.getElementById("DivContDesc").innerText
+                Track.Id = this._TrackId
+                Track.ModifyExistingTrack = document.getElementById("ToggleExistingTrack").checked
+                let CallToServer = new Object()
+                CallToServer.Action = "SaveTrack"
+                CallToServer.Data = Track
+                GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+            }
+            
         } else {
             alert("Enter a name and a group before updating a track")
         }

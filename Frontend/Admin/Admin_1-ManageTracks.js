@@ -119,8 +119,6 @@ class GeoXManageTracks {
     }
 
     LoadViewInfoTrack(TrackId){
-        //window.open(window.location.origin + "/getmap/?trackid=" + TrackId, '_blank').focus();
-
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Contener

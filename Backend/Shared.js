@@ -33,7 +33,6 @@ function PromiseAddTrack(Track, MyApp, User){
         TrackData.Date = new Date()
         TrackData.Owner = User
         TrackData.Description = Track.Description
-        TrackData.Image = Track.Image
         // Calculate exterior point
         let ReponseMinMaxGeoJsonTrack = MinMaxGeoJsonTrack(GeoJson)
         if (ReponseMinMaxGeoJsonTrack.IsError){
@@ -71,6 +70,7 @@ function PromiseAddTrack(Track, MyApp, User){
             const ElevationData = await GetElevationOfGeoJson(GeoJson)
             TrackData.Elevation = ElevationData.AllElevation
             TrackData.InfoElevation = ElevationData.InfoElevation
+            TrackData.Image = Track.Image
 
             let InsertTarck = true
             if ((Track.Id != null) && (Track.ModifyExistingTrack)){
@@ -101,6 +101,7 @@ function PromiseAddTrack(Track, MyApp, User){
                 DataToDb[MongoTracksCollection.Elevation]= TrackData.Elevation
                 DataToDb[MongoTracksCollection.InfoElevation]= TrackData.InfoElevation
                 DataToDb[MongoTracksCollection.Description]= TrackData.Description
+                DataToDb[MongoTracksCollection.Image]= TrackData.Image
                 
                 Mongo.UpdateByIdPromise(Track.Id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
                     if (reponse.matchedCount == 0){

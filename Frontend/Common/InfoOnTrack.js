@@ -42,7 +42,7 @@ class InfoOnTrack {
     LoadView(){
         this._HtmlDiv.innerHTML=""
         // Blank
-        this._HtmlDiv.appendChild(CoreXBuild.Div("","","height: 6.5vh;"))
+        this._HtmlDiv.appendChild(CoreXBuild.Div("","","height: 5vh;"))
         // Info
         let DivInfo = CoreXBuild.Div("DivTitre","DivInfoOneTrack", "width: 100%;")
         this._HtmlDiv.appendChild(DivInfo)

@@ -8,6 +8,7 @@ class GeoXManageTracks {
         this._GPX = null
         this._GeoJson = null
         this._ImageTrack = null
+        this._WindowScrollY = 0
     }
 
     Initiation(StartWithLoadViewManageTrack = true){
@@ -77,6 +78,7 @@ class GeoXManageTracks {
     }
 
     LoadViewManageTracks(){
+        window.scrollTo(0, this._WindowScrollY);
         // Clear view
         this._DivApp.innerHTML = ""
         // Contener
@@ -135,6 +137,7 @@ class GeoXManageTracks {
     }
 
     LoadViewAction(AppGroup, Track){
+        this._WindowScrollY = window.scrollY
         let HTMLContent = CoreXBuild.DivFlexColumn()
         HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id), "Text ButtonCoreXWindow"))
@@ -371,8 +374,7 @@ class GeoXManageTracks {
                 let parser = new DOMParser();
                 let xmlDoc = parser.parseFromString(evt.target.result,"text/xml");
                 me._GPX = evt.target.result
-                me._GeoJson = toGeoJSON.gpx(xmlDoc)
-                me.BuildVirutalMap()
+                me.ConvertGpxToImg()
             }
             reader.onerror = function (evt) {
                 alert("Error reading file");
@@ -381,78 +383,27 @@ class GeoXManageTracks {
         Contener.appendChild(Input)
     }
 
+    async ConvertGpxToImg(){
+        let MyGpxToImg = new GpxToImg(this._GPX)
+        let ReponseGpxToImg = await MyGpxToImg.Convert()
+        if (ReponseGpxToImg.Error){
+            // changer le nom du boutton
+            document.getElementById("SelectAndSend").innerHTML="Error"
+            console.error(ReponseGpxToImg.ErrorMsg)
+        } else {
+            this._ImageTrack = ReponseGpxToImg.Img
+            this._GeoJson = ReponseGpxToImg.GeoJson
+            this.SendAddTrack()
+        }
+    }
+
     SelectFile(){
-        //if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+        if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
             var fileCmd = "FileSelecteur.click()"
             eval(fileCmd)
-        //} else {
-        //    alert("Enter a name and a group before selecting and sending your file")
-        //}
-    }
-
-    BuildVirutalMap(){
-        this._DivApp.appendChild(CoreXBuild.Div("MyMAp", "", "height: 338px; width: 600px; position: absolute; top: 0px; left: -600px;"))
-        let Openstreetmap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-        })
-        let CenterPoint = {Lat: "50.709446", Long: "4.543413"}
-        let Zoom = 14
-        let MyMap = L.map("MyMAp" , {zoomControl: false, tapTolerance:40, tap:false, layers: [Openstreetmap]}).setView([CenterPoint.Lat, CenterPoint.Long], Zoom);
-        let WeightTrack = (L.Browser.mobile) ? 5 : 3
-        var TrackStyle = {
-            "color": "blue",
-            "weight": WeightTrack
-        };
-        var layerTrack1=L.geoJSON(this._GeoJson , 
-            {
-                renderer: L.canvas(),
-                style: TrackStyle, 
-                filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
-                arrowheads: {frequency: '100px', size: '15m', fill: true}
-            }).addTo(MyMap)
-
-        var numPts = this._GeoJson.features[0].geometry.coordinates.length;
-        var beg = this._GeoJson.features[0].geometry.coordinates[0];
-        var end = this._GeoJson.features[0].geometry.coordinates[numPts-1];
-        let IconPointStartOption = L.icon({
-            iconUrl: Icon.MarkerVert(),
-            iconSize:     [40, 40],
-            iconAnchor:   [20, 40],
-            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
-        });
-        let IconPointEndOption = L.icon({
-            iconUrl: Icon.MarkerRouge(),
-            iconSize:     [40, 40],
-            iconAnchor:   [20, 40],
-            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
-        });
-        var MarkerStart = new L.marker([beg[1],beg[0]], {icon: IconPointStartOption}).addTo(MyMap)
-        var MarkerEnd = new L.marker([end[1],end[0]], {icon: IconPointEndOption}).addTo(MyMap)
-        let me = this
-        MyMap.once('moveend', function(){
-            // Afficher la track a modifier
-            me.ConvertMapToImage(MyMap)
-        })
-        // FitBound
-        MyMap.fitBounds(layerTrack1.getBounds());
-    }
-
-    ConvertMapToImage(MyMap){
-        let me = this
-        leafletImage(MyMap, function(err, canvas) {
-            // var img = document.createElement('img');
-            // var dimensions = MyMap.getSize();
-            // img.width = dimensions.x;
-            // img.height = dimensions.y;
-            // img.src = canvas.toDataURL();
-            // let divimg = CoreXBuild.Div("Img", "", "")
-            // me._DivApp.appendChild(divimg)
-            // divimg.appendChild(img);
-
-            me._ImageTrack = canvas.toDataURL()
-            me.SendAddTrack()
-        });
+        } else {
+            alert("Enter a name and a group before selecting and sending your file")
+        }
     }
 
     SendAddTrack(){
