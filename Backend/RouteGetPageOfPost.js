@@ -16,7 +16,7 @@ async function GetPostOfPage (Page, res, MyApp){
 
 function PromiseGetPostOfPageFromDb(Page, MyApp){
     return new Promise(resolve => {
-        let numberofitem = 2
+        let numberofitem = 5
         let cursor = Page * numberofitem
         let MongoR = require('@gregvanko/corex').Mongo
         Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
