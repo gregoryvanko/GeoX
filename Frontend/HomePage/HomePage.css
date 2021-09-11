@@ -61,29 +61,96 @@ body{
     justify-content: center;
     align-items: center;
     align-content: center;
-    background-color: #f7f7f7;
+    background-color: white;
     padding: 0.5rem;
     border: 0.1rem solid black;
     border-radius: 1rem;
     margin-bottom: 1rem;
+    box-shadow: 0.1rem 0.1rem  1rem black;
 }
 
-.PostDescription{
+.PostInfo{
     width: 100%;
     box-sizing: border-box;
-    border: 0.05rem solid black;
-    border-radius: 1rem;
-    background-color: white;
-    padding: 1rem;
-    margin-bottom: 0.8rem;
+    padding: 0.4rem 0.9rem 0.4rem 0.9rem;
 }
 
 .PostTitre{
     font-weight: bold;
+    font-size: 1.5rem;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.4rem;
+}
+
+.PostDate{
+    font-size: 0.8rem;
+}
+
+.PostDescription{
+    margin-bottom: 0.4rem;
+}
+
+.PostDivImg{
+    width: 100%;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+    box-sizing: border-box;
 }
 
 .PostImg{
     border: 0.05rem solid black;
-    max-width: 100%;
+    width: 100%;
     border-radius: 0.2rem;
+}
+
+.FlexRowAr{
+    display: flex; 
+    flex-direction: row; 
+    justify-content:space-around; 
+    align-content:center; 
+    align-items: center; 
+    flex-wrap: wrap;
+}
+
+.FlexColAr{
+    display: flex; 
+    flex-direction: column; 
+    justify-content:space-around; 
+    align-content:center; 
+    align-items: center; 
+    flex-wrap: wrap;
+}
+
+.PostInfoBox{
+    border: 0.05rem solid black;
+    border-radius: 0.5rem;
+    width: 100%;
+    padding: 0.2rem;
+    margin-bottom: 0.4rem;
+}
+
+.PostInfoTextValue{
+    padding-right: 0.5rem; 
+    font-size: 0.8rem;
+}
+
+.PostInfoTextUnite{
+    font-size: 0.8rem;
+}
+
+.PostInfoImg{
+    height: 2rem;
+    width: 2rem;
+    display: flex; 
+    flex-direction: row; 
+    justify-content:center; 
+    align-content:center; 
+    align-items: center; 
+    flex-wrap: wrap;
+}
+
+.PostVerticalLine{
+    border-left: 0.2rem solid #dfdfe8; 
+    height: 3rem;
 }
