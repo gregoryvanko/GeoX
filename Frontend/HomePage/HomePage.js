@@ -19,24 +19,6 @@ class HomePage{
     GetSVGGeoX(){
         const placeholder = document.createElement('div');
         placeholder.innerHTML = `<svg style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" height="4rem" xmlns:vectornator="http://vectornator.io" version="1.1" viewBox="0 0 518.076 165.03">
-        <metadata>
-        <vectornator:setting key="DimensionsVisible" value="1"/>
-        <vectornator:setting key="PencilOnly" value="0"/>
-        <vectornator:setting key="SnapToPoints" value="0"/>
-        <vectornator:setting key="OutlineMode" value="0"/>
-        <vectornator:setting key="CMYKEnabledKey" value="0"/>
-        <vectornator:setting key="RulersVisible" value="1"/>
-        <vectornator:setting key="SnapToEdges" value="0"/>
-        <vectornator:setting key="GuidesVisible" value="1"/>
-        <vectornator:setting key="DisplayWhiteBackground" value="0"/>
-        <vectornator:setting key="doHistoryDisabled" value="0"/>
-        <vectornator:setting key="SnapToGuides" value="1"/>
-        <vectornator:setting key="TimeLapseWatermarkDisabled" value="0"/>
-        <vectornator:setting key="Units" value="Points"/>
-        <vectornator:setting key="DynamicGuides" value="0"/>
-        <vectornator:setting key="IsolateActiveLayer" value="0"/>
-        <vectornator:setting key="SnapToGrid" value="0"/>
-        </metadata>
         <defs/>
         <g id="Untitled" vectornator:layerName="Untitled">
         <path stroke="#ffffff" stroke-width="1" d="M330.468+148.775C353.57+73.273+526.881-6.891+511.338+3.708C466.21+34.481+366.393+112.65+359.685+148.775L330.468+148.775Z" fill="#000000" stroke-linecap="butt" opacity="1" stroke-linejoin="miter"/>
@@ -97,27 +79,53 @@ class HomePage{
 
     RenderPosts (Data){
         Data.forEach(element => {
+            
+            let DivPost = document.createElement('div')
+            DivPost.classList.add("DivPost")
+            // Add Titre
+            DivPost.appendChild(this.RenderDescription(element.Name, element.Description, element.Date))
 
             // Add image
-            document.getElementById(this._IdDivApp).appendChild(this.RenderMapImage(element.Image))
+            DivPost.appendChild(this.RenderMapImage(element.Image))
+            document.getElementById(this._IdDivApp).appendChild(DivPost)
         });
+    }
+
+    RenderDescription(Name = "Name", Description= "Description", Date= null){
+        let DivContent = document.createElement('div')
+        DivContent.classList.add("PostDescription")
+        let DivText = document.createElement('div') 
+        DivText.classList.add("PostTitre")
+        DivContent.appendChild(DivText)
+        DivText.innerText = Name
+
+        return DivContent
     }
 
     RenderMapImage(Image){
         if(Image){
             var img = document.createElement('img');
-            img.style.maxWidth = "100%"
-            //img.width = 600;
-            //img.height = 338;
+            img.classList.add("PostImg")
             img.src = Image
             let divimg = document.createElement('div');
             divimg.appendChild(img)
             return divimg
         } else {
-            let divtext = document.createElement('div')
-            divtext.innerText = "No Image"
-            return divtext
+            return this.GetSvgNoImageDiv()
         }
+    }
+
+    GetSvgNoImageDiv(){
+        const placeholder = document.createElement('div');
+        placeholder.innerHTML = `<svg height="90%" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="90%" xmlns:vectornator="http://vectornator.io" version="1.1" viewBox="0 0 600 338">
+        <defs/>
+        <g id="Calque 1" vectornator:layerName="Calque 1">
+        <path stroke="#000000" stroke-width="16.2913" d="M453.71+47.4626L146.002+47.4626C138.998+47.4626+133.32+53.1061+133.32+60.0677L133.32+267.594C133.32+274.555+138.998+280.199+146.002+280.199L453.71+280.199C460.714+280.199+466.392+274.555+466.392+267.594L466.392+60.0677C466.392+53.1061+460.714+47.4626+453.71+47.4626Z" fill="none" stroke-linecap="round" opacity="1" stroke-linejoin="round"/>
+        <path stroke="#000000" stroke-width="12.4893" d="M461.775+188.849L366.463+93.1774L190.475+273.794L263.076+195.579L214.735+148.177L139.611+222.243" fill="none" stroke-linecap="round" opacity="1" stroke-linejoin="round"/>
+        <path stroke="#000000" stroke-width="21.8232" d="M448.863+320.404L150.639+19.1442" fill="none" stroke-linecap="round" opacity="1" stroke-linejoin="round"/>
+        </g>
+        </svg>`
+        return placeholder.firstElementChild
     }
 }
 
