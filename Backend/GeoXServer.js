@@ -17,7 +17,7 @@ class GeoXServer{
     */
     Api(Data, Socket, User, UserId){
         // On Log tout sauve quand on fait un Add Track
-        if ((Data.Value.Action != "SaveTrack") && (Data.Value.Action != "Add") && (Data.Value.Action != "GetElevation")){
+        if ((Data.Value.Action != "SaveTrack") && (Data.Value.Action != "Add") && (Data.Value.Action != "GetElevation") && (Data.Value.Action != "ModifyDB")){
             this._MyApp.LogAppliInfo("SoApi Data: " + JSON.stringify(Data), User, UserId)
         } else {
             this._MyApp.LogAppliInfo(`SoApi Data: {"Action":"${Data.Action}","Value":{"Action":"${Data.Value.Action}"}}`, User, UserId)
@@ -90,6 +90,14 @@ class GeoXServer{
                     //ModifyDB.AddElevationToAlTracks(this._MyApp)
                 } else if (Data.Value.Action == "GetTrackInfo"){
                     ModuleAdminManageTrack.CallGetTrackInfo(Data.Value.Data,this._MyApp,  Socket, User, UserId)
+                } else if (Data.Value.Action == "ModifyDB"){
+                    let ModuleModifyDb = require("./ModifyDb")
+                    if (Data.Value.Data.SubAction == "GetGpx"){
+                        ModuleModifyDb.GetGpx(this._MyApp, Data.Value.Data.Id, Socket)
+                    }
+                    if (Data.Value.Data.SubAction == "SaveImg"){
+                        ModuleModifyDb.SaveImg(this._MyApp, Data.Value.Data.Id, Data.Value.Data.Img, Socket)
+                    }
                 } else {
                     this._MyApp.LogAppliError(`Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`, User, UserId)
                     Socket.emit("GeoXError", `Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`)

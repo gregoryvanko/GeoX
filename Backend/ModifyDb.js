@@ -240,4 +240,44 @@ function PromiseUpdateDataInDb (Id, Data, Mongo, MongoTracksCollection){
     })
 }
 
+exports.GetGpx = (MyApp, Id, Socket) => {
+    let MongoR = require('@gregvanko/corex').Mongo
+    let Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    let MongoTracksCollection = MongoConfig.TracksCollection
+    let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+    const Querry = {'_id': new MongoObjectId(Id)}
+    const Projection = { projection:{_id: 1, [MongoTracksCollection.GpxData]: 1}}
+    Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
+        if(reponse.length == 0){
+            console.Log("Error: id not found")
+        } else {
+            Socket.emit("AdminManageTrack", {Action: "ModifyDB", Data: {SubAction: "ConvertGpxToImg", Gpx : reponse[0]}})
+        }
+    },(erreur)=>{
+        console.Log("Error DB: " + erreur)
+    })
+}
+
+exports.SaveImg = (MyApp, Id, Img, Socket) => {
+    let MongoR = require('@gregvanko/corex').Mongo
+    let Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    let MongoTracksCollection = MongoConfig.TracksCollection
+
+    let DataToDb = new Object()
+    DataToDb[MongoTracksCollection.Image]= Img
+
+    Mongo.UpdateByIdPromise(Id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
+        if (reponse.matchedCount == 0){
+            console.log("Error, Id not found")
+        } else {
+            console.log("Img Saved for id: " + Id)
+            Socket.emit("AdminManageTrack", {Action: "ModifyDB", Data: {SubAction: "Next"}})
+        }
+    },(erreur)=>{
+        console.Log("Error DB: " + erreur)
+    })
+}
+
 module.exports.AddElevationToAlTracks = AddElevationToAlTracks

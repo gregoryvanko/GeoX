@@ -12,11 +12,32 @@ class GpxToImg {
         let parser = new DOMParser();
         let xmlDoc = parser.parseFromString(this._Gpx,"text/xml");
         this._GeoJson = toGeoJSON.gpx(xmlDoc)
-        return new Promise ((resolve, reject) => {
-            let ConvertReponse = {Error: true, ErrorMsg:"GpxToImg : InitError", Gpx: this._Gpx, GeoJson: this._GeoJson, Img: null}
-            this.BuildVirutalMap(resolve, reject, ConvertReponse)
-            
-        })
+        // Si la conversion est OK
+        if (this._GeoJson.features.length > 0){
+            // Si on a un GeoJson avec plusieurs line pour une track on le modifie
+            if (this._GeoJson.features[0].geometry.type == "MultiLineString"){
+                // Changer le type en LineString
+                this._GeoJson.features[0].geometry.type = "LineString"
+                // Fusionner les coodronnee
+                const listofcoordonate = this._GeoJson.features[0].geometry.coordinates
+                let NewListofcoordonate = []
+                listofcoordonate.forEach(OneListe => {
+                    OneListe.forEach(element => {
+                        NewListofcoordonate.push(element)
+                    });
+                });
+                this._GeoJson.features[0].geometry.coordinates = NewListofcoordonate
+            }
+            return new Promise ((resolve, reject) => {
+                let ConvertReponse = {Error: true, ErrorMsg:"GpxToImg : InitError", Gpx: this._Gpx, GeoJson: this._GeoJson, Img: null}
+                this.BuildVirutalMap(resolve, reject, ConvertReponse)
+            })
+        } else {
+            return new Promise ((resolve, reject) => {
+                let ConvertReponse = {Error: true, ErrorMsg:"GpxToImg : GeoJson not converted from gpx", Gpx: this._Gpx, GeoJson: this._GeoJson, Img: null}
+                resolve(ConvertReponse)
+            })
+        }
     }
 
     BuildVirutalMap(resolve, reject, ConvertReponse){
@@ -61,7 +82,9 @@ class GpxToImg {
         let me = this
         MyMap.once('moveend', function(){
             // Afficher la track a modifier
-            me.ConvertMapToImage(MyMap, resolve, reject, ConvertReponse)
+            setTimeout(function(){
+                me.ConvertMapToImage(MyMap, resolve, reject, ConvertReponse)
+            }, 1000);
         })
         // FitBound
         MyMap.fitBounds(layerTrack1.getBounds());
@@ -83,7 +106,7 @@ class GpxToImg {
                 ConvertReponse.Error = true
                 ConvertReponse.ErrorMsg = err
                 me.DeleteVirtualMap()
-                reject(ConvertReponse)
+                resolve(ConvertReponse)
             } else {
                 ConvertReponse.Error = false
                 ConvertReponse.ErrorMsg = null

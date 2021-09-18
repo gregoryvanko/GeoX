@@ -26,8 +26,6 @@ class HomePage{
 
     }
 
-    
-
     GetButtonLunchApp(){
         let button = document.createElement('button')
         button.innerText = "Open App"

@@ -2,6 +2,9 @@ class GeoXManageTracks {
     constructor(DivApp){
         this._DivApp = document.getElementById(DivApp)
         this._AppData = null
+
+        // For Modify DB
+        this._CurrentItemnumb = 0
     }
 
     Initiation(){
@@ -9,6 +12,8 @@ class GeoXManageTracks {
         GlobalDisplayAction('On')
         // Clear Action List
         GlobalClearActionList()
+        // Add action
+        GlobalAddActionInList("Modify DB", this.ModifyDB.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // SocketIO
@@ -44,6 +49,15 @@ class GeoXManageTracks {
         } else if (Value.Action == "SetTrackInfo" ){
             // Load Info Track view
             let InfoTrackView = new InfoOnTrack(Value.Data, "ContentInfoTrack")
+        } else if (Value.Action == "ModifyDB" ){
+            if (Value.Data.SubAction == "ConvertGpxToImg"){
+                this.ConvertGpxToImgAndSend(Value.Data.Gpx._id, Value.Data.Gpx.GpxData)
+            }
+            if (Value.Data.SubAction == "Next"){
+                this._CurrentItemnumb ++
+                console.log(this._CurrentItemnumb )
+                this.AddImgofGpx()
+            }
         } else {
             console.log("error, Action not found: " + Value.Action)
         }
@@ -139,6 +153,40 @@ class GeoXManageTracks {
         Contener.appendChild(CoreXBuild.Div("","","height: 6vh;"))
         // Send status to serveur
         GlobalSendSocketIo("GeoX", "AdminManageTrack", {Action: "GetTrackInfo", Data: TrackId})
+    }
+
+    ModifyDB(){
+        this.AddImgofGpx()
+    }
+
+    AddImgofGpx(){
+        if ((this._AppData.length > 0) && (this._CurrentItemnumb < this._AppData.length )){
+            let data = this._AppData[this._CurrentItemnumb]
+            // Send status to serveur
+            let CallToServer = new Object()
+            CallToServer.Action = "ModifyDB"
+            CallToServer.Data = {SubAction : "GetGpx", Id: data._id}
+            GlobalSendSocketIo("GeoX", "AdminManageTrack", CallToServer)
+        } else {
+            alert("No Data")
+        }
+    }
+
+    async ConvertGpxToImgAndSend(Id, Gpx){
+        let MyGpxToImg = new GpxToImg(Gpx)
+        let ReponseGpxToImg = await MyGpxToImg.Convert()
+        if (ReponseGpxToImg.Error){
+            console.log("Error convert gpx for id: " + Id)
+            this._CurrentItemnumb ++
+            console.log(this._CurrentItemnumb )
+            this.AddImgofGpx()
+        } else {
+            // Send status to serveur
+            let CallToServer = new Object()
+            CallToServer.Action = "ModifyDB"
+            CallToServer.Data = {SubAction : "SaveImg", Id: Id, Img: ReponseGpxToImg.Img}
+            GlobalSendSocketIo("GeoX", "AdminManageTrack", CallToServer)
+        }
     }
 }
 
