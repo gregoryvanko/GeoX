@@ -344,6 +344,9 @@ class GeoXManageTracks {
         // DivToogle.appendChild(CoreXBuild.DivTexte("MultiLine to OneLine Track:", "", "", ""))
         // DivToogle.appendChild(CoreXBuild.ToggleSwitch("ToggleMultiToOneLine", true))
         
+        // Div Map
+        let DivMap = CoreXBuild.Div("DivMap", "", "")
+        Contener.appendChild(DivMap)
         // Div Button
         let DivBoxButton = CoreXBuild.Div("", "InputBox", "")
         Contener.appendChild(DivBoxButton)
@@ -374,7 +377,7 @@ class GeoXManageTracks {
                 let parser = new DOMParser();
                 let xmlDoc = parser.parseFromString(evt.target.result,"text/xml");
                 me._GPX = evt.target.result
-                me.ConvertGpxToImg()
+                me.ConvertGpxToImg(DivMap)
             }
             reader.onerror = function (evt) {
                 alert("Error reading file");
@@ -383,8 +386,8 @@ class GeoXManageTracks {
         Contener.appendChild(Input)
     }
 
-    async ConvertGpxToImg(){
-        let MyGpxToImg = new GpxToImg(this._GPX)
+    async ConvertGpxToImg(Div){
+        let MyGpxToImg = new GpxToImg(this._GPX, Div)
         let ReponseGpxToImg = await MyGpxToImg.Convert()
         if (ReponseGpxToImg.Error){
             // changer le nom du boutton

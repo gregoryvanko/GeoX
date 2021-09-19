@@ -668,6 +668,10 @@ class GeoXCreateTrack {
             DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
             DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", this._TrackPublic))
 
+            // DivMap
+            let DivMap = CoreXBuild.Div("DivMap", "", "width: 600px;")
+            Contener.appendChild(DivMap)
+
             // Empty space
             Contener.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
 
@@ -675,7 +679,7 @@ class GeoXCreateTrack {
             let DivButton = CoreXBuild.DivFlexRowAr("")
             Contener.appendChild(DivButton)
             // Button save
-            DivButton.appendChild(CoreXBuild.Button("Save",this.SendSaveTrack.bind(this),"Text Button ButtonWidth30", "Save"))
+            DivButton.appendChild(CoreXBuild.Button("Save",this.SendSaveTrack.bind(this, DivInput, DivMap),"Text Button ButtonWidth30", "Save"))
             // Button cancel
             DivButton.appendChild(CoreXBuild.Button("Cancel",this.CancelSaveTrack.bind(this),"Text Button ButtonWidth30", "Cancel"))
             // Empty space
@@ -721,7 +725,7 @@ class GeoXCreateTrack {
         }
     }
 
-    async SendSaveTrack(){
+    async SendSaveTrack(DivInput , DivMap){
         if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
             // Change button to waiting
             document.getElementById("Save").innerHTML="Build..."
@@ -740,7 +744,8 @@ class GeoXCreateTrack {
 </gpx>`
             
             // Build Image
-            let MyGpxToImg = new GpxToImg(gpxtrack)
+            DivInput.style.display = "none"
+            let MyGpxToImg = new GpxToImg(gpxtrack, DivMap)
             let ReponseGpxToImg = await MyGpxToImg.Convert()
             if (ReponseGpxToImg.Error){
                 // changer le nom du boutton

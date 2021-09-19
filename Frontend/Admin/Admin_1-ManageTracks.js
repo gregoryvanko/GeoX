@@ -11,8 +11,10 @@ class GeoXManageTracks {
         GlobalDisplayAction('On')
         // Clear Action List
         GlobalClearActionList()
-        // Add action
-        GlobalAddActionInList("Modify DB", this.ModifyDB.bind(this))
+
+        // Add action Modify DB
+        //GlobalAddActionInList("Modify DB", this.ModifyDB.bind(this))
+        
         // Clear view
         this._DivApp.innerHTML=""
         // SocketIO
