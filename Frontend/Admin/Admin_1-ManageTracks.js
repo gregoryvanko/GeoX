@@ -56,7 +56,7 @@ class GeoXManageTracks {
             if (Value.Data.SubAction == "Next"){
                 this._CurrentItemnumb ++
                 console.log(this._CurrentItemnumb )
-                this.AddImgofGpx()
+                this.GetGpx()
             }
         } else {
             console.log("error, Action not found: " + Value.Action)
@@ -155,11 +155,13 @@ class GeoXManageTracks {
         GlobalSendSocketIo("GeoX", "AdminManageTrack", {Action: "GetTrackInfo", Data: TrackId})
     }
 
+    // Modify DB action
+
     ModifyDB(){
-        this.AddImgofGpx()
+        this.GetGpx()
     }
 
-    AddImgofGpx(){
+    GetGpx(){
         if ((this._AppData.length > 0) && (this._CurrentItemnumb < this._AppData.length )){
             let data = this._AppData[this._CurrentItemnumb]
             // Send status to serveur
@@ -179,7 +181,7 @@ class GeoXManageTracks {
             console.log("Error convert gpx for id: " + Id)
             this._CurrentItemnumb ++
             console.log(this._CurrentItemnumb )
-            this.AddImgofGpx()
+            this.GetGpx()
         } else {
             // Send status to serveur
             let CallToServer = new Object()
