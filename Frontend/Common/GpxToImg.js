@@ -1,6 +1,7 @@
 class GpxToImg {
     
-    constructor(Gpx = null, Imgwidth = "600px", Imgheight = "338px"){
+    constructor(Gpx=null, Div=null, Imgwidth="600", Imgheight="338"){
+        this._Div = Div
         this._Imgwidth = Imgwidth
         this._Imgheight = Imgheight
         this._Gpx = Gpx
@@ -41,14 +42,14 @@ class GpxToImg {
     }
 
     BuildVirutalMap(resolve, reject, ConvertReponse){
-        document.body.appendChild(CoreXBuild.Div(this._MapId, "", `height: ${this._Imgheight}; width: ${this._Imgwidth}; position: absolute; top: 0px; left: -${this._Imgwidth}`))
+        this._Div.appendChild(CoreXBuild.Div(this._MapId, "", `height: ${this._Imgheight}px; width: ${this._Imgwidth}px;`))
         let Openstreetmap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
         })
         let CenterPoint = {Lat: "50.709446", Long: "4.543413"}
         let Zoom = 14
-        let MyMap = L.map("MyMAp" , {zoomControl: false, tapTolerance:40, tap:false, layers: [Openstreetmap]}).setView([CenterPoint.Lat, CenterPoint.Long], Zoom);
+        let MyMap = L.map("MyMAp" , {attributionControl: false, fadeAnimation: false, zoomAnimation: false, zoomControl: false, tapTolerance:40, tap:false, layers: [Openstreetmap]}).setView([CenterPoint.Lat, CenterPoint.Long], Zoom);
         let WeightTrack = (L.Browser.mobile) ? 5 : 3
         var TrackStyle = {
             "color": "blue",
@@ -56,7 +57,6 @@ class GpxToImg {
         };
         var layerTrack1=L.geoJSON(this._GeoJson , 
             {
-                renderer: L.canvas(),
                 style: TrackStyle, 
                 filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
                 arrowheads: {frequency: '100px', size: '15m', fill: true}
@@ -90,35 +90,23 @@ class GpxToImg {
         MyMap.fitBounds(layerTrack1.getBounds());
     }
 
-    ConvertMapToImage(MyMap, resolve, reject, ConvertReponse){
-        let me = this
-        leafletImage(MyMap, function(err, canvas) {
-            // var img = document.createElement('img');
-            // var dimensions = MyMap.getSize();
-            // img.width = dimensions.x;
-            // img.height = dimensions.y;
-            // img.src = canvas.toDataURL();
-            // let divimg = CoreXBuild.Div("Img", "", "")
-            // document.biody.appendChild(divimg)
-            // divimg.appendChild(img);
+    async ConvertMapToImage(MyMap, resolve, reject, ConvertReponse){
+        const width = this._Imgwidth
+        const height = this._Imgheight
+        const dataURL = await domtoimage.toPng(document.getElementById(this._MapId), { width, height})
+        // const imgElement = document.createElement("img");
+        // imgElement.src = dataURL;
+        // document.body.appendChild(imgElement);
 
-            if (err){
-                ConvertReponse.Error = true
-                ConvertReponse.ErrorMsg = err
-                me.DeleteVirtualMap()
-                resolve(ConvertReponse)
-            } else {
-                ConvertReponse.Error = false
-                ConvertReponse.ErrorMsg = null
-                ConvertReponse.Img = canvas.toDataURL()
-                me.DeleteVirtualMap()
-                resolve(ConvertReponse)
-            }
-        });
+        ConvertReponse.Error = false
+        ConvertReponse.ErrorMsg = null
+        ConvertReponse.Img = dataURL
+        me.DeleteVirtualMap()
+        resolve(ConvertReponse)
     }
     
     DeleteVirtualMap(){
         let DivMap = document.getElementById(this._MapId)
-        document.body.removeChild(DivMap)
+        this._Div.removeChild(DivMap)
     }
 }

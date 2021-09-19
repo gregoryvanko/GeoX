@@ -175,7 +175,8 @@ class GeoXManageTracks {
     }
 
     async ConvertGpxToImgAndSend(Id, Gpx){
-        let MyGpxToImg = new GpxToImg(Gpx)
+        this._DivApp.innerHTML=""
+        let MyGpxToImg = new GpxToImg(Gpx, this._DivApp)
         let ReponseGpxToImg = await MyGpxToImg.Convert()
         if (ReponseGpxToImg.Error){
             console.log("Error convert gpx for id: " + Id)

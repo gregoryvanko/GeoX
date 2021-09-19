@@ -202,8 +202,9 @@ class HomePage{
     }
 
     GetSvgGeoX(){
-        const placeholder = document.createElement('div');
-        placeholder.innerHTML = `<svg style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" height="4rem" xmlns:vectornator="http://vectornator.io" version="1.1" viewBox="0 0 518.076 165.03">
+        let placeholder = document.createElement('div')
+        placeholder.style.height = "4rem"
+        placeholder.innerHTML = `<svg style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" height="100%" xmlns:vectornator="http://vectornator.io" version="1.1" viewBox="0 0 518.076 165.03">
         <defs/>
         <g id="Untitled" vectornator:layerName="Untitled">
         <path stroke="#ffffff" stroke-width="1" d="M330.468+148.775C353.57+73.273+526.881-6.891+511.338+3.708C466.21+34.481+366.393+112.65+359.685+148.775L330.468+148.775Z" fill="#000000" stroke-linecap="butt" opacity="1" stroke-linejoin="miter"/>
@@ -213,7 +214,7 @@ class HomePage{
         <path stroke="#ffffff" stroke-width="1.24341" d="M169.052+56.5671L164.495+66.6611C160.668+65.8689+156.578+65.1239+152.225+64.4288C147.872+63.7336+142.742+63.2968+136.836+63.1185C130.76+63.2071+125.307+64.0806+120.479+65.7391C115.642+67.3975+111.42+69.7754+107.814+72.8728C104.216+75.9786+101.17+79.6704+98.675+83.9494C96.1802+88.2285+94.2581+92.943+92.9089+98.0956C91.1689+104.736+90.5795+110.413+91.1396+115.129C91.6907+119.845+93.1507+123.707+95.5183+126.715C97.8947+129.733+101.008+131.941+104.861+133.34C108.705+134.731+113.059+135.426+117.921+135.426C121.036+135.426+123.895+135.253+126.5+134.905C129.113+134.556+131.422+134.144+133.425+133.667C135.427+133.182+137.29+132.636+139.012+132.029L145.275+108.056L128.104+108.056L130.675+98.229L159.531+98.229L149.285+137.392C145.551+139.406+140.654+141.217+134.596+142.827C128.546+144.444+122.138+145.208+115.375+145.12C109.147+145.12+103.35+144.425+97.9877+143.033C92.625+141.634+88.1865+139.167+84.6734+135.633C81.1513+132.09+78.8601+127.261+77.7998+121.147C76.7472+115.041+77.4434+107.312+79.8873+97.9621C81.873+90.3674+84.8388+83.7517+88.7848+78.1139C92.7307+72.4845+97.3219+67.8136+102.557+64.1012C107.785+60.3888+113.462+57.5947+119.588+55.7179C125.715+53.841+131.939+52.9032+138.261+52.9032C142.386+52.9032+146.323+53.0973+150.074+53.4855C153.816+53.8823+157.227+54.319+160.308+54.7958C163.388+55.2811+166.303+55.872+169.052+56.5671Z" fill="#000000" stroke-linecap="butt" opacity="1" stroke-linejoin="miter"/>
         </g>
         </svg>`
-        return placeholder.firstElementChild
+        return placeholder
     }
 
     GetSvgNoImageDiv(){
@@ -237,7 +238,7 @@ class HomePage{
     
     GetSvgElevationPlusDiv(){
         const placeholder = document.createElement('div');
-        placeholder.innerHTML = `<svg viewBox="-50.314 -46.166 224.37 176.265" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+        placeholder.innerHTML = `<svg viewBox="-50.314 -46.166 224.37 176.265" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com" width="100%" height="100%">
         <g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal" transform="matrix(1, 0, 0, 1, 0, -27.610161)">
           <path d="M0,172v-172h172v172z" fill="none"/>
           <g fill="#000000">
@@ -254,7 +255,7 @@ class HomePage{
 
     GetSvgElevationMoinsDiv(){
         const placeholder = document.createElement('div');
-        placeholder.innerHTML = `<svg viewBox="-5.44 -37.637 224.37 167.736" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+        placeholder.innerHTML = `<svg viewBox="-5.44 -37.637 224.37 167.736" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com" width="100%" height="100%">
         <g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal" transform="matrix(1, 0, 0, 1, 0, -27.610161)">
           <path d="M0,172v-172h172v172z" fill="none"/>
           <g fill="#000000">
@@ -273,7 +274,7 @@ class HomePage{
 
     GetSvgElevationMaxDiv(){
         const placeholder = document.createElement('div');
-        placeholder.innerHTML = `<svg viewBox="-5.44 -37.637 224.37 167.736" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+        placeholder.innerHTML = `<svg viewBox="-5.44 -37.637 224.37 167.736" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com" width="100%" height="100%">
         <g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal" transform="matrix(1, 0, 0, 1, 0, -27.610161)">
           <path d="M0,172v-172h172v172z" fill="none"/>
           <g fill="#000000">
@@ -287,7 +288,7 @@ class HomePage{
 
     GetSvgElevationMinDiv(){
         const placeholder = document.createElement('div');
-        placeholder.innerHTML = `<svg viewBox="-5.44 -37.637 224.37 167.736" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+        placeholder.innerHTML = `<svg viewBox="-5.44 -37.637 224.37 167.736" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com" width="100%" height="100%">
         <g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal" transform="matrix(1, 0, 0, 1, 0, -27.610161)">
           <path d="M0,172v-172h172v172z" fill="none"/>
           <g fill="#000000">
@@ -299,7 +300,6 @@ class HomePage{
         return placeholder.firstElementChild
     }
 }
-
 
 window.onload = function () {
     let MyApp = new HomePage()
