@@ -2,7 +2,6 @@ class GeoXManageTracks {
     constructor(DivApp){
         this._DivApp = document.getElementById(DivApp)
         this._AppData = null
-
         // For Modify DB
         this._CurrentItemnumb = 0
     }

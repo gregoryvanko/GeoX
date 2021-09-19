@@ -101,7 +101,7 @@ class GpxToImg {
         ConvertReponse.Error = false
         ConvertReponse.ErrorMsg = null
         ConvertReponse.Img = dataURL
-        me.DeleteVirtualMap()
+        this.DeleteVirtualMap()
         resolve(ConvertReponse)
     }
     
