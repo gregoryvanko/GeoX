@@ -1,7 +1,4 @@
 function CallRouteGetHome(req, res, MyApp){
-    //let path = require('path');
-    //let reqPath = path.join(__dirname, '../Frontend/HomePage/HomePage.html')
-    //res.sendFile(reqPath);
     res.send(GetHtmlHomePage(MyApp.AppName))
 }
 
@@ -36,10 +33,22 @@ function GetCSSHomePAge(){
 }
 
 function GetJSHomePAge(){
+    let js = ""
+
+    let os = require('os')
     let fs = require('fs')
     let path = require('path');
-    let reqPath = path.join(__dirname, '../Frontend/HomePage/HomePage.js')
-    return fs.readFileSync(reqPath, 'utf8')
+
+    // HtmlElem-Post
+    let PathHtmlElementPost = path.join(__dirname, '../Frontend/Common/HtmlElem-Post.js')
+    js += fs.readFileSync(PathHtmlElementPost, 'utf8')
+    js += os.EOL
+
+    // Home
+    let PathHomePage = path.join(__dirname, '../Frontend/HomePage/HomePage.js')
+    js += fs.readFileSync(PathHomePage, 'utf8')
+    js += os.EOL
+    return js
 }
 
 module.exports.CallRouteGetHome = CallRouteGetHome
