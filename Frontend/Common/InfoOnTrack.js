@@ -6,7 +6,6 @@ class InfoOnTrack {
         this._Date = Data.Date
         this._GeoJsonData = Data.GeoJsonData
         this._Length = Data.Length
-        this._Owner = Data.Owner
         this._Center = Data.Center
         this._StartPoint = Data.StartPoint
         this._Elevation = Data.Elevation
@@ -42,40 +41,70 @@ class InfoOnTrack {
     LoadView(){
         this._HtmlDiv.innerHTML=""
         // Blank
-        this._HtmlDiv.appendChild(CoreXBuild.Div("","","height: 5vh;"))
+        let divblank = document.createElement('div')
+        divblank.style.height ="4vh"
+        this._HtmlDiv.appendChild(divblank)
         // Info
-        let DivInfo = CoreXBuild.Div("DivTitre","DivInfoOneTrack", "width: 100%;")
+        let DivInfo = document.createElement('div')
+        DivInfo.classList.add("DivInfoOneTrack")
         this._HtmlDiv.appendChild(DivInfo)
         this.DrawInfo(DivInfo)
         // Div Data
-        let DivData = CoreXBuild.Div("DivData","DivInfoOneTrack", "width: 100%;")
+        let DivData = document.createElement('div')
+        DivData.classList.add("DivInfoOneTrack")
         this._HtmlDiv.appendChild(DivData)
         this.DrawData(DivData)
         // Div Carte
-        let DivCarte = CoreXBuild.Div("DivCarte","DivInfoOneTrack", "width: 100%;")
+        let DivCarte = document.createElement('div')
+        DivCarte.classList.add("DivInfoOneTrack")
         this._HtmlDiv.appendChild(DivCarte)
         this.DrawMap(DivCarte)
         // Div Elevation
-        let DivElevation = CoreXBuild.Div("DivElevation","DivInfoOneTrack", "width: 100%;")
+        let DivElevation = document.createElement('div')
+        DivElevation.classList.add("DivInfoOneTrack")
         this._HtmlDiv.appendChild(DivElevation)
         this.DrawElevation(DivElevation)
     }
 
     DrawInfo(DivInfo){
         // Name
-        DivInfo.appendChild(CoreXBuild.DivTexte(this._Name,"","TitreInfoOneTrack", "width: 100%;"))
-        // Owner
-        DivInfo.appendChild(CoreXBuild.DivTexte(this._Owner,"","TextSmall", "width: 100%; padding-left: 2vh;"))
+        let divname = document.createElement('div')
+        divname.innerHTML = this._Name
+        divname.style.width ="100%"
+        divname.classList.add("TitreInfoOneTrack")
+        DivInfo.appendChild(divname)
         // Date
-        DivInfo.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(this._Date),"","TextSmall", "width: 100%; padding-left: 2vh; margin-bottom: 2vh;"))
+        let divdate = document.createElement('div')
+        divdate.innerHTML = this.GetDateString(this._Date)
+        divdate.classList.add("TextSmall")
+        divdate.style.width ="100%"
+        divdate.style.paddingLeft ="2vh"
+        divdate.style.marginBottom ="2vh"
+        DivInfo.appendChild(divdate)
         // Description
         if (this._Description != ""){
-            DivInfo.appendChild(CoreXBuild.DivTexte(this._Description,"","Text", "width: 100%;  padding-left: 2vh;"))
+            let divdesc = document.createElement('div')
+            divdesc.innerHTML = this._Description
+            divdesc.classList.add("Text")
+            divdesc.style.width ="100%"
+            divdesc.style.paddingLeft ="2vh"
+            DivInfo.appendChild(divdesc)
         }
     }
 
+    GetDateString(DateString){
+        var Now = new Date(DateString)
+        var dd = Now.getDate()
+        var mm = Now.getMonth()+1
+        var yyyy = Now.getFullYear()
+        if(dd<10) {dd='0'+dd} 
+        if(mm<10) {mm='0'+mm}
+        return yyyy + "-" + mm + "-" + dd
+    }
+
     DrawData(DivData){
-        let conteneur = CoreXBuild.DivFlexRowAr("")
+        let conteneur = document.createElement('div')
+        conteneur.setAttribute("style","width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
         DivData.appendChild(conteneur)
         conteneur.appendChild(this.DrawDataInfo(this._Length, "Km", CommonIcon.Lenght()))
         conteneur.appendChild(this.DrawVerticalLine())
@@ -89,26 +118,51 @@ class InfoOnTrack {
     }
 
     DrawDataInfo(Value, Unite, Description){
-        let conteneur = CoreXBuild.Div("", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
-        let conteneurvalue = CoreXBuild.DivFlexRowAr("")
-        conteneurvalue.appendChild(CoreXBuild.DivTexte(Value,"","Text", "padding-right: 0.5vw; font-weight: bold;"))
-        conteneurvalue.appendChild(CoreXBuild.DivTexte(Unite,"","TextSmall", "font-weight: bold;"))
+        let conteneur = document.createElement('div')
+        conteneur.setAttribute("style","display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center;")
+
+        let conteneurvalue = document.createElement('div')
+        conteneurvalue.setAttribute("style","width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
+
+        let divdesc = document.createElement('div')
+        divdesc.innerHTML = Value
+        divdesc.classList.add("Text")
+        divdesc.style.paddingRight ="0.5vw"
+        divdesc.style.fontWeight ="bold"
+        conteneurvalue.appendChild(divdesc)
+
+        let divunite = document.createElement('div')
+        divunite.innerHTML = Unite
+        divunite.classList.add("TextSmall")
+        divunite.style.fontWeight ="bold"
+        conteneurvalue.appendChild(divunite)
+
         conteneur.appendChild(conteneurvalue)
 
-        let conteneurdescription = CoreXBuild.DivFlexRowAr("")
-        conteneurdescription.appendChild(CoreXBuild.Image64(Description,"", "", "height: 3vh;"))
+        let conteneurdescription = document.createElement('div')
+        conteneurdescription.setAttribute("style","width: 100%; display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center;")
+
+        let image = document.createElement("img")
+        image.setAttribute("src", Description)
+        image.setAttribute("Style", "height: 3vh;")
+        conteneurdescription.appendChild(image)
+
         conteneur.appendChild(conteneurdescription)
         return conteneur
     }
 
     DrawVerticalLine(){
-        let conteneur = CoreXBuild.Div("" , "", "border-left: 2px solid #dfdfe8; height: 6vh;")
-        return conteneur
+        let line = document.createElement("div")
+        line.setAttribute("Style", "border-left: 2px solid #dfdfe8; height: 6vh;")
+        return line
     }
 
     DrawMap(DivCarte){
         if (this._GeoJsonData){
-            DivCarte.appendChild(CoreXBuild.Div(this._MapId, "InfoOnTrackMap", ""))
+            let Divmap = document.createElement('div')
+            Divmap.setAttribute("id", this._MapId)
+            Divmap.classList.add("InfoOnTrackMap")
+            DivCarte.appendChild(Divmap)
             // Parametre de la carte
             let CenterPoint = {Lat: this._Center.Lat, Long: this._Center.Long}
             let Zoom = 14
@@ -175,7 +229,10 @@ class InfoOnTrack {
             // FitBound
             this._Map.fitBounds(layerTrack1.getBounds());
         } else {
-            DivCarte.appendChild(CoreXBuild.DivTexte("No Geojson data available.","","Text", ""))
+            let Diverreur = document.createElement('div')
+            Diverreur.innerHTML = "No Geojson data available."
+            Diverreur.classList.add("Text")
+            DivCarte.appendChild(Diverreur)
         }
         
     }
@@ -223,17 +280,6 @@ class InfoOnTrack {
                     datasets: [{
                         label: 'Elevation',
                         data: this._Elevation,
-
-                        // data: [{
-                        //     x: 0,
-                        //     y: 4
-                        // }, {
-                        //     x: 1,
-                        //     y: 7
-                        // }, {
-                        //     x: 2,
-                        //     y: 6
-                        // }],
                         showLine: true,
                         fill: false,
                         borderColor: 'blue',
@@ -293,7 +339,10 @@ class InfoOnTrack {
                 }
             });
         } else {
-            DivElevation.appendChild(CoreXBuild.DivTexte("No Elevation data available.","","Text", ""))
+            let Diverreur = document.createElement('div')
+            Diverreur.innerHTML = "No Elevation data available."
+            Diverreur.classList.add("Text")
+            DivElevation.appendChild(Diverreur)
         }
     }
 
@@ -301,7 +350,6 @@ class InfoOnTrack {
         let ElevationPoint = this._Elevation[Index]
         let latlng = [ElevationPoint.coord.lat, ElevationPoint.coord.long]
         if (this._GpsPointer == null){
-            //this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'#0073f0', fillOpacity:1}).addTo(this._Map)
             this._GpsPointer = L.circleMarker([50.709446,4.543413], {radius: 8, weight:4,color: 'white', fillColor:'red', fillOpacity:1}).addTo(this._Map)
         }
         this._GpsPointer.setLatLng(latlng)

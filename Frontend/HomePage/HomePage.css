@@ -30,15 +30,33 @@ body{
     border-radius: 1rem;
     text-align: center;
     display: inline-block;
-    color: balck;
+    color: black;
     background: transparent;
     outline: none;
     font-size: 1rem;
     right: 0rem;
     top: 1.5rem;
     position: fixed;
-    z-index: 999;
     background-color: white;
+}
+
+.CloseButton{
+    margin: 0.4rem;
+    padding: 0.4rem;
+    cursor: pointer;
+    border: 1px solid black;
+    border-radius: 1rem;
+    text-align: center;
+    display: inline-block;
+    color: black;
+    background: transparent;
+    outline: none;
+    font-size: 1rem;
+    right: 0rem;
+    top: 0rem;
+    position: absolute;
+    background-color: white;
+
 }
 
 .DivApp{
@@ -51,4 +69,34 @@ body{
     align-items: center;
     align-content: center;
     margin-top: 2rem;
+}
+
+.Divbleur{
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column; 
+    justify-content:space-around; 
+    align-content:center; 
+    align-items: center;
+    position: fixed;
+    top:0;
+}
+
+.DivBackground{
+    width: 90vw;
+    max-width: 1000px;
+    height: 96vh;
+    top:2vh;
+    display: block;
+    position: fixed;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    overflow-y: scroll;
+}
+
+.DivDataTrack{
+    padding: 1rem;
 }

@@ -5,3 +5,8 @@
 @PageNumber = 0
 GET {{hostname}}/getpageofpost/{{PageNumber}} HTTP/1.1
 Content-Type: {{contentType}}
+
+### Get Post Data
+@PostId = 6147a6ef7431ce2fdbd8c925
+GET {{hostname}}/getdataofpost/{{PostId}} HTTP/1.1
+Content-Type: {{contentType}}

@@ -1,4 +1,5 @@
 class HomePage{
+    
     constructor(){
         this._IdDivApp = "divapp"
         this._PageOfPosts = 0
@@ -57,11 +58,13 @@ class HomePage{
             if (responseJson.Error){
                 document.getElementById(this._IdDivApp).appendChild(this.GetDivError(responseJson.ErrorMsg))
             } else {
-                this.RenderPosts(responseJson.Data, this._IdDivApp)
+                this.RenderPosts(responseJson.Data)
             }
         })
         .catch((error) => {
-            document.getElementById(this._IdDivApp).appendChild(this.GetDivError(error))
+            let divapp = document.getElementById(this._IdDivApp)
+            divapp.innerHTML = ""
+            divapp.appendChild(this.GetDivError(error))
         });
     }
 
@@ -73,14 +76,16 @@ class HomePage{
         return diverror
     }
 
-    RenderPosts (Data, DivId){
+    RenderPosts (Data){
         if (Data.length != 0){
             let MiddlepointData = Math.ceil(Data.length / 2)-1
             let CurrentpointData = 0
             Data.forEach(element => {
                 // Creation du post
                 let TempGeoxPsot = new GeoxPost(element)
-                document.getElementById(DivId).appendChild(TempGeoxPsot)
+                TempGeoxPsot.addEventListener("click", this.GetTrackData.bind(this, element._id))
+                TempGeoxPsot.style.cursor = "pointer"
+                document.getElementById(this._IdDivApp).appendChild(TempGeoxPsot)
                 // si l'element est l'element milieu
                 if (CurrentpointData == MiddlepointData){
                     // ajouter le listener pour declancher le GetPosts
@@ -89,7 +94,7 @@ class HomePage{
                 CurrentpointData ++
             });
         } else {
-            document.getElementById(DivId).appendChild(this.GetDivError("End of posts"))
+            document.getElementById(this._IdDivApp).appendChild(this.GetDivError("End of posts"))
         }
     }
 
@@ -107,6 +112,82 @@ class HomePage{
         </g>
         </svg>`
         return placeholder
+    }
+
+    GetTrackData(Id){
+        //blur app
+        let divApp = document.getElementById(this._IdDivApp)
+        divApp.style.filter = "blur(2px)"
+
+        // Add Bleur
+        let divbleur = document.createElement('div')
+        divbleur.id = "Divbleur"
+        divbleur.classList.add("Divbleur")
+        document.body.appendChild(divbleur)
+
+        // Add backgound
+        let divbackground = document.createElement('div')
+        divbackground.id = "DivBackground"
+        divbackground.classList.add("DivBackground")
+        divbleur.appendChild(divbackground)
+        // Close button
+        let button = document.createElement('button')
+        button.innerText = "Close"
+        button.classList.add("CloseButton");
+        button.onclick = this.RemoveTrackData.bind(this)
+        divbackground.appendChild(button)
+        // Text
+        let divwaiting = document.createElement('div')
+        divwaiting.id = "DivWaiting"
+        divwaiting.innerText = "Waiting data..."
+        divwaiting.style.textAlign = "center"
+        divwaiting.style.marginTop = "5vh"
+        divbackground.appendChild(divwaiting)
+
+        // fetch
+        fetch("/getdataofpost/" + Id).then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error("get track of posts failed: " + response.status + " " + response.statusText);
+            }
+        })
+        .then((responseJson) => {
+            if (responseJson.Error){
+                document.getElementById(this._IdDivApp).appendChild(this.GetDivError(responseJson.ErrorMsg))
+            } else {
+                this.RenderTrackData(responseJson.Data)
+            }
+        })
+        .catch((error) => {
+            let divapp = document.getElementById(this._IdDivApp)
+            divapp.innerHTML = ""
+            divapp.appendChild(this.GetDivError(error))
+        });
+    }
+
+    RenderTrackData(Data){
+        let divbackground = document.getElementById("DivBackground")
+        divbackground.removeChild(document.getElementById("DivWaiting"))
+        // Add InfoOnTrack
+        let DivData = document.createElement('div')
+        DivData.id = "DivData"
+        DivData.classList.add("DivDataTrack")
+        divbackground.appendChild(DivData)
+        let InfoTrackView = new InfoOnTrack(Data, "DivData")
+        // Bloc le scroll
+        document.body.style.overflow='hidden'
+        
+    }
+
+    RemoveTrackData(){
+        event.stopPropagation()
+        //blur app
+        let divApp = document.getElementById(this._IdDivApp)
+        divApp.style.filter = "none"
+        // Remove
+        document.body.removeChild(document.getElementById("Divbleur"))
+        document.body.style.overflow='auto'
     }
 }
 

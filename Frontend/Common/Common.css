@@ -233,16 +233,17 @@
     margin-bottom: 1vh;
     border: 1px solid #dfdfe8;
     padding: 1vh;
-    box-sizing: border-box
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .InfoOnTrackMap{
-    height: 50vh; 
+    height: 40vh; 
     width: 100%
 }
 
 .InfoOnTrackChart{
-    height:30vh; 
+    height:20vh; 
     width:100%;
 }
 

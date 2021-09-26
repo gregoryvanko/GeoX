@@ -120,6 +120,11 @@ class GeoXServer{
         MyRouteGetPageOfPost.CallRouteGetPageOfPost(req, res, this._MyApp)
     }
 
+    GetDataOfPost(req, res){
+        let MyRouteGetDataOfPost = require("./RouteGetDataOfPost")
+        MyRouteGetDataOfPost.CallRouteGetDataOfPost(req, res, this._MyApp)
+    }
+
     /**
      * Fonction executee lors d'un appel a la route GET Home
      * @param {req} req request html GET
