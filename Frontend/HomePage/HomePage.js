@@ -85,6 +85,7 @@ class HomePage{
                 let TempGeoxPsot = new GeoxPost(element)
                 TempGeoxPsot.addEventListener("click", this.GetTrackData.bind(this, element._id))
                 TempGeoxPsot.style.cursor = "pointer"
+                TempGeoxPsot.style.width = "100%"
                 document.getElementById(this._IdDivApp).appendChild(TempGeoxPsot)
                 // si l'element est l'element milieu
                 if (CurrentpointData == MiddlepointData){
