@@ -43,10 +43,11 @@ class InfoOnTrack {
         // Blank
         let divblank = document.createElement('div')
         divblank.style.height ="4vh"
-        this._HtmlDiv.appendChild(divblank)
+        //this._HtmlDiv.appendChild(divblank)
         // Info
         let DivInfo = document.createElement('div')
         DivInfo.classList.add("DivInfoOneTrack")
+        DivInfo.style.borderWidth = "0px"
         this._HtmlDiv.appendChild(DivInfo)
         this.DrawInfo(DivInfo)
         // Div Data
@@ -290,7 +291,7 @@ class InfoOnTrack {
                     animation: false,
                     maintainAspectRatio: false,
                     legend: {
-                        position: 'bottom'
+                        display: false
                     },tooltips: {
                         intersect: false,
                         mode: 'x-axis',

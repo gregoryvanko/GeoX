@@ -26,11 +26,11 @@ body{
     margin: 0.5rem;
     padding: 0.5rem;
     cursor: pointer;
-    border: 1px solid black;
+    border: 1px solid blue;
     border-radius: 1rem;
     text-align: center;
     display: inline-block;
-    color: black;
+    color: blue;
     background: transparent;
     outline: none;
     font-size: 1rem;
@@ -85,9 +85,9 @@ body{
 }
 
 .DivBackground{
-    width: 90vw;
+    width: 95vw;
     max-width: 1000px;
-    height: 96vh;
+    height: 92vh;
     top:2vh;
     display: block;
     position: fixed;
