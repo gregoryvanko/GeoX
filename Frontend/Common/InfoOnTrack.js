@@ -303,9 +303,9 @@ class InfoOnTrack {
                         callbacks: {
                           label: function(tooltipItem, data) {
                               me.DrawElevationPointOnMap(tooltipItem.index, tooltipItem.label, tooltipItem.value)
-                              let x = "Distance: " + tooltipItem.label + "m"
+                              let x = "Distance: " + tooltipItem.xLabel + "m"
                               let multistringText = [x]
-                              let y = "Elevation: " + tooltipItem.value + "m"
+                              let y = "Elevation: " + tooltipItem.yLabel + "m"
                               multistringText.push(y);
                               return multistringText;
                           },
