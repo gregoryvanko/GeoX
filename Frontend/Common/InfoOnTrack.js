@@ -81,6 +81,7 @@ class InfoOnTrack {
         divdate.style.width ="100%"
         divdate.style.paddingLeft ="2vh"
         divdate.style.marginBottom ="2vh"
+        divdate.style.color= "rgb(109, 109, 120)"
         DivInfo.appendChild(divdate)
         // Description
         if (this._Description != ""){
@@ -330,7 +331,6 @@ class InfoOnTrack {
                         }],
                         yAxes: [{
                             ticks: {
-                                stepSize: 10,
                                 callback: function(value, index, values) {
                                     return value + ' m'
                                 }
