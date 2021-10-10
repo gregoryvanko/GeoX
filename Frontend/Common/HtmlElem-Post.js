@@ -45,10 +45,10 @@ class GeoxPost extends HTMLElement {
                 align-content: center;
                 background-color: white;
                 padding: 0.5rem;
-                border: 0.1rem solid black;
-                border-radius: 1rem;
+                /*border: 0.1rem solid black;*/
+                border-radius: 0.2rem;
                 margin-bottom: 1rem;
-                box-shadow: 0.1rem 0.1rem  1rem black;
+                box-shadow: 0.1rem 0.1rem  0.4rem black;
             }
             
             .PostInfo{
@@ -62,11 +62,12 @@ class GeoxPost extends HTMLElement {
                 font-size: 1.5rem;
                 box-sizing: border-box;
                 width: 100%;
-                padding: 0.4rem;
+                margin-top: 0.4rem;
             }
             
             .PostDate{
                 font-size: 0.8rem;
+                color: rgb(109, 109, 120);
             }
             
             .PostDescription{
@@ -75,13 +76,13 @@ class GeoxPost extends HTMLElement {
             
             .PostDivImg{
                 width: 100%;
-                padding-left: 0.9rem;
-                padding-right: 0.9rem;
+                /*padding-left: 0.9rem;
+                padding-right: 0.9rem;*/
                 box-sizing: border-box;
             }
             
             .PostImg{
-                border: 0.05rem solid black;
+                /*border: 0.05rem solid black;*/
                 width: 100%;
                 border-radius: 0.2rem;
             }
@@ -89,7 +90,7 @@ class GeoxPost extends HTMLElement {
             .FlexRowAr{
                 display: flex; 
                 flex-direction: row; 
-                justify-content:space-around; 
+                justify-content:space-between; 
                 align-content:center; 
                 align-items: center; 
                 flex-wrap: wrap;
@@ -105,8 +106,8 @@ class GeoxPost extends HTMLElement {
             }
             
             .PostInfoBox{
-                border: 0.05rem solid black;
-                border-radius: 0.5rem;
+                /*border: 0.05rem solid black;
+                border-radius: 0.5rem;*/
                 width: 100%;
                 padding: 0.2rem;
                 margin-bottom: 0.4rem;
@@ -156,6 +157,7 @@ class GeoxPost extends HTMLElement {
         let DivDate = document.createElement('div') 
         Div.appendChild(DivDate)
         DivDate.classList.add("PostDate")
+        DivDate.classList.add("PostDescription")
         DivDate.innerText= this.GetDateString(PostDate)
         // Description
         let DivDescription = document.createElement('div') 

@@ -13,7 +13,7 @@ body{
     font-synthesis: none;
     letter-spacing: normal;
     text-rendering: optimizelegibility;
-    background-color: white;
+    background-color: rgb(247, 247, 250);
     color: black;
     display: flex;
     flex-direction: column;

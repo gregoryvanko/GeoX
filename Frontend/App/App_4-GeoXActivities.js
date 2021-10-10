@@ -49,11 +49,8 @@ class GeoXActivities {
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
         this._DivApp.appendChild(Conteneur)
         // Titre de l'application
-        Conteneur.appendChild(CoreXBuild.DivTexte("GeoX Activities", "", "Titre"))
+        Conteneur.appendChild(CoreXBuild.DivTexte("Activities", "", "Titre"))
     }
-
-
-    // To Delete
     
 }
 
