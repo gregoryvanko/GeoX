@@ -42,7 +42,7 @@ class HomePage{
     GetDivApp(){
         let divapp = document.createElement('div')
         divapp.id = this._IdDivApp
-        divapp.classList.add("DivApp")
+        divapp.classList.add("DivPostApp")
         return divapp
     }
 
@@ -173,7 +173,7 @@ class HomePage{
         // Add InfoOnTrack
         let DivData = document.createElement('div')
         DivData.id = "DivData"
-        DivData.classList.add("DivDataTrack")
+        DivData.style.padding = "1rem"
         divbackground.appendChild(DivData)
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
         // Bloc le scroll

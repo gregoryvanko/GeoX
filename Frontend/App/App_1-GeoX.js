@@ -1178,7 +1178,7 @@ class GeoX {
     }
     InfoTrack(TrackId){
         CoreXWindow.DeleteWindow()
-        // Remove mao
+        // Remove map
         this.RemoveMap()
         // Add info div
         this.AddInfoTrackConteneur()
@@ -1321,4 +1321,4 @@ class GeoX {
 // Creation de l'application
 let MyGeoX = new GeoX(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Tracks", Icon.GeoXMapIcon(), MyGeoX.Initiation.bind(MyGeoX), true)
+GlobalCoreXAddApp("Tracks", Icon.GeoXMapIcon(), MyGeoX.Initiation.bind(MyGeoX), false)

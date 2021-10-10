@@ -39,8 +39,49 @@ function GetCSSHomePAge(){
     Css += fs.readFileSync(reqPath, 'utf8')
     Css += os.EOL
 
-    reqPath = path.join(__dirname, '../Frontend/HomePage/HomePage.css')
-    Css += fs.readFileSync(reqPath, 'utf8')
+    Css +=`
+    body{
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none; 
+        -webkit-user-select: none;   
+        -khtml-user-select: none;    
+        -moz-user-select: none;      
+        -ms-user-select: none;      
+        user-select: none;  
+        cursor: default;
+        font-family: Arial, Verdana, sans-serif;
+        font-synthesis: none;
+        letter-spacing: normal;
+        text-rendering: optimizelegibility;
+        background-color: rgb(247, 247, 250);
+        color: black;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+    }
+    
+    .OpenButton{
+        margin: 0.5rem;
+        padding: 0.5rem;
+        cursor: pointer;
+        border: 1px solid blue;
+        border-radius: 1rem;
+        text-align: center;
+        display: inline-block;
+        color: blue;
+        background: transparent;
+        outline: none;
+        font-size: 1rem;
+        right: 0rem;
+        top: 1.5rem;
+        position: fixed;
+        background-color: white;
+    }
+    `
     Css += os.EOL
 
     return Css
