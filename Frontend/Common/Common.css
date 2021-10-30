@@ -260,7 +260,7 @@
 }
 
 .CloseButton{
-    margin: 0.4rem;
+    margin-bottom: 2rem;
     padding: 0.4rem;
     cursor: pointer;
     border: 1px solid black;
@@ -271,37 +271,22 @@
     background: transparent;
     outline: none;
     font-size: 1rem;
-    right: 0rem;
-    top: 0rem;
-    position: absolute;
+    width: 10rem;
+    margin-left: auto;
+    margin-right: auto;
     background-color: white;
 
 }
 
-.Divbleur{
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0,0,0,0.3);
+.DivTrackInfo{
     display: flex;
     flex-direction: column; 
     justify-content:space-around; 
     align-content:center; 
-    align-items: center;
-    position: fixed;
-    top:0;
-}
-
-.DivBackground{
-    width: 95vw;
-    max-width: 1000px;
-    height: 92vh;
-    top:2vh;
-    display: block;
-    position: fixed;
-    background-color: white;
-    border: 1px solid black;
-    border-radius: 0.5rem;
-    overflow-y: scroll;
+    display: none;
+    width: 45rem;
+    box-sizing: border-box;
+    max-width: 90%;
 }
 
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),

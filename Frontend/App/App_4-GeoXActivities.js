@@ -3,6 +3,8 @@ class GeoXActivities {
         this._DivApp = document.getElementById(DivApp)
 
         this._IdDivApp = "divapp"
+        this._IdDivTrackInfo = "DivTrackInfo"
+        this._WindowScrollY = 0
         this._PageOfPosts = 0
         let me = this
         this._Observer = new IntersectionObserver((entries)=>{
@@ -68,6 +70,9 @@ class GeoXActivities {
         // DivApp
         let divapp = CoreXBuild.Div(this._IdDivApp, "DivPostApp", "")
         Conteneur.appendChild(divapp)
+        // DivTrackInfo
+        let divtrackinfo = CoreXBuild.Div(this._IdDivTrackInfo, "DivTrackInfo", "")
+        Conteneur.appendChild(divtrackinfo)
         // Div Waiting
         let divwaiting = CoreXBuild.DivTexte("Waiting...", "DivWaitingPost", "Texte", "margin-bottom: 2rem;")
         Conteneur.appendChild(divwaiting)
@@ -134,34 +139,29 @@ class GeoXActivities {
     }
 
     GetTrackData(Id){
-        //blur app
+        // Scroll to
+        this._WindowScrollY = window.scrollY
+
+        // Hide divapp
         let divApp = document.getElementById(this._IdDivApp)
-        divApp.style.filter = "blur(2px)"
+        divApp.style.display = "none"
 
-        // Add Bleur
-        let divbleur = document.createElement('div')
-        divbleur.id = "Divbleur"
-        divbleur.classList.add("Divbleur")
-        document.body.appendChild(divbleur)
+        // Hide waiting
+        if (document.getElementById("DivWaitingPost")){
+            document.getElementById("DivWaitingPost").style.display = "none"
+        }
 
-        // Add backgound
-        let divbackground = document.createElement('div')
-        divbackground.id = "DivBackground"
-        divbackground.classList.add("DivBackground")
-        divbleur.appendChild(divbackground)
-        // Close button
-        let button = document.createElement('button')
-        button.innerText = "Close"
-        button.classList.add("CloseButton");
-        button.onclick = this.RemoveTrackData.bind(this)
-        divbackground.appendChild(button)
+        // Show divinfotrack
+        let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
+        divTrackInfo.style.display = "flex"
+
         // Text
         let divwaiting = document.createElement('div')
         divwaiting.id = "DivWaiting"
         divwaiting.innerText = "Waiting data..."
         divwaiting.style.textAlign = "center"
         divwaiting.style.marginTop = "5vh"
-        divbackground.appendChild(divwaiting)
+        divTrackInfo.appendChild(divwaiting)
 
         // fetch
         fetch("/getdataofpost/" + Id).then((response) => {
@@ -186,7 +186,7 @@ class GeoXActivities {
     }
 
     RenderTrackData(Data){
-        let divbackground = document.getElementById("DivBackground")
+        let divbackground = document.getElementById(this._IdDivTrackInfo)
         divbackground.removeChild(document.getElementById("DivWaiting"))
         // Add InfoOnTrack
         let DivData = document.createElement('div')
@@ -194,19 +194,35 @@ class GeoXActivities {
         DivData.style.padding = "1rem"
         divbackground.appendChild(DivData)
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
-        // Bloc le scroll
-        document.body.style.overflow='hidden'
+        
+        // Close button
+        let button = document.createElement('button')
+        button.innerText = "Close"
+        button.classList.add("CloseButton");
+        button.onclick = this.RemoveTrackData.bind(this)
+        divbackground.appendChild(button)
         
     }
 
     RemoveTrackData(){
         event.stopPropagation()
-        //blur app
+
+        // show divapp
         let divApp = document.getElementById(this._IdDivApp)
-        divApp.style.filter = "none"
-        // Remove
-        document.body.removeChild(document.getElementById("Divbleur"))
-        document.body.style.overflow='auto'
+        divApp.style.display = "flex"
+
+        // show waiting
+        if (document.getElementById("DivWaitingPost")){
+            document.getElementById("DivWaitingPost").style.display = "block"
+        }
+
+        // Hide divinfotrack
+        let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
+        divTrackInfo.innerHTML = ""
+        divTrackInfo.style.display = "none"
+
+        // Scroll to
+        window.scrollTo(0, this._WindowScrollY);
     }
 }
 

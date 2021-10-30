@@ -473,17 +473,25 @@ class GeoXCreateTrack {
         let i = this._TrackMarkers.findIndex(x => x.LeafletId == myid)
         // remove marker for map
         this._MarkerGroup.removeLayer(myid)
-        // si le markeur n'est pas le dernier
-        if (i +1 < this._TrackMarkers.length){
-            // Si le marker suivant est en mode autoroute
-            if (this._TrackMarkers[i + 1].AutoRoute){
-                this._TrackMarkers[i + 1].SubPoints= await this.GetRoute(this._TrackMarkers[i - 1].LatLng, this._TrackMarkers[i + 1].LatLng)
+        // si c'est le tout premier marker
+        if (i ==0){
+            // Supprimer les point intermediaire du second marker si il existe
+            if (this._TrackMarkers.length > 1){
+                this._TrackMarkers[i + 1].SubPoints = null
+            }
+        } else {
+            // si le markeur n'est pas le dernier
+            if (i +1 < this._TrackMarkers.length){
+                // Si le marker suivant est en mode autoroute
+                if (this._TrackMarkers[i + 1].AutoRoute){
+                    this._TrackMarkers[i + 1].SubPoints= await this.GetRoute(this._TrackMarkers[i - 1].LatLng, this._TrackMarkers[i + 1].LatLng)
+                }
             }
         }
         // Supprimer le marker de _TrackMarkers
         this._TrackMarkers.splice(i, 1)
         if (this._TrackMarkers.length > 0){
-            // Creer un nouveau popup pour le premier marker (que le delete boutton)
+            // Creer un nouveau popup pour le premier marker (le popup n'affiche que le boutton delete)
             var FirsttMarker = this._MarkerGroup.getLayer(this._TrackMarkers[0].LeafletId)
             FirsttMarker.bindPopup(this.BuildPopupContent(FirsttMarker._leaflet_id))
         }
