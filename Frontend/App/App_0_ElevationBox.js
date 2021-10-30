@@ -226,4 +226,5 @@ class ElevationBox {
         // Update Text
         document.getElementById(this._IdElevationBoxtext).innerHTML = Text
     }
+    
 }
