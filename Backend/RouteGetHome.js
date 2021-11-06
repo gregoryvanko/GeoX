@@ -80,6 +80,24 @@ function GetCSSHomePAge(){
         margin-right: auto;
     }
 
+    .ButtonX{
+        margin-bottom: 1rem;
+        cursor: pointer;
+        border: 3px solid black;
+        border-radius: 50%;
+        text-align: center;
+        display: inline-block;
+        color: black;
+        background: transparent;
+        outline: none;
+        font-size: 1.5rem;
+        margin-left: auto;
+        background-color: white;
+        font-weight: bold;
+        padding: 1px 6px;
+        -webkit-appearance: none;
+    }
+
     .FixedRight{
         right: 1rem;
         top: 1.5rem;
