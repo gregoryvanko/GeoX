@@ -65,7 +65,6 @@ function GetCSSHomePAge(){
     }
     
     .OpenButton{
-        margin: 0.5rem;
         padding: 0.5rem;
         cursor: pointer;
         border: 1px solid blue;
@@ -73,14 +72,36 @@ function GetCSSHomePAge(){
         text-align: center;
         display: inline-block;
         color: blue;
-        background: transparent;
         outline: none;
         font-size: 1rem;
-        right: 0rem;
+        background-color: white;
+        max-width: 10rem;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .FixedRight{
+        right: 1rem;
         top: 1.5rem;
         position: fixed;
-        background-color: white;
     }
+
+    .InfoBox{
+        width:40rem;
+        box-sizing: border-box;
+        max-width: 85%;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        border: 1px solid black;
+        border-radius: 1rem;
+        background-color: white;
+        top: 30vh;
+        position: fixed;
+        padding: 0.5rem;
+        box-shadow: 0.4rem 0.4rem 1rem black;
+    }
+    
     `
     Css += os.EOL
 

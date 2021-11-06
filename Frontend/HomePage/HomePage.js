@@ -33,8 +33,9 @@ class HomePage{
 
     GetButtonLunchApp(){
         let button = document.createElement('button')
-        button.innerText = "Open App"
+        button.innerText = "Open Application"
         button.classList.add("OpenButton");
+        button.classList.add("FixedRight");
         button.onclick = this.OpenApp.bind(this)
         return button
     }
@@ -94,11 +95,13 @@ class HomePage{
             Data.forEach(element => {
                 // Creation du post
                 let TempGeoxPsot = new GeoxPost(element)
-                TempGeoxPsot.addEventListener("click", this.GetTrackData.bind(this, element._id))
+                // ajout de l'element click sur le post
+                //TempGeoxPsot.addEventListener("click", this.GetTrackData.bind(this, element._id))
+                TempGeoxPsot.addEventListener("click", this.ShowMessageToOpenApp.bind(this))
                 TempGeoxPsot.style.cursor = "pointer"
                 TempGeoxPsot.style.width = "100%"
                 document.getElementById(this._IdDivApp).appendChild(TempGeoxPsot)
-                // si l'element est l'element milieu
+                // si l'element est l'element milieu: ajouter le listener pour declencher un getpost
                 if (CurrentpointData == MiddlepointData){
                     // ajouter le listener pour declancher le GetPosts
                     this._Observer.observe(TempGeoxPsot)
@@ -113,6 +116,7 @@ class HomePage{
     GetSvgGeoX(){
         let placeholder = document.createElement('div')
         placeholder.style.height = "4rem"
+        placeholder.style.marginRight = "auto"
         placeholder.innerHTML = `<svg style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" height="100%" xmlns:vectornator="http://vectornator.io" version="1.1" viewBox="0 0 518.076 165.03">
         <defs/>
         <g id="Untitled" vectornator:layerName="Untitled">
@@ -126,6 +130,49 @@ class HomePage{
         return placeholder
     }
 
+    ShowMessageToOpenApp(){
+        if (!document.getElementById("InfoBox")){
+            // Conteneur
+            let InfoBox = document.createElement('div')
+            InfoBox.id = "InfoBox"
+            InfoBox.classList.add("InfoBox");
+            // Close button
+            let buttonC = document.createElement('button')
+            InfoBox.appendChild(buttonC)
+            buttonC.classList.add("ButtonX");
+            buttonC.innerText = "X"
+            buttonC.onclick = this.HideMessageToOpenApp.bind(this)
+            // Texte
+            let texte = document.createElement('div')
+            InfoBox.appendChild(texte)
+            texte.innerText = "Open the application to access to more informations, fonctionalities, and to download GPX file of this track."
+            texte.style.marginBottom = "2rem"
+            texte.style.width = "80%"
+            texte.style.marginLeft = "auto"
+            texte.style.marginRight = "auto"
+            // Button Open App
+            let button = document.createElement('button')
+            InfoBox.appendChild(button)
+            button.classList.add("OpenButton");
+            button.innerText = "Open Application"
+            button.onclick = this.OpenApp.bind(this)
+            // empty space
+            let divempty = document.createElement('div')
+            InfoBox.appendChild(divempty)
+            divempty.style.height = "1rem"
+            // Add InfoBox to body
+            document.body.appendChild(InfoBox)
+        }
+    }
+
+    HideMessageToOpenApp(){
+        document.body.removeChild(document.getElementById("InfoBox"))
+    }
+
+    /**
+     * Recupère les données d'une track via son ID
+     * @param {number} Id Numero id de la track
+     */
     GetTrackData(Id){
         // Scroll to
         this._WindowScrollY = window.scrollY

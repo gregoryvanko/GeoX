@@ -207,7 +207,6 @@
     user-select: text;
 }
 
-
 .IconeInList{
     height:2.5vw;
 }
@@ -275,7 +274,6 @@
     margin-left: auto;
     margin-right: auto;
     background-color: white;
-
 }
 
 .DivTrackInfo{
@@ -287,6 +285,24 @@
     width: 45rem;
     box-sizing: border-box;
     max-width: 90%;
+}
+
+.ButtonX{
+    margin-bottom: 1rem;
+    cursor: pointer;
+    border: 3px solid black;
+    border-radius: 50%;
+    text-align: center;
+    display: inline-block;
+    color: black;
+    background: transparent;
+    outline: none;
+    font-size: 1.5rem;
+    margin-left: auto;
+    background-color: white;
+    font-weight: bold;
+    padding: 1px 6px;
+    -webkit-appearance: none;
 }
 
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
