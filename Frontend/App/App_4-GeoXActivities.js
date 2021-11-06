@@ -188,20 +188,27 @@ class GeoXActivities {
     RenderTrackData(Data){
         let divbackground = document.getElementById(this._IdDivTrackInfo)
         divbackground.removeChild(document.getElementById("DivWaiting"))
+
+        // Close button
+        let button = document.createElement('button')
+        button.classList.add("ButtonX");
+        button.style.marginBottom = "-1rem"
+        button.onclick = this.RemoveTrackData.bind(this)
+        divbackground.appendChild(button)
+
         // Add InfoOnTrack
         let DivData = document.createElement('div')
         DivData.id = "DivData"
-        DivData.style.padding = "1rem"
         divbackground.appendChild(DivData)
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
-        
-        // Close button
-        let button = document.createElement('button')
-        button.innerText = "Close"
-        button.classList.add("CloseButton");
-        button.onclick = this.RemoveTrackData.bind(this)
-        divbackground.appendChild(button)
-        
+
+        // Save Button and download GPX Button
+        let DivButtonAction = CoreXBuild.DivFlexRowAr("ButtonAction")
+        divbackground.appendChild(DivButtonAction)
+        let ButtonSave = CoreXBuild.Button("Save", this.ClickSaveToMyTrack.bind(this, Data.Id), "CloseButton", "SaveToMe")
+        DivButtonAction.appendChild(ButtonSave)
+        let ButtonGPX = CoreXBuild.Button("GPX", this.ClickDownloadGPX.bind(this, Data.Id), "CloseButton", "GPX")
+        DivButtonAction.appendChild(ButtonGPX)
     }
 
     RemoveTrackData(){
@@ -223,6 +230,14 @@ class GeoXActivities {
 
         // Scroll to
         window.scrollTo(0, this._WindowScrollY);
+    }
+
+    ClickSaveToMyTrack(Id){
+        alert("Save " + Id)
+    }
+
+    ClickDownloadGPX(Id){
+        alert("GPX " + Id)
     }
 }
 

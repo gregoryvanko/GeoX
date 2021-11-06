@@ -287,6 +287,27 @@
     max-width: 90%;
 }
 
+.ButtonX{
+    margin-bottom: 1rem;
+    cursor: pointer;
+    border: 3px solid black;
+    border-radius: 50%;
+    text-align: center;
+    display: inline-block;
+    color: black;
+    background: transparent;
+    outline: none;
+    font-size: 1.5rem;
+    margin-left: auto;
+    background-color: white;
+    font-weight: bold;
+    padding: 1px 6px;
+    -webkit-appearance: none;
+}
+.ButtonX::after{
+    content: "X";
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)

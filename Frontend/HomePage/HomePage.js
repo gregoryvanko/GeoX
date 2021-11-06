@@ -140,7 +140,6 @@ class HomePage{
             let buttonC = document.createElement('button')
             InfoBox.appendChild(buttonC)
             buttonC.classList.add("ButtonX");
-            buttonC.innerText = "X"
             buttonC.onclick = this.HideMessageToOpenApp.bind(this)
             // Texte
             let texte = document.createElement('div')
