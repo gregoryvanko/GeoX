@@ -158,22 +158,17 @@ function PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User){
 
         // Query Mongodb
         const Querry = {'_id': new MongoObjectId(TrackId)}
-        const Projection = {}
+        const Projection = {projection:{_id: 0}}
         Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 1){
-                let TrackData = new Object()
+                // Copy de la track
+                let TrackData = reponse[0]
+                // Modification de la track
                 TrackData.Name = Name
                 TrackData.Group = Group
                 TrackData.Color = "#0000FF"
                 TrackData.Date = new Date()
                 TrackData.Owner = User
-                TrackData.ExteriorPoint = reponse[0].ExteriorPoint
-                TrackData.GeoJsonData = reponse[0].GeoJsonData
-                TrackData.GpxData = reponse[0].GpxData
-                TrackData.Length = reponse[0].Length
-                TrackData.Center = reponse[0].Center
-                TrackData.Public = Public
-                TrackData.StartPoint = reponse[0].StartPoint
                 Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
                     ReponseSaveTrack.Error = false
                     resolve(ReponseSaveTrack)
