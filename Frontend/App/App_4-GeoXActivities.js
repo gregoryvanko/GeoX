@@ -76,6 +76,10 @@ class GeoXActivities {
         // Div Waiting
         let divwaiting = CoreXBuild.DivTexte("Waiting...", "DivWaitingPost", "Texte", "margin-bottom: 2rem;")
         Conteneur.appendChild(divwaiting)
+        // empty space
+        let divempty = document.createElement('div')
+        Conteneur.appendChild(divempty)
+        divempty.style.height = "2rem"
         // Get Posts
         this.GetPosts()
     }
@@ -205,9 +209,9 @@ class GeoXActivities {
         // Save Button and download GPX Button
         let DivButtonAction = CoreXBuild.DivFlexRowAr("ButtonAction")
         divbackground.appendChild(DivButtonAction)
-        let ButtonSave = CoreXBuild.Button("Save", this.ClickSaveToMyTrack.bind(this, Data.Id), "CloseButton", "SaveToMe")
+        let ButtonSave = CoreXBuild.Button("Save", this.ClickSaveToMyTrack.bind(this, Data._id), "CloseButton", "SaveToMe")
         DivButtonAction.appendChild(ButtonSave)
-        let ButtonGPX = CoreXBuild.Button("GPX", this.ClickDownloadGPX.bind(this, Data.Id), "CloseButton", "GPX")
+        let ButtonGPX = CoreXBuild.Button("GPX", this.ClickDownloadGPX.bind(this, Data._id), "CloseButton", "GPX")
         DivButtonAction.appendChild(ButtonGPX)
     }
 
