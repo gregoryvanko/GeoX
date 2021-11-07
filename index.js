@@ -1,5 +1,5 @@
 class GeoX {
-    constructor(Name = "AppName", Port = 4000, Debug = true){
+   constructor(Name = "AppName", Port = 4000, Debug = true){
        // Creation de l'application CoreX
        let corex = require('@gregvanko/corex').corex
        this._OptionApplication = {
@@ -12,10 +12,10 @@ class GeoX {
        this._Debug = Debug
        let GeoXServerR = require('./Backend/GeoXServer').GeoXServer
        this._GeoXServer = new GeoXServerR(this._MyApp)
-    }
+   }
  
     /* Start de l'application */
-    Start(){
+   Start(){
        // Css de l'application CoreX
        const CSS= {
           FontSize:{
@@ -76,9 +76,12 @@ class GeoX {
        // Route Get post Data
        this._MyApp.AddRouteGet("getdataofpost/:post", this._GeoXServer.GetDataOfPost.bind(this._GeoXServer))
 
+      // API
+      this._MyApp.AddApiFct("GetTrackData", this._GeoXServer.GetTrackDataApi.bind(this), false)
+         
        // Start
        this._MyApp.Start()
-       }
+   }
  }
  
  module.exports.GeoX = GeoX

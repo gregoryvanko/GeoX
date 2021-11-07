@@ -241,7 +241,16 @@ class GeoXActivities {
     }
 
     ClickDownloadGPX(Id){
-        alert("GPX " + Id)
+        let FctData = {TrackId: Id, GetData: "GPX"}
+        GlobalCallApiPromise("GetTrackData", FctData, "", "").then((reponse)=>{
+            var link = document.createElement('a')
+            link.download = 'Track.gpx'
+            var blob = new Blob([reponse], {typde: 'text/plain'})
+            link.href = window.URL.createObjectURL(blob)
+            link.click()
+        },(erreur)=>{
+            console.log(erreur)
+        })
     }
 }
 

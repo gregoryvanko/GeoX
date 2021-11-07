@@ -591,6 +591,36 @@ function PromiseGetElevation({ lat, lng }){
     })
 }
 
+function GetTrackDataApi(MyApp, Data, Res, User, UserId){
+    let MongoR = require('@gregvanko/corex').Mongo
+    Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    MongoTracksCollection = MongoConfig.TracksCollection
+    let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+
+    let Projection = {}
+    if (Data.GetData == "GPX"){
+        Projection = { projection:{[MongoTracksCollection.GpxData]: 1}}
+    }
+    const Sort = {[MongoTracksCollection.Date]: -1}
+    const Querry = {'_id': new MongoObjectId(Data.TrackId)}
+    Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
+        if(reponse.length == 0){
+            MyApp.LogAppliError("GetTrackDataApi Track Id not found", User, UserId)
+            Res.json({Error: true, ErrorMsg: "GetTrackDataApi Track Id not found", Data: ""})
+        } else {
+            if (Data.GetData == "GPX"){
+                Res.json({Error: false, ErrorMsg: "", Data: reponse[0][MongoTracksCollection.GpxData]})
+                // Log
+                MyApp.LogAppliInfo("GPX send to user", User, UserId)
+            }
+        }
+    },(erreur)=>{
+        MyApp.LogAppliError("GetTrackDataApi DB error : " + erreur, User, UserId)
+        Res.json({Error: true, ErrorMsg: "GetTrackDataApi DB error ", Data: ""})
+    })
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
@@ -601,3 +631,4 @@ module.exports.PromiseGetTracksInfo = PromiseGetTracksInfo
 module.exports.GetElevationOfGeoJson = GetElevationOfGeoJson
 module.exports.GetElevationOfLatLng = GetElevationOfLatLng
 module.exports.CalculateTrackLength = CalculateTrackLength
+module.exports.GetTrackDataApi = GetTrackDataApi

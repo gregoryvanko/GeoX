@@ -172,5 +172,10 @@ class GeoXServer{
         HtmlString = HtmlString.replace(/\r?\n|\r/g, " ")
         return HtmlString
     }
+
+    GetTrackDataApi(Data, Res, User, UserId){
+        let Shared = require("./Shared")
+        Shared.GetTrackDataApi(this._MyApp, Data, Res, User, UserId)
+    }
 }
 module.exports.GeoXServer = GeoXServer
