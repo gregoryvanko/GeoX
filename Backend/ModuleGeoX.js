@@ -166,6 +166,7 @@ function PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User){
                 // Modification de la track
                 TrackData.Name = Name
                 TrackData.Group = Group
+                TrackData.Public = Public
                 TrackData.Color = "#0000FF"
                 TrackData.Date = new Date()
                 TrackData.Owner = User

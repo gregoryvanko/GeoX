@@ -621,6 +621,44 @@ function GetTrackDataApi(MyApp, Data, Res, User, UserId){
     })
 }
 
+function SaveTrackByIdApi(MyApp, Data, Res, User, UserId){
+    let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+    let MongoR = require('@gregvanko/corex').Mongo
+    Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+    let MongoConfig = require("./MongoConfig.json")
+    MongoTracksCollection = MongoConfig.TracksCollection
+
+    // Query Mongodb
+    const Querry = {'_id': new MongoObjectId(Data.TrackId)}
+    const Projection = {projection:{_id: 0}}
+    Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
+        if(reponse.length == 1){
+            // Copy de la track
+            let TrackData = reponse[0]
+            // Modification de la track
+            TrackData.Name = Data.Name
+            TrackData.Group = Data.Group
+            TrackData.Public = Data.Public
+            TrackData.Color = "#0000FF"
+            TrackData.Date = new Date()
+            TrackData.Owner = User
+            Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
+                Res.json({Error: false, ErrorMsg: "", Data:"Done"})
+            },(erreur)=>{
+                MyApp.LogAppliError("SaveTrackByIdApi inster track error: " + erreur, User, UserId)
+                Res.json({Error: true, ErrorMsg: "SaveTrackByIdApi inster track error", Data: ""})
+            })
+        } else {
+            MyApp.LogAppliError("SaveTrackByIdApi Track id not found", User, UserId)
+            Res.json({Error: true, ErrorMsg: "SaveTrackByIdApi Track id not found", Data: ""})
+        }
+    },(erreur)=>{
+        MyApp.LogAppliError("SaveTrackByIdApi get track data error: " + erreur, User, UserId)
+        Res.json({Error: true, ErrorMsg: "SaveTrackByIdApi get track data error", Data: ""})
+    })
+
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
@@ -632,3 +670,4 @@ module.exports.GetElevationOfGeoJson = GetElevationOfGeoJson
 module.exports.GetElevationOfLatLng = GetElevationOfLatLng
 module.exports.CalculateTrackLength = CalculateTrackLength
 module.exports.GetTrackDataApi = GetTrackDataApi
+module.exports.SaveTrackByIdApi = SaveTrackByIdApi

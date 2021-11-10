@@ -16,6 +16,8 @@ class GeoXActivities {
                 }
             })
         }, {threshold: [1]})
+
+        this._UserGroup = null
     }
 
     Initiation(){
@@ -236,8 +238,92 @@ class GeoXActivities {
         window.scrollTo(0, this._WindowScrollY);
     }
 
-    ClickSaveToMyTrack(Id){
-        alert("Save " + Id)
+    ClickSaveToMyTrack(TrackId){
+        // Open save box
+        this.BuildSaveTrackVue(TrackId)
+    }
+
+    BuildSaveTrackVue(TrackId){
+        let Content = CoreXBuild.DivFlexColumn("")
+        // Empty space
+        Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Titre
+        Content.append(CoreXBuild.DivTexte("Save Track", "", "SousTitre"))
+        // Input Name
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name","",true))
+        // Input `Group
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group","",true))
+        // Description
+        // ToDo
+        // Toggle Public
+        let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWondow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Content.appendChild(DivTooglePublic)
+        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
+        DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
+        // Error Text
+        Content.appendChild(CoreXBuild.DivTexte("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh; height: 4vh;"))
+        // Div Button
+        let DivButton = CoreXBuild.DivFlexRowAr("")
+        Content.appendChild(DivButton)
+        // Button save
+        DivButton.appendChild(CoreXBuild.Button("Save",this.SaveToMyTrack.bind(this, TrackId),"Text Button ButtonWidth30", "SaveTrack"))
+        // Button cancel
+        DivButton.appendChild(CoreXBuild.Button("Cancel",this.CancelSaveToMyTrack.bind(this),"Text Button ButtonWidth30", "Cancel"))
+        // Empty space
+        Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Open Window
+        CoreXWindow.BuildWindow(Content)
+        // Add AutoComplete
+        let me = this
+        autocomplete({
+            input: document.getElementById("InputTrackGroup"),
+            minLength: 1,
+            emptyMsg: 'No suggestion',
+            fetch: function(text, update) {
+                if (me._UserGroup != null){
+                    text = text.toLowerCase();
+                    var GroupFiltred = me._UserGroup.filter(n => n.toLowerCase().startsWith(text))
+                    var suggestions = []
+                    GroupFiltred.forEach(element => {
+                        var MyObject = new Object()
+                        MyObject.label = element
+                        suggestions.push(MyObject)
+                    });
+                    update(suggestions);
+                }
+            },
+            onSelect: function(item) {
+                document.getElementById("InputTrackGroup").value = item.label;
+            }
+        });
+    }
+
+    /**
+     * Cancel Save track view
+     */
+    CancelSaveToMyTrack(){
+        CoreXWindow.DeleteWindow()
+    }
+
+    SaveToMyTrack(TrackId){
+        if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            document.getElementById("ErrorSaveTrack").innerText = ""
+            // Send action
+            let NewName = document.getElementById("InputTrackName").value 
+            let NewGroup = document.getElementById("InputTrackGroup").value
+            let NewPublic = document.getElementById("TogglePublic").checked
+            let FctData = {SaveType: "ById", TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic}
+            GlobalCallApiPromise("SaveTrack", FctData, "", "").then((reponse)=>{
+                alert("Saved")
+            },(erreur)=>{
+                console.log(erreur)
+                alert(erreur)
+            })
+            // Delete Window
+            CoreXWindow.DeleteWindow()
+        } else {
+            document.getElementById("ErrorSaveTrack").innerText = "Enter a name and a group before saving"
+        }
     }
 
     ClickDownloadGPX(Id){
@@ -250,6 +336,7 @@ class GeoXActivities {
             link.click()
         },(erreur)=>{
             console.log(erreur)
+            alert(erreur)
         })
     }
 }

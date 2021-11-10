@@ -78,9 +78,10 @@ class GeoX {
 
       // API
       this._MyApp.AddApiFct("GetTrackData", this._GeoXServer.GetTrackDataApi.bind(this), false)
+      this._MyApp.AddApiFct("SaveTrack", this._GeoXServer.SaveTrackApi.bind(this), false)
          
-       // Start
-       this._MyApp.Start()
+      // Start
+      this._MyApp.Start()
    }
  }
  

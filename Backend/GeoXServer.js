@@ -177,5 +177,14 @@ class GeoXServer{
         let Shared = require("./Shared")
         Shared.GetTrackDataApi(this._MyApp, Data, Res, User, UserId)
     }
+
+    SaveTrackApi(Data, Res, User, UserId){
+        let Shared = require("./Shared")
+        if (Data.SaveType == "ById"){
+            Shared.SaveTrackByIdApi(this._MyApp, Data, Res, User, UserId)
+        } else {
+            Res.json({Error: true, ErrorMsg: "SaveType not found: " + Data.SaveType, Data: ""})
+        }
+    }
 }
 module.exports.GeoXServer = GeoXServer
