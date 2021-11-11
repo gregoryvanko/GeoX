@@ -250,13 +250,18 @@ class GeoXActivities {
         // Titre
         Content.append(CoreXBuild.DivTexte("Save Track", "", "SousTitre"))
         // Input Name
-        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name","",true))
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name","",true))
         // Input `Group
-        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWondow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group","",true))
+        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group","",true))
         // Description
-        // ToDo
+        let DivDescription = CoreXBuild.Div("", "InputBoxCoreXWindow Text", "")
+        Content.appendChild(DivDescription)
+        DivDescription.appendChild(CoreXBuild.DivTexte("Description", "", "Text", ""))
+        let DivContDesc = CoreXBuild.Div("DivContDesc", "DivContentEdit TextSmall", "")
+        DivContDesc.contentEditable = "True"
+        DivDescription.appendChild(DivContDesc)
         // Toggle Public
-        let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWondow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Content.appendChild(DivTooglePublic)
         DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
         DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
@@ -308,19 +313,19 @@ class GeoXActivities {
     SaveToMyTrack(TrackId){
         if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
             document.getElementById("ErrorSaveTrack").innerText = ""
+            document.getElementById("SaveTrack").innerText = "Saving..."
             // Send action
             let NewName = document.getElementById("InputTrackName").value 
             let NewGroup = document.getElementById("InputTrackGroup").value
             let NewPublic = document.getElementById("TogglePublic").checked
-            let FctData = {SaveType: "ById", TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic}
+            let NewDescription = document.getElementById("DivContDesc").innerText
+            let FctData = {SaveType: "ById", TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
             GlobalCallApiPromise("SaveTrack", FctData, "", "").then((reponse)=>{
-                alert("Saved")
+                // Delete Window
+                CoreXWindow.DeleteWindow()
             },(erreur)=>{
-                console.log(erreur)
-                alert(erreur)
+                document.getElementById("ErrorSaveTrack").innerText = erreur
             })
-            // Delete Window
-            CoreXWindow.DeleteWindow()
         } else {
             document.getElementById("ErrorSaveTrack").innerText = "Enter a name and a group before saving"
         }

@@ -77,8 +77,8 @@ class GeoX {
        this._MyApp.AddRouteGet("getdataofpost/:post", this._GeoXServer.GetDataOfPost.bind(this._GeoXServer))
 
       // API
-      this._MyApp.AddApiFct("GetTrackData", this._GeoXServer.GetTrackDataApi.bind(this), false)
-      this._MyApp.AddApiFct("SaveTrack", this._GeoXServer.SaveTrackApi.bind(this), false)
+      this._MyApp.AddApiFct("GetTrackData", this._GeoXServer.ApiGetTrackData.bind(this), false)
+      this._MyApp.AddApiFct("SaveTrack", this._GeoXServer.ApiSaveTrack.bind(this), false)
          
       // Start
       this._MyApp.Start()

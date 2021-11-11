@@ -36,7 +36,7 @@ class GeoXServer{
                 } else if (Data.Value.Action == "GetTrack"){
                     ModuleGeoX.CallGetTrack(Data.Value, this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "SaveTrack"){
-                    ModuleGeoX.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, Data.Value.Public, this._MyApp,  Socket, User, UserId)
+                    ModuleGeoX.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, Data.Value.Public, Data.Value.Description, this._MyApp,  Socket, User, UserId)
                 } else if (Data.Value.Action == "GetTrackInfo"){
                     ModuleGeoX.CallGetTrackInfo(Data.Value.Data,this._MyApp,  Socket, User, UserId)
                 }else {
@@ -173,15 +173,15 @@ class GeoXServer{
         return HtmlString
     }
 
-    GetTrackDataApi(Data, Res, User, UserId){
+    ApiGetTrackData(Data, Res, User, UserId){
         let Shared = require("./Shared")
-        Shared.GetTrackDataApi(this._MyApp, Data, Res, User, UserId)
+        Shared.ApiGetTrackData(this._MyApp, Data, Res, User, UserId)
     }
 
-    SaveTrackApi(Data, Res, User, UserId){
+    ApiSaveTrack(Data, Res, User, UserId){
         let Shared = require("./Shared")
         if (Data.SaveType == "ById"){
-            Shared.SaveTrackByIdApi(this._MyApp, Data, Res, User, UserId)
+            Shared.ApiSaveTrackById(this._MyApp, Data, Res, User, UserId)
         } else {
             Res.json({Error: true, ErrorMsg: "SaveType not found: " + Data.SaveType, Data: ""})
         }

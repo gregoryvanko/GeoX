@@ -591,7 +591,7 @@ function PromiseGetElevation({ lat, lng }){
     })
 }
 
-function GetTrackDataApi(MyApp, Data, Res, User, UserId){
+function ApiGetTrackData(MyApp, Data, Res, User, UserId){
     let MongoR = require('@gregvanko/corex').Mongo
     Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
     let MongoConfig = require("./MongoConfig.json")
@@ -606,8 +606,8 @@ function GetTrackDataApi(MyApp, Data, Res, User, UserId){
     const Querry = {'_id': new MongoObjectId(Data.TrackId)}
     Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
         if(reponse.length == 0){
-            MyApp.LogAppliError("GetTrackDataApi Track Id not found", User, UserId)
-            Res.json({Error: true, ErrorMsg: "GetTrackDataApi Track Id not found", Data: ""})
+            MyApp.LogAppliError("ApiGetTrackData Track Id not found", User, UserId)
+            Res.json({Error: true, ErrorMsg: "ApiGetTrackData Track Id not found", Data: ""})
         } else {
             if (Data.GetData == "GPX"){
                 Res.json({Error: false, ErrorMsg: "", Data: reponse[0][MongoTracksCollection.GpxData]})
@@ -616,12 +616,12 @@ function GetTrackDataApi(MyApp, Data, Res, User, UserId){
             }
         }
     },(erreur)=>{
-        MyApp.LogAppliError("GetTrackDataApi DB error : " + erreur, User, UserId)
-        Res.json({Error: true, ErrorMsg: "GetTrackDataApi DB error ", Data: ""})
+        MyApp.LogAppliError("ApiGetTrackData DB error : " + erreur, User, UserId)
+        Res.json({Error: true, ErrorMsg: "ApiGetTrackData DB error ", Data: ""})
     })
 }
 
-function SaveTrackByIdApi(MyApp, Data, Res, User, UserId){
+function ApiSaveTrackById(MyApp, Data, Res, User, UserId){
     let MongoObjectId = require('@gregvanko/corex').MongoObjectId
     let MongoR = require('@gregvanko/corex').Mongo
     Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
@@ -639,22 +639,23 @@ function SaveTrackByIdApi(MyApp, Data, Res, User, UserId){
             TrackData.Name = Data.Name
             TrackData.Group = Data.Group
             TrackData.Public = Data.Public
+            TrackData.Description = Data.Description
             TrackData.Color = "#0000FF"
             TrackData.Date = new Date()
             TrackData.Owner = User
             Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
                 Res.json({Error: false, ErrorMsg: "", Data:"Done"})
             },(erreur)=>{
-                MyApp.LogAppliError("SaveTrackByIdApi inster track error: " + erreur, User, UserId)
-                Res.json({Error: true, ErrorMsg: "SaveTrackByIdApi inster track error", Data: ""})
+                MyApp.LogAppliError("ApiSaveTrackById inster track error: " + erreur, User, UserId)
+                Res.json({Error: true, ErrorMsg: "ApiSaveTrackById inster track error", Data: ""})
             })
         } else {
-            MyApp.LogAppliError("SaveTrackByIdApi Track id not found", User, UserId)
-            Res.json({Error: true, ErrorMsg: "SaveTrackByIdApi Track id not found", Data: ""})
+            MyApp.LogAppliError("ApiSaveTrackById Track id not found", User, UserId)
+            Res.json({Error: true, ErrorMsg: "ApiSaveTrackById Track id not found", Data: ""})
         }
     },(erreur)=>{
-        MyApp.LogAppliError("SaveTrackByIdApi get track data error: " + erreur, User, UserId)
-        Res.json({Error: true, ErrorMsg: "SaveTrackByIdApi get track data error", Data: ""})
+        MyApp.LogAppliError("ApiSaveTrackById get track data error: " + erreur, User, UserId)
+        Res.json({Error: true, ErrorMsg: "ApiSaveTrackById get track data error", Data: ""})
     })
 
 }
@@ -669,5 +670,5 @@ module.exports.PromiseGetTracksInfo = PromiseGetTracksInfo
 module.exports.GetElevationOfGeoJson = GetElevationOfGeoJson
 module.exports.GetElevationOfLatLng = GetElevationOfLatLng
 module.exports.CalculateTrackLength = CalculateTrackLength
-module.exports.GetTrackDataApi = GetTrackDataApi
-module.exports.SaveTrackByIdApi = SaveTrackByIdApi
+module.exports.ApiGetTrackData = ApiGetTrackData
+module.exports.ApiSaveTrackById = ApiSaveTrackById

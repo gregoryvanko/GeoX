@@ -136,8 +136,8 @@ function CallGetTrack(Data, MyApp, Socket, User, UserId){
     })
 }
 
-async function CallSaveTrack(TrackId, Name, Group, Public, MyApp, Socket, User, UserId){
-    let ReponseSaveTrack = await PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User)
+async function CallSaveTrack(TrackId, Name, Group, Public, Description, MyApp, Socket, User, UserId){
+    let ReponseSaveTrack = await PromiseSaveTrack(TrackId, Name, Group, Public, Description, MyApp, User)
     if (ReponseSaveTrack.Error) {
         MyApp.LogAppliError("CallSaveTrack error: " + ReponseSaveTrack.ErrorMsg, User, UserId)
         Socket.emit("GeoXError", "CallSaveTrack error: " + ReponseSaveTrack.ErrorMsg)
@@ -146,7 +146,7 @@ async function CallSaveTrack(TrackId, Name, Group, Public, MyApp, Socket, User, 
     }
 }
 
-function PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User){
+function PromiseSaveTrack(TrackId, Name, Group, Public, Description, MyApp, User){
     return new Promise (resolve =>{``
         let MongoObjectId = require('@gregvanko/corex').MongoObjectId
         let MongoR = require('@gregvanko/corex').Mongo
@@ -167,6 +167,7 @@ function PromiseSaveTrack(TrackId, Name, Group, Public, MyApp, User){
                 TrackData.Name = Name
                 TrackData.Group = Group
                 TrackData.Public = Public
+                TrackData.Description = Description
                 TrackData.Color = "#0000FF"
                 TrackData.Date = new Date()
                 TrackData.Owner = User
