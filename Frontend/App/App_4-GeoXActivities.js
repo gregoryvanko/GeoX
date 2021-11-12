@@ -239,6 +239,12 @@ class GeoXActivities {
     }
 
     ClickSaveToMyTrack(TrackId){
+        // Get all group of user
+        GlobalCallApiPromise("GetAllGroups", "", "", "").then((reponse)=>{
+            this._UserGroup = reponse
+        },(erreur)=>{
+            console.log(erreur)
+        })
         // Open save box
         this.BuildSaveTrackVue(TrackId)
     }
@@ -312,8 +318,11 @@ class GeoXActivities {
 
     SaveToMyTrack(TrackId){
         if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            // effacer le message d'erreur
             document.getElementById("ErrorSaveTrack").innerText = ""
+            // modifier le boutton save
             document.getElementById("SaveTrack").innerText = "Saving..."
+            document.getElementById("SaveTrack").disabled = true
             // Send action
             let NewName = document.getElementById("InputTrackName").value 
             let NewGroup = document.getElementById("InputTrackGroup").value
@@ -325,6 +334,7 @@ class GeoXActivities {
                 CoreXWindow.DeleteWindow()
             },(erreur)=>{
                 document.getElementById("ErrorSaveTrack").innerText = erreur
+                document.getElementById("SaveTrack").disabled = false
             })
         } else {
             document.getElementById("ErrorSaveTrack").innerText = "Enter a name and a group before saving"

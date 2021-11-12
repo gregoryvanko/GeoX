@@ -174,6 +174,7 @@ class GeoXServer{
     }
 
     ApiGetTrackData(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetTrackData: " + JSON.stringify(Data), User, UserId)
         let Shared = require("./Shared")
         Shared.ApiGetTrackData(this._MyApp, Data, Res, User, UserId)
     }
@@ -181,9 +182,23 @@ class GeoXServer{
     ApiSaveTrack(Data, Res, User, UserId){
         let Shared = require("./Shared")
         if (Data.SaveType == "ById"){
+            this._MyApp.LogAppliInfo("ApiSaveTrack: " + JSON.stringify(Data), User, UserId)
             Shared.ApiSaveTrackById(this._MyApp, Data, Res, User, UserId)
         } else {
             Res.json({Error: true, ErrorMsg: "SaveType not found: " + Data.SaveType, Data: ""})
+            this._MyApp.LogAppliError(`ApiSaveTrack error, SaveType ${Data.SaveType} not found`, User, UserId)
+        }
+    }
+
+    async ApiGetAllGroups(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetAllGroups", User, UserId)
+        let Shared = require("./Shared")
+        let ReponseUserGroup = await Shared.PromiseGetUserGroup(this._MyApp, User)
+        if(!ReponseUserGroup.Error){
+            Res.json({Error: false, ErrorMsg: "", Data:ReponseUserGroup.Data})
+        } else {
+            Res.json({Error: true, ErrorMsg: "ApiGetAllGroups error: " + ReponseUserGroup.ErrorMsg, Data: ""})
+            this._MyApp.LogAppliError("ApiGetAllGroups error: " + ReponseUserGroup.ErrorMsg, User, UserId)
         }
     }
 }

@@ -645,9 +645,10 @@ function ApiSaveTrackById(MyApp, Data, Res, User, UserId){
             TrackData.Owner = User
             Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
                 Res.json({Error: false, ErrorMsg: "", Data:"Done"})
+                MyApp.LogAppliInfo("ApiSaveTrackById: Track:" + Data.TrackId + " is saved", User, UserId)
             },(erreur)=>{
-                MyApp.LogAppliError("ApiSaveTrackById inster track error: " + erreur, User, UserId)
                 Res.json({Error: true, ErrorMsg: "ApiSaveTrackById inster track error", Data: ""})
+                MyApp.LogAppliError("ApiSaveTrackById inster track error: " + erreur, User, UserId)
             })
         } else {
             MyApp.LogAppliError("ApiSaveTrackById Track id not found", User, UserId)
