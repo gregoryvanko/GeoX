@@ -201,5 +201,31 @@ class GeoXServer{
             this._MyApp.LogAppliError("ApiGetAllGroups error: " + ReponseUserGroup.ErrorMsg, User, UserId)
         }
     }
+
+    ApiGetAllMarkers(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetAllMarkers " + JSON.stringify(Data), User, UserId)
+
+        let numberofitem = 10
+        let cursor = Data.Page * numberofitem
+
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(this._MyApp.MongoUrl ,this._MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        const Query = {[MongoTracksCollection.Public]: true}
+        const Projection = {projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.StartPoint]: 1}}
+        const Sort = {[MongoTracksCollection.Date]: -1}
+        Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                Res.json({Error: false, ErrorMsg: "", Data:[]})
+            } else {
+                Res.json({Error: false, ErrorMsg: "", Data:reponse})
+            }
+        },(erreur)=>{
+            Res.json({Error: true, ErrorMsg: "ApiGetAllMarkers error: " + erreur, Data: ""})
+            this._MyApp.LogAppliError("ApiGetAllMarkers error: " + erreur, User, UserId)
+        })
+    }
 }
 module.exports.GeoXServer = GeoXServer

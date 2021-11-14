@@ -4,6 +4,9 @@ class GeoXActivities {
 
         this._IdDivApp = "divapp"
         this._IdDivTrackInfo = "DivTrackInfo"
+        this._IdDivContentTrackInfo = "DivContentTrackInfo"
+        this._MapId = "mapid"
+
         this._WindowScrollY = 0
         this._PageOfPosts = 0
         let me = this
@@ -18,6 +21,11 @@ class GeoXActivities {
         }, {threshold: [1]})
 
         this._UserGroup = null
+        this._IsPostPresentation = true
+
+        this._Map = null
+        this._PageOfMarkers = 0
+        this._AllMarkers = []
     }
 
     Initiation(){
@@ -67,23 +75,49 @@ class GeoXActivities {
         // Contener
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
         this._DivApp.appendChild(Conteneur)
-        // Titre de l'application
-        Conteneur.appendChild(CoreXBuild.DivTexte("Activities", "", "Titre"))
-        // DivApp
-        let divapp = CoreXBuild.Div(this._IdDivApp, "DivPostApp", "")
-        Conteneur.appendChild(divapp)
+
+        // si on prensente la vue sous forme de post
+        if (this._IsPostPresentation){
+            // si on avait affiché la carte on la supprime
+            if (this._Map){
+                this.RemoveMap()
+            }
+            // Button Map
+            Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnToogleMapPost.bind(this), "ActionMap",  `<img src="${Icon.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
+            // Titre de l'application
+            Conteneur.appendChild(CoreXBuild.DivTexte("Activities", "TitreActivities", "Titre"))
+            // DivApp
+            let divapp = CoreXBuild.Div(this._IdDivApp, "DivPostApp", "")
+            Conteneur.appendChild(divapp)
+            // Div Waiting
+            let divwaiting = CoreXBuild.DivTexte("Waiting...", "DivWaitingPost", "Texte", "margin-bottom: 2rem;")
+            Conteneur.appendChild(divwaiting)
+            // Get Posts
+            this.GetPosts()
+        // Si on presente la vue Map
+        } else {
+            // Button Post
+            Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnToogleMapPost.bind(this), "ActionMap",  `<img src="${Icon.GeoXActivities()}" alt="icon" width="32" height="32">`))
+            // Ajout du div qui va contenir la map
+            Conteneur.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
+            this._Map = new GeoXMap(this._MapId) 
+            this._Map.RenderMap()
+            this._Map.AddMarkersClusterGroup()
+            this._Map.OnClickOnMarker = this.ClickOnMarker.bind(this)
+            // Get All marker by page
+            this.GetAllMarkersByPage()
+        }
+        
         // DivTrackInfo
         let divtrackinfo = CoreXBuild.Div(this._IdDivTrackInfo, "DivTrackInfo", "")
         Conteneur.appendChild(divtrackinfo)
-        // Div Waiting
-        let divwaiting = CoreXBuild.DivTexte("Waiting...", "DivWaitingPost", "Texte", "margin-bottom: 2rem;")
-        Conteneur.appendChild(divwaiting)
+        let divcontenttrackinfo = CoreXBuild.Div(this._IdDivContentTrackInfo, "DivContentTrackInfo", "")
+        divtrackinfo.appendChild(divcontenttrackinfo)
         // empty space
         let divempty = document.createElement('div')
-        Conteneur.appendChild(divempty)
         divempty.style.height = "2rem"
-        // Get Posts
-        this.GetPosts()
+        divtrackinfo.appendChild(divempty)
+
     }
 
     GetPosts(){
@@ -148,11 +182,15 @@ class GeoXActivities {
         // Scroll to
         this._WindowScrollY = window.scrollY
 
+        // Hide titre
+        let DivTitreActivities = document.getElementById("TitreActivities")
+        DivTitreActivities.style.display = "none"
+
         // Hide divapp
         let divApp = document.getElementById(this._IdDivApp)
         divApp.style.display = "none"
 
-        // Hide waiting
+        // Hide waitingPost
         if (document.getElementById("DivWaitingPost")){
             document.getElementById("DivWaitingPost").style.display = "none"
         }
@@ -167,7 +205,7 @@ class GeoXActivities {
         divwaiting.innerText = "Waiting data..."
         divwaiting.style.textAlign = "center"
         divwaiting.style.marginTop = "5vh"
-        divTrackInfo.appendChild(divwaiting)
+        document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
         // fetch
         fetch("/getdataofpost/" + Id).then((response) => {
@@ -192,13 +230,16 @@ class GeoXActivities {
     }
 
     RenderTrackData(Data){
-        let divbackground = document.getElementById(this._IdDivTrackInfo)
+        let divbackground = document.getElementById(this._IdDivContentTrackInfo)
+
+        // Remove waiting
         divbackground.removeChild(document.getElementById("DivWaiting"))
 
         // Close button
         let button = document.createElement('button')
         button.classList.add("ButtonX");
-        button.style.marginBottom = "-1rem"
+        button.style.marginBottom = "-2.5rem"
+        button.style.zIndex = "100"
         button.onclick = this.RemoveTrackData.bind(this)
         divbackground.appendChild(button)
 
@@ -220,6 +261,10 @@ class GeoXActivities {
     RemoveTrackData(){
         event.stopPropagation()
 
+        // show titre
+        let DivTitreActivities = document.getElementById("TitreActivities")
+        DivTitreActivities.style.display = "block"
+
         // show divapp
         let divApp = document.getElementById(this._IdDivApp)
         divApp.style.display = "flex"
@@ -231,8 +276,8 @@ class GeoXActivities {
 
         // Hide divinfotrack
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
-        divTrackInfo.innerHTML = ""
         divTrackInfo.style.display = "none"
+        document.getElementById(this._IdDivContentTrackInfo).innerHTML = ""
 
         // Scroll to
         window.scrollTo(0, this._WindowScrollY);
@@ -240,7 +285,7 @@ class GeoXActivities {
 
     ClickSaveToMyTrack(TrackId){
         // Get all group of user
-        GlobalCallApiPromise("GetAllGroups", "", "", "").then((reponse)=>{
+        GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
             this._UserGroup = reponse
         },(erreur)=>{
             console.log(erreur)
@@ -329,7 +374,7 @@ class GeoXActivities {
             let NewPublic = document.getElementById("TogglePublic").checked
             let NewDescription = document.getElementById("DivContDesc").innerText
             let FctData = {SaveType: "ById", TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
-            GlobalCallApiPromise("SaveTrack", FctData, "", "").then((reponse)=>{
+            GlobalCallApiPromise("ApiSaveTrack", FctData, "", "").then((reponse)=>{
                 // Delete Window
                 CoreXWindow.DeleteWindow()
             },(erreur)=>{
@@ -343,7 +388,7 @@ class GeoXActivities {
 
     ClickDownloadGPX(Id){
         let FctData = {TrackId: Id, GetData: "GPX"}
-        GlobalCallApiPromise("GetTrackData", FctData, "", "").then((reponse)=>{
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
             var link = document.createElement('a')
             link.download = 'Track.gpx'
             var blob = new Blob([reponse], {typde: 'text/plain'})
@@ -353,6 +398,65 @@ class GeoXActivities {
             console.log(erreur)
             alert(erreur)
         })
+    }
+
+    /**
+     * Click on button Map
+     */
+    ClickOnToogleMapPost(){
+        if (this._IsPostPresentation){
+            this._IsPostPresentation = false
+        } else {
+            this._IsPostPresentation = true
+        }
+        this.LoadStartView()
+    }
+
+    /**
+     * Remove map and reset map data
+     */
+    RemoveMap(){
+        this._Map.RemoveMap()
+        this._Map = null
+        this._PageOfMarkers = 0
+        this._AllMarkers = []
+    }
+
+    /**
+     * Get makers of all tracks of GeoX by page
+     */
+    GetAllMarkersByPage(){
+        let FctData = {Page: this._PageOfMarkers}
+        GlobalCallApiPromise("ApiGetAllMarkers", FctData, "", "").then((reponse)=>{
+            if (reponse.length != 0){
+                this.RenderMarkersOnMap(reponse)
+                this._PageOfMarkers ++
+                this.GetAllMarkersByPage()
+            }
+        },(erreur)=>{
+            alert("Error: " + erreur)
+        })
+    }
+
+    /**
+     * Affiche les marker sur la carte
+     * @param {Array} Markers Array af Marker elements
+     */
+    RenderMarkersOnMap(Markers){
+        // Add each marker on map
+        Markers.forEach(element => {
+            this._Map.AddMarker(element)
+        });
+        // Save marker
+        this._AllMarkers.push(...Markers)
+    }
+
+    /**
+     * executee lors d'un click sur un marker
+     * @param {String} TrackId Track id of the clicked marker
+     */
+    ClickOnMarker(TrackId){
+        alert("coucou " + TrackId)
     }
 }
 

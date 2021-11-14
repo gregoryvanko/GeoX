@@ -77,9 +77,10 @@ class GeoX {
        this._MyApp.AddRouteGet("getdataofpost/:post", this._GeoXServer.GetDataOfPost.bind(this._GeoXServer))
 
       // API
-      this._MyApp.AddApiFct("GetTrackData", this._GeoXServer.ApiGetTrackData.bind(this), false)
-      this._MyApp.AddApiFct("SaveTrack", this._GeoXServer.ApiSaveTrack.bind(this), false)
-      this._MyApp.AddApiFct("GetAllGroups", this._GeoXServer.ApiGetAllGroups.bind(this), false)
+      this._MyApp.AddApiFct("ApiGetTrackData", this._GeoXServer.ApiGetTrackData.bind(this), false)
+      this._MyApp.AddApiFct("ApiSaveTrack", this._GeoXServer.ApiSaveTrack.bind(this), false)
+      this._MyApp.AddApiFct("ApiGetAllGroups", this._GeoXServer.ApiGetAllGroups.bind(this), false)
+      this._MyApp.AddApiFct("ApiGetAllMarkers", this._GeoXServer.ApiGetAllMarkers.bind(this), false)
          
       // Start
       this._MyApp.Start()
