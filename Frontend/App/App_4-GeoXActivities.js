@@ -5,7 +5,7 @@ class GeoXActivities {
         this._IdDivApp = "divapp"
         this._IdDivTrackInfo = "DivTrackInfo"
         this._IdDivContentTrackInfo = "DivContentTrackInfo"
-        this._IdDivMap = "mapid"
+        this._IdDivMap = "mapidActivites"
         this._IdDivTrackDataOnMap = "DivTrackDataOnMap"
 
         this._WindowScrollY = 0
@@ -30,8 +30,14 @@ class GeoXActivities {
     }
 
     Initiation(){
-        // Reset page of post
+        // Reset page
+        this._WindowScrollY = 0
         this._PageOfPosts = 0
+        this._UserGroup = null
+        this._IsPostPresentation = true
+        this._Map = null
+        this._PageOfMarkers = 0
+        this._AllMarkers = []
         // Show Action Button
         GlobalDisplayAction('On')
         // Clear Action List
@@ -110,8 +116,8 @@ class GeoXActivities {
         }
         
         // DivTrackInfo
-        let divtrackinfo = CoreXBuild.Div(this._IdDivTrackInfo, "DivTrackInfo", "")
-        Conteneur.appendChild(divtrackinfo)
+        let divtrackinfo = CoreXBuild.Div(this._IdDivTrackInfo, "DivTrackInfo", "margin-left:auto; margin-right:auto;")
+        this._DivApp.appendChild(divtrackinfo)
         let divcontenttrackinfo = CoreXBuild.Div(this._IdDivContentTrackInfo, "DivContentTrackInfo", "")
         divtrackinfo.appendChild(divcontenttrackinfo)
         // empty space
@@ -183,18 +189,9 @@ class GeoXActivities {
         // Scroll to
         this._WindowScrollY = window.scrollY
 
-        // Hide titre
-        let DivTitreActivities = document.getElementById("TitreActivities")
-        DivTitreActivities.style.display = "none"
-
-        // Hide divapp
-        let divApp = document.getElementById(this._IdDivApp)
+        // Hide divapp 
+        let divApp = document.getElementById("Conteneur")
         divApp.style.display = "none"
-
-        // Hide waitingPost
-        if (document.getElementById("DivWaitingPost")){
-            document.getElementById("DivWaitingPost").style.display = "none"
-        }
 
         // Show divinfotrack
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
@@ -224,9 +221,7 @@ class GeoXActivities {
             }
         })
         .catch((error) => {
-            let divapp = document.getElementById(this._IdDivApp)
-            divapp.innerHTML = ""
-            divapp.appendChild(this.GetDivError(error))
+            alert(error)
         });
     }
 
@@ -262,18 +257,9 @@ class GeoXActivities {
     RemoveTrackData(){
         event.stopPropagation()
 
-        // show titre
-        let DivTitreActivities = document.getElementById("TitreActivities")
-        DivTitreActivities.style.display = "block"
-
         // show divapp
-        let divApp = document.getElementById(this._IdDivApp)
+        let divApp = document.getElementById("Conteneur")
         divApp.style.display = "flex"
-
-        // show waiting
-        if (document.getElementById("DivWaitingPost")){
-            document.getElementById("DivWaitingPost").style.display = "block"
-        }
 
         // Hide divinfotrack
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
@@ -421,8 +407,6 @@ class GeoXActivities {
         this._Map = null
         this._PageOfMarkers = 0
         this._AllMarkers = []
-        let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
-        if (DivTrackDataOnMap != null){document.body.removeChild(DivTrackDataOnMap)}
 
     }
 
@@ -470,9 +454,13 @@ class GeoXActivities {
         let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
         if (DivTrackDataOnMap == null){
             DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
-            document.body.appendChild(DivTrackDataOnMap)
+            document.getElementById("Conteneur").appendChild(DivTrackDataOnMap)
+            DivTrackDataOnMap.addEventListener("click", this.GetTrackData.bind(this, TrackId))
         } else {
-            DivTrackDataOnMap.innerHTML = ""
+            document.getElementById("Conteneur").removeChild(DivTrackDataOnMap)
+            DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
+            document.getElementById("Conteneur").appendChild(DivTrackDataOnMap)
+            DivTrackDataOnMap.addEventListener("click", this.GetTrackData.bind(this, TrackId))
         }
         // Add track name
         let divname = document.createElement('div')
