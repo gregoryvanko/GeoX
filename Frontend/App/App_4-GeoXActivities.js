@@ -382,7 +382,6 @@ class GeoXActivities {
             link.href = window.URL.createObjectURL(blob)
             link.click()
         },(erreur)=>{
-            console.log(erreur)
             alert(erreur)
         })
     }
@@ -445,6 +444,7 @@ class GeoXActivities {
      */
     ClickOnMarker(TrackId){
         this.RenderTrackDataOnMap(TrackId)
+        this.RenderTrackGeoJSonOnMap(TrackId)
     }
 
     RenderTrackDataOnMap(TrackId){
@@ -485,6 +485,16 @@ class GeoXActivities {
         conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
         conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevMin, "m", CommonIcon.ElevationMin()))
         DivTrackDataOnMap.appendChild(conteneur)
+    }
+
+    RenderTrackGeoJSonOnMap(TrackId){
+        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+            this._Map.RemoveAllTracks()
+            this._Map.AddTrackOnMap(TrackId, reponse)        
+        },(erreur)=>{
+            alert(erreur)
+        })
     }
 }
 

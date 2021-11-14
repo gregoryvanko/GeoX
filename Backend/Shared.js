@@ -601,6 +601,8 @@ function ApiGetTrackData(MyApp, Data, Res, User, UserId){
     let Projection = {}
     if (Data.GetData == "GPX"){
         Projection = { projection:{[MongoTracksCollection.GpxData]: 1}}
+    } else if (Data.GetData == "GeoJSon"){
+        Projection = { projection:{[MongoTracksCollection.GeoJsonData]: 1}}
     }
     const Sort = {[MongoTracksCollection.Date]: -1}
     const Querry = {'_id': new MongoObjectId(Data.TrackId)}
@@ -611,8 +613,10 @@ function ApiGetTrackData(MyApp, Data, Res, User, UserId){
         } else {
             if (Data.GetData == "GPX"){
                 Res.json({Error: false, ErrorMsg: "", Data: reponse[0][MongoTracksCollection.GpxData]})
-                // Log
                 MyApp.LogAppliInfo("GPX send to user", User, UserId)
+            } else if (Data.GetData == "GeoJSon"){
+                Res.json({Error: false, ErrorMsg: "", Data: reponse[0][MongoTracksCollection.GeoJsonData]})
+                MyApp.LogAppliInfo("GeoJSon send to user", User, UserId)
             }
         }
     },(erreur)=>{

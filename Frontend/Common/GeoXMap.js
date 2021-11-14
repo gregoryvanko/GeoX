@@ -14,6 +14,24 @@ class GeoXMap{
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
+        // Style for Marker Start
+        this._IconPointStartOption = L.icon({
+            iconUrl: Icon.MarkerVert(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+        });
+        // Style for Marker End
+        this._IconPointEndOption = L.icon({
+            iconUrl: Icon.MarkerRouge(),
+            iconSize:     [40, 40],
+            iconAnchor:   [20, 40],
+            popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
+        });
+
+        // Track style
+        this._TrackWeight = (L.Browser.mobile) ? 5 : 3
+        this._TrackColor = "#0000FF"
     }
 
     get Map(){
@@ -107,5 +125,33 @@ class GeoXMap{
         this._MarkersCluster.eachLayer(function(layer) {
             me._MarkersCluster.removeLayer(layer)
         })
+    }
+
+    AddTrackOnMap(TrackId, GeoJson){
+        let WeightTrack = this._TrackWeight
+        var TrackStyle = {
+            "color": this._TrackColor,
+            "weight": WeightTrack
+        }
+        let layerTrack1=L.geoJSON(GeoJson, 
+            {
+                style: TrackStyle, 
+                filter: function(feature, layer) {if (feature.geometry.type == "LineString") return true}, 
+                arrowheads: {frequency: '100px', size: '15m', fill: true}
+            })
+            .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
+            .on('mouseout', function (e){e.target.setStyle({weight:WeightTrack});})
+            .addTo(this._LayerGroup)
+        layerTrack1.Type= "GeoXTrack"
+        layerTrack1.id = TrackId
+        // Get Start and end point
+        let numPts = GeoJson.features[0].geometry.coordinates.length;
+        let beg = GeoJson.features[0].geometry.coordinates[0];
+        let end = GeoJson.features[0].geometry.coordinates[numPts-1];
+        // Add marker
+        let MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._LayerGroup)
+        MarkerEnd.id = TrackId+ "end"
+        MarkerEnd.Type = "GeoXMarker"
+        MarkerEnd.dragging.disable();
     }
 }
