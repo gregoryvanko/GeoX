@@ -5,7 +5,8 @@ class GeoXActivities {
         this._IdDivApp = "divapp"
         this._IdDivTrackInfo = "DivTrackInfo"
         this._IdDivContentTrackInfo = "DivContentTrackInfo"
-        this._MapId = "mapid"
+        this._IdDivMap = "mapid"
+        this._IdDivTrackDataOnMap = "DivTrackDataOnMap"
 
         this._WindowScrollY = 0
         this._PageOfPosts = 0
@@ -99,8 +100,8 @@ class GeoXActivities {
             // Button Post
             Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnToogleMapPost.bind(this), "ActionMap",  `<img src="${Icon.GeoXActivities()}" alt="icon" width="32" height="32">`))
             // Ajout du div qui va contenir la map
-            Conteneur.appendChild(CoreXBuild.Div(this._MapId, "", "height: 100vh; width: 100%;"))
-            this._Map = new GeoXMap(this._MapId) 
+            Conteneur.appendChild(CoreXBuild.Div(this._IdDivMap, "", "height: 100vh; width: 100%;"))
+            this._Map = new GeoXMap(this._IdDivMap) 
             this._Map.RenderMap()
             this._Map.AddMarkersClusterGroup()
             this._Map.OnClickOnMarker = this.ClickOnMarker.bind(this)
@@ -420,6 +421,9 @@ class GeoXActivities {
         this._Map = null
         this._PageOfMarkers = 0
         this._AllMarkers = []
+        let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
+        if (DivTrackDataOnMap != null){document.body.removeChild(DivTrackDataOnMap)}
+
     }
 
     /**
@@ -456,7 +460,43 @@ class GeoXActivities {
      * @param {String} TrackId Track id of the clicked marker
      */
     ClickOnMarker(TrackId){
-        alert("coucou " + TrackId)
+        this.RenderTrackDataOnMap(TrackId)
+    }
+
+    RenderTrackDataOnMap(TrackId){
+        // Get Track data
+        let TrackData =  this._AllMarkers.find(x => x._id === TrackId)
+        // Build div trak data on map
+        let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
+        if (DivTrackDataOnMap == null){
+            DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
+            document.body.appendChild(DivTrackDataOnMap)
+        } else {
+            DivTrackDataOnMap.innerHTML = ""
+        }
+        // Add track name
+        let divname = document.createElement('div')
+        divname.innerHTML = TrackData.Name
+        divname.style.width ="100%"
+        divname.style.fontWeight ="bold"
+        divname.style.textAlign ="left"
+        divname.style.marginBottom ="0.5rem"
+        divname.style.marginLeft ="0.5rem"
+        divname.classList.add("Text")
+        DivTrackDataOnMap.appendChild(divname)
+        // Add track ingo
+        let conteneur = document.createElement('div')
+        conteneur.setAttribute("style","width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.Length, "Km", CommonIcon.Lenght()))
+        conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevCumulP, "m", CommonIcon.ElevationPlus()))
+        conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevCumulM, "m", CommonIcon.ElevationMoins()))
+        conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevMax, "m", CommonIcon.ElevationMax()))
+        conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevMin, "m", CommonIcon.ElevationMin()))
+        DivTrackDataOnMap.appendChild(conteneur)
     }
 }
 

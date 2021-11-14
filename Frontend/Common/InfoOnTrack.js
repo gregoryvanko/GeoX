@@ -108,18 +108,18 @@ class InfoOnTrack {
         let conteneur = document.createElement('div')
         conteneur.setAttribute("style","width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
         DivData.appendChild(conteneur)
-        conteneur.appendChild(this.DrawDataInfo(this._Length, "Km", CommonIcon.Lenght()))
-        conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._ElevCumulP, "m", CommonIcon.ElevationPlus()))
-        conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._ElevCumulM, "m", CommonIcon.ElevationMoins()))
-        conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._ElevMax, "m", CommonIcon.ElevationMax()))
-        conteneur.appendChild(this.DrawVerticalLine())
-        conteneur.appendChild(this.DrawDataInfo(this._ElevMin, "m", CommonIcon.ElevationMin()))
+        conteneur.appendChild(this.constructor.DrawDataInfo(this._Length, "Km", CommonIcon.Lenght()))
+        conteneur.appendChild(this.constructor.DrawVerticalLine())
+        conteneur.appendChild(this.constructor.DrawDataInfo(this._ElevCumulP, "m", CommonIcon.ElevationPlus()))
+        conteneur.appendChild(this.constructor.DrawVerticalLine())
+        conteneur.appendChild(this.constructor.DrawDataInfo(this._ElevCumulM, "m", CommonIcon.ElevationMoins()))
+        conteneur.appendChild(this.constructor.DrawVerticalLine())
+        conteneur.appendChild(this.constructor.DrawDataInfo(this._ElevMax, "m", CommonIcon.ElevationMax()))
+        conteneur.appendChild(this.constructor.DrawVerticalLine())
+        conteneur.appendChild(this.constructor.DrawDataInfo(this._ElevMin, "m", CommonIcon.ElevationMin()))
     }
 
-    DrawDataInfo(Value, Unite, Description){
+    static DrawDataInfo(Value, Unite, Description){
         let conteneur = document.createElement('div')
         conteneur.setAttribute("style","display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center;")
 
@@ -153,7 +153,7 @@ class InfoOnTrack {
         return conteneur
     }
 
-    DrawVerticalLine(){
+    static DrawVerticalLine(){
         let line = document.createElement("div")
         line.setAttribute("Style", "border-left: 2px solid #dfdfe8; height: 6vh;")
         return line
