@@ -245,13 +245,21 @@ class GeoXActivities {
         divbackground.appendChild(DivData)
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
 
-        // Save Button and download GPX Button
+        // Div Button Action
         let DivButtonAction = CoreXBuild.DivFlexRowAr("ButtonAction")
         divbackground.appendChild(DivButtonAction)
-        let ButtonSave = CoreXBuild.Button("Save", this.ClickSaveToMyTrack.bind(this, Data._id), "CloseButton", "SaveToMe")
+        // Button Save
+        let ButtonSave = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.SaveBlack(), "Save Track"), this.ClickSaveToMyTrack.bind(this, Data._id), "CloseButton", "SaveToMe")
         DivButtonAction.appendChild(ButtonSave)
-        let ButtonGPX = CoreXBuild.Button("GPX", this.ClickDownloadGPX.bind(this, Data._id), "CloseButton", "GPX")
+        // Button download GPX
+        let ButtonGPX = CoreXBuild.Button("&#8681 GPX", this.ClickDownloadGPX.bind(this, Data._id), "CloseButton", "GPX")
         DivButtonAction.appendChild(ButtonGPX)
+        // Button Go To Start
+        let ButtonGo = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go to start"), this.ClickGoToStart.bind(this, Data.StartPoint), "CloseButton", "GoToStart")
+        DivButtonAction.appendChild(ButtonGo)
+        // Button Follow track
+        let ButtonFollow = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.ClickFollowTrack.bind(this, Data._id), "CloseButton", "GoToStart")
+        DivButtonAction.appendChild(ButtonFollow)
     }
 
     RemoveTrackData(){
@@ -495,6 +503,32 @@ class GeoXActivities {
         },(erreur)=>{
             alert(erreur)
         })
+    }
+
+    /**
+     * Build content of a "image + text" button
+     * @param {src} Image src image value of the button
+     * @param {string} Text text of the button
+     * @returns 
+     */
+    BuildImageAndTextButtonContent(Image, Text){
+        return `<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Image}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">${Text}</div></div>`
+    }
+
+    /**
+     * Button Go to start clicked
+     * @param {Object} StartPoint Start point of the track
+     */
+    ClickGoToStart(StartPoint){
+        if ((navigator.platform.indexOf("iPhone") != -1) || (navigator.platform.indexOf("iPad") != -1) || (navigator.platform.indexOf("iPod") != -1)){
+            window.open(`maps://maps.google.com/maps?daddr=${StartPoint.Lat},${StartPoint.Lng}&amp;ll=`);
+        } else {
+            window.open(`https://maps.google.com/maps?daddr=${StartPoint.Lat},${StartPoint.Lng}&amp;ll=`)
+        }
+    }
+
+    ClickFollowTrack(TrackId){
+        alert(TrackId)
     }
 }
 

@@ -40,10 +40,6 @@ class InfoOnTrack {
 
     LoadView(){
         this._HtmlDiv.innerHTML=""
-        // Blank
-        let divblank = document.createElement('div')
-        divblank.style.height ="4vh"
-        //this._HtmlDiv.appendChild(divblank)
         // Info
         let DivInfo = document.createElement('div')
         DivInfo.classList.add("DivInfoOneTrack")
@@ -80,7 +76,6 @@ class InfoOnTrack {
         divdate.classList.add("TextSmall")
         divdate.style.width ="100%"
         divdate.style.paddingLeft ="2vh"
-        divdate.style.marginBottom ="2vh"
         divdate.style.color= "rgb(109, 109, 120)"
         DivInfo.appendChild(divdate)
         // Description

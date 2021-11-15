@@ -225,9 +225,9 @@
 }
 
 .DivInfoOneTrack{
-    margin-bottom: 1vh;
+    margin-bottom: 0.5rem;
     border: 1px solid #dfdfe8;
-    padding: 1vh;
+    padding: 0.5rem;
     box-sizing: border-box;
     width: 100%;
 }
@@ -238,7 +238,7 @@
 }
 
 .InfoOnTrackChart{
-    height:20vh; 
+    height:18vh; 
     width:100%;
 }
 
@@ -334,7 +334,6 @@ screen and (max-width: 700px)
     .AppConteneur{width: 95%;}
     .TitreInfoOneTrack{font-size: calc(var(--TitreIphone)*0.6);}
     .InfoOnTrackMap{height: 40vh;}
-    .InfoOnTrackChart{height:20vh;}
 }
 
 @media screen and (min-width: 1200px)
