@@ -90,6 +90,7 @@ class GeoXMap{
     AddMarkersClusterGroup(){
         // Build markerClusterGroup
         this._MarkersCluster = L.markerClusterGroup({
+            maxClusterRadius: 30,
             iconCreateFunction: function(cluster) {
                 return L.divIcon({ 
                     html: cluster.getChildCount(), 
