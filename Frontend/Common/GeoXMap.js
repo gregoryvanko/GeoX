@@ -128,7 +128,7 @@ class GeoXMap{
         })
     }
 
-    AddTrackOnMap(TrackId, GeoJson){
+    AddTrackOnMap(TrackId, GeoJson, FitBounds){
         let WeightTrack = this._TrackWeight
         var TrackStyle = {
             "color": this._TrackColor,
@@ -149,10 +149,20 @@ class GeoXMap{
         let numPts = GeoJson.features[0].geometry.coordinates.length;
         let beg = GeoJson.features[0].geometry.coordinates[0];
         let end = GeoJson.features[0].geometry.coordinates[numPts-1];
-        // Add marker
+        // Add marker Start
+        let MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption}).addTo(this._LayerGroup)
+        MarkerStart.id = TrackId + "start"
+        MarkerStart.Type = "GeoXMarker"
+        MarkerStart.dragging.disable();
+        // Add marker end
         let MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._LayerGroup)
         MarkerEnd.id = TrackId+ "end"
         MarkerEnd.Type = "GeoXMarker"
         MarkerEnd.dragging.disable();
+
+        // FitBounds
+        if (FitBounds){
+            this._Map.fitBounds(layerTrack1.getBounds())
+        }
     }
 }

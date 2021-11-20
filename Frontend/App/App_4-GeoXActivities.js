@@ -7,6 +7,7 @@ class GeoXActivities {
         this._IdDivContentTrackInfo = "DivContentTrackInfo"
         this._IdDivMap = "mapidActivites"
         this._IdDivTrackDataOnMap = "DivTrackDataOnMap"
+        this._IdDivMapFollow = "mapidFollow"
 
         this._WindowScrollY = 0
         this._PageOfPosts = 0
@@ -25,6 +26,7 @@ class GeoXActivities {
         this._IsPostPresentation = true
 
         this._Map = null
+        this._MapFollow = null
         this._PageOfMarkers = 0
         this._AllMarkers = []
     }
@@ -36,6 +38,7 @@ class GeoXActivities {
         this._UserGroup = null
         this._IsPostPresentation = true
         this._Map = null
+        this._MapFollow = null
         this._PageOfMarkers = 0
         this._AllMarkers = []
         // Show Action Button
@@ -79,6 +82,7 @@ class GeoXActivities {
     LoadStartView(){
         // Clear view
         this._DivApp.innerHTML=""
+
         // Contener
         let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
         this._DivApp.appendChild(Conteneur)
@@ -87,7 +91,10 @@ class GeoXActivities {
         if (this._IsPostPresentation){
             // si on avait affiché la carte on la supprime
             if (this._Map){
-                this.RemoveMap()
+                this._Map.RemoveMap()
+                this._Map = null
+                this._PageOfMarkers = 0
+                this._AllMarkers = []
             }
             // Button Map
             Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnToogleMapPost.bind(this), "ActionMap",  `<img src="${Icon.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
@@ -118,13 +125,17 @@ class GeoXActivities {
         // DivTrackInfo
         let divtrackinfo = CoreXBuild.Div(this._IdDivTrackInfo, "DivTrackInfo", "margin-left:auto; margin-right:auto;")
         this._DivApp.appendChild(divtrackinfo)
-        let divcontenttrackinfo = CoreXBuild.Div(this._IdDivContentTrackInfo, "DivContentTrackInfo", "")
-        divtrackinfo.appendChild(divcontenttrackinfo)
-        // empty space
+        divtrackinfo.appendChild(CoreXBuild.Div(this._IdDivContentTrackInfo, "DivContentTrackInfo", ""))
+        divtrackinfo.appendChild(this.BuildEmptySpace())
+
+        // DivFollowTrack
+        this._DivApp.appendChild(CoreXBuild.Div(this._IdDivMapFollow, "", "height: 100vh; width: 100%; display: none;")) 
+    }
+
+    BuildEmptySpace(){
         let divempty = document.createElement('div')
         divempty.style.height = "2rem"
-        divtrackinfo.appendChild(divempty)
-
+        return divempty
     }
 
     GetPosts(){
@@ -193,7 +204,7 @@ class GeoXActivities {
         let divApp = document.getElementById("Conteneur")
         divApp.style.display = "none"
 
-        // Show divinfotrack
+        // Show IdDivTrackInfo
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
         divTrackInfo.style.display = "flex"
 
@@ -407,17 +418,6 @@ class GeoXActivities {
     }
 
     /**
-     * Remove map and reset map data
-     */
-    RemoveMap(){
-        this._Map.RemoveMap()
-        this._Map = null
-        this._PageOfMarkers = 0
-        this._AllMarkers = []
-
-    }
-
-    /**
      * Get makers of all tracks of GeoX by page
      */
     GetAllMarkersByPage(){
@@ -452,7 +452,7 @@ class GeoXActivities {
      */
     ClickOnMarker(TrackId){
         this.RenderTrackDataOnMap(TrackId)
-        this.RenderTrackGeoJSonOnMap(TrackId)
+        this.RenderTrackGeoJSonOnMap(this._Map, TrackId)
     }
 
     RenderTrackDataOnMap(TrackId){
@@ -495,11 +495,11 @@ class GeoXActivities {
         DivTrackDataOnMap.appendChild(conteneur)
     }
 
-    RenderTrackGeoJSonOnMap(TrackId){
+    RenderTrackGeoJSonOnMap(Map, TrackId){
         let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
         GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
-            this._Map.RemoveAllTracks()
-            this._Map.AddTrackOnMap(TrackId, reponse)        
+            Map.RemoveAllTracks()
+            Map.AddTrackOnMap(TrackId, reponse, false)        
         },(erreur)=>{
             alert(erreur)
         })
@@ -528,7 +528,57 @@ class GeoXActivities {
     }
 
     ClickFollowTrack(TrackId){
-        alert(TrackId)
+        // Add wainting box
+        this.BuildWaitingBox()
+        // Get Track Data
+        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+            this.RemoveWaitingBox()
+            this.RenderTrackToFollowAndMap(TrackId, reponse)
+        },(erreur)=>{
+            this.RemoveWaitingBox()
+            alert(erreur)
+        })
+    }
+
+    BuildWaitingBox(){
+        // Add WaitingBox
+        let Content = CoreXBuild.DivFlexColumn("")
+        // Empty space
+        Content.appendChild(this.BuildEmptySpace())
+        // Texte waiting
+        Content.appendChild(CoreXBuild.DivTexte("Waiting data...", "", "text"))
+        // Empty space
+        Content.appendChild(this.BuildEmptySpace())
+        // Show window
+        CoreXWindow.BuildWindow(Content)
+    }
+
+    RemoveWaitingBox(){
+        CoreXWindow.DeleteWindow()
+    }
+
+    RenderTrackToFollowAndMap(TrackId, TrackGeoJson){
+        // Hide Conteneur 
+        let divApp = document.getElementById("Conteneur")
+        divApp.style.display = "none"
+
+        // Hide IdDivTrackInfo
+        let DivTrackInfo = document.getElementById(this._IdDivTrackInfo)
+        DivTrackInfo.style.display = "none"
+        document.getElementById(this._IdDivContentTrackInfo).innerHTML = ""
+
+        // Show IdDivMapFollow
+        let DivMapFollow = document.getElementById(this._IdDivMapFollow)
+        DivMapFollow.style.display = "block"
+
+        // Build Map
+        this._MapFollow = new GeoXMap(this._IdDivMapFollow) 
+        this._MapFollow.RenderMap()
+
+        // Add track
+        this._MapFollow.RemoveAllTracks()
+        this._MapFollow.AddTrackOnMap(TrackId, TrackGeoJson, true) 
     }
 }
 
