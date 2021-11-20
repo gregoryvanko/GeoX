@@ -26,7 +26,7 @@ class GeoXActivities {
         this._IsPostPresentation = true
 
         this._Map = null
-        this._MapFollow = null
+        this._FollowMyTrack = null
         this._PageOfMarkers = 0
         this._AllMarkers = []
     }
@@ -38,7 +38,7 @@ class GeoXActivities {
         this._UserGroup = null
         this._IsPostPresentation = true
         this._Map = null
-        this._MapFollow = null
+        this._FollowMyTrack = null
         this._PageOfMarkers = 0
         this._AllMarkers = []
         // Show Action Button
@@ -175,8 +175,8 @@ class GeoXActivities {
             Data.forEach(element => {
                 // Creation du post
                 let TempGeoxPsot = new GeoxPost(element)
-                TempGeoxPsot.addEventListener("click", this.GetTrackData.bind(this, element._id))
-                TempGeoxPsot.style.cursor = "pointer"
+                TempGeoxPsot.OnPostClick = this.GetTrackData.bind(this, element._id)
+                TempGeoxPsot.OnActionClick = this.ClickOnActionPost.bind(this)
                 TempGeoxPsot.style.width = "100%"
                 document.getElementById(this._IdDivApp).appendChild(TempGeoxPsot)
                 // si l'element est l'element milieu
@@ -234,6 +234,10 @@ class GeoXActivities {
         .catch((error) => {
             alert(error)
         });
+    }
+
+    ClickOnActionPost(ActionType){
+        alert("coucou " + ActionType)
     }
 
     RenderTrackData(Data){
@@ -480,7 +484,7 @@ class GeoXActivities {
         divname.style.marginLeft ="0.5rem"
         divname.classList.add("Text")
         DivTrackDataOnMap.appendChild(divname)
-        // Add track ingo
+        // Add track info
         let conteneur = document.createElement('div')
         conteneur.setAttribute("style","width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
         conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.Length, "Km", CommonIcon.Lenght()))
@@ -572,13 +576,36 @@ class GeoXActivities {
         let DivMapFollow = document.getElementById(this._IdDivMapFollow)
         DivMapFollow.style.display = "block"
 
-        // Build Map
-        this._MapFollow = new GeoXMap(this._IdDivMapFollow) 
-        this._MapFollow.RenderMap()
+        // On efface le bouton menu action
+        GlobalDisplayAction('Off')
 
-        // Add track
-        this._MapFollow.RemoveAllTracks()
-        this._MapFollow.AddTrackOnMap(TrackId, TrackGeoJson, true) 
+        // Start Follow Track on map
+        let TrackData = {TrackId: TrackId, TrackGeoJson: TrackGeoJson}
+        this._FollowMyTrack = new FollowTrackOnMap(this._IdDivMapFollow, TrackData)
+        this._FollowMyTrack.OnStop = this.StopFollowingTrack.bind(this)
+        this._FollowMyTrack.Start()
+    }
+
+    StopFollowingTrack(){
+        // Vider DivMapFollow
+        document.getElementById(this._IdDivMapFollow).innerHTML = ""
+
+        // Show Conteneur 
+        let divApp = document.getElementById("Conteneur")
+        divApp.style.display = "flex"
+
+        // Hide IdDivMapFollow
+        let DivMapFollow = document.getElementById(this._IdDivMapFollow)
+        DivMapFollow.style.display = "none"
+
+        // On efface le bouton menu action
+        GlobalDisplayAction('On')
+
+        // Stop Follow Track
+        this._FollowMyTrack = null
+
+        // Scroll to
+        window.scrollTo(0, this._WindowScrollY);
     }
 }
 

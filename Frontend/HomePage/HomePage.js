@@ -95,10 +95,8 @@ class HomePage{
             Data.forEach(element => {
                 // Creation du post
                 let TempGeoxPsot = new GeoxPost(element)
-                // ajout de l'element click sur le post
-                //TempGeoxPsot.addEventListener("click", this.GetTrackData.bind(this, element._id))
-                TempGeoxPsot.addEventListener("click", this.ShowMessageToOpenApp.bind(this))
-                TempGeoxPsot.style.cursor = "pointer"
+                TempGeoxPsot.OnPostClick = this.ShowMessageToOpenApp.bind(this)
+                TempGeoxPsot.OnActionClick = this.ClickOnActionPost.bind(this)
                 TempGeoxPsot.style.width = "100%"
                 document.getElementById(this._IdDivApp).appendChild(TempGeoxPsot)
                 // si l'element est l'element milieu: ajouter le listener pour declencher un getpost
@@ -168,84 +166,8 @@ class HomePage{
         document.body.removeChild(document.getElementById("InfoBox"))
     }
 
-    /**
-     * Recupère les données d'une track via son ID
-     * @param {number} Id Numero id de la track
-     */
-    GetTrackData(Id){
-        // Scroll to
-        this._WindowScrollY = window.scrollY
-
-        // Hide divapp
-        let divApp = document.getElementById(this._IdDivApp)
-        divApp.style.display = "none"
-
-        // Show divinfotrack
-        let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
-        divTrackInfo.style.display = "flex"
-
-        // Text
-        let divwaiting = document.createElement('div')
-        divwaiting.id = "DivWaiting"
-        divwaiting.innerText = "Waiting data..."
-        divwaiting.style.textAlign = "center"
-        divwaiting.style.marginTop = "5vh"
-        divTrackInfo.appendChild(divwaiting)
-
-        // fetch
-        fetch("/getdataofpost/" + Id).then((response) => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error("get track of posts failed: " + response.status + " " + response.statusText);
-            }
-        })
-        .then((responseJson) => {
-            if (responseJson.Error){
-                document.getElementById(this._IdDivApp).appendChild(this.GetDivError(responseJson.ErrorMsg))
-            } else {
-                this.RenderTrackData(responseJson.Data)
-            }
-        })
-        .catch((error) => {
-            let divapp = document.getElementById(this._IdDivApp)
-            divapp.innerHTML = ""
-            divapp.appendChild(this.GetDivError(error))
-        });
-    }
-
-    RenderTrackData(Data){
-        let divbackground = document.getElementById(this._IdDivTrackInfo)
-        divbackground.removeChild(document.getElementById("DivWaiting"))
-        // Add InfoOnTrack
-        let DivData = document.createElement('div')
-        DivData.id = "DivData"
-        DivData.style.padding = "1rem"
-        divbackground.appendChild(DivData)
-        let InfoTrackView = new InfoOnTrack(Data, "DivData")
-
-        // Close button
-        let button = document.createElement('button')
-        button.innerText = "Close"
-        button.classList.add("CloseButton");
-        button.onclick = this.RemoveTrackData.bind(this)
-        divbackground.appendChild(button)
-    }
-
-    RemoveTrackData(){
-        event.stopPropagation()
-
-        // show divapp
-        let divApp = document.getElementById(this._IdDivApp)
-        divApp.style.display = "flex"
-
-        // Hide divinfotrack
-        let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
-        divTrackInfo.innerHTML = ""
-        divTrackInfo.style.display = "none"
-
-        // Scroll to
-        window.scrollTo(0, this._WindowScrollY);
+    ClickOnActionPost(ActionType){
+        alert("coucou " + ActionType)
     }
 }
 

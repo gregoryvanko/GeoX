@@ -141,7 +141,7 @@ class GeoXManageTracks {
         let HTMLContent = CoreXBuild.DivFlexColumn()
         HTMLContent.appendChild(CoreXBuild.DivTexte("Track actions", "", "Text", ""))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128279 Get Track link", this.LoadViewLink.bind(this,Track._id), "Text ButtonCoreXWindow"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group, Track.Public, Track.Description), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button ("&#128394 Update Track", this.LoadViewUpdateTrack.bind(this,AppGroup, Track._id, Track.Name, Track.Group, Track.Public, Track.Description, Track.Color), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button (`<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Icon.Information()}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">Info Track</div></div>`, this.LoadViewInfoTrack.bind(this,Track._id), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button (`<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Icon.ModifyTrack()}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">Modify Track</div></div>`, this.ModifyTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, Track.Description), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128465 Delete Track", this.SendDeleteTrack.bind(this, Track._id, Track.Name, true), "Text ButtonCoreXWindow"))
@@ -184,7 +184,7 @@ class GeoXManageTracks {
         alert(window.location.origin + "/getmap/?trackid=" + TrackId)
     }
 
-    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup, Public, Description){
+    LoadViewUpdateTrack(Groups, TrackId, TrackName, TrackGroup, Public, Description, Color){
         CoreXWindow.DeleteWindow()
         // Clear Conteneur
         this._DivApp.innerHTML = ""
@@ -194,9 +194,9 @@ class GeoXManageTracks {
         // Titre de l'application
         Contener.appendChild(CoreXBuild.DivTexte("Update Track", "", "Titre", ""))
         // Input Name
-        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Name:", "Text", "InputTrackName",TrackName, "Input Text", "text", "Name",))
+        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name:", "Text", "InputTrackName",TrackName, "Input Text", "text", "Name",))
         // Input `Group
-        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Track Group:", "Text", "InputTrackGroup",TrackGroup, "Input Text", "text", "Group",))
+        Contener.appendChild(CoreXBuild.InputWithLabel("InputBox", "Group:", "Text", "InputTrackGroup",TrackGroup, "Input Text", "text", "Group",))
         // Add AutoComplete
         document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
         autocomplete({
@@ -229,8 +229,20 @@ class GeoXManageTracks {
         // Toggle Public
         let DivTooglePublic = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Contener.appendChild(DivTooglePublic)
-        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
+        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public:", "", "", ""))
         DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", Public))
+        // Color
+        let divColor = CoreXBuild.Div("", "InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; flex-wrap: wrap;")
+        let TextColor = CoreXBuild.DivTexte("Color:", "", "Text", "")
+        divColor.appendChild(TextColor)
+        let inputcolor = document.createElement("input")
+        divColor.appendChild(inputcolor)
+        inputcolor.setAttribute("id","SelectColor")
+        inputcolor.setAttribute("type","color")
+        inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; height: 2rem; border: 1px solid black;")
+        inputcolor.value = Color
+        //inputcolor.onchange = (event)=>{CoreXWindow.DeleteWindow(); this.ChangeTrackColor(event.target.value, element.Name, element.Length, element.Id)}
+        Contener.appendChild(divColor)
         // Div Button
         let DivBoxButton = CoreXBuild.Div("", "InputBox", "")
         Contener.appendChild(DivBoxButton)
@@ -282,6 +294,7 @@ class GeoXManageTracks {
             Track.Group = document.getElementById("InputTrackGroup").value 
             Track.Public = document.getElementById("TogglePublic").checked 
             Track.Description = document.getElementById("DivContDesc").innerText
+            Track.Color = document.getElementById("SelectColor").value
             // Data to send
             let CallToServer = new Object()
             CallToServer.Action = "Update"
@@ -338,6 +351,7 @@ class GeoXManageTracks {
         Contener.appendChild(DivTooglePublic)
         DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
         DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
+        
         // // Toggle MultiLine to OneLine
         // let DivToogle = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         // Contener.appendChild(DivToogle)
@@ -345,6 +359,7 @@ class GeoXManageTracks {
         // DivToogle.appendChild(CoreXBuild.ToggleSwitch("ToggleMultiToOneLine", true))
         
         // Div Map
+        
         let DivMap = CoreXBuild.Div("DivMap", "", "")
         Contener.appendChild(DivMap)
         // Div Button

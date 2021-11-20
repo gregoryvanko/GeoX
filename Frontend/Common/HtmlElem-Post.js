@@ -3,7 +3,6 @@ class GeoxPost extends HTMLElement {
         super()
         this.Shadow = this.attachShadow({mode: "open"})
 
-        this._Id = Data._id
         this._Name = Data.Name
         this._Description = Data.Description
         this._Date = Data.Date
@@ -12,27 +11,29 @@ class GeoxPost extends HTMLElement {
         this._Image = Data.Image
     }
 
-    set id(val){
-        this.setAttribute("id", val)
-    }
-
     connectedCallback(){
         this.Render()
     }
 
-    Render(){
-        this.id = this._Id
-        
+    Render(){        
         let DivPost = document.createElement('div') 
-        DivPost.setAttribute("id", this._Id)
         DivPost.classList.add("DivPost")
+        // Content
+        let DivContent = document.createElement('div')
+        DivContent.style.width = "100%"
+        DivContent.style.cursor = "pointer"
+        DivContent.onclick = this.OnPostClick.bind(this)
+        DivPost.appendChild(DivContent)
         // Add Info
-        DivPost.appendChild(this.RenderPostsTitre(this._Name))
+        DivContent.appendChild(this.RenderPostsTitre(this._Name))
         // Add mesure
-        DivPost.appendChild(this.RenderPostsMesure(this._Description, this._Date, this._Length, this._InfoElevation))
+        DivContent.appendChild(this.RenderPostsMesure(this._Description, this._Date, this._Length, this._InfoElevation))
         // Add image
-        DivPost.appendChild(this.RenderPostsMapImage(this._Image))
+        DivContent.appendChild(this.RenderPostsMapImage(this._Image))
+        // Add Action Button
+        DivPost.appendChild(this.RenderActionButton())
         
+        // Add CSS to Shadow element
         this.Shadow.innerHTML= `
         <style>
             .DivPost{
@@ -137,9 +138,33 @@ class GeoxPost extends HTMLElement {
                 border-left: 0.2rem solid #dfdfe8; 
                 height: 3rem;
             }
+
+            .CloseButton{
+                margin-bottom: 0.5rem;
+                margin-top: 0.5rem;
+                padding: 0.4rem;
+                cursor: pointer;
+                border: 1px solid black;
+                border-radius: 1rem;
+                text-align: center;
+                display: inline-block;
+                color: black;
+                background: transparent;
+                outline: none;
+                font-size: 1rem;
+                width: 4rem;
+                margin-left: auto;
+                margin-right: auto;
+                background-color: white;
+            }
         </style>
         `
+        // Add DivPost to shadow element
         this.Shadow.appendChild(DivPost)
+    }
+
+    OnPostClick(){
+        alert('click on post')
     }
 
     RenderPostsTitre(PostName = "Name"){
@@ -164,7 +189,7 @@ class GeoxPost extends HTMLElement {
         Div.appendChild(DivDescription)
         DivDescription.classList.add("PostDescription")
         DivDescription.innerText= PsotDescription
-
+        // Info track
         let DivCont = document.createElement('div')
         Div.appendChild(DivCont)
         DivCont.classList.add("PostInfo")
@@ -233,6 +258,36 @@ class GeoxPost extends HTMLElement {
         }
     }
 
+    RenderActionButton(){
+        let Div = document.createElement('div')
+        Div.classList.add("PostInfo")
+        Div.classList.add("PostInfoBox")
+        let DivContent = document.createElement('div')
+        Div.appendChild(DivContent)
+        DivContent.classList.add("FlexRowAr")
+        DivContent.appendChild(this.RenderButton(this.GetSaveBlack(), "Save"))
+        DivContent.appendChild(this.RenderPostsMesureInfoVerticalLine())
+        DivContent.appendChild(this.RenderButton(this.GetSaveBlack(), "GPX"))
+        DivContent.appendChild(this.RenderPostsMesureInfoVerticalLine())
+        DivContent.appendChild(this.RenderButton(this.GetSaveBlack(), "GoTo"))
+        DivContent.appendChild(this.RenderPostsMesureInfoVerticalLine())
+        DivContent.appendChild(this.RenderButton(this.GetSaveBlack(), "Follow"))
+
+        return Div
+    }
+
+    RenderButton(Image, ActionType){
+        let button = document.createElement('button')
+        button.innerHTML = `<img src="${Image}" alt="icon" width="20" height="20">`
+        button.classList.add("CloseButton");
+        button.onclick = this.OnActionClick.bind(this, ActionType)
+        return button
+    }
+
+    OnActionClick(ActionType){
+        alert(ActionType)
+    }
+
     GetDateString(DateString){
         var Now = new Date(DateString)
         var dd = Now.getDate()
@@ -241,6 +296,10 @@ class GeoxPost extends HTMLElement {
         if(dd<10) {dd='0'+dd} 
         if(mm<10) {mm='0'+mm}
         return yyyy + "-" + mm + "-" + dd
+    }
+
+    GetSaveBlack(){
+        return 'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxNzIgMTcyIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBmb250LWZhbWlseT0ibm9uZSIgZm9udC13ZWlnaHQ9Im5vbmUiIGZvbnQtc2l6ZT0ibm9uZSIgdGV4dC1hbmNob3I9Im5vbmUiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTogbm9ybWFsIj48cGF0aCBkPSJNMCwxNzJ2LTE3MmgxNzJ2MTcyeiIgZmlsbD0ibm9uZSI+PC9wYXRoPjxnIGZpbGw9IiMwMDAwMDAiPjxwYXRoIGQ9Ik0yNC4wOCwxMy43NmMtNS42NjAzNiwwIC0xMC4zMiw0LjY1OTY0IC0xMC4zMiwxMC4zMnYxMjMuODRjMCw1LjY2MDM3IDQuNjU5NjQsMTAuMzIgMTAuMzIsMTAuMzJoMTIzLjg0YzUuNjYwMzcsMCAxMC4zMiwtNC42NTk2MyAxMC4zMiwtMTAuMzJ2LTEwMi41MTQ2OWMtMC4wMDAxOCwtMC45MTIyOCAtMC4zNjI2OSwtMS43ODcxNSAtMS4wMDc4MSwtMi40MzIxOWwtMjguMjA1MzEsLTI4LjIwNTMxYy0wLjY0NTA0LC0wLjY0NTEyIC0xLjUxOTksLTEuMDA3NjQgLTIuNDMyMTksLTEuMDA3ODF6TTI0LjA4LDIwLjY0aDE3LjJ2NDEuMjhjMCw1LjY2MDM3IDQuNjU5NjMsMTAuMzIgMTAuMzIsMTAuMzJoNjUuMzZjNS42NjAzNywwIDEwLjMyLC00LjY1OTYzIDEwLjMyLC0xMC4zMnYtMzkuMTcwMzFsMjQuMDgsMjQuMDh2MTAxLjA5MDMxYzAsMS45MDc2MyAtMS41MzIzNywzLjQ0IC0zLjQ0LDMuNDRoLTE3LjJ2LTUxLjZjMCwtNS42NjAzNyAtNC42NTk2MywtMTAuMzIgLTEwLjMyLC0xMC4zMmgtNjguOGMtNS42NjAzNywwIC0xMC4zMiw0LjY1OTYzIC0xMC4zMiwxMC4zMnY1MS42aC0xNy4yYy0xLjkwNzY0LDAgLTMuNDQsLTEuNTMyMzcgLTMuNDQsLTMuNDR2LTEyMy44NGMwLC0xLjkwNzY0IDEuNTMyMzYsLTMuNDQgMy40NCwtMy40NHpNNDguMTYsMjAuNjRoNzIuMjR2NDEuMjhjMCwxLjkwNzYzIC0xLjUzMjM3LDMuNDQgLTMuNDQsMy40NGgtNjUuMzZjLTEuOTA3NjMsMCAtMy40NCwtMS41MzIzNyAtMy40NCwtMy40NHpNOTkuNzYsMjcuNTJjLTEuODk5NzgsMC4wMDAxOSAtMy40Mzk4MSwxLjU0MDIyIC0zLjQ0LDMuNDR2MjQuMDhjMC4wMDAxOSwxLjg5OTc4IDEuNTQwMjIsMy40Mzk4MSAzLjQ0LDMuNDRoMTAuMzJjMS44OTk3OCwtMC4wMDAxOSAzLjQzOTgxLC0xLjU0MDIyIDMuNDQsLTMuNDR2LTI0LjA4Yy0wLjAwMDE5LC0xLjg5OTc4IC0xLjU0MDIyLC0zLjQzOTgxIC0zLjQ0LC0zLjQ0ek0xMDMuMiwzNC40aDMuNDR2MTcuMmgtMy40NHpNNTEuNiw5Ni4zMmg2OC44YzEuOTA3NjMsMCAzLjQ0LDEuNTMyMzcgMy40NCwzLjQ0djUxLjZoLTc1LjY4di01MS42YzAsLTEuOTA3NjMgMS41MzIzNywtMy40NCAzLjQ0LC0zLjQ0ek0yNy41MiwxMzcuNnY2Ljg4aDYuODh2LTYuODh6TTEzNy42LDEzNy42djYuODhoNi44OHYtNi44OHoiPjwvcGF0aD48L2c+PC9nPjwvc3ZnPg=='
     }
 
     GetSvgNoImageDiv(){
