@@ -29,6 +29,8 @@ class GeoXActivities {
         this._FollowMyTrack = null
         this._PageOfMarkers = 0
         this._AllMarkers = []
+
+        this._FiltrePost = {DistanceMin: 0, DistanceMax: null}
     }
 
     Initiation(){
@@ -143,7 +145,10 @@ class GeoXActivities {
     }
 
     GetPosts(){
-        fetch("/getpageofpost/" + this._PageOfPosts).then((response) => {
+        let myHeaders = new Headers({"X-filter": JSON.stringify(this._FiltrePost)});
+        let myInit = { method: 'GET', headers: myHeaders};
+
+        fetch("/getpageofpost/" + this._PageOfPosts, myInit).then((response) => {
             if (response.ok) {
               return response.json();
             } else {
@@ -621,7 +626,61 @@ class GeoXActivities {
     }
 
     ClickOnFilter(){
-        alert("ToDo")
+        // Create filter view
+        let Conteneur = CoreXBuild.DivFlexColumn("")
+        // Titre
+        Conteneur.appendChild(CoreXBuild.DivTexte("Filter", "", "Titre", "width:100%; text-align: center;"))
+        // Min Km
+        let DivMinKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Conteneur.appendChild(DivMinKm)
+        DivMinKm.appendChild(CoreXBuild.DivTexte("Distance Min (Km):", "", "", ""))
+        DivMinKm.appendChild(CoreXBuild.Input("MinKm", this.GetMinMaxKm("Min"), "Input", "width: 20%;", "number", "MinKm"))
+        // Max Km
+        let DivMaxKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Conteneur.appendChild(DivMaxKm)
+        DivMaxKm.appendChild(CoreXBuild.DivTexte("Max Distance (Km):", "", "", ""))
+        DivMaxKm.appendChild(CoreXBuild.Input("MaxKm", this.GetMinMaxKm("Max"), "Input", "width: 20%;", "number", "MaxKm"))
+        // Empty space
+        Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Div Button
+        let DivButton = CoreXBuild.DivFlexRowAr("")
+        Conteneur.appendChild(DivButton)
+        // Button save
+        DivButton.appendChild(CoreXBuild.Button("Save",this.SetFilter.bind(this),"Text Button ButtonWidth30", "Save"))
+        // Button cancel
+        DivButton.appendChild(CoreXBuild.Button("Cancel",CoreXWindow.DeleteWindow,"Text Button ButtonWidth30", "Cancel"))
+        // Empty space
+        Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        // Build window
+        CoreXWindow.BuildWindow(Conteneur)
+    }
+
+    GetMinMaxKm(Type){
+        let reponse = null
+        if (Type == "Min"){
+            if (this._FiltrePost.DistanceMin == null){
+                reponse = 0
+            } else {
+                reponse = parseInt(this._FiltrePost.DistanceMin)
+            }
+        } else {
+            if (this._FiltrePost.DistanceMax == null){
+                reponse = 200
+            } else {
+                reponse = parseInt(this._FiltrePost.DistanceMax)
+            }
+        }
+        return reponse
+    }
+
+    SetFilter(){
+        // Set filter
+        this._FiltrePost.DistanceMin = parseInt(document.getElementById("MinKm").value)
+        this._FiltrePost.DistanceMax = parseInt(document.getElementById("MaxKm").value)
+        // close window
+        CoreXWindow.DeleteWindow()
+        // retrive post
+        //this.LoadStartView()
     }
 }
 

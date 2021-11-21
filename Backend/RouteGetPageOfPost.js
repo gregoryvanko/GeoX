@@ -1,11 +1,15 @@
 function CallRouteGetPageOfPost(req, res, MyApp){
     let Page = req.params.page
-    GetPostOfPage(Page, res, MyApp)
+    let Filter = null
+    if (req.headers["x-filter"]){
+        Filter = JSON.parse(req.headers["x-filter"])
+    }
+    GetPostOfPage(Page, Filter, res, MyApp)
 }
 
-async function GetPostOfPage (Page, res, MyApp){
+async function GetPostOfPage (Page, Filter, res, MyApp){
     // Get Post of page
-    let ReponsePostOfPageFromDb = await PromiseGetPostOfPageFromDb(parseInt(Page), MyApp)
+    let ReponsePostOfPageFromDb = await PromiseGetPostOfPageFromDb(parseInt(Page), Filter, MyApp)
     if(ReponsePostOfPageFromDb.Error){
         MyApp.LogAppliError(ReponsePostOfPageFromDb.ErrorMsg, "GetPageOfPost", "GetPageOfPost")
         res.status("500").json(ReponsePostOfPageFromDb)
@@ -14,7 +18,7 @@ async function GetPostOfPage (Page, res, MyApp){
     }
 }
 
-function PromiseGetPostOfPageFromDb(Page, MyApp){
+function PromiseGetPostOfPageFromDb(Page, Filter, MyApp){
     return new Promise(resolve => {
         let numberofitem = 5
         let cursor = Page * numberofitem
