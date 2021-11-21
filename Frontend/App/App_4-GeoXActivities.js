@@ -30,7 +30,7 @@ class GeoXActivities {
         this._PageOfMarkers = 0
         this._AllMarkers = []
 
-        this._FiltrePost = {DistanceMin: 0, DistanceMax: null}
+        this._FiltrePost = {DistanceMin: 1, DistanceMax: 200}
     }
 
     Initiation(){
@@ -434,6 +434,7 @@ class GeoXActivities {
             this._IsPostPresentation = false
         } else {
             this._IsPostPresentation = true
+            this._PageOfPosts = 0
         }
         this.LoadStartView()
     }
@@ -634,12 +635,12 @@ class GeoXActivities {
         let DivMinKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Conteneur.appendChild(DivMinKm)
         DivMinKm.appendChild(CoreXBuild.DivTexte("Distance Min (Km):", "", "", ""))
-        DivMinKm.appendChild(CoreXBuild.Input("MinKm", this.GetMinMaxKm("Min"), "Input", "width: 20%;", "number", "MinKm"))
+        DivMinKm.appendChild(CoreXBuild.Input("MinKm", this._FiltrePost.DistanceMin, "Input", "width: 20%;", "number", "MinKm"))
         // Max Km
         let DivMaxKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Conteneur.appendChild(DivMaxKm)
         DivMaxKm.appendChild(CoreXBuild.DivTexte("Max Distance (Km):", "", "", ""))
-        DivMaxKm.appendChild(CoreXBuild.Input("MaxKm", this.GetMinMaxKm("Max"), "Input", "width: 20%;", "number", "MaxKm"))
+        DivMaxKm.appendChild(CoreXBuild.Input("MaxKm", this._FiltrePost.DistanceMax, "Input", "width: 20%;", "number", "MaxKm"))
         // Empty space
         Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
         // Div Button
@@ -655,24 +656,6 @@ class GeoXActivities {
         CoreXWindow.BuildWindow(Conteneur)
     }
 
-    GetMinMaxKm(Type){
-        let reponse = null
-        if (Type == "Min"){
-            if (this._FiltrePost.DistanceMin == null){
-                reponse = 0
-            } else {
-                reponse = parseInt(this._FiltrePost.DistanceMin)
-            }
-        } else {
-            if (this._FiltrePost.DistanceMax == null){
-                reponse = 200
-            } else {
-                reponse = parseInt(this._FiltrePost.DistanceMax)
-            }
-        }
-        return reponse
-    }
-
     SetFilter(){
         // Set filter
         this._FiltrePost.DistanceMin = parseInt(document.getElementById("MinKm").value)
@@ -680,7 +663,8 @@ class GeoXActivities {
         // close window
         CoreXWindow.DeleteWindow()
         // retrive post
-        //this.LoadStartView()
+        this._PageOfPosts = 0
+        this.LoadStartView()
     }
 }
 

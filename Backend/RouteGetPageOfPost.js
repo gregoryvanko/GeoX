@@ -32,7 +32,17 @@ function PromiseGetPostOfPageFromDb(Page, Filter, MyApp){
         ReponsePost.ErrorMsg = ""
         ReponsePost.Data = []
 
-        const Query = {[MongoTracksCollection.Public]: true}
+        let Query = {[MongoTracksCollection.Public]: true}
+        if (Filter != null){
+            if ((Filter.DistanceMin != 1) || (Filter.DistanceMax != 200)){
+                Query = {
+                    $and:[
+                        {[MongoTracksCollection.Public]: true},
+                        {[MongoTracksCollection.Length]:{$gte: Filter.DistanceMin}},
+                        {[MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}}
+                    ]}
+            }
+        }
         const Projection = {projection:{[MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.Image]: 1, [MongoTracksCollection.StartPoint]: 1}}
         const Sort = {[MongoTracksCollection.Date]: -1}
         Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{

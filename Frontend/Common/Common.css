@@ -318,8 +318,8 @@
 }
 
 .ButtonLeftActionSecond{
-    left: 0px; 
-    top: 55px;
+    left: 55px; 
+    top: 0px;
     position: fixed;
     display: inline;
     z-index: 999;
@@ -356,7 +356,7 @@ screen and (max-width: 700px)
     .AppConteneur{width: 95%;}
     .TitreInfoOneTrack{font-size: calc(var(--TitreIphone)*0.6);}
     .InfoOnTrackMap{height: 40vh;}
-    .ButtonLeftActionSecond{font-size: calc(3vw * 1.5);height: 10VW; width: 10VW; left: 4px; top: 12vw; }
+    .ButtonLeftActionSecond{font-size: calc(3vw * 1.5);height: 10VW; width: 10VW; left: 12vw; }
 }
 
 @media screen and (min-width: 1200px)
