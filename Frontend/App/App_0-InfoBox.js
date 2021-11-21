@@ -161,7 +161,7 @@ class InfoBox{
         // Add button Init Fitbound
         action.appendChild(CoreXBuild.Button (`<img src="${Icon.FitBoundWhite()}" alt="icon" width="30" height="30">`, this.SetFitBound.bind(this, this._InitFitBound), "ButtonInfoBoxNav", ""))
         // Add filter button
-        action.appendChild(CoreXBuild.Button (`<img src="${Icon.Filter()}" alt="icon" width="30" height="30">`, this.FilterTrack.bind(this), "ButtonInfoBoxNav", ""))
+        action.appendChild(CoreXBuild.Button (`<img src="${Icon.FilterBlanc()}" alt="icon" width="30" height="30">`, this.FilterTrack.bind(this), "ButtonInfoBoxNav", ""))
         
         // Get content
         let content = document.getElementById("InfoBoxContent")

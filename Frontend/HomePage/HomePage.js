@@ -33,7 +33,7 @@ class HomePage{
 
     GetButtonLunchApp(){
         let button = document.createElement('button')
-        button.innerText = "Open Application"
+        button.innerText = "Login"
         button.classList.add("OpenButton");
         button.classList.add("FixedRight");
         button.onclick = this.OpenApp.bind(this)
@@ -95,8 +95,12 @@ class HomePage{
             Data.forEach(element => {
                 // Creation du post
                 let TempGeoxPsot = new GeoxPost(element)
-                TempGeoxPsot.OnPostClick = this.ShowMessageToOpenApp.bind(this)
-                TempGeoxPsot.OnActionClick = this.ClickOnActionPost.bind(this)
+                TempGeoxPsot.OnClickPost = this.ShowMessageToOpenApp.bind(this, "Login to access to more informations on this track.")
+                TempGeoxPsot.OnClickSave = this.ShowMessageToOpenApp.bind(this, "Login to save this track")
+                TempGeoxPsot.OnClickGpx = this.ShowMessageToOpenApp.bind(this, "Login to download the GPX file of this track")
+                TempGeoxPsot.OnClickGoTo = this.ShowMessageToOpenApp.bind(this, "Login to go to sart point of this track")
+                TempGeoxPsot.OnClickFollow = this.ShowMessageToOpenApp.bind(this, "Login to follow this track")
+
                 TempGeoxPsot.style.width = "100%"
                 document.getElementById(this._IdDivApp).appendChild(TempGeoxPsot)
                 // si l'element est l'element milieu: ajouter le listener pour declencher un getpost
@@ -128,7 +132,7 @@ class HomePage{
         return placeholder
     }
 
-    ShowMessageToOpenApp(){
+    ShowMessageToOpenApp(MessageText){
         if (!document.getElementById("InfoBox")){
             // Conteneur
             let InfoBox = document.createElement('div')
@@ -142,16 +146,16 @@ class HomePage{
             // Texte
             let texte = document.createElement('div')
             InfoBox.appendChild(texte)
-            texte.innerText = "Open the application to access to more informations, fonctionalities, and to download GPX file of this track."
+            texte.innerText = MessageText
             texte.style.marginBottom = "2rem"
             texte.style.width = "80%"
             texte.style.marginLeft = "auto"
             texte.style.marginRight = "auto"
-            // Button Open App
+            // Button Login App
             let button = document.createElement('button')
             InfoBox.appendChild(button)
             button.classList.add("OpenButton");
-            button.innerText = "Open Application"
+            button.innerText = "Login"
             button.onclick = this.OpenApp.bind(this)
             // empty space
             let divempty = document.createElement('div')
@@ -164,10 +168,6 @@ class HomePage{
 
     HideMessageToOpenApp(){
         document.body.removeChild(document.getElementById("InfoBox"))
-    }
-
-    ClickOnActionPost(ActionType){
-        alert("coucou " + ActionType)
     }
 }
 

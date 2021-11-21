@@ -58,7 +58,7 @@ class GeoXActivities {
     /**
      * Action pour aller au module de creation de track
      */
-     GoToCreateTrack(){
+    GoToCreateTrack(){
         GlobalReset()
         MyGeoXCreateTrack.Initiation()
     }
@@ -98,6 +98,8 @@ class GeoXActivities {
             }
             // Button Map
             Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnToogleMapPost.bind(this), "ActionMap",  `<img src="${Icon.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
+            // Button Filter
+            Conteneur.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
             // Titre de l'application
             Conteneur.appendChild(CoreXBuild.DivTexte("Activities", "TitreActivities", "Titre"))
             // DivApp
@@ -112,6 +114,8 @@ class GeoXActivities {
         } else {
             // Button Post
             Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnToogleMapPost.bind(this), "ActionMap",  `<img src="${Icon.GeoXActivities()}" alt="icon" width="32" height="32">`))
+            // Button Filter
+            Conteneur.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
             // Ajout du div qui va contenir la map
             Conteneur.appendChild(CoreXBuild.Div(this._IdDivMap, "", "height: 100vh; width: 100%;"))
             this._Map = new GeoXMap(this._IdDivMap) 
@@ -175,8 +179,12 @@ class GeoXActivities {
             Data.forEach(element => {
                 // Creation du post
                 let TempGeoxPsot = new GeoxPost(element)
-                TempGeoxPsot.OnPostClick = this.GetTrackData.bind(this, element._id)
-                TempGeoxPsot.OnActionClick = this.ClickOnActionPost.bind(this)
+                TempGeoxPsot.OnClickPost = this.GetTrackData.bind(this, element._id)
+                TempGeoxPsot.OnClickSave = this.ClickSaveToMyTrack.bind(this, element._id)
+                TempGeoxPsot.OnClickGpx = this.ClickDownloadGPX.bind(this, element._id)
+                TempGeoxPsot.OnClickGoTo = this.ClickGoToStart.bind(this, element.StartPoint)
+                TempGeoxPsot.OnClickFollow = this.ClickFollowTrackOnPost.bind(this, element._id)
+
                 TempGeoxPsot.style.width = "100%"
                 document.getElementById(this._IdDivApp).appendChild(TempGeoxPsot)
                 // si l'element est l'element milieu
@@ -196,6 +204,13 @@ class GeoXActivities {
         }
     }
 
+    ClickFollowTrackOnPost(TrackId){
+        // Scroll to
+        this._WindowScrollY = window.scrollY
+        // Click on follow Track
+        this.ClickFollowTrack(TrackId)
+    }
+
     GetTrackData(Id){
         // Scroll to
         this._WindowScrollY = window.scrollY
@@ -213,7 +228,8 @@ class GeoXActivities {
         divwaiting.id = "DivWaiting"
         divwaiting.innerText = "Waiting data..."
         divwaiting.style.textAlign = "center"
-        divwaiting.style.marginTop = "5vh"
+        divwaiting.style.marginTop = "2rem"
+        divwaiting.style.marginBottom = "2rem"
         document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
         // fetch
@@ -234,10 +250,6 @@ class GeoXActivities {
         .catch((error) => {
             alert(error)
         });
-    }
-
-    ClickOnActionPost(ActionType){
-        alert("coucou " + ActionType)
     }
 
     RenderTrackData(Data){
@@ -267,7 +279,7 @@ class GeoXActivities {
         let ButtonSave = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.SaveBlack(), "Save Track"), this.ClickSaveToMyTrack.bind(this, Data._id), "CloseButton", "SaveToMe")
         DivButtonAction.appendChild(ButtonSave)
         // Button download GPX
-        let ButtonGPX = CoreXBuild.Button("&#8681 GPX", this.ClickDownloadGPX.bind(this, Data._id), "CloseButton", "GPX")
+        let ButtonGPX = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Download(), "GPX"), this.ClickDownloadGPX.bind(this, Data._id), "CloseButton", "GPX")
         DivButtonAction.appendChild(ButtonGPX)
         // Button Go To Start
         let ButtonGo = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go to start"), this.ClickGoToStart.bind(this, Data.StartPoint), "CloseButton", "GoToStart")
@@ -606,6 +618,10 @@ class GeoXActivities {
 
         // Scroll to
         window.scrollTo(0, this._WindowScrollY);
+    }
+
+    ClickOnFilter(){
+        alert("ToDo")
     }
 }
 

@@ -145,8 +145,8 @@ class GeoXManageTracks {
         HTMLContent.appendChild(CoreXBuild.Button (`<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Icon.Information()}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">Info Track</div></div>`, this.LoadViewInfoTrack.bind(this,Track._id), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button (`<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Icon.ModifyTrack()}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">Modify Track</div></div>`, this.ModifyTrack.bind(this,this._AppGroup, Track._id, Track.Name, Track.Group, Track.Public, Track.Description), "Text ButtonCoreXWindow"))
         HTMLContent.appendChild(CoreXBuild.Button ("&#128465 Delete Track", this.SendDeleteTrack.bind(this, Track._id, Track.Name, true), "Text ButtonCoreXWindow"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GPX", this.DownloadFile.bind(this, "gpx", Track._id), "Text ButtonCoreXWindow"))
-        HTMLContent.appendChild(CoreXBuild.Button ("&#8681 GeoJson", this.DownloadFile.bind(this, "geojson", Track._id), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button (`<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Icon.Download()}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">GPX</div></div>`, this.DownloadFile.bind(this, "gpx", Track._id), "Text ButtonCoreXWindow"))
+        HTMLContent.appendChild(CoreXBuild.Button (`<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Icon.Download()}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">GeoJson</div></div>`, this.DownloadFile.bind(this, "geojson", Track._id), "Text ButtonCoreXWindow"))
         CoreXWindow.BuildWindow(HTMLContent)
     }
 

@@ -317,6 +317,28 @@
     content: "X";
 }
 
+.ButtonLeftActionSecond{
+    left: 0px; 
+    top: 55px;
+    position: fixed;
+    display: inline;
+    z-index: 999;
+    font-size: 1.5vw;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: var(--CoreX-color);
+    background-color: white;
+    padding: 4px;
+    margin: 4px;
+    opacity: 1;
+    cursor: pointer;
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    outline: none;
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)
@@ -334,6 +356,7 @@ screen and (max-width: 700px)
     .AppConteneur{width: 95%;}
     .TitreInfoOneTrack{font-size: calc(var(--TitreIphone)*0.6);}
     .InfoOnTrackMap{height: 40vh;}
+    .ButtonLeftActionSecond{font-size: calc(3vw * 1.5);height: 10VW; width: 10VW; left: 4px; top: 12vw; }
 }
 
 @media screen and (min-width: 1200px)
