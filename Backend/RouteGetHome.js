@@ -26,20 +26,9 @@ function GetHtmlHomePage (Titre){
 }
 
 function GetCSSHomePAge(){
-    let Css= ""
     let os = require('os')
-    let fs = require('fs')
-    let path = require('path');
 
-    let reqPath = path.join(__dirname, '../Frontend/Common/0-leaflet.css')
-    Css += fs.readFileSync(reqPath, 'utf8')
-    Css += os.EOL
-
-    reqPath = path.join(__dirname, '../Frontend/Common/Common.css')
-    Css += fs.readFileSync(reqPath, 'utf8')
-    Css += os.EOL
-
-    Css +=`
+    let Css =`
     body{
         margin: 0;
         padding: 0;
@@ -102,6 +91,26 @@ function GetCSSHomePAge(){
         box-shadow: 0.4rem 0.4rem 1rem black;
     }
     
+    .ButtonX{
+        margin-bottom: 1rem;
+        cursor: pointer;
+        border: 3px solid black;
+        border-radius: 50%;
+        text-align: center;
+        display: inline-block;
+        color: black;
+        background: transparent;
+        outline: none;
+        font-size: 1.5rem;
+        margin-left: auto;
+        background-color: white;
+        font-weight: bold;
+        padding: 1px 6px;
+        -webkit-appearance: none;
+    }
+    .ButtonX::after{
+        content: "X";
+    }
     `
     Css += os.EOL
 
@@ -117,30 +126,6 @@ function GetJSHomePAge(){
 
     // HtmlElem-Post
     let Path = path.join(__dirname, '../Frontend/Common/HtmlElem-Post.js')
-    js += fs.readFileSync(Path, 'utf8')
-    js += os.EOL
-
-    // InfoOnTrack
-    Path = path.join(__dirname, '../Frontend/Common/InfoOnTrack.js')
-    js += fs.readFileSync(Path, 'utf8')
-    js += os.EOL
-
-    // Icon
-    Path = path.join(__dirname, '../Frontend/Common/CommonIcon.js')
-    js += fs.readFileSync(Path, 'utf8')
-    js += os.EOL
-    Path = path.join(__dirname, '../Frontend/Common/Icon.js')
-    js += fs.readFileSync(Path, 'utf8')
-    js += os.EOL
-
-    // leaflet
-    Path = path.join(__dirname, '../Frontend/Common/0-leaflet.js')
-    js += fs.readFileSync(Path, 'utf8')
-    js += os.EOL
-    Path = path.join(__dirname, '../Frontend/Common/1-leaflet.geometryutil.js')
-    js += fs.readFileSync(Path, 'utf8')
-    js += os.EOL
-    Path = path.join(__dirname, '../Frontend/Common/2-leaflet-arrowheads.js')
     js += fs.readFileSync(Path, 'utf8')
     js += os.EOL
 

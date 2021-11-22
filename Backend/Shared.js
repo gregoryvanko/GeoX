@@ -665,6 +665,100 @@ function ApiSaveTrackById(MyApp, Data, Res, User, UserId){
 
 }
 
+function PromiseGetPostFromDb(MyApp, Page, Filter, User, UserId){
+    return new Promise(resolve => {
+        let numberofitem = 5
+        let cursor = Page * numberofitem
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let ReponsePost = new Object()
+        ReponsePost.Error = true
+        ReponsePost.ErrorMsg = ""
+        ReponsePost.Data = []
+
+        let Query = {[MongoTracksCollection.Public]: true}
+        if (Filter != null){
+            if ((Filter.DistanceMin != 1) || (Filter.DistanceMax != 200) || (Filter.HideMyTrack != false)){
+                if (Filter.HideMyTrack){
+                    Query = {
+                        $and:[
+                            {[MongoTracksCollection.Public]: true},
+                            {[MongoTracksCollection.Length]:{$gte: Filter.DistanceMin}},
+                            {[MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}},
+                            {[MongoTracksCollection.Owner]: { $ne: User }}
+                        ]}
+                } else {
+                    Query = {
+                        $and:[
+                            {[MongoTracksCollection.Public]: true},
+                            {[MongoTracksCollection.Length]:{$gte: Filter.DistanceMin}},
+                            {[MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}}
+                        ]}
+                }
+                
+            }
+        }
+        const Projection = {projection:{[MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.Image]: 1, [MongoTracksCollection.StartPoint]: 1}}
+        const Sort = {[MongoTracksCollection.Date]: -1}
+        Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                ReponsePost.Error = false
+                ReponsePost.ErrorMsg = null
+                ReponsePost.Data = []
+            } else {
+                ReponsePost.Error = false
+                ReponsePost.ErrorMsg = null
+                ReponsePost.Data = reponse
+            }
+            resolve(ReponsePost)
+        },(erreur)=>{
+            ReponsePost.Error = true
+            ReponsePost.ErrorMsg = "PromiseGetPostOfPageFromDb error: " + erreur
+            ReponsePost.Data = []
+            resolve(ReponsePost)
+        })
+    })
+}
+
+function PromiseGetDataOfPostFromDb(MyApp, PostId){
+    return new Promise(resolve => {
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+
+        let ReponsePost = new Object()
+        ReponsePost.Error = true
+        ReponsePost.ErrorMsg = ""
+        ReponsePost.Data = []
+
+        const Query = {'_id': new MongoObjectId(PostId)}
+        const Projection = { projection:{[MongoTracksCollection.GpxData]: 0, [MongoTracksCollection.Color]: 0, [MongoTracksCollection.Group]: 0, [MongoTracksCollection.Owner]: 0, [MongoTracksCollection.Owner]: 0}}
+        const Sort = {[MongoTracksCollection.Image]: -1}
+        Mongo.FindSortPromise(Query, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                ReponsePost.Error = false
+                ReponsePost.ErrorMsg = null
+                ReponsePost.Data = []
+            } else {
+                ReponsePost.Error = false
+                ReponsePost.ErrorMsg = null
+                ReponsePost.Data = reponse[0]
+            }
+            resolve(ReponsePost)
+        },(erreur)=>{
+            ReponsePost.Error = true
+            ReponsePost.ErrorMsg = "PromiseGetDataOfPostFromDb error: " + erreur
+            ReponsePost.Data = []
+            resolve(ReponsePost)
+        })
+    })
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
@@ -677,3 +771,5 @@ module.exports.GetElevationOfLatLng = GetElevationOfLatLng
 module.exports.CalculateTrackLength = CalculateTrackLength
 module.exports.ApiGetTrackData = ApiGetTrackData
 module.exports.ApiSaveTrackById = ApiSaveTrackById
+module.exports.PromiseGetPostFromDb = PromiseGetPostFromDb
+module.exports.PromiseGetDataOfPostFromDb = PromiseGetDataOfPostFromDb

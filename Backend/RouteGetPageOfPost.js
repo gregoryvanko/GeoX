@@ -1,15 +1,11 @@
 function CallRouteGetPageOfPost(req, res, MyApp){
     let Page = req.params.page
-    let Filter = null
-    if (req.headers["x-filter"]){
-        Filter = JSON.parse(req.headers["x-filter"])
-    }
-    GetPostOfPage(Page, Filter, res, MyApp)
+    GetPostOfPage(Page, res, MyApp)
 }
 
-async function GetPostOfPage (Page, Filter, res, MyApp){
+async function GetPostOfPage (Page, res, MyApp){
     // Get Post of page
-    let ReponsePostOfPageFromDb = await PromiseGetPostOfPageFromDb(parseInt(Page), Filter, MyApp)
+    let ReponsePostOfPageFromDb = await PromiseGetPostOfPageFromDb(parseInt(Page), MyApp)
     if(ReponsePostOfPageFromDb.Error){
         MyApp.LogAppliError(ReponsePostOfPageFromDb.ErrorMsg, "GetPageOfPost", "GetPageOfPost")
         res.status("500").json(ReponsePostOfPageFromDb)
@@ -18,7 +14,7 @@ async function GetPostOfPage (Page, Filter, res, MyApp){
     }
 }
 
-function PromiseGetPostOfPageFromDb(Page, Filter, MyApp){
+function PromiseGetPostOfPageFromDb(Page, MyApp){
     return new Promise(resolve => {
         let numberofitem = 5
         let cursor = Page * numberofitem
@@ -33,16 +29,6 @@ function PromiseGetPostOfPageFromDb(Page, Filter, MyApp){
         ReponsePost.Data = []
 
         let Query = {[MongoTracksCollection.Public]: true}
-        if (Filter != null){
-            if ((Filter.DistanceMin != 1) || (Filter.DistanceMax != 200)){
-                Query = {
-                    $and:[
-                        {[MongoTracksCollection.Public]: true},
-                        {[MongoTracksCollection.Length]:{$gte: Filter.DistanceMin}},
-                        {[MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}}
-                    ]}
-            }
-        }
         const Projection = {projection:{[MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.Image]: 1, [MongoTracksCollection.StartPoint]: 1}}
         const Sort = {[MongoTracksCollection.Date]: -1}
         Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{

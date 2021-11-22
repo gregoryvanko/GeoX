@@ -120,10 +120,10 @@ class GeoXServer{
         MyRouteGetPageOfPost.CallRouteGetPageOfPost(req, res, this._MyApp)
     }
 
-    GetDataOfPost(req, res){
-        let MyRouteGetDataOfPost = require("./RouteGetDataOfPost")
-        MyRouteGetDataOfPost.CallRouteGetDataOfPost(req, res, this._MyApp)
-    }
+    // GetDataOfPost(req, res){
+    //     let MyRouteGetDataOfPost = require("./RouteGetDataOfPost")
+    //     MyRouteGetDataOfPost.CallRouteGetDataOfPost(req, res, this._MyApp)
+    // }
 
     /**
      * Fonction executee lors d'un appel a la route GET Home
@@ -173,6 +173,31 @@ class GeoXServer{
         return HtmlString
     }
 
+    async ApiGetAllPost(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetPostData: " + JSON.stringify(Data), User, UserId)
+        let Shared = require("./Shared")
+        let ReponsePostFromDb = await Shared.PromiseGetPostFromDb(this._MyApp, parseInt(Data.Page), Data.Filter, User, UserId)
+        if(ReponsePostFromDb.Error){
+            this._MyApp.LogAppliError(ReponsePostFromDb.ErrorMsg, "GetPageOfPost", "GetPageOfPost")
+            Res.status("500").json(ReponsePostFromDb.ErrorMsg)
+        } else {
+            Res.status("200").json(ReponsePostFromDb)
+        }
+    }
+    
+    async ApiGetPostData(Data, Res, User, UserId){
+        // Get Post data
+        this._MyApp.LogAppliInfo("ApiGetPostData " + JSON.stringify(Data), User, UserId)
+        let Shared = require("./Shared")
+        let ReponseDataOfPostFromDb = await Shared.PromiseGetDataOfPostFromDb(this._MyApp, Data.PostId)
+        if(ReponseDataOfPostFromDb.Error){
+            this._MyApp.LogAppliError(ReponseDataOfPostFromDb.ErrorMsg, "GetDataOfPost", "GetDataOfPost")
+            Res.status("500").json(ReponseDataOfPostFromDb)
+        } else {
+            Res.status("200").json(ReponseDataOfPostFromDb)
+        }
+    }
+
     ApiGetTrackData(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetTrackData: " + JSON.stringify(Data), User, UserId)
         let Shared = require("./Shared")
@@ -215,13 +240,23 @@ class GeoXServer{
 
         let Query = {[MongoTracksCollection.Public]: true}
         if (Data.Filter != null){
-            if ((Data.Filter.DistanceMin != 1) || (Data.Filter.DistanceMax != 200)){
-                Query = {
-                    $and:[
-                        {[MongoTracksCollection.Public]: true},
-                        {[MongoTracksCollection.Length]:{$gte: Data.Filter.DistanceMin}},
-                        {[MongoTracksCollection.Length]:{$lte: Data.Filter.DistanceMax}}
-                    ]}
+            if ((Data.Filter.DistanceMin != 1) || (Data.Filter.DistanceMax != 200) || (Data.Filter.HideMyTrack != false)){
+                if (Data.Filter.HideMyTrack){
+                    Query = {
+                        $and:[
+                            {[MongoTracksCollection.Public]: true},
+                            {[MongoTracksCollection.Length]:{$gte: Data.Filter.DistanceMin}},
+                            {[MongoTracksCollection.Length]:{$lte: Data.Filter.DistanceMax}},
+                            {[MongoTracksCollection.Owner]: { $ne: User }}
+                        ]}
+                } else {
+                    Query = {
+                        $and:[
+                            {[MongoTracksCollection.Public]: true},
+                            {[MongoTracksCollection.Length]:{$gte: Data.Filter.DistanceMin}},
+                            {[MongoTracksCollection.Length]:{$lte: Data.Filter.DistanceMax}}
+                        ]}
+                }
             }
         }
         const Projection = {projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.StartPoint]: 1}}

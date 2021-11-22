@@ -145,28 +145,12 @@ class GeoXActivities {
     }
 
     GetPosts(){
-        let myHeaders = new Headers({"X-filter": JSON.stringify(this._FiltrePost)});
-        let myInit = { method: 'GET', headers: myHeaders};
-
-        fetch("/getpageofpost/" + this._PageOfPosts, myInit).then((response) => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error("get posts failed: " + response.status + " " + response.statusText);
-            }
+        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
+        GlobalCallApiPromise("ApiGetAllPost", FctData, "", "").then((reponse)=>{
+            this.RenderPosts(reponse)
+        },(erreur)=>{
+            alert("Error: " + erreur)
         })
-        .then((responseJson) => {
-            if (responseJson.Error){
-                document.getElementById(this._IdDivApp).appendChild(this.GetDivError(responseJson.ErrorMsg))
-            } else {
-                this.RenderPosts(responseJson.Data)
-            }
-        })
-        .catch((error) => {
-            let divapp = document.getElementById(this._IdDivApp)
-            divapp.innerHTML = ""
-            divapp.appendChild(this.GetDivError(error))
-        });
     }
 
     GetDivError(MyError){
@@ -237,24 +221,12 @@ class GeoXActivities {
         divwaiting.style.marginBottom = "2rem"
         document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
-        // fetch
-        fetch("/getdataofpost/" + Id).then((response) => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error("get track of posts failed: " + response.status + " " + response.statusText);
-            }
+        let FctData = {PostId: Id}
+        GlobalCallApiPromise("ApiGetPostData", FctData, "", "").then((reponse)=>{
+            this.RenderTrackData(reponse)
+        },(erreur)=>{
+            alert("Error: " + erreur)
         })
-        .then((responseJson) => {
-            if (responseJson.Error){
-                document.getElementById(this._IdDivApp).appendChild(this.GetDivError(responseJson.ErrorMsg))
-            } else {
-                this.RenderTrackData(responseJson.Data)
-            }
-        })
-        .catch((error) => {
-            alert(error)
-        });
     }
 
     RenderTrackData(Data){
@@ -641,6 +613,11 @@ class GeoXActivities {
         Conteneur.appendChild(DivMaxKm)
         DivMaxKm.appendChild(CoreXBuild.DivTexte("Max Distance (Km):", "", "", ""))
         DivMaxKm.appendChild(CoreXBuild.Input("MaxKm", this._FiltrePost.DistanceMax, "Input", "width: 20%;", "number", "MaxKm"))
+        // Toggle HideMyTrack
+        let DivToogleHideMyTrack = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        Conteneur.appendChild(DivToogleHideMyTrack)
+        DivToogleHideMyTrack.appendChild(CoreXBuild.DivTexte("Hide my Track:", "", "", ""))
+        DivToogleHideMyTrack.appendChild(CoreXBuild.ToggleSwitch("ToggleHideMyTrack", this._FiltrePost.HideMyTrack))
         // Empty space
         Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
         // Div Button
@@ -660,6 +637,7 @@ class GeoXActivities {
         // Set filter
         this._FiltrePost.DistanceMin = parseInt(document.getElementById("MinKm").value)
         this._FiltrePost.DistanceMax = parseInt(document.getElementById("MaxKm").value)
+        this._FiltrePost.HideMyTrack = document.getElementById("ToggleHideMyTrack").checked 
         // close window
         CoreXWindow.DeleteWindow()
         if (this._IsPostPresentation){

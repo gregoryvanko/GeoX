@@ -67,16 +67,17 @@ class GeoX {
        // SocketIo
        this._MyApp.AddSocketIoFct("GeoX", this._GeoXServer.Api.bind(this._GeoXServer))
 
-       // Route Home
-       this._MyApp.AddRouteGet("", this._GeoXServer.RouteGetHome.bind(this._GeoXServer))
-       // Route GetMap
-       this._MyApp.AddRouteGet("getmap", this._GeoXServer.RouteGetMap.bind(this._GeoXServer))
-       // Route Get page of post
-       this._MyApp.AddRouteGet("getpageofpost/:page", this._GeoXServer.GetPageOfPost.bind(this._GeoXServer))
-       // Route Get post Data
-       this._MyApp.AddRouteGet("getdataofpost/:post", this._GeoXServer.GetDataOfPost.bind(this._GeoXServer))
+      // Route Home
+      this._MyApp.AddRouteGet("", this._GeoXServer.RouteGetHome.bind(this._GeoXServer))
+      // Route GetMap
+      this._MyApp.AddRouteGet("getmap", this._GeoXServer.RouteGetMap.bind(this._GeoXServer))
+       
+      // Route Api Get page of post
+      this._MyApp.AddRouteGet("getpageofpost/:page", this._GeoXServer.GetPageOfPost.bind(this._GeoXServer))
 
       // API
+      this._MyApp.AddApiFct("ApiGetAllPost", this._GeoXServer.ApiGetAllPost.bind(this), false)
+      this._MyApp.AddApiFct("ApiGetPostData", this._GeoXServer.ApiGetPostData.bind(this), false)
       this._MyApp.AddApiFct("ApiGetTrackData", this._GeoXServer.ApiGetTrackData.bind(this), false)
       this._MyApp.AddApiFct("ApiSaveTrack", this._GeoXServer.ApiSaveTrack.bind(this), false)
       this._MyApp.AddApiFct("ApiGetAllGroups", this._GeoXServer.ApiGetAllGroups.bind(this), false)
