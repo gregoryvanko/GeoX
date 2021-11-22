@@ -30,7 +30,7 @@ class GeoXActivities {
         this._PageOfMarkers = 0
         this._AllMarkers = []
 
-        this._FiltrePost = {DistanceMin: 1, DistanceMax: 200}
+        this._FiltrePost = {DistanceMin: 1, DistanceMax: 200, HideMyTrack: false}
     }
 
     Initiation(){
@@ -443,7 +443,7 @@ class GeoXActivities {
      * Get makers of all tracks of GeoX by page
      */
     GetAllMarkersByPage(){
-        let FctData = {Page: this._PageOfMarkers}
+        let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost}
         GlobalCallApiPromise("ApiGetAllMarkers", FctData, "", "").then((reponse)=>{
             if (reponse.length != 0){
                 this.RenderMarkersOnMap(reponse)
@@ -662,8 +662,12 @@ class GeoXActivities {
         this._FiltrePost.DistanceMax = parseInt(document.getElementById("MaxKm").value)
         // close window
         CoreXWindow.DeleteWindow()
-        // retrive post
-        this._PageOfPosts = 0
+        if (this._IsPostPresentation){
+            // retrive post
+            this._PageOfPosts = 0
+        } else {
+            this._PageOfMarkers = 0
+        }
         this.LoadStartView()
     }
 }

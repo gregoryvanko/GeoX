@@ -213,7 +213,17 @@ class GeoXServer{
         let MongoConfig = require("./MongoConfig.json")
         MongoTracksCollection = MongoConfig.TracksCollection
 
-        const Query = {[MongoTracksCollection.Public]: true}
+        let Query = {[MongoTracksCollection.Public]: true}
+        if (Data.Filter != null){
+            if ((Data.Filter.DistanceMin != 1) || (Data.Filter.DistanceMax != 200)){
+                Query = {
+                    $and:[
+                        {[MongoTracksCollection.Public]: true},
+                        {[MongoTracksCollection.Length]:{$gte: Data.Filter.DistanceMin}},
+                        {[MongoTracksCollection.Length]:{$lte: Data.Filter.DistanceMax}}
+                    ]}
+            }
+        }
         const Projection = {projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.StartPoint]: 1}}
         const Sort = {[MongoTracksCollection.Date]: -1}
         Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{
