@@ -90,6 +90,18 @@ function GetCSSHomePAge(){
         padding: 0.5rem;
         box-shadow: 0.4rem 0.4rem 1rem black;
     }
+
+    .DivPostApp{
+        width:45rem;
+        box-sizing: border-box;
+        max-width: 90%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        margin-top: 2rem;
+    }
     
     .ButtonX{
         margin-bottom: 1rem;
