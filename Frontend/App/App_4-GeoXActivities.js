@@ -491,6 +491,7 @@ class GeoXActivities {
         button.style.zIndex = "100"
         button.style.fontSize = "1rem"
         button.style.padding = "1px 5px"
+        button.style.marginBottom = "0rem"
         button.onclick = this.RemoveTrackDataOnMap.bind(this)
         divNameAndClose.appendChild(button)
 

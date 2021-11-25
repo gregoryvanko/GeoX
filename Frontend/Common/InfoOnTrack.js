@@ -76,6 +76,8 @@ class InfoOnTrack {
         divdate.classList.add("TextSmall")
         divdate.style.width ="100%"
         divdate.style.paddingLeft ="2vh"
+        divdate.style.paddingRight ="2vh"
+        divdate.style.boxSizing = "border-box"
         divdate.style.color= "rgb(109, 109, 120)"
         DivInfo.appendChild(divdate)
         // Description
@@ -85,6 +87,8 @@ class InfoOnTrack {
             divdesc.classList.add("Text")
             divdesc.style.width ="100%"
             divdesc.style.paddingLeft ="2vh"
+            divdesc.style.paddingRight ="2vh"
+            divdesc.style.boxSizing = "border-box"
             DivInfo.appendChild(divdesc)
         }
     }
