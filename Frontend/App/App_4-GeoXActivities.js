@@ -208,6 +208,10 @@ class GeoXActivities {
         let divApp = document.getElementById("Conteneur")
         divApp.style.display = "none"
 
+        // Hide action button
+        GlobalDisplayAction('Off')
+
+
         // Show IdDivTrackInfo
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
         divTrackInfo.style.display = "flex"
@@ -272,6 +276,9 @@ class GeoXActivities {
         // show divapp
         let divApp = document.getElementById("Conteneur")
         divApp.style.display = "flex"
+
+        // Show action button
+        GlobalDisplayAction('On')
 
         // Hide divinfotrack
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
@@ -452,7 +459,7 @@ class GeoXActivities {
     RenderTrackDataOnMap(TrackId){
         // Get Track data
         let TrackData =  this._AllMarkers.find(x => x._id === TrackId)
-        // Build div trak data on map
+        // Build div track data on map
         let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
         if (DivTrackDataOnMap == null){
             DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
@@ -464,6 +471,9 @@ class GeoXActivities {
             document.getElementById("Conteneur").appendChild(DivTrackDataOnMap)
             DivTrackDataOnMap.addEventListener("click", this.GetTrackData.bind(this, TrackId))
         }
+        // Name and close buttion
+        let divNameAndClose = CoreXBuild.Div("", "", "width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
+        DivTrackDataOnMap.appendChild(divNameAndClose)
         // Add track name
         let divname = document.createElement('div')
         divname.innerHTML = TrackData.Name
@@ -473,7 +483,17 @@ class GeoXActivities {
         divname.style.marginBottom ="0.5rem"
         divname.style.marginLeft ="0.5rem"
         divname.classList.add("Text")
-        DivTrackDataOnMap.appendChild(divname)
+        divNameAndClose.appendChild(divname)
+        // Add button
+        let button = document.createElement('button')
+        button.classList.add("ButtonX");
+        button.style.borderWidth = "2px"
+        button.style.zIndex = "100"
+        button.style.fontSize = "1rem"
+        button.style.padding = "1px 5px"
+        button.onclick = this.RemoveTrackDataOnMap.bind(this)
+        divNameAndClose.appendChild(button)
+
         // Add track info
         let conteneur = document.createElement('div')
         conteneur.setAttribute("style","width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
@@ -487,6 +507,18 @@ class GeoXActivities {
         conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
         conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevMin, "m", CommonIcon.ElevationMin()))
         DivTrackDataOnMap.appendChild(conteneur)
+    }
+
+    RemoveTrackDataOnMap(){
+        event.stopPropagation()
+
+        // Remove all track on map
+        this._Map.RemoveAllTracks()
+        // Remove track data
+        let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
+        if (DivTrackDataOnMap != null){
+            document.getElementById("Conteneur").removeChild(DivTrackDataOnMap)
+        }
     }
 
     RenderTrackGeoJSonOnMap(Map, TrackId){
