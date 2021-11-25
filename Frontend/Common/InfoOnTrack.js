@@ -75,8 +75,8 @@ class InfoOnTrack {
         divdate.innerHTML = this.GetDateString(this._Date)
         divdate.classList.add("TextSmall")
         divdate.style.width ="100%"
-        divdate.style.paddingLeft ="2vh"
-        divdate.style.paddingRight ="2vh"
+        divdate.style.paddingLeft ="0.4rem"
+        divdate.style.paddingRight ="0.4rem"
         divdate.style.boxSizing = "border-box"
         divdate.style.color= "rgb(109, 109, 120)"
         DivInfo.appendChild(divdate)
@@ -86,8 +86,8 @@ class InfoOnTrack {
             divdesc.innerHTML = this._Description
             divdesc.classList.add("Text")
             divdesc.style.width ="100%"
-            divdesc.style.paddingLeft ="2vh"
-            divdesc.style.paddingRight ="2vh"
+            divdesc.style.paddingLeft ="0.4rem"
+            divdesc.style.paddingRight ="0.4rem"
             divdesc.style.boxSizing = "border-box"
             DivInfo.appendChild(divdesc)
         }
