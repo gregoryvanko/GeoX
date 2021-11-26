@@ -686,4 +686,4 @@ class GeoXActivities {
 // Creation de l'application
 let MyGeoXActivities = new GeoXActivities(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Activities", Icon.GeoXActivities(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)
+GlobalCoreXAddApp("Activities", Icon.GeoXMapIcon(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)

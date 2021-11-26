@@ -23,27 +23,6 @@ class GeoXServer{
             this._MyApp.LogAppliInfo(`SoApi Data: {"Action":"${Data.Action}","Value":{"Action":"${Data.Value.Action}"}}`, User, UserId)
         }
         switch (Data.Action) {
-            case "ModuleGeoX":
-                let ModuleGeoX = require("./ModuleGeoX")
-                if (Data.Value.Action == "GetInitialData"){
-                    ModuleGeoX.CallGetInitialData(this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetTracksOfGroup"){
-                    ModuleGeoX.CallGetTracksOfGroup(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "UpdateTrackColor"){
-                    ModuleGeoX.CallUpdateTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetMarkers"){
-                    ModuleGeoX.CallGetMarkers(this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetTrack"){
-                    ModuleGeoX.CallGetTrack(Data.Value, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "SaveTrack"){
-                    ModuleGeoX.CallSaveTrack(Data.Value.TrackId, Data.Value.Name, Data.Value.Group, Data.Value.Public, Data.Value.Description, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetTrackInfo"){
-                    ModuleGeoX.CallGetTrackInfo(Data.Value.Data,this._MyApp,  Socket, User, UserId)
-                }else {
-                    this._MyApp.LogAppliError(`Api GeoXServer error, ModuleGeoX Action ${Data.Value.Action} not found`, User, UserId)
-                    Socket.emit("GeoXError", `Api GeoXServer error, ModuleGeoX Action ${Data.Value.Action} not found`)
-                }
-                break
             case "ManageTrack":
                 let ManageTrack = require("./ModuleManageTrack")
                 if (Data.Value.Action == "GetUserData") {
