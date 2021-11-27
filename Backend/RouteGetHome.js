@@ -137,7 +137,7 @@ function GetJSHomePAge(){
     let path = require('path');
 
     // HtmlElem-Post
-    let Path = path.join(__dirname, '../Frontend/Common/HtmlElem-Post.js')
+    let Path = path.join(__dirname, '../Frontend/Common/HtmlElemGeoxPost.js')
     js += fs.readFileSync(Path, 'utf8')
     js += os.EOL
 

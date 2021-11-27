@@ -204,7 +204,7 @@
 }
 
 .IconeInList{
-    height:2.5vw;
+    height:1.2rem;
 }
 
 .AppConteneur{
@@ -351,7 +351,6 @@ screen and (max-width: 700px)
     .ButtonCoreXWindow{width: 60%;}
     .InputBox{width: 90%;}
     .Input {padding: 3%;}
-    .IconeInList{height:2vh; margin-left: 2vh;}
     .AppConteneur{width: 95%;}
     .TitreInfoOneTrack{font-size: calc(var(--TitreIphone)*0.6);}
     .InfoOnTrackMap{height: 40vh;}

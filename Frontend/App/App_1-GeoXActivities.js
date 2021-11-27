@@ -167,7 +167,7 @@ class GeoXActivities {
             let CurrentpointData = 0
             Data.forEach(element => {
                 // Creation du post
-                let TempGeoxPsot = new GeoxPost(element)
+                let TempGeoxPsot = new HtmlElemGeoxPost(element)
                 TempGeoxPsot.OnClickPost = this.GetTrackData.bind(this, element._id)
                 TempGeoxPsot.OnClickSave = this.ClickSaveToMyTrack.bind(this, element._id)
                 TempGeoxPsot.OnClickGpx = this.ClickDownloadGPX.bind(this, element._id)

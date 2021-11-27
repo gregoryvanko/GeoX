@@ -473,17 +473,13 @@ function PromiseGetAllTracksInfo(MyApp, User){
         let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
         const Querry = {[MongoTracksCollection.Owner]: User}
-        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Color]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.ExteriorPoint]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.Public]: 1, [MongoTracksCollection.Description]: 1}}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Color]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Public]: 1, [MongoTracksCollection.Description]: 1}}
         const Sort = {[MongoTracksCollection.Date]: -1}
         Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){
-                ReponseTracks.Error = false
-                ReponseTracks.ErrorMsg = null
-                ReponseTracks.Data = []
+                ReponseTracks = {Error: false, ErrorMsg:null, Data:[]}
             } else {
-                ReponseTracks.Error = false
-                ReponseTracks.ErrorMsg = null
-                ReponseTracks.Data = reponse
+                ReponseTracks = {Error: false, ErrorMsg:null, Data:reponse}
             }
             resolve(ReponseTracks)
         },(erreur)=>{
@@ -759,6 +755,36 @@ function PromiseGetDataOfPostFromDb(MyApp, PostId){
     })
 }
 
+function PromiseGetMyPosts(MyApp, Page, User){
+    return new Promise(resolve => {
+        let numberofitem = 10
+        let cursor = Page * numberofitem
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
+
+        const Querry = {[MongoTracksCollection.Owner]: User}
+        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Public]: 1}}
+        const Sort = {[MongoTracksCollection.Date]: -1}
+        Mongo.FindSortLimitSkipPromise(Querry, Projection, Sort,numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                ReponseTracks = {Error: false, ErrorMsg:null, Data:[]}
+            } else {
+                ReponseTracks = {Error: false, ErrorMsg:null, Data:reponse}
+            }
+            resolve(ReponseTracks)
+        },(erreur)=>{
+            ReponseTracks.Error = true
+            ReponseTracks.ErrorMsg = "PromiseGetMyPosts error: " + erreur
+            ReponseTracks.Data = []
+            resolve(ReponseTracks)
+        })
+    })
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
@@ -773,3 +799,4 @@ module.exports.ApiGetTrackData = ApiGetTrackData
 module.exports.ApiSaveTrackById = ApiSaveTrackById
 module.exports.PromiseGetPostFromDb = PromiseGetPostFromDb
 module.exports.PromiseGetDataOfPostFromDb = PromiseGetDataOfPostFromDb
+module.exports.PromiseGetMyPosts = PromiseGetMyPosts

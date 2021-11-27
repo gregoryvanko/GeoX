@@ -1,4 +1,4 @@
-class GeoxPost extends HTMLElement {
+class HtmlElemGeoxPost extends HTMLElement {
     constructor(Data = {_id: "no-id", Name: "No Name", Description:null, Date:null, Length:null, InfoElevation:null, Image:null}){
         super()
         this.Shadow = this.attachShadow({mode: "open"})
@@ -409,4 +409,4 @@ class GeoxPost extends HTMLElement {
     }
 }
 
-customElements.define('geox-post', GeoxPost)
+customElements.define('geox-post', HtmlElemGeoxPost)

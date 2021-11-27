@@ -157,7 +157,7 @@ class GeoXServer{
         let Shared = require("./Shared")
         let ReponsePostFromDb = await Shared.PromiseGetPostFromDb(this._MyApp, parseInt(Data.Page), Data.Filter, User, UserId)
         if(ReponsePostFromDb.Error){
-            this._MyApp.LogAppliError(ReponsePostFromDb.ErrorMsg, "GetPageOfPost", "GetPageOfPost")
+            this._MyApp.LogAppliError(ReponsePostFromDb.ErrorMsg, User, UserId)
             Res.status("500").json(ReponsePostFromDb.ErrorMsg)
         } else {
             Res.status("200").json(ReponsePostFromDb)
@@ -170,7 +170,7 @@ class GeoXServer{
         let Shared = require("./Shared")
         let ReponseDataOfPostFromDb = await Shared.PromiseGetDataOfPostFromDb(this._MyApp, Data.PostId)
         if(ReponseDataOfPostFromDb.Error){
-            this._MyApp.LogAppliError(ReponseDataOfPostFromDb.ErrorMsg, "GetDataOfPost", "GetDataOfPost")
+            this._MyApp.LogAppliError(ReponseDataOfPostFromDb.ErrorMsg, User, UserId)
             Res.status("500").json(ReponseDataOfPostFromDb)
         } else {
             Res.status("200").json(ReponseDataOfPostFromDb)
@@ -250,6 +250,18 @@ class GeoXServer{
             Res.json({Error: true, ErrorMsg: "ApiGetAllMarkers error: " + erreur, Data: ""})
             this._MyApp.LogAppliError("ApiGetAllMarkers error: " + erreur, User, UserId)
         })
+    }
+
+    async ApiGetMyPosts(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetMyPosts: " + JSON.stringify(Data), User, UserId)
+        let Shared = require("./Shared")
+        let ReponseMyPosts = await Shared.PromiseGetMyPosts(this._MyApp, parseInt(Data.Page), User)
+        if(ReponseMyPosts.Error){
+            this._MyApp.LogAppliError(ReponseMyPosts.ErrorMsg, User, UserId)
+            Res.status("500").json(ReponseMyPosts)
+        } else {
+            Res.status("200").json(ReponseMyPosts)
+        }
     }
 }
 module.exports.GeoXServer = GeoXServer
