@@ -4,6 +4,7 @@ class GeoXManageTracks {
         this._ConteneurManageTrack = "ConteneurManageTrack"
         this._ConteneurViewOnMap = "ConteneurViewOnMap"
         this._ConteneurAddTrack = "ConteneurAddTrack"
+        this._ConteneurTrackData = "ConteneurTrackData"
         this._ListOfMyPosts = "ListOfMyPosts"
         this._PageOfPosts = 0
 
@@ -51,6 +52,11 @@ class GeoXManageTracks {
         let ConteneurAddTrack = CoreXBuild.DivFlexColumn(this._ConteneurAddTrack)
         ConteneurAddTrack.style.display = "none"
         this._DivApp.appendChild(ConteneurAddTrack)
+        // Conteneur Track Data
+        let ConteneurTrackData = CoreXBuild.DivFlexColumn(this._ConteneurTrackData)
+        ConteneurTrackData.style.display = "none"
+        this._DivApp.appendChild(ConteneurTrackData)
+        // Start Load data
         if (this._StartWithLoadViewManageTrack){
             if (ShowOnMap){
                 this.LoadViewOnMap()
@@ -67,11 +73,11 @@ class GeoXManageTracks {
         let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
         ConteneurManageTrack.style.display = "flex"
         // Hide ConteneurViewOnMap
-        let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
-        ConteneurViewOnMap.style.display = "none"
+        document.getElementById(this._ConteneurViewOnMap).style.display = "none"
         // Hide ConteneurAddTrack
-        let ConteneurAddTrack = document.getElementById(this._ConteneurAddTrack)
-        ConteneurAddTrack.style.display = "none"
+        document.getElementById(this._ConteneurAddTrack).style.display = "none"
+        // Hide ConteneurTrackData
+        document.getElementById(this._ConteneurTrackData).style.display = "none"
         // Hide Action Button
         GlobalDisplayAction('On')
 
@@ -107,14 +113,14 @@ class GeoXManageTracks {
 
     LoadViewAddTrack(){
         // Hide ConteneurManageTrack
-        let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
-        ConteneurManageTrack.style.display = "none"
+        document.getElementById(this._ConteneurManageTrack).style.display = "none"
         // Hide ConteneurViewOnMap
-        let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
-        ConteneurViewOnMap.style.display = "none"
+        document.getElementById(this._ConteneurViewOnMap).style.display = "none"
         // Hide ConteneurAddTrack
         let ConteneurAddTrack = document.getElementById(this._ConteneurAddTrack)
         ConteneurAddTrack.style.display = "flex"
+        // Hide ConteneurTrackData
+        document.getElementById(this._ConteneurTrackData).style.display = "none"
         // Hide Action Button
         GlobalDisplayAction('Off')
 
@@ -125,15 +131,15 @@ class GeoXManageTracks {
     }
 
     LoadViewOnMap(){
-        // Show ConteneurManageTrack
-        let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
-        ConteneurManageTrack.style.display = "none"
-        // Hide ConteneurViewOnMap
+        // Hide ConteneurManageTrack
+        document.getElementById(this._ConteneurManageTrack).style.display = "none"
+        // Show ConteneurViewOnMap
         let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
         ConteneurViewOnMap.style.display = "flex"
         // Hide ConteneurAddTrack
-        let ConteneurAddTrack = document.getElementById(this._ConteneurAddTrack)
-        ConteneurAddTrack.style.display = "none"
+        document.getElementById(this._ConteneurAddTrack).style.display = "none"
+        // Hide ConteneurTrackData
+        document.getElementById(this._ConteneurTrackData).style.display = "none"
         // Hide Action Button
         GlobalDisplayAction('On')
 
@@ -141,6 +147,20 @@ class GeoXManageTracks {
         ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, false), "ActionLeft",  `<img src="${Icon.GeoXActivities()}" alt="icon" width="32" height="32">`))
         // GetData
         // ToDo
+    }
+
+    LoadViewTrackData(){
+        // Hide ConteneurManageTrack
+        document.getElementById(this._ConteneurManageTrack).style.display = "none"
+        // Hide ConteneurViewOnMap
+        document.getElementById(this._ConteneurViewOnMap).style.display = "none"
+        // Hide ConteneurAddTrack
+        document.getElementById(this._ConteneurAddTrack).style.display = "none"
+        // Shox ConteneurTrackData
+        let ConteneurTrackData = document.getElementById(this._ConteneurTrackData)
+        ConteneurTrackData.style.display = "flex"
+        // Hide Action Button
+        GlobalDisplayAction('Off')
     }
 
     GetMyPosts(){
