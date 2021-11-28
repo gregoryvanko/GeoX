@@ -439,7 +439,7 @@ class GeoXManageTracks {
         DivBoxButton.appendChild(DivButton)
         if (IsAddTrack){
             // Button Add
-            DivButton.appendChild(CoreXBuild.Button("Select GPX",this.ClickAddTrack.bind(this),"Text Button ButtonWidth30", "SelectAndSend"))
+            DivButton.appendChild(CoreXBuild.Button("Select GPX",this.ClickSendAddTrack.bind(this),"Text Button ButtonWidth30", "SelectAndSend"))
             //Input file
             var Input = document.createElement("input")
             Input.setAttribute("type","file")
@@ -469,7 +469,7 @@ class GeoXManageTracks {
             DivButton.appendChild(Input)
         } else {
             // Button Update
-            DivButton.appendChild(CoreXBuild.Button("Update Track",this.ClickUpdateTrack.bind(this, Id),"Text Button ButtonWidth30"))
+            DivButton.appendChild(CoreXBuild.Button("Update Track",this.ClickSendUpdateTrack.bind(this, Id),"Text Button ButtonWidth30"))
         }
         // Button cancel
         DivButton.appendChild(CoreXBuild.Button("Cancel",this.ClickCancelAddModifyTrack.bind(this),"Text Button ButtonWidth30", "Cancel"))
@@ -645,7 +645,10 @@ class GeoXManageTracks {
         window.scrollTo(0, this._WindowScrollY);
     }
 
-    ClickAddTrack(){
+    /**
+     * Send data of new track
+     */
+    ClickSendAddTrack(){
         if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
             var fileCmd = "FileSelecteur.click()"
             eval(fileCmd)
@@ -654,10 +657,13 @@ class GeoXManageTracks {
         }
     }
 
-    ClickUpdateTrack(TrackId){
+    ClickSendUpdateTrack(TrackId){
         alert("ToDo")
     }
 
+    /**
+     * Cancel Add or Modify track
+     */
     ClickCancelAddModifyTrack(){
         document.getElementById(this._ConteneurAddTrack).innerHTML = ""
         if (!this._StartWithLoadViewManageTrack){
@@ -741,6 +747,10 @@ class GeoXManageTracks {
         CoreXWindow.DeleteWindow()
     }
 
+    /**
+     * Show window with error message
+     * @param {String} Error Error message
+     */
     ShowErrorMessage(Error){
         let Content = CoreXBuild.DivFlexColumn("")
         // Empty space
@@ -753,6 +763,10 @@ class GeoXManageTracks {
         CoreXWindow.BuildWindow(Content)
     }
 
+    /**
+     * Convertir un GPX en une image de la track
+     * @param {string} GPX Gpx data
+     */
     async ConvertGpxToImg(GPX){
         let Div = document.getElementById(this._DivMapAddTrack )
         let MyGpxToImg = new GpxToImg(GPX, Div)
@@ -766,6 +780,13 @@ class GeoXManageTracks {
         }
     }
 
+    /**
+     * Send data of new or existing track to the server
+     * @param {String} TrackId Id of track to modify
+     * @param {String} Gpx GPX data
+     * @param {Src} Image Image de la track
+     * @param {String} GeoJson GeoJson de la track
+     */
     SendAddModifyTrack(TrackId= null, Gpx = null, Image = null, GeoJson = null){
         document.getElementById("SelectAndSend").innerHTML="Send..."
         let Track = new Object()
