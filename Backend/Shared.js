@@ -621,7 +621,7 @@ function ApiGetTrackData(MyApp, Data, Res, User, UserId){
     })
 }
 
-function ApiSaveTrackById(MyApp, Data, Res, User, UserId){
+function ApiCopyTrackById(MyApp, Data, Res, User, UserId){
     let MongoObjectId = require('@gregvanko/corex').MongoObjectId
     let MongoR = require('@gregvanko/corex').Mongo
     Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
@@ -645,18 +645,18 @@ function ApiSaveTrackById(MyApp, Data, Res, User, UserId){
             TrackData.Owner = User
             Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
                 Res.json({Error: false, ErrorMsg: "", Data:"Done"})
-                MyApp.LogAppliInfo("ApiSaveTrackById: Track:" + Data.TrackId + " is saved", User, UserId)
+                MyApp.LogAppliInfo("ApiCopyTrackById: Track:" + Data.TrackId + " is saved", User, UserId)
             },(erreur)=>{
-                Res.json({Error: true, ErrorMsg: "ApiSaveTrackById inster track error", Data: ""})
-                MyApp.LogAppliError("ApiSaveTrackById inster track error: " + erreur, User, UserId)
+                Res.json({Error: true, ErrorMsg: "ApiCopyTrackById inster track error", Data: ""})
+                MyApp.LogAppliError("ApiCopyTrackById inster track error: " + erreur, User, UserId)
             })
         } else {
-            MyApp.LogAppliError("ApiSaveTrackById Track id not found", User, UserId)
-            Res.json({Error: true, ErrorMsg: "ApiSaveTrackById Track id not found", Data: ""})
+            MyApp.LogAppliError("ApiCopyTrackById Track id not found", User, UserId)
+            Res.json({Error: true, ErrorMsg: "ApiCopyTrackById Track id not found", Data: ""})
         }
     },(erreur)=>{
-        MyApp.LogAppliError("ApiSaveTrackById get track data error: " + erreur, User, UserId)
-        Res.json({Error: true, ErrorMsg: "ApiSaveTrackById get track data error", Data: ""})
+        MyApp.LogAppliError("ApiCopyTrackById get track data error: " + erreur, User, UserId)
+        Res.json({Error: true, ErrorMsg: "ApiCopyTrackById get track data error", Data: ""})
     })
 
 }
@@ -796,7 +796,7 @@ module.exports.GetElevationOfGeoJson = GetElevationOfGeoJson
 module.exports.GetElevationOfLatLng = GetElevationOfLatLng
 module.exports.CalculateTrackLength = CalculateTrackLength
 module.exports.ApiGetTrackData = ApiGetTrackData
-module.exports.ApiSaveTrackById = ApiSaveTrackById
+module.exports.ApiCopyTrackById = ApiCopyTrackById
 module.exports.PromiseGetPostFromDb = PromiseGetPostFromDb
 module.exports.PromiseGetDataOfPostFromDb = PromiseGetDataOfPostFromDb
 module.exports.PromiseGetMyPosts = PromiseGetMyPosts

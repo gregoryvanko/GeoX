@@ -183,15 +183,10 @@ class GeoXServer{
         Shared.ApiGetTrackData(this._MyApp, Data, Res, User, UserId)
     }
 
-    ApiSaveTrack(Data, Res, User, UserId){
+    ApiCopyTrack(Data, Res, User, UserId){
         let Shared = require("./Shared")
-        if (Data.SaveType == "ById"){
-            this._MyApp.LogAppliInfo("ApiSaveTrack: " + JSON.stringify(Data), User, UserId)
-            Shared.ApiSaveTrackById(this._MyApp, Data, Res, User, UserId)
-        } else {
-            Res.json({Error: true, ErrorMsg: "SaveType not found: " + Data.SaveType, Data: ""})
-            this._MyApp.LogAppliError(`ApiSaveTrack error, SaveType ${Data.SaveType} not found`, User, UserId)
-        }
+        this._MyApp.LogAppliInfo("ApiCopyTrack: " + JSON.stringify(Data), User, UserId)
+        Shared.ApiCopyTrackById(this._MyApp, Data, Res, User, UserId)
     }
 
     async ApiGetAllGroups(Data, Res, User, UserId){
@@ -252,8 +247,8 @@ class GeoXServer{
         })
     }
 
-    async ApiGetMyPosts(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiGetMyPosts: " + JSON.stringify(Data), User, UserId)
+    async ApiGetAllMyTracks(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetAllMyTracks: " + JSON.stringify(Data), User, UserId)
         let Shared = require("./Shared")
         let ReponseMyPosts = await Shared.PromiseGetMyPosts(this._MyApp, parseInt(Data.Page), User)
         if(ReponseMyPosts.Error){

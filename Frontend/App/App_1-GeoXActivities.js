@@ -379,8 +379,8 @@ class GeoXActivities {
             let NewGroup = document.getElementById("InputTrackGroup").value
             let NewPublic = document.getElementById("TogglePublic").checked
             let NewDescription = document.getElementById("DivContDesc").innerText
-            let FctData = {SaveType: "ById", TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
-            GlobalCallApiPromise("ApiSaveTrack", FctData, "", "").then((reponse)=>{
+            let FctData = {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
+            GlobalCallApiPromise("ApiCopyTrack", FctData, "", "").then((reponse)=>{
                 // Delete Window
                 CoreXWindow.DeleteWindow()
             },(erreur)=>{

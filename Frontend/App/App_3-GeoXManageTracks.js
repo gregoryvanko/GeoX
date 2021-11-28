@@ -8,6 +8,7 @@ class GeoXManageTracks {
         this._ConteneurFollowTrackOnMap = "ConteneurFollowTrackOnMap"
         this._DivListOfMyTracksData = "DivListOfMyTracksData"
         this._DivDataOfOneTrack = "DivDataOfOneTrack"
+        this._DivMapAddTrack = "DivMapAddTrack"
         this._PageOfPosts = 0
 
         let me = this
@@ -26,6 +27,7 @@ class GeoXManageTracks {
         this._WindowScrollY = 0
 
         this._FollowMyTrack = null
+        this._UserGroup = null
     }
 
     /**
@@ -42,6 +44,8 @@ class GeoXManageTracks {
         this._DivApp.innerHTML=""
         // Load Data
         this.LoadView(this._ShowOnMap)
+        // Get All group
+        this.GetMyGroups()
     }
 
     /**
@@ -107,7 +111,7 @@ class GeoXManageTracks {
         // Button view on map
         ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, true), "ActionLeft",  `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
         // Button Add track
-        ConteneurManageTrack.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.Initiation.bind(this, false),"ButtonLeftActionSecond","ButtonAddTrack"))
+        ConteneurManageTrack.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddTrack.bind(this),"ButtonLeftActionSecond","ButtonAddTrack"))
         // Div pour le titre des colonnes
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         BoxTitre.style.width = "60rem"
@@ -135,7 +139,9 @@ class GeoXManageTracks {
     /**
      * Load de la vue Add Track
      */
-    LoadViewAddTrack(){
+    LoadViewAddTrack(IsAddTrack = true, TrackData = null){
+        // Save WindowScrollY
+        this._WindowScrollY = window.scrollY
         // Hide ConteneurManageTrack
         document.getElementById(this._ConteneurManageTrack).style.display = "none"
         // Hide ConteneurViewOnMap
@@ -150,10 +156,14 @@ class GeoXManageTracks {
         // Hide Action Button
         GlobalDisplayAction('Off')
 
-        // Titre de l'application
-        ConteneurAddTrack.appendChild(CoreXBuild.DivTexte("Add Track", "", "Titre"))
-        
-        // ToDo
+        if (IsAddTrack){
+            // Titre de l'application
+            ConteneurAddTrack.appendChild(CoreXBuild.DivTexte("Add Track", "", "Titre"))
+        } else {
+            // Titre de l'application
+            ConteneurAddTrack.appendChild(CoreXBuild.DivTexte("Modify Track", "", "Titre"))
+        }
+        this.RenderAddModifyTrackData(IsAddTrack, TrackData)
     }
 
     /**
@@ -221,7 +231,7 @@ class GeoXManageTracks {
      */
     GetAllMyTracksData(){
         let FctData = {Page: this._PageOfPosts}
-        GlobalCallApiPromise("ApiGetMyPosts", FctData, "", "").then((reponse)=>{
+        GlobalCallApiPromise("ApiGetAllMyTracks", FctData, "", "").then((reponse)=>{
             this.RenderAllMyTracksDataInViewManageTrack(reponse)
         },(erreur)=>{
             alert("Error: " + erreur)
@@ -239,7 +249,16 @@ class GeoXManageTracks {
         },(erreur)=>{
             let DivDataOfOneTrack = document.getElementById(this._DivDataOfOneTrack)
             DivDataOfOneTrack.innerHTML =""
-            DivDataOfOneTrack.appendChild(this.BuildDivError(erreur))
+            DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(erreur, "", "Text", "color:red;"))
+        })
+    }
+
+    GetMyGroups(){
+        // Get all group of user
+        GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
+            this._UserGroup = reponse
+        },(erreur)=>{
+            this.ShowErrorMessage(erreur)
         })
     }
 
@@ -279,7 +298,7 @@ class GeoXManageTracks {
         } else {
             // End of Post
             let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
-            ConteneurManageTrack.appendChild(this.BuildDivError("End of posts"))
+            ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("End of tracks", "", "Text", "color:red;"))
             // Remove WaitingDataManageTrack
             if (document.getElementById("WaitingDataManageTrack")){
                 ConteneurManageTrack.removeChild(document.getElementById("WaitingDataManageTrack"))
@@ -350,6 +369,117 @@ class GeoXManageTracks {
         this._FollowMyTrack = new FollowTrackOnMap(this._ConteneurFollowTrackOnMap, TrackData)
         this._FollowMyTrack.OnStop = this.ClickStopFollowingTrack.bind(this)
         this._FollowMyTrack.Start()
+    }
+
+    RenderAddModifyTrackData(IsAddTrack, Data){
+        let Id = (Data == null) ? "" : Data._id
+        let Name = (Data == null) ? "" : Data.Name
+        let Group = (Data == null) ? "" : Data.Group
+        let Description = (Data == null) ? "" : Data.Description
+        let Public = (Data == null) ? true : Data.Public
+        let Color = (Data == null) ? "#0000FF" : Data.Color
+
+        let ConteneurAddTrack = document.getElementById(this._ConteneurAddTrack)
+        // Input Name
+        ConteneurAddTrack.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name:", "Text", "InputTrackName",Name, "Input Text", "text", "Name",))
+        // Input `Group
+        ConteneurAddTrack.appendChild(CoreXBuild.InputWithLabel("InputBox", "Group:", "Text", "InputTrackGroup",Group, "Input Text", "text", "Group",))
+        // Add AutoComplete
+        let me = this
+        document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
+        autocomplete({
+            input: document.getElementById("InputTrackGroup"),
+            minLength: 1,
+            emptyMsg: 'No suggestion',
+            fetch: function(text, update) {
+                text = text.toLowerCase();
+                var GroupFiltred = me._UserGroup.filter(n => n.toLowerCase().startsWith(text))
+                var suggestions = []
+                GroupFiltred.forEach(element => {
+                    var MyObject = new Object()
+                    MyObject.label = element
+                    suggestions.push(MyObject)
+                });
+                update(suggestions);
+            },
+            onSelect: function(item) {
+                document.getElementById("InputTrackGroup").value = item.label;
+            }
+        });
+        // Description
+        let DivDescription = CoreXBuild.Div("", "InputBox Text", "")
+        ConteneurAddTrack.appendChild(DivDescription)
+        DivDescription.appendChild(CoreXBuild.DivTexte("Description", "", "Text", ""))
+        let DivContDesc = CoreXBuild.Div("DivContDesc", "DivContentEdit TextSmall", "")
+        DivContDesc.innerText = Description
+        DivContDesc.contentEditable = "True"
+        DivDescription.appendChild(DivContDesc)
+        // Toggle Public
+        let DivTooglePublic = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        ConteneurAddTrack.appendChild(DivTooglePublic)
+        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public:", "", "", ""))
+        DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", Public))
+        // Color
+        if (!IsAddTrack){
+            let divColor = CoreXBuild.Div("", "InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; flex-wrap: wrap;")
+            let TextColor = CoreXBuild.DivTexte("Color:", "", "Text", "")
+            divColor.appendChild(TextColor)
+            let inputcolor = document.createElement("input")
+            divColor.appendChild(inputcolor)
+            inputcolor.setAttribute("id","SelectColor")
+            inputcolor.setAttribute("type","color")
+            inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; height: 2rem; border: 1px solid black;")
+            inputcolor.value = Color
+            ConteneurAddTrack.appendChild(divColor)
+        }
+        // Div Button
+        let DivBoxButton = CoreXBuild.Div("", "InputBox", "")
+        ConteneurAddTrack.appendChild(DivBoxButton)
+        let DivButton = CoreXBuild.DivFlexRowAr("")
+        DivBoxButton.appendChild(DivButton)
+        if (IsAddTrack){
+            // Button Add
+            DivButton.appendChild(CoreXBuild.Button("Select GPX",this.ClickAddTrack.bind(this),"Text Button ButtonWidth30", "SelectAndSend"))
+            //Input file
+            var Input = document.createElement("input")
+            Input.setAttribute("type","file")
+            Input.setAttribute("name","FileSelecteur")
+            Input.setAttribute("id","FileSelecteur")
+            Input.setAttribute("accept", '.gpx')
+            Input.setAttribute("style","display: none;")
+            Input.addEventListener("change", ()=>{
+                // Change button to waiting
+                document.getElementById("SelectAndSend").innerHTML="Build..."
+                document.getElementById("SelectAndSend").disabled = true
+
+                var fichierSelectionne = document.getElementById('FileSelecteur').files[0]
+                var reader = new FileReader();
+                let me = this
+                reader.readAsText(fichierSelectionne, "UTF-8");
+                reader.onload = function (evt) {
+                    let parser = new DOMParser();
+                    //let xmlDoc = parser.parseFromString(evt.target.result,"text/xml");
+                    //me._GPX = evt.target.result
+                    me.ConvertGpxToImg(evt.target.result)
+                }
+                reader.onerror = function (evt) {
+                    alert("Error reading file");
+                }
+            }, false)
+            DivButton.appendChild(Input)
+        } else {
+            // Button Update
+            DivButton.appendChild(CoreXBuild.Button("Update Track",this.ClickUpdateTrack.bind(this, Id),"Text Button ButtonWidth30"))
+        }
+        // Button cancel
+        DivButton.appendChild(CoreXBuild.Button("Cancel",this.ClickCancelAddModifyTrack.bind(this),"Text Button ButtonWidth30", "Cancel"))
+        // Empty space
+        ConteneurAddTrack.appendChild(this.BuildEmptySpace())
+        // Div Map
+        if (IsAddTrack){
+            let DivMapAddTrack = CoreXBuild.Div(this._DivMapAddTrack, "", "")
+            ConteneurAddTrack.appendChild(DivMapAddTrack)
+        }
     }
 
     /**
@@ -509,25 +639,63 @@ class GeoXManageTracks {
             document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
             // Hide Action Button
             GlobalDisplayAction('On')
-            // Scroll
-            window.scrollTo(0, this._WindowScrollY)
         }
 
         // Scroll to
         window.scrollTo(0, this._WindowScrollY);
     }
 
-    /**
-     * Build HTML div with error message
-     * @param {String} MyError Error message
-     * @returns HTML element div
-     */
-    BuildDivError(MyError){
-        let diverror = document.createElement('div')
-        diverror.innerText = MyError
-        diverror.style.color = "red"
-        diverror.style.margin = "2rem"
-        return diverror
+    ClickAddTrack(){
+        if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            var fileCmd = "FileSelecteur.click()"
+            eval(fileCmd)
+        } else {
+            this.ShowErrorMessage("Enter a name and a group before selecting and sending your file")
+        }
+    }
+
+    ClickUpdateTrack(TrackId){
+        alert("ToDo")
+    }
+
+    ClickCancelAddModifyTrack(){
+        document.getElementById(this._ConteneurAddTrack).innerHTML = ""
+        if (!this._StartWithLoadViewManageTrack){
+            this._StartWithLoadViewManageTrack = true
+            this.LoadView(this._ShowOnMap)
+        } else {
+            if (this._ShowOnMap){
+                // Hide ConteneurManageTrack
+                document.getElementById(this._ConteneurManageTrack).style.display = "none"
+                // Show ConteneurViewOnMap
+                let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
+                ConteneurViewOnMap.style.display = "flex"
+                // Hide ConteneurAddTrack
+                document.getElementById(this._ConteneurAddTrack).style.display = "none"
+                // Hide ConteneurTrackData
+                document.getElementById(this._ConteneurTrackData).style.display = "none"
+                // Hide ConteneurFollowTrackOnMap
+                document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+                // Hide Action Button
+                GlobalDisplayAction('Off')
+            } else {
+                // Show ConteneurManageTrack
+                let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
+                ConteneurManageTrack.style.display = "flex"
+                // Hide ConteneurViewOnMap
+                document.getElementById(this._ConteneurViewOnMap).style.display = "none"
+                // Hide ConteneurAddTrack
+                document.getElementById(this._ConteneurAddTrack).style.display = "none"
+                // Hide ConteneurTrackData
+                document.getElementById(this._ConteneurTrackData).style.display = "none"
+                // Hide ConteneurFollowTrackOnMap
+                document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+                // Hide Action Button
+                GlobalDisplayAction('On')
+                // Scroll
+                window.scrollTo(0, this._WindowScrollY)
+            }
+        }
     }
 
     /**
@@ -546,7 +714,7 @@ class GeoXManageTracks {
      * @param {string} Text text of the button
      * @returns 
      */
-     BuildImageAndTextButtonContent(Image, Text){
+    BuildImageAndTextButtonContent(Image, Text){
         return `<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Image}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">${Text}</div></div>`
     }
 
@@ -559,7 +727,7 @@ class GeoXManageTracks {
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Texte waiting
-        Content.appendChild(CoreXBuild.DivTexte("Waiting data...", "", "text"))
+        Content.appendChild(CoreXBuild.DivTexte("Waiting data...", "", "Text"))
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Show window
@@ -571,6 +739,57 @@ class GeoXManageTracks {
      */
     RemoveWaitingBox(){
         CoreXWindow.DeleteWindow()
+    }
+
+    ShowErrorMessage(Error){
+        let Content = CoreXBuild.DivFlexColumn("")
+        // Empty space
+        Content.appendChild(this.BuildEmptySpace())
+        // Texte waiting
+        Content.appendChild(CoreXBuild.DivTexte(Error, "", "Text", "color:red;"))
+        // Empty space
+        Content.appendChild(this.BuildEmptySpace())
+        // Show window
+        CoreXWindow.BuildWindow(Content)
+    }
+
+    async ConvertGpxToImg(GPX){
+        let Div = document.getElementById(this._DivMapAddTrack )
+        let MyGpxToImg = new GpxToImg(GPX, Div)
+        let ReponseGpxToImg = await MyGpxToImg.Convert()
+        if (ReponseGpxToImg.Error){
+            // changer le nom du boutton
+            document.getElementById("SelectAndSend").innerHTML="Error"
+            this.ShowErrorMessage(ReponseGpxToImg.ErrorMsg)
+        } else {
+            this.SendAddModifyTrack(null, GPX, ReponseGpxToImg.Img, ReponseGpxToImg.GeoJson)
+        }
+    }
+
+    SendAddModifyTrack(TrackId= null, Gpx = null, Image = null, GeoJson = null){
+        document.getElementById("SelectAndSend").innerHTML="Send..."
+        let Track = new Object()
+        Track.Name = document.getElementById("InputTrackName").value 
+        Track.Group = document.getElementById("InputTrackGroup").value 
+        Track.Public = document.getElementById("TogglePublic").checked 
+        //Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
+        Track.MultiToOneLine = true
+        Track.FileContent = Gpx
+        Track.GeoJson = GeoJson
+        Track.Image = Image
+        Track.Id = TrackId
+        Track.Description = document.getElementById("DivContDesc").innerText
+        // Data to send
+        let FctData = {Action: "AddModify", Data : Track}
+        debugger
+        GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
+            this.ClickCancelAddModifyTrack()
+        },(erreur)=>{
+            // changer le nom du boutton
+            document.getElementById("SelectAndSend").innerHTML="Error"
+            // Show error
+            this.ShowErrorMessage(erreur)
+        })
     }
 }
 

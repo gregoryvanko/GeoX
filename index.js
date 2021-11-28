@@ -79,10 +79,10 @@ class GeoX {
       this._MyApp.AddApiFct("ApiGetAllPost", this._GeoXServer.ApiGetAllPost.bind(this), false)
       this._MyApp.AddApiFct("ApiGetPostData", this._GeoXServer.ApiGetPostData.bind(this), false)
       this._MyApp.AddApiFct("ApiGetTrackData", this._GeoXServer.ApiGetTrackData.bind(this), false)
-      this._MyApp.AddApiFct("ApiSaveTrack", this._GeoXServer.ApiSaveTrack.bind(this), false)
-      this._MyApp.AddApiFct("ApiGetAllGroups", this._GeoXServer.ApiGetAllGroups.bind(this), false)
+      this._MyApp.AddApiFct("ApiCopyTrack", this._GeoXServer.ApiCopyTrack.bind(this), false)
       this._MyApp.AddApiFct("ApiGetAllMarkers", this._GeoXServer.ApiGetAllMarkers.bind(this), false)
-      this._MyApp.AddApiFct("ApiGetMyPosts", this._GeoXServer.ApiGetMyPosts.bind(this), false)
+      this._MyApp.AddApiFct("ApiGetAllGroups", this._GeoXServer.ApiGetAllGroups.bind(this), false)
+      this._MyApp.AddApiFct("ApiGetAllMyTracks", this._GeoXServer.ApiGetAllMyTracks.bind(this), false)
          
       // Start
       this._MyApp.Start()
