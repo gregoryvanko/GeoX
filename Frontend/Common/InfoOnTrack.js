@@ -21,13 +21,13 @@ class InfoOnTrack {
         this._LayerGroup = null
         this._WeightTrack = (L.Browser.mobile) ? 5 : 3
         this._IconPointStartOption = L.icon({
-            iconUrl: Icon.MarkerVert(),
+            iconUrl: IconMarker.MarkerVert(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         this._IconPointEndOption = L.icon({
-            iconUrl: Icon.MarkerRouge(),
+            iconUrl: IconMarker.MarkerRouge(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor

@@ -66,13 +66,13 @@ class GpxToImg {
         var beg = this._GeoJson.features[0].geometry.coordinates[0];
         var end = this._GeoJson.features[0].geometry.coordinates[numPts-1];
         let IconPointStartOption = L.icon({
-            iconUrl: Icon.MarkerVert(),
+            iconUrl: IconMarker.MarkerVert(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         let IconPointEndOption = L.icon({
-            iconUrl: Icon.MarkerRouge(),
+            iconUrl: IconMarker.MarkerRouge(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor

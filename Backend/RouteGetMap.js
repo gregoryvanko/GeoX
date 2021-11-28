@@ -55,7 +55,7 @@ function BuildHtmlGetMap(DataMap){
     reponse += fs.readFileSync(__dirname + "/../Frontend/Common/0-leaflet.js", 'utf8')
     reponse += fs.readFileSync(__dirname + "/../Frontend/Common/1-leaflet.geometryutil.js", 'utf8')
     reponse += fs.readFileSync(__dirname + "/../Frontend/Common/2-leaflet-arrowheads.js", 'utf8')
-    reponse += fs.readFileSync(__dirname + "/../Frontend/Common/Icon.js", 'utf8')
+    reponse += fs.readFileSync(__dirname + "/../Frontend/Common/IconMarker.js", 'utf8')
     reponse += `
             </script>
         </head>
@@ -118,14 +118,14 @@ function BuildHtmlGetMap(DataMap){
                     };
                     // Style for Marker Start
                     var IconPointStartOption = L.icon({
-                        iconUrl: Icon.MarkerVert(),
+                        iconUrl: IconMarker.MarkerVert(),
                         iconSize:     [40, 40],
                         iconAnchor:   [20, 40],
                         popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
                     });
                     // Style for Marker End
                     var IconPointEndOption = L.icon({
-                        iconUrl: Icon.MarkerRouge(),
+                        iconUrl: IconMarker.MarkerRouge(),
                         iconSize:     [40, 40],
                         iconAnchor:   [20, 40],
                         popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor

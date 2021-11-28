@@ -31,7 +31,7 @@ class GeoXCreateTrack {
         this._LayerGroup = null
 
         this._IconPointOption = L.icon({
-            iconUrl: Icon.MarkerBleu(),
+            iconUrl: IconMarker.MarkerBleu(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
@@ -858,14 +858,14 @@ class GeoXCreateTrack {
         }
         // Style for Marker Start
         var IconPointStartOption = L.icon({
-            iconUrl: Icon.MarkerVert(),
+            iconUrl: IconMarker.MarkerVert(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         // Style for Marker End
         var IconPointEndOption = L.icon({
-            iconUrl: Icon.MarkerRouge(),
+            iconUrl: IconMarker.MarkerRouge(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
@@ -1086,4 +1086,4 @@ class GeoXCreateTrack {
 // Creation de l'application
 let MyGeoXCreateTrack = new GeoXCreateTrack(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Create My Tracks", Icon.GeoXCreateTrack(), MyGeoXCreateTrack.Initiation.bind(MyGeoXCreateTrack))
+GlobalCoreXAddApp("Create My Tracks", IconGeoX.GeoXCreateTrack(), MyGeoXCreateTrack.Initiation.bind(MyGeoXCreateTrack))

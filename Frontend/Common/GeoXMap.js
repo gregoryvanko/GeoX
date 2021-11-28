@@ -9,21 +9,21 @@ class GeoXMap{
 
         // Style for Marker Icon
         this._IconPointOption = L.icon({
-            iconUrl: Icon.MarkerBleu(),
+            iconUrl: IconMarker.MarkerBleu(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         // Style for Marker Start
         this._IconPointStartOption = L.icon({
-            iconUrl: Icon.MarkerVert(),
+            iconUrl: IconMarker.MarkerVert(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         // Style for Marker End
         this._IconPointEndOption = L.icon({
-            iconUrl: Icon.MarkerRouge(),
+            iconUrl: IconMarker.MarkerRouge(),
             iconSize:     [40, 40],
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor

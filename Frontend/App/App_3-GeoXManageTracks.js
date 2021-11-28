@@ -5,6 +5,7 @@ class GeoXManageTracks {
         this._ConteneurViewOnMap = "ConteneurViewOnMap"
         this._ConteneurAddTrack = "ConteneurAddTrack"
         this._ConteneurTrackData = "ConteneurTrackData"
+        this._ConteneurFollowTrackOnMap = "ConteneurFollowTrackOnMap"
         this._DivListOfMyTracksData = "DivListOfMyTracksData"
         this._DivDataOfOneTrack = "DivDataOfOneTrack"
         this._PageOfPosts = 0
@@ -21,7 +22,10 @@ class GeoXManageTracks {
         }, {threshold: [1]})
 
         this._StartWithLoadViewManageTrack = true
+        this._ShowOnMap = false
         this._WindowScrollY = 0
+
+        this._FollowMyTrack = null
     }
 
     /**
@@ -37,14 +41,14 @@ class GeoXManageTracks {
         // Clear view
         this._DivApp.innerHTML=""
         // Load Data
-        this.LoadView()
+        this.LoadView(this._ShowOnMap)
     }
 
     /**
      * Load view de l'application
-     * @param {Boolean} ShowOnMap Show view OnMap?
      */
     LoadView(ShowOnMap = false){
+        this._ShowOnMap = ShowOnMap
         // Clear data
         this._PageOfPosts = 0
         // Clear view
@@ -65,9 +69,11 @@ class GeoXManageTracks {
         let ConteneurTrackData = CoreXBuild.DivFlexColumn(this._ConteneurTrackData)
         ConteneurTrackData.style.display = "none"
         this._DivApp.appendChild(ConteneurTrackData)
+        // Conteneur Follow track on map
+        this._DivApp.appendChild(CoreXBuild.Div(this._ConteneurFollowTrackOnMap, "", "height: 100vh; width: 100%; display: none;")) 
         // Start Load data
         if (this._StartWithLoadViewManageTrack){
-            if (ShowOnMap){
+            if (this._ShowOnMap){
                 this.LoadViewOnMap()
             } else {
                 this.LoadViewManageTracks()
@@ -81,7 +87,7 @@ class GeoXManageTracks {
      * Load de la vue Manage Track
      */
     LoadViewManageTracks(){
-        this._StartWithLoadViewManageTrack = true
+        this._ShowOnMap = false
         // Show ConteneurManageTrack
         let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
         ConteneurManageTrack.style.display = "flex"
@@ -91,13 +97,15 @@ class GeoXManageTracks {
         document.getElementById(this._ConteneurAddTrack).style.display = "none"
         // Hide ConteneurTrackData
         document.getElementById(this._ConteneurTrackData).style.display = "none"
+        // Hide ConteneurFollowTrackOnMap
+        document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
         // Hide Action Button
         GlobalDisplayAction('On')
 
         // Titre de l'application
         ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
         // Button view on map
-        ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, true), "ActionLeft",  `<img src="${Icon.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
+        ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, true), "ActionLeft",  `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
         // Button Add track
         ConteneurManageTrack.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.Initiation.bind(this, false),"ButtonLeftActionSecond","ButtonAddTrack"))
         // Div pour le titre des colonnes
@@ -137,6 +145,8 @@ class GeoXManageTracks {
         ConteneurAddTrack.style.display = "flex"
         // Hide ConteneurTrackData
         document.getElementById(this._ConteneurTrackData).style.display = "none"
+        // Hide ConteneurFollowTrackOnMap
+        document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
         // Hide Action Button
         GlobalDisplayAction('Off')
 
@@ -150,7 +160,7 @@ class GeoXManageTracks {
      * Load de la vue Map
      */
     LoadViewOnMap(){
-        this._StartWithLoadViewManageTrack = false
+        this._ShowOnMap = true
         // Hide ConteneurManageTrack
         document.getElementById(this._ConteneurManageTrack).style.display = "none"
         // Show ConteneurViewOnMap
@@ -160,11 +170,13 @@ class GeoXManageTracks {
         document.getElementById(this._ConteneurAddTrack).style.display = "none"
         // Hide ConteneurTrackData
         document.getElementById(this._ConteneurTrackData).style.display = "none"
+        // Hide ConteneurFollowTrackOnMap
+        document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
         // Hide Action Button
         GlobalDisplayAction('On')
 
         // Add button manage my track
-        ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, false), "ActionLeft",  `<img src="${Icon.GeoXActivities()}" alt="icon" width="32" height="32">`))
+        ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, false), "ActionLeft",  `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`))
         // GetData
         // ToDo
     }
@@ -184,6 +196,8 @@ class GeoXManageTracks {
         // Show ConteneurTrackData
         let ConteneurTrackData = document.getElementById(this._ConteneurTrackData)
         ConteneurTrackData.style.display = "flex"
+        // Hide ConteneurFollowTrackOnMap
+        document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
         // Hide Action Button
         GlobalDisplayAction('Off')
 
@@ -278,15 +292,12 @@ class GeoXManageTracks {
      * @param {Object} Data Data of track for GeoXActivities view
      */
     RenderInfoOnTrackInViewTrackData(Data){
-        // Vider le DivDataOfOneTrack 
         let DivDataOfOneTrack = document.getElementById(this._DivDataOfOneTrack)
-        DivDataOfOneTrack.innerHTML =""
         // Add InfoOnTrack view
         let InfoTrackView = new InfoOnTrack(Data, this._DivDataOfOneTrack)
         // Add button
         let DivButtonAction = CoreXBuild.DivFlexRowAr("ButtonAction")
         DivDataOfOneTrack.appendChild(DivButtonAction)
-        
         // Button Go To Start
         let ButtonGo = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go to start"), this.ClickGoToStart.bind(this, Data.StartPoint), "CloseButton", "GoToStart")
         DivButtonAction.appendChild(ButtonGo)
@@ -294,23 +305,51 @@ class GeoXManageTracks {
         let ButtonFollow = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.ClickFollowTrack.bind(this, Data._id), "CloseButton", "FollowTrack")
         DivButtonAction.appendChild(ButtonFollow)
         // Button Update
-        let ButtonUpdate = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data._id), "CloseButton", "Update")
+        let ButtonUpdate = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Pencil(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data._id), "CloseButton", "Update")
         DivButtonAction.appendChild(ButtonUpdate)
         // Button Modify
         let ButtonModify = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.ModifyTrack(), "Modify Track"), this.ClickModifyTrack.bind(this, Data._id), "CloseButton", "Modify")
         DivButtonAction.appendChild(ButtonModify)
         // Button Delete
-        let ButtonDelete = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.ModifyTrack(), "Delete Track"), this.ClickDeleteTrack.bind(this, Data._id), "CloseButton", "Delete")
+        let ButtonDelete = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Trash(), "Delete Track"), this.ClickDeleteTrack.bind(this, Data._id), "CloseButton", "Delete")
         DivButtonAction.appendChild(ButtonDelete)
         // Button Link
-        let ButtonLink = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Get link"), this.ClickGetLinkOfTrack.bind(this, Data._id), "CloseButton", "Link")
+        let ButtonLink = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Link(), "Get link"), this.ClickGetLinkOfTrack.bind(this, Data._id), "CloseButton", "Link")
         DivButtonAction.appendChild(ButtonLink)
         // Button download GPX
-        let ButtonGPX = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Download(), "GPX"), this.ClickDownloadGPX.bind(this, Data._id), "CloseButton", "GPX")
+        let ButtonGPX = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Download(), "GPX"), this.ClickDownloadGPX.bind(this, Data._id, Data.Name), "CloseButton", "GPX")
         DivButtonAction.appendChild(ButtonGPX)
 
         // Empty
         DivDataOfOneTrack.appendChild(this.BuildEmptySpace())
+    }
+
+    /**
+     * Render track to follow on map
+     * @param {String} TrackId id of track
+     * @param {Object} TrackGeoJson GeoJson Object
+     */
+    RenderTrackToFollowOnMap(TrackId, TrackGeoJson){
+        // Vider le _ConteneurTrackData 
+        document.getElementById(this._ConteneurTrackData).innerHTML =""
+        // Hide ConteneurManageTrack
+        document.getElementById(this._ConteneurManageTrack).style.display = "none"
+        // Hide ConteneurViewOnMap
+        document.getElementById(this._ConteneurViewOnMap).style.display = "none"
+        // Hide ConteneurAddTrack
+        document.getElementById(this._ConteneurAddTrack).style.display = "none"
+        // Hide ConteneurTrackData
+        document.getElementById(this._ConteneurTrackData).style.display = "none"
+        // Show ConteneurFollowTrackOnMap
+        document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "block"
+        // On efface le bouton menu action
+        GlobalDisplayAction('Off')
+
+        // Start Follow Track on map
+        let TrackData = {TrackId: TrackId, TrackGeoJson: TrackGeoJson}
+        this._FollowMyTrack = new FollowTrackOnMap(this._ConteneurFollowTrackOnMap, TrackData)
+        this._FollowMyTrack.OnStop = this.ClickStopFollowingTrack.bind(this)
+        this._FollowMyTrack.Start()
     }
 
     /**
@@ -329,21 +368,7 @@ class GeoXManageTracks {
     ClickOnBackFromTrackData(){
         let ConteneurTrackData = document.getElementById(this._ConteneurTrackData)
         ConteneurTrackData.innerHTML = ""
-        if (this._StartWithLoadViewManageTrack){
-            // Show ConteneurManageTrack
-            let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
-            ConteneurManageTrack.style.display = "flex"
-            // Hide ConteneurViewOnMap
-            document.getElementById(this._ConteneurViewOnMap).style.display = "none"
-            // Hide ConteneurAddTrack
-            document.getElementById(this._ConteneurAddTrack).style.display = "none"
-            // Hide ConteneurTrackData
-            document.getElementById(this._ConteneurTrackData).style.display = "none"
-            // Hide Action Button
-            GlobalDisplayAction('On')
-            // Scroll
-            window.scrollTo(0, this._WindowScrollY)
-        } else {
+        if (this._ShowOnMap){
             // Hide ConteneurManageTrack
             document.getElementById(this._ConteneurManageTrack).style.display = "none"
             // Show ConteneurViewOnMap
@@ -353,37 +378,143 @@ class GeoXManageTracks {
             document.getElementById(this._ConteneurAddTrack).style.display = "none"
             // Hide ConteneurTrackData
             document.getElementById(this._ConteneurTrackData).style.display = "none"
+            // Hide ConteneurFollowTrackOnMap
+            document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+            // Hide Action Button
+            GlobalDisplayAction('Off')
+        } else {
+            // Show ConteneurManageTrack
+            let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
+            ConteneurManageTrack.style.display = "flex"
+            // Hide ConteneurViewOnMap
+            document.getElementById(this._ConteneurViewOnMap).style.display = "none"
+            // Hide ConteneurAddTrack
+            document.getElementById(this._ConteneurAddTrack).style.display = "none"
+            // Hide ConteneurTrackData
+            document.getElementById(this._ConteneurTrackData).style.display = "none"
+            // Hide ConteneurFollowTrackOnMap
+            document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
             // Hide Action Button
             GlobalDisplayAction('On')
+            // Scroll
+            window.scrollTo(0, this._WindowScrollY)
         }
     }
 
-    ClickGoToStart(TrackId){
-
+    /**
+     * Go to Start position
+     * @param {Object} StartPoint StartPoint coordonate
+     */
+    ClickGoToStart(StartPoint){
+        if ((navigator.platform.indexOf("iPhone") != -1) || (navigator.platform.indexOf("iPad") != -1) || (navigator.platform.indexOf("iPod") != -1)){
+            window.open(`maps://maps.google.com/maps?daddr=${StartPoint.Lat},${StartPoint.Lng}&amp;ll=`);
+        } else {
+            window.open(`https://maps.google.com/maps?daddr=${StartPoint.Lat},${StartPoint.Lng}&amp;ll=`)
+        }
     }
 
+    /**
+     * Show track to follow on map
+     * @param {String} TrackId Id of track
+     */
     ClickFollowTrack(TrackId){
-
+        // Add wainting box
+        this.BuildWaitingBox()
+        // Get Track Data
+        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+            this.RemoveWaitingBox()
+            this.RenderTrackToFollowOnMap(TrackId, reponse)
+        },(erreur)=>{
+            this.RemoveWaitingBox()
+            alert(erreur)
+        })
     }
 
     ClickUpdateTrackData(TrackId){
-
+        // ToDo
     }
 
     ClickModifyTrack(TrackId){
-
+        // ToDo
     }
 
     ClickDeleteTrack(TrackId){
-
+        // ToDo
     }
 
+    /**
+     * Show link of track
+     * @param {String} TrackId Id of track
+     */
     ClickGetLinkOfTrack(TrackId){
-
+        let HTMLContent = CoreXBuild.DivFlexColumn()
+        HTMLContent.appendChild(CoreXBuild.DivTexte(window.location.origin + "/getmap/?trackid=" + TrackId, "", "Text", "margin-top: 2rem; margin-bottom: 2rem; user-select: text;"))
+        CoreXWindow.BuildWindow(HTMLContent)
     }
 
-    ClickDownloadGPX(TrackId){
+    /**
+     * Download GPX file
+     * @param {String} TrackId Id of track
+     * @param {String} Name Name of track
+     */
+    ClickDownloadGPX(TrackId, Name){
+        let FctData = {TrackId: TrackId, GetData: "GPX"}
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+            var link = document.createElement('a')
+            link.download = `${Name}.gpx`
+            var blob = new Blob([reponse], {typde: 'text/plain'})
+            link.href = window.URL.createObjectURL(blob)
+            link.click()
+        },(erreur)=>{
+            alert(erreur)
+        })
+    }
 
+    /**
+     * Hide conteneur follow on track and show previous conteneur
+     */
+    ClickStopFollowingTrack(){
+        // Vider DivMapFollow
+        document.getElementById(this._ConteneurFollowTrackOnMap).innerHTML = ""
+
+        // Stop Follow Track
+        this._FollowMyTrack = null
+
+        if (this._ShowOnMap){
+            // Hide ConteneurManageTrack
+            document.getElementById(this._ConteneurManageTrack).style.display = "none"
+            // Show ConteneurViewOnMap
+            let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
+            ConteneurViewOnMap.style.display = "flex"
+            // Hide ConteneurAddTrack
+            document.getElementById(this._ConteneurAddTrack).style.display = "none"
+            // Hide ConteneurTrackData
+            document.getElementById(this._ConteneurTrackData).style.display = "none"
+            // Hide ConteneurFollowTrackOnMap
+            document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+            // Hide Action Button
+            GlobalDisplayAction('Off')
+        } else {
+            // Show ConteneurManageTrack
+            let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
+            ConteneurManageTrack.style.display = "flex"
+            // Hide ConteneurViewOnMap
+            document.getElementById(this._ConteneurViewOnMap).style.display = "none"
+            // Hide ConteneurAddTrack
+            document.getElementById(this._ConteneurAddTrack).style.display = "none"
+            // Hide ConteneurTrackData
+            document.getElementById(this._ConteneurTrackData).style.display = "none"
+            // Hide ConteneurFollowTrackOnMap
+            document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+            // Hide Action Button
+            GlobalDisplayAction('On')
+            // Scroll
+            window.scrollTo(0, this._WindowScrollY)
+        }
+
+        // Scroll to
+        window.scrollTo(0, this._WindowScrollY);
     }
 
     /**
@@ -418,9 +549,32 @@ class GeoXManageTracks {
      BuildImageAndTextButtonContent(Image, Text){
         return `<div style="display: flex;justify-content: center; align-content: center; align-items: center;"><img src="${Image}" alt="icon" width="20" height="20"> <div style="margin-left: 0.5vw;">${Text}</div></div>`
     }
+
+    /**
+     * Build wainting Box
+     */
+    BuildWaitingBox(){
+        // Add WaitingBox
+        let Content = CoreXBuild.DivFlexColumn("")
+        // Empty space
+        Content.appendChild(this.BuildEmptySpace())
+        // Texte waiting
+        Content.appendChild(CoreXBuild.DivTexte("Waiting data...", "", "text"))
+        // Empty space
+        Content.appendChild(this.BuildEmptySpace())
+        // Show window
+        CoreXWindow.BuildWindow(Content)
+    }
+
+    /**
+     * Hide wainting Box
+     */
+    RemoveWaitingBox(){
+        CoreXWindow.DeleteWindow()
+    }
 }
 
 // Creation de l'application
 let MyGeoXManageTracks = new GeoXManageTracks(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Manage My Tracks", Icon.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))
+GlobalCoreXAddApp("Manage My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))

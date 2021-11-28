@@ -52,7 +52,7 @@ class FollowTrackOnMap {
     /**
      * Show de la box avec les info de suivi d'une track
      */
-     ShowDistanceInfoBox(){
+    ShowDistanceInfoBox(){
         // Div du box
         let DivBoxTracks = CoreXBuild.Div("DivBoxDistance", "DivBoxDistance", "")
         document.getElementById(this._IdDivMap).appendChild(DivBoxTracks)
@@ -96,7 +96,7 @@ class FollowTrackOnMap {
     /**
      * Hide de la box avec les info de suivi d'une track
      */
-     HideDistanceInfoBox(){
+    HideDistanceInfoBox(){
         // If TracksInfo existe alors on le supprime
         let DivBoxDistance = document.getElementById("DivBoxDistance")
         if(DivBoxDistance){
