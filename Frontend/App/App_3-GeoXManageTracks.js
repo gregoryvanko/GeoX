@@ -44,8 +44,6 @@ class GeoXManageTracks {
         this._DivApp.innerHTML=""
         // Load Data
         this.LoadView(this._ShowOnMap)
-        // Get All group
-        this.GetMyGroups()
     }
 
     /**
@@ -53,6 +51,8 @@ class GeoXManageTracks {
      */
     LoadView(ShowOnMap = false){
         this._ShowOnMap = ShowOnMap
+        // Get All group
+        this.GetMyGroups()
         // Clear data
         this._PageOfPosts = 0
         // Clear view
@@ -258,7 +258,7 @@ class GeoXManageTracks {
         GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
             this._UserGroup = reponse
         },(erreur)=>{
-            this.ShowErrorMessage(erreur)
+            this.ShowErrorMessage(erreur.ErrorMsg)
         })
     }
 
@@ -324,13 +324,13 @@ class GeoXManageTracks {
         let ButtonFollow = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.ClickFollowTrack.bind(this, Data._id), "CloseButton", "FollowTrack")
         DivButtonAction.appendChild(ButtonFollow)
         // Button Update
-        let ButtonUpdate = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Pencil(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data._id), "CloseButton", "Update")
+        let ButtonUpdate = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Pencil(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data), "CloseButton", "Update")
         DivButtonAction.appendChild(ButtonUpdate)
         // Button Modify
         let ButtonModify = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.ModifyTrack(), "Modify Track"), this.ClickModifyTrack.bind(this, Data._id), "CloseButton", "Modify")
         DivButtonAction.appendChild(ButtonModify)
         // Button Delete
-        let ButtonDelete = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Trash(), "Delete Track"), this.ClickDeleteTrack.bind(this, Data._id), "CloseButton", "Delete")
+        let ButtonDelete = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Trash(), "Delete Track"), this.ClickDeleteTrack.bind(this, Data._id, Data.Name), "CloseButton", "Delete")
         DivButtonAction.appendChild(ButtonDelete)
         // Button Link
         let ButtonLink = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Link(), "Get link"), this.ClickGetLinkOfTrack.bind(this, Data._id), "CloseButton", "Link")
@@ -561,16 +561,23 @@ class GeoXManageTracks {
         })
     }
 
-    ClickUpdateTrackData(TrackId){
-        // ToDo
+    ClickUpdateTrackData(Data){
+        // ToDo maque Group et Color dans Data
     }
 
     ClickModifyTrack(TrackId){
         // ToDo
     }
 
-    ClickDeleteTrack(TrackId){
-        // ToDo
+    ClickDeleteTrack(TrackId, TrackName){
+        if (confirm(`Do you want to delete track : ${TrackName}?`)){
+            let FctData = {Action: "Delete", TrackId : TrackId}
+            GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
+                this.LoadView(this._ShowOnMap)
+            },(erreur)=>{
+                this.ShowErrorMessage(erreur)
+            })
+        }
     }
 
     /**
@@ -776,7 +783,7 @@ class GeoXManageTracks {
             document.getElementById("SelectAndSend").innerHTML="Error"
             this.ShowErrorMessage(ReponseGpxToImg.ErrorMsg)
         } else {
-            this.SendAddModifyTrack(null, GPX, ReponseGpxToImg.Img, ReponseGpxToImg.GeoJson)
+            this.SendAddTrack(GPX, ReponseGpxToImg.Img, ReponseGpxToImg.GeoJson)
         }
     }
 
@@ -787,24 +794,24 @@ class GeoXManageTracks {
      * @param {Src} Image Image de la track
      * @param {String} GeoJson GeoJson de la track
      */
-    SendAddModifyTrack(TrackId= null, Gpx = null, Image = null, GeoJson = null){
+    SendAddTrack(Gpx = null, Image = null, GeoJson = null){
         document.getElementById("SelectAndSend").innerHTML="Send..."
         let Track = new Object()
         Track.Name = document.getElementById("InputTrackName").value 
         Track.Group = document.getElementById("InputTrackGroup").value 
         Track.Public = document.getElementById("TogglePublic").checked 
-        //Track.MultiToOneLine = document.getElementById("ToggleMultiToOneLine").checked 
         Track.MultiToOneLine = true
         Track.FileContent = Gpx
         Track.GeoJson = GeoJson
         Track.Image = Image
-        Track.Id = TrackId
+        Track.Id = null
         Track.Description = document.getElementById("DivContDesc").innerText
+        Track.Color = (document.getElementById("SelectColor")) ? document.getElementById("SelectColor").value : "#0000FF"
         // Data to send
-        let FctData = {Action: "AddModify", Data : Track}
-        debugger
+        let FctData = {Action: "Add", TrackData : Track}
         GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
             this.ClickCancelAddModifyTrack()
+            this.GetMyGroups()
         },(erreur)=>{
             // changer le nom du boutton
             document.getElementById("SelectAndSend").innerHTML="Error"
@@ -817,4 +824,4 @@ class GeoXManageTracks {
 // Creation de l'application
 let MyGeoXManageTracks = new GeoXManageTracks(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Manage My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))
+GlobalCoreXAddApp("My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))

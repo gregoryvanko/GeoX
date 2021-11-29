@@ -258,5 +258,32 @@ class GeoXServer{
             Res.status("200").json(ReponseMyPosts)
         }
     }
+
+    async ApiManageTrack (Data, Res, User, UserId){
+        let Shared = require("./Shared")
+        if (Data.Action == "Add"){
+            let ReponseAddTrack = await Shared.PromiseAddTrack(Data.TrackData, this._MyApp, User)
+            if(ReponseAddTrack.Error){
+                this._MyApp.LogAppliError(ReponseAddTrack.ErrorMsg, User, UserId)
+                Res.status("500").json(ReponseAddTrack)
+            } else {
+                Res.status("200").json(ReponseAddTrack)
+                this._MyApp.LogAppliInfo("New track saved from a Added track", User, UserId)
+            }
+        } else if (Data.Action == "Modify"){
+            // ToDo
+        } else if (Data.Action == "Delete"){
+            let ReponseDelTrack = await Shared.PromiseDeleteTrack(Data.TrackId, this._MyApp, User)
+            if(ReponseDelTrack.Error){
+                this._MyApp.LogAppliError(ReponseDelTrack.ErrorMsg, User, UserId)
+                Res.status("500").json(ReponseDelTrack)
+            } else {
+                Res.status("200").json(ReponseDelTrack)
+                this._MyApp.LogAppliInfo("Track Deleted", User, UserId)
+            }
+        } else {
+            Res.status("500").json("ApiManageTrack => Action not found: " + Data.Action)
+        }
+    }
 }
 module.exports.GeoXServer = GeoXServer

@@ -29,7 +29,7 @@ function PromiseAddTrack(Track, MyApp, User){
         let TrackData = new Object()
         TrackData.Name = Track.Name
         TrackData.Group = Track.Group
-        TrackData.Color = "#0000FF"
+        TrackData.Color = (Track.Color) ? Track.Color : "#0000FF"
         TrackData.Date = new Date()
         TrackData.Owner = User
         TrackData.Description = Track.Description
@@ -359,6 +359,24 @@ async function GetElevationOfLatLng(LatLng){
         }
     }
     return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
+}
+
+function PromiseDeleteTrack(TrackId, MyApp, User){
+    return new Promise(resolve => {
+        let Reponse = {Error: true, ErrorMsg:"InitError", Data:null}
+
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+        Mongo.DeleteByIdPromise(TrackId, MongoTracksCollection.Collection).then((reponse)=>{
+            Reponse = {Error: false, ErrorMsg:"", Data:"Ok"}
+            resolve(Reponse)
+        },(erreur)=>{
+            Reponse = {Error: true, ErrorMsg:"PromiseDeleteTrack DB error : " + erreur, Data:null}
+            resolve(Reponse)
+        })
+    })
 }
 
 function PromiseGetUserGroup(MyApp, User){
@@ -786,6 +804,7 @@ function PromiseGetMyPosts(MyApp, Page, User){
 }
 
 module.exports.PromiseAddTrack = PromiseAddTrack
+module.exports.PromiseDeleteTrack = PromiseDeleteTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
 module.exports.PromiseGetTracksData = PromiseGetTracksData
