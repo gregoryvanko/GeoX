@@ -590,7 +590,7 @@ class GeoXManageTracks {
      */
     ClickGetLinkOfTrack(TrackId){
         let HTMLContent = CoreXBuild.DivFlexColumn()
-        HTMLContent.appendChild(CoreXBuild.DivTexte(window.location.origin + "/getmap/?trackid=" + TrackId, "", "Text", "margin-top: 2rem; margin-bottom: 2rem; user-select: text;"))
+        HTMLContent.appendChild(CoreXBuild.DivTexte(window.location.origin + "/getmap/?trackid=" + TrackId, "", "Text", "margin-top: 2rem; margin-bottom: 2rem; user-select: text; -webkit-user-select: text;"))
         CoreXWindow.BuildWindow(HTMLContent)
     }
 
