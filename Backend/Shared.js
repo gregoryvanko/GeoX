@@ -751,7 +751,7 @@ function PromiseGetDataOfPostFromDb(MyApp, PostId){
         ReponsePost.Data = []
 
         const Query = {'_id': new MongoObjectId(PostId)}
-        const Projection = { projection:{[MongoTracksCollection.GpxData]: 0, [MongoTracksCollection.Color]: 0, [MongoTracksCollection.Group]: 0, [MongoTracksCollection.Owner]: 0, [MongoTracksCollection.Owner]: 0}}
+        const Projection = { projection:{[MongoTracksCollection.GpxData]: 0, [MongoTracksCollection.Owner]: 0}}
         const Sort = {[MongoTracksCollection.Image]: -1}
         Mongo.FindSortPromise(Query, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){

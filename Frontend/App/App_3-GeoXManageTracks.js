@@ -28,6 +28,8 @@ class GeoXManageTracks {
 
         this._FollowMyTrack = null
         this._UserGroup = null
+
+        this.GeoXCreateTrackView = MyGeoXCreateTrack
     }
 
     /**
@@ -141,7 +143,9 @@ class GeoXManageTracks {
      */
     LoadViewAddTrack(IsAddTrack = true, TrackData = null){
         // Save WindowScrollY
-        this._WindowScrollY = window.scrollY
+        if (IsAddTrack){
+            this._WindowScrollY = window.scrollY
+        }
         // Hide ConteneurManageTrack
         document.getElementById(this._ConteneurManageTrack).style.display = "none"
         // Hide ConteneurViewOnMap
@@ -298,7 +302,7 @@ class GeoXManageTracks {
         } else {
             // End of Post
             let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
-            ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("End of tracks", "", "Text", "color:red;"))
+            ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("End of tracks", "", "Text", "color:red; margin-top: 1rem; margin-bottom: 1rem;"))
             // Remove WaitingDataManageTrack
             if (document.getElementById("WaitingDataManageTrack")){
                 ConteneurManageTrack.removeChild(document.getElementById("WaitingDataManageTrack"))
@@ -327,7 +331,7 @@ class GeoXManageTracks {
         let ButtonUpdate = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Pencil(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data), "CloseButton", "Update")
         DivButtonAction.appendChild(ButtonUpdate)
         // Button Modify
-        let ButtonModify = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.ModifyTrack(), "Modify Track"), this.ClickModifyTrack.bind(this, Data._id), "CloseButton", "Modify")
+        let ButtonModify = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.ModifyTrack(), "Modify Track"), this.ClickModifyTrack.bind(this, Data._id, Data.Name, Data.Group, Data.Public, Data.Description), "CloseButton", "Modify")
         DivButtonAction.appendChild(ButtonModify)
         // Button Delete
         let ButtonDelete = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Trash(), "Delete Track"), this.ClickDeleteTrack.bind(this, Data._id, Data.Name), "CloseButton", "Delete")
@@ -458,8 +462,6 @@ class GeoXManageTracks {
                 reader.readAsText(fichierSelectionne, "UTF-8");
                 reader.onload = function (evt) {
                     let parser = new DOMParser();
-                    //let xmlDoc = parser.parseFromString(evt.target.result,"text/xml");
-                    //me._GPX = evt.target.result
                     me.ConvertGpxToImg(evt.target.result)
                 }
                 reader.onerror = function (evt) {
@@ -469,7 +471,7 @@ class GeoXManageTracks {
             DivButton.appendChild(Input)
         } else {
             // Button Update
-            DivButton.appendChild(CoreXBuild.Button("Update Track",this.ClickSendUpdateTrack.bind(this, Id),"Text Button ButtonWidth30"))
+            DivButton.appendChild(CoreXBuild.Button("Update Track",this.ClickSendUpdateTrack.bind(this, Id),"Text Button ButtonWidth30", "SelectAndSend"))
         }
         // Button cancel
         DivButton.appendChild(CoreXBuild.Button("Cancel",this.ClickCancelAddModifyTrack.bind(this),"Text Button ButtonWidth30", "Cancel"))
@@ -562,11 +564,13 @@ class GeoXManageTracks {
     }
 
     ClickUpdateTrackData(Data){
-        // ToDo maque Group et Color dans Data
+        document.getElementById(this._ConteneurTrackData).innerHTML = ""
+        this.LoadViewAddTrack(false, Data)
     }
 
-    ClickModifyTrack(TrackId){
-        // ToDo
+    ClickModifyTrack(TrackId, TrackName, TrackGroup, Public, Description){
+        GlobalReset()
+        this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description)
     }
 
     ClickDeleteTrack(TrackId, TrackName){
@@ -665,7 +669,33 @@ class GeoXManageTracks {
     }
 
     ClickSendUpdateTrack(TrackId){
-        alert("ToDo")
+        if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
+            document.getElementById("SelectAndSend").innerHTML="Send..."
+            document.getElementById("SelectAndSend").disabled = true
+            let Track = new Object()
+            Track.Name = document.getElementById("InputTrackName").value 
+            Track.Group = document.getElementById("InputTrackGroup").value 
+            Track.Public = document.getElementById("TogglePublic").checked 
+            Track.MultiToOneLine = true
+            Track.FileContent = null
+            Track.GeoJson = null
+            Track.Image = null
+            Track.Id = TrackId
+            Track.Description = document.getElementById("DivContDesc").innerText
+            Track.Color = (document.getElementById("SelectColor")) ? document.getElementById("SelectColor").value : "#0000FF"
+            // Data to send
+            let FctData = {Action: "Modify", TrackData : Track}
+            GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
+                this.Initiation(this._StartWithLoadViewManageTrack)
+            },(erreur)=>{
+                // changer le nom du boutton
+                document.getElementById("SelectAndSend").innerHTML="Error"
+                // Show error
+                this.ShowErrorMessage(erreur)
+            })
+        } else {
+            this.ShowErrorMessage("Enter a name and a group before selecting and sending your file")
+        }
     }
 
     /**

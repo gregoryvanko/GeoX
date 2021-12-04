@@ -153,7 +153,7 @@ class GeoXServer{
     }
 
     async ApiGetAllPost(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiGetPostData: " + JSON.stringify(Data), User, UserId)
+        this._MyApp.LogAppliInfo("ApiGetAllPost: " + JSON.stringify(Data), User, UserId)
         let Shared = require("./Shared")
         let ReponsePostFromDb = await Shared.PromiseGetPostFromDb(this._MyApp, parseInt(Data.Page), Data.Filter, User, UserId)
         if(ReponsePostFromDb.Error){
@@ -271,8 +271,17 @@ class GeoXServer{
                 this._MyApp.LogAppliInfo("New track saved from a Added track", User, UserId)
             }
         } else if (Data.Action == "Modify"){
-            // ToDo
+            this._MyApp.LogAppliInfo("ApiManageTrack: " + JSON.stringify(Data), User, UserId)
+            let ReponseModifyTrack = await Shared.PromiseUpdateTrack(Data.TrackData, this._MyApp, User)
+            if(ReponseModifyTrack.Error){
+                this._MyApp.LogAppliError(ReponseModifyTrack.ErrorMsg, User, UserId)
+                Res.status("500").json(ReponseModifyTrack)
+            } else {
+                Res.status("200").json(ReponseModifyTrack)
+                this._MyApp.LogAppliInfo("Track data updated", User, UserId)
+            }
         } else if (Data.Action == "Delete"){
+            this._MyApp.LogAppliInfo("ApiManageTrack: " + JSON.stringify(Data), User, UserId)
             let ReponseDelTrack = await Shared.PromiseDeleteTrack(Data.TrackId, this._MyApp, User)
             if(ReponseDelTrack.Error){
                 this._MyApp.LogAppliError(ReponseDelTrack.ErrorMsg, User, UserId)
