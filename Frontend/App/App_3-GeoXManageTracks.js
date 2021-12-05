@@ -9,7 +9,12 @@ class GeoXManageTracks {
         this._DivListOfMyTracksData = "DivListOfMyTracksData"
         this._DivDataOfOneTrack = "DivDataOfOneTrack"
         this._DivMapAddTrack = "DivMapAddTrack"
+        this._IdDivMap = "mapidActivites"
+        this._IdDivTrackDataOnMap = "DivTrackDataOnMap"
+
         this._PageOfPosts = 0
+        this._PageOfMarkers = 0
+        this._AllMarkers = []
 
         let me = this
         this._Observer = new IntersectionObserver((entries)=>{
@@ -26,10 +31,13 @@ class GeoXManageTracks {
         this._ShowOnMap = false
         this._WindowScrollY = 0
 
+        this._Map = null
         this._FollowMyTrack = null
         this._UserGroup = null
 
         this.GeoXCreateTrackView = MyGeoXCreateTrack
+
+        this._FiltrePost = {DistanceMin: 1, DistanceMax: 200}
     }
 
     /**
@@ -57,6 +65,13 @@ class GeoXManageTracks {
         this.GetMyGroups()
         // Clear data
         this._PageOfPosts = 0
+        this._PageOfMarkers = 0
+        this._AllMarkers = []
+        // si on avait affiché la carte on la supprime
+        if (this._Map){
+            this._Map.RemoveMap()
+            this._Map = null
+        }
         // Clear view
         this._DivApp.innerHTML=""
         // Contener Manage Track
@@ -71,11 +86,11 @@ class GeoXManageTracks {
         let ConteneurAddTrack = CoreXBuild.DivFlexColumn(this._ConteneurAddTrack)
         ConteneurAddTrack.style.display = "none"
         this._DivApp.appendChild(ConteneurAddTrack)
-        // Conteneur Track Data
+        // Contener Track Data
         let ConteneurTrackData = CoreXBuild.DivFlexColumn(this._ConteneurTrackData)
         ConteneurTrackData.style.display = "none"
         this._DivApp.appendChild(ConteneurTrackData)
-        // Conteneur Follow track on map
+        // Contener Follow track on map
         this._DivApp.appendChild(CoreXBuild.Div(this._ConteneurFollowTrackOnMap, "", "height: 100vh; width: 100%; display: none;")) 
         // Start Load data
         if (this._StartWithLoadViewManageTrack){
@@ -124,7 +139,7 @@ class GeoXManageTracks {
         BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 44%; margin-left:1%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 29%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 13%;"))
-        // Liste despost
+        // Liste des post
         let ListofMyPost = CoreXBuild.DivFlexColumn(this._DivListOfMyTracksData)
         ListofMyPost.style.width = "60rem"
         ListofMyPost.style.maxWidth = "90%"
@@ -191,8 +206,14 @@ class GeoXManageTracks {
 
         // Add button manage my track
         ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, false), "ActionLeft",  `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`))
-        // GetData
-        // ToDo
+        // Ajout du div qui va contenir la map
+        ConteneurViewOnMap.appendChild(CoreXBuild.Div(this._IdDivMap, "", "height: 100vh; width: 100%;"))
+        this._Map = new GeoXMap(this._IdDivMap) 
+        this._Map.RenderMap()
+        this._Map.AddMarkersClusterGroup()
+        this._Map.OnClickOnMarker = this.ClickOnMarker.bind(this)
+        // Get All marker by page
+        this.GetAllMarkersByPage()
     }
 
     /**
@@ -224,7 +245,12 @@ class GeoXManageTracks {
         DivDataOfOneTrack.style.marginTop = "3rem"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text
-        DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(`Waiting data of track: ${TrackName}`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        if (TrackName){
+            DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(`Waiting data of track: ${TrackName}`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        } else {
+            DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(`Waiting data of track`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        }
+        
 
         // get InfoOnTrack data
         this.GetInfoOnTrack(TrackId)
@@ -257,12 +283,32 @@ class GeoXManageTracks {
         })
     }
 
+    /**
+     * Get All groups of user
+     */
     GetMyGroups(){
-        // Get all group of user
         GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
             this._UserGroup = reponse
         },(erreur)=>{
             this.ShowErrorMessage(erreur.ErrorMsg)
+        })
+    }
+
+    /**
+     * Get makers of all tracks of GeoX by page
+     */
+     GetAllMarkersByPage(){
+        let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost}
+        GlobalCallApiPromise("ApiGetAllMyTracksMarkers", FctData, "", "").then((reponse)=>{
+            if (reponse.length != 0){
+                if (this._Map){
+                    this.RenderMarkersOnMap(reponse)
+                    this._PageOfMarkers ++
+                    this.GetAllMarkersByPage()
+                }
+            }
+        },(erreur)=>{
+            this.ShowErrorMessage(erreur)
         })
     }
 
@@ -275,10 +321,10 @@ class GeoXManageTracks {
             let MiddlepointData = Math.ceil(Data.length / 2)-1
             let CurrentpointData = 0
             Data.forEach(element => {
+                // Construction du BoxTracks
                 let BoxTracks = CoreXBuild.DivFlexRowStart("")
                 BoxTracks.style.marginTop = "0.7rem"
                 BoxTracks.style.marginBottom = "0.7rem"
-                document.getElementById(this._DivListOfMyTracksData).appendChild(BoxTracks)
                 BoxTracks.appendChild(CoreXBuild.DivTexte(element.Name,"","Text", "width: 44%; margin-left:1%; padding:0.2rem;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(element.Group,"","TextSmall", "width: 29%; padding:0.2rem;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(element.Date),"","TextSmall", "width: 13%; padding:0.2rem;"))
@@ -290,14 +336,19 @@ class GeoXManageTracks {
                 }
                 BoxTracks.style.cursor = "pointer"
                 BoxTracks.onclick = this.ClickOnTrackData.bind(this, element._id, element.Name)
-                // Ajout d'une ligne
-                document.getElementById(this._DivListOfMyTracksData).appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
                 // si l'element est l'element milieu
                 if (CurrentpointData == MiddlepointData){
                     // ajouter le listener pour declancher le GetPosts
                     this._Observer.observe(BoxTracks)
                 }
                 CurrentpointData ++
+                // si _DivListOfMyTracksData existe on ajout les BoxTracks et une ligne
+                if (document.getElementById(this._DivListOfMyTracksData)){
+                    // Ajout du BoxTracks
+                    document.getElementById(this._DivListOfMyTracksData).appendChild(BoxTracks)
+                    // Ajout d'une ligne
+                    document.getElementById(this._DivListOfMyTracksData).appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
+                }
             });
         } else {
             // End of Post
@@ -348,7 +399,7 @@ class GeoXManageTracks {
     }
 
     /**
-     * Render track to follow on map
+     * Render view track to follow on map
      * @param {String} TrackId id of track
      * @param {Object} TrackGeoJson GeoJson Object
      */
@@ -375,6 +426,11 @@ class GeoXManageTracks {
         this._FollowMyTrack.Start()
     }
 
+    /**
+     * Render view Add or Modify track data
+     * @param {Boolean} IsAddTrack Show Add Track or Modify Track
+     * @param {Object} Data Data on track to modify
+     */
     RenderAddModifyTrackData(IsAddTrack, Data){
         let Id = (Data == null) ? "" : Data._id
         let Name = (Data == null) ? "" : Data.Name
@@ -485,6 +541,107 @@ class GeoXManageTracks {
     }
 
     /**
+     * Affiche les marker sur la carte
+     * @param {Array} Markers Array af Marker elements
+     */
+    RenderMarkersOnMap(Markers){
+        // Add each marker on map
+        Markers.forEach(element => {
+            this._Map.AddMarker(element)
+        });
+        // Save marker
+        this._AllMarkers.push(...Markers)
+    }
+
+    /**
+     * Render Box with track data on map
+     * @param {String} TrackId Id of track
+     */
+    RenderTrackDataOnMap(TrackId){
+        // Get Track data
+        let TrackData =  this._AllMarkers.find(x => x._id === TrackId)
+        // Build div track data on map
+        let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
+        if (DivTrackDataOnMap == null){
+            DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
+            document.getElementById(this._ConteneurViewOnMap).appendChild(DivTrackDataOnMap)
+            DivTrackDataOnMap.addEventListener("click", this.ClickOnTrackData.bind(this, TrackId, null))
+        } else {
+            document.getElementById(this._ConteneurViewOnMap).removeChild(DivTrackDataOnMap)
+            DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
+            document.getElementById(this._ConteneurViewOnMap).appendChild(DivTrackDataOnMap)
+            DivTrackDataOnMap.addEventListener("click", this.ClickOnTrackData.bind(this, TrackId, null))
+        }
+        // Name and close buttion
+        let divNameAndClose = CoreXBuild.Div("", "", "width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
+        DivTrackDataOnMap.appendChild(divNameAndClose)
+        // Add track name
+        let divname = document.createElement('div')
+        divname.innerHTML = TrackData.Name
+        divname.style.width ="100%"
+        divname.style.fontWeight ="bold"
+        divname.style.textAlign ="left"
+        divname.style.marginBottom ="0.5rem"
+        divname.style.marginLeft ="0.5rem"
+        divname.classList.add("Text")
+        divNameAndClose.appendChild(divname)
+        // Add button
+        let button = document.createElement('button')
+        button.classList.add("ButtonX");
+        button.style.borderWidth = "2px"
+        button.style.zIndex = "100"
+        button.style.fontSize = "1rem"
+        button.style.padding = "1px 5px"
+        button.style.marginBottom = "0rem"
+        button.onclick = this.RemoveTrackDataOnMap.bind(this)
+        divNameAndClose.appendChild(button)
+
+        // Add track info
+        let conteneur = document.createElement('div')
+        conteneur.setAttribute("style","width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.Length, "Km", CommonIcon.Lenght()))
+        conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevCumulP, "m", CommonIcon.ElevationPlus()))
+        conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevCumulM, "m", CommonIcon.ElevationMoins()))
+        conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevMax, "m", CommonIcon.ElevationMax()))
+        conteneur.appendChild(InfoOnTrack.DrawVerticalLine())
+        conteneur.appendChild(InfoOnTrack.DrawDataInfo(TrackData.InfoElevation.ElevMin, "m", CommonIcon.ElevationMin()))
+        DivTrackDataOnMap.appendChild(conteneur)
+    }
+
+    /**
+     * Remove Box track data on map
+     */
+    RemoveTrackDataOnMap(){
+        event.stopPropagation()
+
+        // Remove all track on map
+        this._Map.RemoveAllTracks()
+        // Remove track data
+        let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
+        if (DivTrackDataOnMap != null){
+            document.getElementById(this._ConteneurViewOnMap).removeChild(DivTrackDataOnMap)
+        }
+    }
+
+    /**
+     * Render track point on map
+     * @param {Object} Map Map on view
+     * @param {String} TrackId Id of track
+     */
+    RenderTrackGeoJSonOnMap(Map, TrackId){
+        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+            Map.RemoveAllTracks()
+            Map.AddTrackOnMap(TrackId, reponse, false)        
+        },(erreur)=>{
+            this.ShowErrorMessage(erreur)
+        })
+    }
+
+    /**
      * Click on track data
      * @param {String} TrackId Id of track
      * @param {String} Name Name of track
@@ -563,16 +720,33 @@ class GeoXManageTracks {
         })
     }
 
+    /**
+     * Show view Add Modify Track
+     * @param {Object} Data Data of track to update
+     */
     ClickUpdateTrackData(Data){
         document.getElementById(this._ConteneurTrackData).innerHTML = ""
         this.LoadViewAddTrack(false, Data)
     }
 
+    /**
+     * Open the module bulid track to modify the track
+     * @param {String} TrackId Id of track do modify with track builder
+     * @param {String} TrackName Name of track to modify
+     * @param {String} TrackGroup Group of trakc to modify
+     * @param {Boolean} Public Is track public
+     * @param {String} Description Description of track
+     */
     ClickModifyTrack(TrackId, TrackName, TrackGroup, Public, Description){
         GlobalReset()
         this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description)
     }
 
+    /**
+     * Delete a track
+     * @param {String} TrackId Id of track to delete
+     * @param {String} TrackName Name of track to delete
+     */
     ClickDeleteTrack(TrackId, TrackName){
         if (confirm(`Do you want to delete track : ${TrackName}?`)){
             let FctData = {Action: "Delete", TrackId : TrackId}
@@ -668,6 +842,10 @@ class GeoXManageTracks {
         }
     }
 
+    /**
+     * Send updated data of track
+     * @param {String} TrackId Id of track to update
+     */
     ClickSendUpdateTrack(TrackId){
         if ((document.getElementById("InputTrackName").value != "") && (document.getElementById("InputTrackGroup").value != "")){
             document.getElementById("SelectAndSend").innerHTML="Send..."
@@ -739,6 +917,15 @@ class GeoXManageTracks {
                 window.scrollTo(0, this._WindowScrollY)
             }
         }
+    }
+
+    /**
+     * executee lors d'un click sur un marker
+     * @param {String} TrackId Track id of the clicked marker
+     */
+     ClickOnMarker(TrackId){
+        this.RenderTrackDataOnMap(TrackId)
+        this.RenderTrackGeoJSonOnMap(this._Map, TrackId)
     }
 
     /**

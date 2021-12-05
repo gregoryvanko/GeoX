@@ -423,7 +423,7 @@ class GeoXActivities {
      */
     GetAllMarkersByPage(){
         let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost}
-        GlobalCallApiPromise("ApiGetAllMarkers", FctData, "", "").then((reponse)=>{
+        GlobalCallApiPromise("ApiGetAllPostMarkers", FctData, "", "").then((reponse)=>{
             if (reponse.length != 0){
                 this.RenderMarkersOnMap(reponse)
                 this._PageOfMarkers ++

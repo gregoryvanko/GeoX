@@ -91,6 +91,7 @@ class GeoXMap{
         // Build markerClusterGroup
         this._MarkersCluster = L.markerClusterGroup({
             maxClusterRadius: 30,
+            disableClusteringAtZoom: 16,
             iconCreateFunction: function(cluster) {
                 return L.divIcon({ 
                     html: cluster.getChildCount(), 

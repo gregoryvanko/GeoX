@@ -201,8 +201,8 @@ class GeoXServer{
         }
     }
 
-    ApiGetAllMarkers(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiGetAllMarkers " + JSON.stringify(Data), User, UserId)
+    ApiGetAllPostMarkers(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetAllPostMarkers " + JSON.stringify(Data), User, UserId)
 
         let numberofitem = 10
         let cursor = Data.Page * numberofitem
@@ -242,8 +242,8 @@ class GeoXServer{
                 Res.json({Error: false, ErrorMsg: "", Data:reponse})
             }
         },(erreur)=>{
-            Res.json({Error: true, ErrorMsg: "ApiGetAllMarkers error: " + erreur, Data: ""})
-            this._MyApp.LogAppliError("ApiGetAllMarkers error: " + erreur, User, UserId)
+            Res.json({Error: true, ErrorMsg: "ApiGetAllPostMarkers error: " + erreur, Data: ""})
+            this._MyApp.LogAppliError("ApiGetAllPostMarkers error: " + erreur, User, UserId)
         })
     }
 
@@ -293,6 +293,43 @@ class GeoXServer{
         } else {
             Res.status("500").json("ApiManageTrack => Action not found: " + Data.Action)
         }
+    }
+
+    ApiGetAllMyTracksMarkers(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetAllMyTracksMarkers " + JSON.stringify(Data), User, UserId)
+
+        let numberofitem = 10
+        let cursor = Data.Page * numberofitem
+
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(this._MyApp.MongoUrl ,this._MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let Query = {[MongoTracksCollection.Owner]: User}
+        if (Data.Filter != null){
+            if ((Data.Filter.DistanceMin != 1) || (Data.Filter.DistanceMax != 200)){
+                Query = {
+                    $and:[
+                        {[MongoTracksCollection.Owner]: User},
+                        {[MongoTracksCollection.Length]:{$gte: Data.Filter.DistanceMin}},
+                        {[MongoTracksCollection.Length]:{$lte: Data.Filter.DistanceMax}}
+                    ]}
+            }
+        }
+        const Projection = {projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.StartPoint]: 1}}
+        const Sort = {[MongoTracksCollection.Date]: -1}
+        Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                Res.json({Error: false, ErrorMsg: "", Data:[]})
+            } else {
+                Res.json({Error: false, ErrorMsg: "", Data:reponse})
+            }
+        },(erreur)=>{
+            let ErrorMsg = "ApiGetAllMyTracksMarkers error: " + erreur
+            Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+            this._MyApp.LogAppliError(ErrorMsg, User, UserId)
+        })
     }
 }
 module.exports.GeoXServer = GeoXServer
