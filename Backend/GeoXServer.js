@@ -331,5 +331,41 @@ class GeoXServer{
             this._MyApp.LogAppliError(ErrorMsg, User, UserId)
         })
     }
+
+    ApiGetAllMyPost(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetAllMyPost " + JSON.stringify(Data), User, UserId)
+
+        let numberofitem = 5
+        let cursor = Data.Page * numberofitem
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(this._MyApp.MongoUrl ,this._MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let Query = {[MongoTracksCollection.Owner]: User}
+        if (Data.Filter != null){
+            if ((Data.Filter.DistanceMin != 1) || (Data.Filter.DistanceMax != 200)){
+                Query = {
+                    $and:[
+                        {[MongoTracksCollection.Owner]: User},
+                        {[MongoTracksCollection.Length]:{$gte: Data.Filter.DistanceMin}},
+                        {[MongoTracksCollection.Length]:{$lte: Data.Filter.DistanceMax}}
+                    ]}
+            }
+        }
+        const Projection = {projection:{[MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.Image]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Public]: 1}}
+        const Sort = {[MongoTracksCollection.Date]: -1}
+        Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                Res.json({Error: false, ErrorMsg: "", Data:[]})
+            } else {
+                Res.json({Error: false, ErrorMsg: "", Data:reponse})
+            }
+        },(erreur)=>{
+            let ErrorMsg = "ApiGetAllMyPost error: " + erreur
+            Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+            this._MyApp.LogAppliError(ErrorMsg, User, UserId)
+        })
+    }
 }
 module.exports.GeoXServer = GeoXServer

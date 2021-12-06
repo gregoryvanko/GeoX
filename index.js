@@ -85,6 +85,7 @@ class GeoX {
       this._MyApp.AddApiFct("ApiGetAllMyTracks", this._GeoXServer.ApiGetAllMyTracks.bind(this), false)
       this._MyApp.AddApiFct("ApiManageTrack", this._GeoXServer.ApiManageTrack.bind(this), false)
       this._MyApp.AddApiFct("ApiGetAllMyTracksMarkers", this._GeoXServer.ApiGetAllMyTracksMarkers.bind(this), false)
+      this._MyApp.AddApiFct("ApiGetAllMyPost", this._GeoXServer.ApiGetAllMyPost.bind(this), false)
          
       // Start
       this._MyApp.Start()

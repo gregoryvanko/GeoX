@@ -694,6 +694,7 @@ function PromiseGetPostFromDb(MyApp, Page, Filter, User, UserId){
         ReponsePost.Data = []
 
         let Query = {[MongoTracksCollection.Public]: true}
+        
         if (Filter != null){
             if ((Filter.DistanceMin != 1) || (Filter.DistanceMax != 200) || (Filter.HideMyTrack != false)){
                 if (Filter.HideMyTrack){

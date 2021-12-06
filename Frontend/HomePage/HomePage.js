@@ -94,7 +94,7 @@ class HomePage{
             let CurrentpointData = 0
             Data.forEach(element => {
                 // Creation du post
-                let TempGeoxPsot = new HtmlElemGeoxPost(element)
+                let TempGeoxPsot = new HtmlElemGeoxPost(element, false)
                 TempGeoxPsot.OnClickPost = this.ShowMessageToOpenApp.bind(this, "Login to access to more informations on this track.")
                 TempGeoxPsot.OnClickSave = this.ShowMessageToOpenApp.bind(this, "Login to save this track")
                 TempGeoxPsot.OnClickGpx = this.ShowMessageToOpenApp.bind(this, "Login to download the GPX file of this track")

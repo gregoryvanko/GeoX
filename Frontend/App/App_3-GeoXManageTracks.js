@@ -1,12 +1,14 @@
 class GeoXManageTracks {
     constructor(DivApp){
         this._DivApp = document.getElementById(DivApp)
-        this._ConteneurManageTrack = "ConteneurManageTrack"
+        this._ConteneurListTrack = "ConteneurListTrack"
+        this._ConteneurPosts = "ConteneurPosts"
         this._ConteneurViewOnMap = "ConteneurViewOnMap"
         this._ConteneurAddTrack = "ConteneurAddTrack"
         this._ConteneurTrackData = "ConteneurTrackData"
         this._ConteneurFollowTrackOnMap = "ConteneurFollowTrackOnMap"
         this._DivListOfMyTracksData = "DivListOfMyTracksData"
+        this._DivListOfMyPostsData = "DivListOfMyPostsData"
         this._DivDataOfOneTrack = "DivDataOfOneTrack"
         this._DivMapAddTrack = "DivMapAddTrack"
         this._IdDivMap = "mapidActivites"
@@ -21,8 +23,19 @@ class GeoXManageTracks {
             entries.forEach(function (obersable){
                 if (obersable.intersectionRatio > 0.5){
                     me._PageOfPosts ++
-                    me.GetAllMyTracksData()
+                    //me.GetAllMyTracksData()
+                    me.GetAllMyPosts()
                     me._Observer.unobserve(obersable.target)
+                }
+            })
+        }, {threshold: [1]})
+
+        this._ObserverListOfTrack = new IntersectionObserver((entries)=>{
+            entries.forEach(function (obersable){
+                if (obersable.intersectionRatio > 0.5){
+                    me._PageOfPosts ++
+                    me.GetAllMyTracksData()
+                    me._ObserverListOfTrack.unobserve(obersable.target)
                 }
             })
         }, {threshold: [1]})
@@ -30,6 +43,7 @@ class GeoXManageTracks {
         this._StartWithLoadViewManageTrack = true
         this._ShowOnMap = false
         this._WindowScrollY = 0
+        this._ListOfTrackIsShow = false
 
         this._Map = null
         this._FollowMyTrack = null
@@ -50,6 +64,8 @@ class GeoXManageTracks {
         GlobalDisplayAction('On')
         // Clear Action List
         GlobalClearActionList()
+        // Add action
+        GlobalAddActionInList("List View", this.LoadListView.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // Load Data
@@ -74,10 +90,10 @@ class GeoXManageTracks {
         }
         // Clear view
         this._DivApp.innerHTML=""
-        // Contener Manage Track
-        let ConteneurManageTrack = CoreXBuild.DivFlexColumn(this._ConteneurManageTrack)
-        ConteneurManageTrack.style.display = "none"
-        this._DivApp.appendChild(ConteneurManageTrack)
+        // Contener Post
+        let ConteneurPost = CoreXBuild.DivFlexColumn(this._ConteneurPosts)
+        ConteneurPost.style.display = "none"
+        this._DivApp.appendChild(ConteneurPost)
         // Contener View on map
         let ConteneurViewOnMap = CoreXBuild.DivFlexColumn(this._ConteneurViewOnMap)
         ConteneurViewOnMap.style.display = "none"
@@ -92,12 +108,18 @@ class GeoXManageTracks {
         this._DivApp.appendChild(ConteneurTrackData)
         // Contener Follow track on map
         this._DivApp.appendChild(CoreXBuild.Div(this._ConteneurFollowTrackOnMap, "", "height: 100vh; width: 100%; display: none;")) 
+        // Contener List of track
+        let ConteneurListTrack = CoreXBuild.DivFlexColumn(this._ConteneurListTrack)
+        ConteneurListTrack.style.display = "none"
+        this._DivApp.appendChild(ConteneurListTrack)
+        
+        
         // Start Load data
         if (this._StartWithLoadViewManageTrack){
             if (this._ShowOnMap){
                 this.LoadViewOnMap()
             } else {
-                this.LoadViewManageTracks()
+                this.LoadViewMyPosts()
             }
         } else {
             this.LoadViewAddTrack()
@@ -105,13 +127,13 @@ class GeoXManageTracks {
     }
 
     /**
-     * Load de la vue Manage Track
+     * Load de la vue Post
      */
-    LoadViewManageTracks(){
+    LoadViewMyPosts(){
         this._ShowOnMap = false
         // Show ConteneurManageTrack
-        let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
-        ConteneurManageTrack.style.display = "flex"
+        let ConteneurMyPost = document.getElementById(this._ConteneurPosts)
+        ConteneurMyPost.style.display = "flex"
         // Hide ConteneurViewOnMap
         document.getElementById(this._ConteneurViewOnMap).style.display = "none"
         // Hide ConteneurAddTrack
@@ -120,21 +142,79 @@ class GeoXManageTracks {
         document.getElementById(this._ConteneurTrackData).style.display = "none"
         // Hide ConteneurFollowTrackOnMap
         document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+        // Hide ConteneurListTrack
+        document.getElementById(this._ConteneurListTrack).style.display = "none"
+        
         // Hide Action Button
         GlobalDisplayAction('On')
 
         // Titre de l'application
-        ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
+        ConteneurMyPost.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
         // Button view on map
-        ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, true), "ActionLeft",  `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
+        ConteneurMyPost.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, true), "ActionLeft",  `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
         // Button Add track
-        ConteneurManageTrack.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddTrack.bind(this),"ButtonLeftActionSecond","ButtonAddTrack"))
+        ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddTrack.bind(this),"ButtonLeftActionSecond","ButtonAddTrack"))
+        // Liste des post
+        let ListofMyPost = CoreXBuild.Div(this._DivListOfMyPostsData, "DivPostApp", "")
+        ConteneurMyPost.appendChild(ListofMyPost)
+        // Waiting text
+        ConteneurMyPost.appendChild(CoreXBuild.DivTexte("Waiting data...","WaitingDataManageTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        
+        // GetData
+        this.GetAllMyPosts()
+    }
+
+    /**
+     * Load de la vue List
+     */
+    LoadListView(){
+        this._ListOfTrackIsShow = true
+        // Clear data
+        this._PageOfPosts = 0
+        this._PageOfMarkers = 0
+        this._AllMarkers = []
+        // si on avait affiché la carte on la supprime
+        if (this._Map){
+            this._Map.RemoveMap()
+            this._Map = null
+        }
+        // Load View list of track
+        this.LoadViewListOfTracks()
+    }
+
+    /**
+     * Load de la vue Manage Track
+     */
+    LoadViewListOfTracks(){
+        // Hide ConteneurPosts
+        document.getElementById(this._ConteneurPosts).style.display = "none"
+        // Hide ConteneurViewOnMap
+        document.getElementById(this._ConteneurViewOnMap).style.display = "none"
+        // Hide ConteneurAddTrack
+        document.getElementById(this._ConteneurAddTrack).style.display = "none"
+        // Hide ConteneurTrackData
+        document.getElementById(this._ConteneurTrackData).style.display = "none"
+        // Hide ConteneurFollowTrackOnMap
+        document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+        // Show Conteneur List of track
+        let ConteneurManageTrack = document.getElementById(this._ConteneurListTrack)
+        ConteneurManageTrack.style.display = "flex"
+
+        GlobalDisplayAction('Off')
+        // Clear Action List
+        GlobalClearActionList()
+
+        // Add Button Back
+        ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromListTrack.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
+
+        // Titre de l'application
+        //ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
         // Div pour le titre des colonnes
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         BoxTitre.style.width = "60rem"
         BoxTitre.style.maxWidth = "90%"
         ConteneurManageTrack.appendChild(BoxTitre)
-        BoxTitre.style.marginTop = "2rem"
+        BoxTitre.style.marginTop = "3rem"
         // Titre des colonnes
         BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 44%; margin-left:1%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 29%;"))
@@ -147,7 +227,7 @@ class GeoXManageTracks {
         // Ajout d'une ligne
         ListofMyPost.appendChild(CoreXBuild.Line("100%", "Opacity:0.5; margin: 1% 0% 0% 0%;"))
         // Waiting text
-        ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("Waiting data...","WaitingDataManageTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("Waiting data...","WaitingDataListTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
         
         // GetData
         this.GetAllMyTracksData()
@@ -162,7 +242,7 @@ class GeoXManageTracks {
             this._WindowScrollY = window.scrollY
         }
         // Hide ConteneurManageTrack
-        document.getElementById(this._ConteneurManageTrack).style.display = "none"
+        document.getElementById(this._ConteneurPosts).style.display = "none"
         // Hide ConteneurViewOnMap
         document.getElementById(this._ConteneurViewOnMap).style.display = "none"
         // Hide ConteneurAddTrack
@@ -172,6 +252,9 @@ class GeoXManageTracks {
         document.getElementById(this._ConteneurTrackData).style.display = "none"
         // Hide ConteneurFollowTrackOnMap
         document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+        // Hide ConteneurListTrack
+        document.getElementById(this._ConteneurListTrack).style.display = "none"
+
         // Hide Action Button
         GlobalDisplayAction('Off')
 
@@ -191,7 +274,7 @@ class GeoXManageTracks {
     LoadViewOnMap(){
         this._ShowOnMap = true
         // Hide ConteneurManageTrack
-        document.getElementById(this._ConteneurManageTrack).style.display = "none"
+        document.getElementById(this._ConteneurPosts).style.display = "none"
         // Show ConteneurViewOnMap
         let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
         ConteneurViewOnMap.style.display = "flex"
@@ -201,6 +284,9 @@ class GeoXManageTracks {
         document.getElementById(this._ConteneurTrackData).style.display = "none"
         // Hide ConteneurFollowTrackOnMap
         document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+        // Hide ConteneurListTrack
+        document.getElementById(this._ConteneurListTrack).style.display = "none"
+
         // Hide Action Button
         GlobalDisplayAction('On')
 
@@ -223,7 +309,7 @@ class GeoXManageTracks {
      */
     LoadViewTrackData(TrackId, TrackName){
         // Hide ConteneurManageTrack
-        document.getElementById(this._ConteneurManageTrack).style.display = "none"
+        document.getElementById(this._ConteneurPosts).style.display = "none"
         // Hide ConteneurViewOnMap
         document.getElementById(this._ConteneurViewOnMap).style.display = "none"
         // Hide ConteneurAddTrack
@@ -233,6 +319,9 @@ class GeoXManageTracks {
         ConteneurTrackData.style.display = "flex"
         // Hide ConteneurFollowTrackOnMap
         document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+        // Hide ConteneurListTrack
+        document.getElementById(this._ConteneurListTrack).style.display = "none"
+
         // Hide Action Button
         GlobalDisplayAction('Off')
 
@@ -256,6 +345,15 @@ class GeoXManageTracks {
         this.GetInfoOnTrack(TrackId)
     }
 
+    GetAllMyPosts(){
+        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
+        GlobalCallApiPromise("ApiGetAllMyPost", FctData, "", "").then((reponse)=>{
+            this.RenderPosts(reponse)
+        },(erreur)=>{
+            this.ShowErrorMessage(erreur)
+        })
+    }
+
     /**
      * Get All My Tracks information
      */
@@ -264,7 +362,7 @@ class GeoXManageTracks {
         GlobalCallApiPromise("ApiGetAllMyTracks", FctData, "", "").then((reponse)=>{
             this.RenderAllMyTracksDataInViewManageTrack(reponse)
         },(erreur)=>{
-            alert("Error: " + erreur)
+            this.ShowErrorMessage(erreur)
         })
     }
 
@@ -290,14 +388,14 @@ class GeoXManageTracks {
         GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
             this._UserGroup = reponse
         },(erreur)=>{
-            this.ShowErrorMessage(erreur.ErrorMsg)
+            this.ShowErrorMessage(erreur)
         })
     }
 
     /**
      * Get makers of all tracks of GeoX by page
      */
-     GetAllMarkersByPage(){
+    GetAllMarkersByPage(){
         let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost}
         GlobalCallApiPromise("ApiGetAllMyTracksMarkers", FctData, "", "").then((reponse)=>{
             if (reponse.length != 0){
@@ -310,6 +408,44 @@ class GeoXManageTracks {
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
         })
+    }
+
+    RenderPosts (Data){
+        if (Data.length != 0){
+            let MiddlepointData = Math.ceil(Data.length / 2)-1
+            let CurrentpointData = 0
+            Data.forEach(element => {
+                // Creation du post
+                let TempGeoxPsot = new HtmlElemGeoxPost(element, true)
+                TempGeoxPsot.OnClickPost = this.ClickOnTrackData.bind(this, element._id, element.Name)
+
+                TempGeoxPsot.OnClickGoTo = this.ClickGoToStart.bind(this, element.StartPoint)
+                TempGeoxPsot.OnClickFollow = this.ClickFollowTrackFromPost.bind(this, element._id)
+                TempGeoxPsot.OnClickUpdate = this.ClickUpdateTrackData.bind(this, element)
+                TempGeoxPsot.OnClickModifyTrace = this.ClickModifyTrack.bind(this, element._id, element.Name, element.Group, element.Public, element.Description)
+                
+
+                TempGeoxPsot.style.width = "100%"
+                
+                // si l'element est l'element milieu
+                if (CurrentpointData == MiddlepointData){
+                    // ajouter le listener pour declancher le GetPosts
+                    this._Observer.observe(TempGeoxPsot)
+                }
+                CurrentpointData ++
+                if (document.getElementById(this._DivListOfMyPostsData)){
+                    document.getElementById(this._DivListOfMyPostsData).appendChild(TempGeoxPsot)
+                }
+            });
+        } else {
+            // End of Post
+            let ConteneurMyPost = document.getElementById(this._ConteneurPosts)
+            ConteneurMyPost.appendChild(CoreXBuild.DivTexte("End of tracks", "", "Text", "color:red; margin-top: 1rem; margin-bottom: 1rem;"))
+            // Remove WaitingDataManageTrack
+            if (document.getElementById("WaitingDataManageTrack")){
+                ConteneurMyPost.removeChild(document.getElementById("WaitingDataManageTrack"))
+            }
+        }
     }
 
     /**
@@ -339,7 +475,7 @@ class GeoXManageTracks {
                 // si l'element est l'element milieu
                 if (CurrentpointData == MiddlepointData){
                     // ajouter le listener pour declancher le GetPosts
-                    this._Observer.observe(BoxTracks)
+                    this._ObserverListOfTrack.observe(BoxTracks)
                 }
                 CurrentpointData ++
                 // si _DivListOfMyTracksData existe on ajout les BoxTracks et une ligne
@@ -352,11 +488,11 @@ class GeoXManageTracks {
             });
         } else {
             // End of Post
-            let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
+            let ConteneurManageTrack = document.getElementById(this._ConteneurListTrack)
             ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("End of tracks", "", "Text", "color:red; margin-top: 1rem; margin-bottom: 1rem;"))
-            // Remove WaitingDataManageTrack
-            if (document.getElementById("WaitingDataManageTrack")){
-                ConteneurManageTrack.removeChild(document.getElementById("WaitingDataManageTrack"))
+            // Remove WaitingDataListTrack
+            if (document.getElementById("WaitingDataListTrack")){
+                ConteneurManageTrack.removeChild(document.getElementById("WaitingDataListTrack"))
             }
         }
     }
@@ -407,7 +543,7 @@ class GeoXManageTracks {
         // Vider le _ConteneurTrackData 
         document.getElementById(this._ConteneurTrackData).innerHTML =""
         // Hide ConteneurManageTrack
-        document.getElementById(this._ConteneurManageTrack).style.display = "none"
+        document.getElementById(this._ConteneurPosts).style.display = "none"
         // Hide ConteneurViewOnMap
         document.getElementById(this._ConteneurViewOnMap).style.display = "none"
         // Hide ConteneurAddTrack
@@ -416,6 +552,9 @@ class GeoXManageTracks {
         document.getElementById(this._ConteneurTrackData).style.display = "none"
         // Show ConteneurFollowTrackOnMap
         document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "block"
+        // Hide ConteneurListTrack
+        document.getElementById(this._ConteneurListTrack).style.display = "none"
+
         // On efface le bouton menu action
         GlobalDisplayAction('Off')
 
@@ -657,9 +796,11 @@ class GeoXManageTracks {
     ClickOnBackFromTrackData(){
         let ConteneurTrackData = document.getElementById(this._ConteneurTrackData)
         ConteneurTrackData.innerHTML = ""
+        // Reset view
+        // ToDo
         if (this._ShowOnMap){
             // Hide ConteneurManageTrack
-            document.getElementById(this._ConteneurManageTrack).style.display = "none"
+            document.getElementById(this._ConteneurPosts).style.display = "none"
             // Show ConteneurViewOnMap
             let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
             ConteneurViewOnMap.style.display = "flex"
@@ -669,11 +810,14 @@ class GeoXManageTracks {
             document.getElementById(this._ConteneurTrackData).style.display = "none"
             // Hide ConteneurFollowTrackOnMap
             document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+            // Hide ConteneurListTrack
+            document.getElementById(this._ConteneurListTrack).style.display = "none"
+
             // Hide Action Button
             GlobalDisplayAction('Off')
         } else {
             // Show ConteneurManageTrack
-            let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
+            let ConteneurManageTrack = document.getElementById(this._ConteneurPosts)
             ConteneurManageTrack.style.display = "flex"
             // Hide ConteneurViewOnMap
             document.getElementById(this._ConteneurViewOnMap).style.display = "none"
@@ -683,11 +827,22 @@ class GeoXManageTracks {
             document.getElementById(this._ConteneurTrackData).style.display = "none"
             // Hide ConteneurFollowTrackOnMap
             document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+            // Hide ConteneurListTrack
+            document.getElementById(this._ConteneurListTrack).style.display = "none"
+
             // Hide Action Button
             GlobalDisplayAction('On')
             // Scroll
             window.scrollTo(0, this._WindowScrollY)
         }
+    }
+
+    /**
+     * Click on Back arrow of list View
+     */
+    ClickOnBackFromListTrack(){
+        this._ListOfTrackIsShow = false
+        this.Initiation(this._StartWithLoadViewManageTrack)
     }
 
     /**
@@ -700,6 +855,15 @@ class GeoXManageTracks {
         } else {
             window.open(`https://maps.google.com/maps?daddr=${StartPoint.Lat},${StartPoint.Lng}&amp;ll=`)
         }
+    }
+
+    /**
+     * Show track to follox (from Post click)
+     * @param {String} TrackId Id of track
+     */
+    ClickFollowTrackFromPost(TrackId){
+        this._WindowScrollY = window.scrollY
+        this.ClickFollowTrack(TrackId)
     }
 
     /**
@@ -798,7 +962,7 @@ class GeoXManageTracks {
 
         if (this._ShowOnMap){
             // Hide ConteneurManageTrack
-            document.getElementById(this._ConteneurManageTrack).style.display = "none"
+            document.getElementById(this._ConteneurPosts).style.display = "none"
             // Show ConteneurViewOnMap
             let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
             ConteneurViewOnMap.style.display = "flex"
@@ -808,11 +972,14 @@ class GeoXManageTracks {
             document.getElementById(this._ConteneurTrackData).style.display = "none"
             // Hide ConteneurFollowTrackOnMap
             document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+            // Hide ConteneurListTrack
+            document.getElementById(this._ConteneurListTrack).style.display = "none"
+
             // Hide Action Button
             GlobalDisplayAction('Off')
         } else {
             // Show ConteneurManageTrack
-            let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
+            let ConteneurManageTrack = document.getElementById(this._ConteneurPosts)
             ConteneurManageTrack.style.display = "flex"
             // Hide ConteneurViewOnMap
             document.getElementById(this._ConteneurViewOnMap).style.display = "none"
@@ -822,6 +989,9 @@ class GeoXManageTracks {
             document.getElementById(this._ConteneurTrackData).style.display = "none"
             // Hide ConteneurFollowTrackOnMap
             document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+            // Hide ConteneurListTrack
+            document.getElementById(this._ConteneurListTrack).style.display = "none"
+
             // Hide Action Button
             GlobalDisplayAction('On')
         }
@@ -887,7 +1057,7 @@ class GeoXManageTracks {
         } else {
             if (this._ShowOnMap){
                 // Hide ConteneurManageTrack
-                document.getElementById(this._ConteneurManageTrack).style.display = "none"
+                document.getElementById(this._ConteneurPosts).style.display = "none"
                 // Show ConteneurViewOnMap
                 let ConteneurViewOnMap = document.getElementById(this._ConteneurViewOnMap)
                 ConteneurViewOnMap.style.display = "flex"
@@ -897,11 +1067,14 @@ class GeoXManageTracks {
                 document.getElementById(this._ConteneurTrackData).style.display = "none"
                 // Hide ConteneurFollowTrackOnMap
                 document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+                // Hide ConteneurListTrack
+                document.getElementById(this._ConteneurListTrack).style.display = "none"
+
                 // Hide Action Button
                 GlobalDisplayAction('Off')
             } else {
                 // Show ConteneurManageTrack
-                let ConteneurManageTrack = document.getElementById(this._ConteneurManageTrack)
+                let ConteneurManageTrack = document.getElementById(this._ConteneurPosts)
                 ConteneurManageTrack.style.display = "flex"
                 // Hide ConteneurViewOnMap
                 document.getElementById(this._ConteneurViewOnMap).style.display = "none"
@@ -911,6 +1084,9 @@ class GeoXManageTracks {
                 document.getElementById(this._ConteneurTrackData).style.display = "none"
                 // Hide ConteneurFollowTrackOnMap
                 document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
+                // Hide ConteneurListTrack
+                document.getElementById(this._ConteneurListTrack).style.display = "none"
+
                 // Hide Action Button
                 GlobalDisplayAction('On')
                 // Scroll
