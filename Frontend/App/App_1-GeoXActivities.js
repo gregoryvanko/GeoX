@@ -50,7 +50,7 @@ class GeoXActivities {
         // Add action
         GlobalAddActionInList("Add Track", this.GoToAddTrack.bind(this))
         GlobalAddActionInList("Create Track", this.GoToCreateTrack.bind(this))
-        GlobalAddActionInList("My Track", this.GoToManageTrack.bind(this))
+        GlobalAddActionInList("My Tracks", this.GoToManageTrack.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // Load Start view

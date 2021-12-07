@@ -297,7 +297,7 @@ class HtmlElemGeoxPost extends HTMLElement {
             DivContent.appendChild(this.RenderPostsMesureInfoVerticalLine())
             DivContent.appendChild(this.RenderButton(this.GetPencil(), this.OnClickUpdate.bind(this)))
             DivContent.appendChild(this.RenderPostsMesureInfoVerticalLine())
-            DivContent.appendChild(this.RenderButton(this.GetModifyTrack(), this.OnClickModifyTrace.bind(this)))
+            DivContent.appendChild(this.RenderButton(this.GetImgDownload(), this.OnClickGpx.bind(this)))
         } else {
             DivContent.appendChild(this.RenderButton(this.GetImgSaveBlack(), this.OnClickSave.bind(this)))
             DivContent.appendChild(this.RenderPostsMesureInfoVerticalLine())
@@ -340,10 +340,6 @@ class HtmlElemGeoxPost extends HTMLElement {
 
     OnClickUpdate(){
         alert("Update")
-    }
-
-    OnClickModifyTrace(){
-        alert("Modify Track")
     }
 
     GetDateString(DateString){

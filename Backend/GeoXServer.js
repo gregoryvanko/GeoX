@@ -353,7 +353,7 @@ class GeoXServer{
                     ]}
             }
         }
-        const Projection = {projection:{[MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.Image]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Public]: 1}}
+        const Projection = {projection:{[MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.Image]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Public]: 1, [MongoTracksCollection.Color]: 1}}
         const Sort = {[MongoTracksCollection.Date]: -1}
         Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){

@@ -258,6 +258,7 @@ class GeoXManageTracks {
         // Hide Action Button
         GlobalDisplayAction('Off')
 
+        // Titre
         if (IsAddTrack){
             // Titre de l'application
             ConteneurAddTrack.appendChild(CoreXBuild.DivTexte("Add Track", "", "Titre"))
@@ -422,7 +423,7 @@ class GeoXManageTracks {
                 TempGeoxPsot.OnClickGoTo = this.ClickGoToStart.bind(this, element.StartPoint)
                 TempGeoxPsot.OnClickFollow = this.ClickFollowTrackFromPost.bind(this, element._id)
                 TempGeoxPsot.OnClickUpdate = this.ClickUpdateTrackData.bind(this, element)
-                TempGeoxPsot.OnClickModifyTrace = this.ClickModifyTrack.bind(this, element._id, element.Name, element.Group, element.Public, element.Description)
+                TempGeoxPsot.OnClickGpx = this.ClickDownloadGPX.bind(this, element._id, element.Name)
                 
 
                 TempGeoxPsot.style.width = "100%"
