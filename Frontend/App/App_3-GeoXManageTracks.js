@@ -1028,8 +1028,6 @@ class GeoXManageTracks {
                 // Hide ConteneurListTrack
                 document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-                // Hide Action Button
-                GlobalDisplayAction('On')
                 // Scroll
                 window.scrollTo(0, this._WindowScrollY)
                 break;
@@ -1047,8 +1045,6 @@ class GeoXManageTracks {
                 // Hide ConteneurListTrack
                 document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-                // Hide Action Button
-                GlobalDisplayAction('Off')
                 break;
             case this._ViewListOfTrack:
                 // Show ConteneurManageTrack
@@ -1064,8 +1060,6 @@ class GeoXManageTracks {
                 // Hide ConteneurListTrack
                 document.getElementById(this._ConteneurListTrack).style.display = "flex"
 
-                // Hide Action Button
-                GlobalDisplayAction('On')
                 // Scroll
                 window.scrollTo(0, this._WindowScrollY)
                 break;
@@ -1083,12 +1077,12 @@ class GeoXManageTracks {
                 // Hide ConteneurListTrack
                 document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-                // Hide Action Button
-                GlobalDisplayAction('On')
                 // Scroll
                 window.scrollTo(0, this._WindowScrollY)
                 break;
         }
+        // show Action Button
+        GlobalDisplayAction('On')
     }
 
     /**
