@@ -23,25 +23,6 @@ class GeoXServer{
             this._MyApp.LogAppliInfo(`SoApi Data: {"Action":"${Data.Action}","Value":{"Action":"${Data.Value.Action}"}}`, User, UserId)
         }
         switch (Data.Action) {
-            case "ManageTrack":
-                let ManageTrack = require("./ModuleManageTrack")
-                if (Data.Value.Action == "GetUserData") {
-                    ManageTrack.CallGetUserData(this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "Delete"){
-                    ManageTrack.CallDeleteTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "Add"){
-                    ManageTrack.CallAddTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "Update"){
-                    ManageTrack.CallUpdateTrack(Data.Value.Data, this._MyApp, Socket, User, UserId)
-                } else if (Data.Value.Action == "Download"){
-                    ManageTrack.CallDownloadTrack(Data.Value.Data,this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetTrackInfo"){
-                    ManageTrack.CallGetTrackInfo(Data.Value.Data,this._MyApp,  Socket, User, UserId)
-                } else {
-                    this._MyApp.LogAppliError(`Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`, User, UserId)
-                    Socket.emit("GeoXError", `Api GeoXServer error, ManageTrack Action ${Data.Value.Action} not found`)
-                }
-                break
             case "CreateTracksOnMap":
                 let CreateTracksOnMap = require('./ModuleCreateTracksOnMap.js')
                 if (Data.Value.Action == "GetUserGroup"){

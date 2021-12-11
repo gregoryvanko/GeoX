@@ -77,7 +77,6 @@ class GeoXManageTracks {
         // Clear view
         this._DivApp.innerHTML=""
         // Load view
-        debugger
         this.LoadView(this._ViewCurrent)
     }
 
@@ -166,8 +165,10 @@ class GeoXManageTracks {
         ConteneurMyPost.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
         // Button view on map
         ConteneurMyPost.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewMap), "ActionLeft",  `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
+        // Button Filter
+        ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
         // Button Add track
-        ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddTrack.bind(this),"ButtonLeftActionSecond","ButtonAddTrack"))
+        ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddTrack.bind(this),"ButtonRightActionSecond","ButtonAddTrack"))
         // Liste des post
         let ListofMyPost = CoreXBuild.Div(this._DivListOfMyPostsData, "DivPostApp", "")
         ConteneurMyPost.appendChild(ListofMyPost)
@@ -220,6 +221,8 @@ class GeoXManageTracks {
 
         // Add Button Back
         ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromListTrack.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
+        // Button Filter
+        ConteneurManageTrack.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
 
         // Titre de l'application
         //ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
@@ -305,8 +308,10 @@ class GeoXManageTracks {
         // show Action Button
         GlobalDisplayAction('On')
 
-        // Add button manage my track
+        // Add button manage my post
         ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewPost), "ActionLeft",  `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`))
+        // Button Filter
+        ConteneurViewOnMap.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
         // Ajout du div qui va contenir la map
         ConteneurViewOnMap.appendChild(CoreXBuild.Div(this._IdDivMap, "", "height: 100vh; width: 100%;"))
         this._Map = new GeoXMap(this._IdDivMap) 
@@ -360,6 +365,9 @@ class GeoXManageTracks {
         this.GetInfoOnTrack(TrackId)
     }
 
+    /**
+     * Get all my post
+     */
     GetAllMyPosts(){
         let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
         GlobalCallApiPromise("ApiGetAllMyPost", FctData, "", "").then((reponse)=>{
@@ -1012,6 +1020,16 @@ class GeoXManageTracks {
         this.RenderTrackGeoJSonOnMap(this._Map, TrackId)
     }
 
+    /**
+     * Click on Filter button
+     */
+    ClickOnFilter(){
+        alert("ToDo")
+    }
+
+    /**
+     * Restore current view
+     */
     RestoreView(){
         switch (this._ViewCurrent ) {
             case this._ViewPost:
