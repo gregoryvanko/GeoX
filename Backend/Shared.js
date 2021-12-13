@@ -106,7 +106,7 @@ function PromiseAddTrack(Track, MyApp, User){
                 Mongo.UpdateByIdPromise(Track.Id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
                     if (reponse.matchedCount == 0){
                         ReponseAddTracks.Error = true
-                        ReponseAddTracks.ErrorMsg = "GeoXServerApi PromiseUpdateTrack Track Id not found: "
+                        ReponseAddTracks.ErrorMsg = "GeoXServerApi PromiseAddTrack Track Id not found: "
                         ReponseAddTracks.Data = []
                     } else {
                         ReponseAddTracks.Error = false
@@ -116,7 +116,7 @@ function PromiseAddTrack(Track, MyApp, User){
                     resolve(ReponseAddTracks)
                 },(erreur)=>{
                     ReponseAddTracks.Error = true
-                    ReponseAddTracks.ErrorMsg = "GeoXServerApi PromiseUpdateTrack error: " + erreur
+                    ReponseAddTracks.ErrorMsg = "GeoXServerApi PromiseAddTrack error: " + erreur
                     ReponseAddTracks.Data = []
                     resolve(ReponseAddTracks)
                 })
@@ -142,7 +142,7 @@ function PromiseAddTrack(Track, MyApp, User){
  * Calcul les lat et long min et max d'une track contenue dans un object GeoJson
  * @param {geojson object} geojson Object GeaoJson d'une track
  */
-function MinMaxGeoJsonTrack(geojson){
+ function MinMaxGeoJsonTrack(geojson){
     let reponse = new Object()
     reponse.IsError = false
     reponse.ErrorMsg = "no error"
@@ -209,23 +209,6 @@ function MinMaxGeoJsonTrack(geojson){
     return reponse
 }
 
-function CalculateTrackLength(GeoJson){
-    let distance = 0
-    let Coord = GeoJson.features[0].geometry.coordinates
-    const { getDistance } = require("geolib")
-    for (let i = 1; i < Coord.length; i++){
-        const [prelng, prelat] = Coord[i - 1]
-        const [lng, lat] = Coord[i]
-        // Get distance from first point
-        let DistBetweenTwoPoint = getDistance(
-            { latitude: prelat, longitude: prelng },
-            { latitude: lat, longitude: lng }
-        )
-        distance += DistBetweenTwoPoint
-    }
-    return distance/1000
-}
-
 async function GetElevationOfGeoJson(GeoJson){
     let Coord = GeoJson.features[0].geometry.coordinates
     let ElevationMin = 0
@@ -289,6 +272,23 @@ async function GetElevationOfGeoJson(GeoJson){
         
     }
     return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
+}
+
+function CalculateTrackLength(GeoJson){
+    let distance = 0
+    let Coord = GeoJson.features[0].geometry.coordinates
+    const { getDistance } = require("geolib")
+    for (let i = 1; i < Coord.length; i++){
+        const [prelng, prelat] = Coord[i - 1]
+        const [lng, lat] = Coord[i]
+        // Get distance from first point
+        let DistBetweenTwoPoint = getDistance(
+            { latitude: prelat, longitude: prelng },
+            { latitude: lat, longitude: lng }
+        )
+        distance += DistBetweenTwoPoint
+    }
+    return distance/1000
 }
 
 async function GetElevationOfLatLng(LatLng){
@@ -510,41 +510,6 @@ function PromiseGetAllTracksInfo(MyApp, User){
 }
 
 /**
- * Calcul le lat et long min et max de toutes les tracks
- * @param {Array} ListOfTracks liste de toutes les tracks
- */
-function MinMaxOfTracks(ListOfTracks){
-    let reponse = new Object()
-    reponse.MinLat = null
-    reponse.MaxLat = null
-    reponse.MinLong = null
-    reponse.MaxLong = null
-    ListOfTracks.forEach(element => {
-        if(reponse.MinLat == null){
-            reponse.MinLat = element.ExteriorPoint.MinLat
-        } else {
-            if(element.ExteriorPoint.MinLat < reponse.MinLat){reponse.MinLat = element.ExteriorPoint.MinLat}
-        }
-        if(reponse.MaxLat == null){
-            reponse.MaxLat = element.ExteriorPoint.MaxLat
-        } else {
-            if(element.ExteriorPoint.MaxLat > reponse.MaxLat){reponse.MaxLat = element.ExteriorPoint.MaxLat}
-        }
-        if(reponse.MinLong == null){
-            reponse.MinLong = element.ExteriorPoint.MinLong
-        } else {
-            if(element.ExteriorPoint.MinLong < reponse.MinLong){reponse.MinLong = element.ExteriorPoint.MinLong}
-        }
-        if(reponse.MaxLong == null){
-            reponse.MaxLong = element.ExteriorPoint.MaxLong
-        } else {
-            if(element.ExteriorPoint.MaxLong > reponse.MaxLong){reponse.MaxLong = element.ExteriorPoint.MaxLong}
-        }
-    });
-    return reponse
-}
-
-/**
  * Get Tracks info with ID
  */
  function PromiseGetTracksInfo(Id, MyApp, User){
@@ -605,187 +570,11 @@ function PromiseGetElevation({ lat, lng }){
     })
 }
 
-function ApiGetTrackData(MyApp, Data, Res, User, UserId){
-    let MongoR = require('@gregvanko/corex').Mongo
-    Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-    let MongoConfig = require("./MongoConfig.json")
-    MongoTracksCollection = MongoConfig.TracksCollection
-    let MongoObjectId = require('@gregvanko/corex').MongoObjectId
-
-    let Projection = {}
-    if (Data.GetData == "GPX"){
-        Projection = { projection:{[MongoTracksCollection.GpxData]: 1}}
-    } else if (Data.GetData == "GeoJSon"){
-        Projection = { projection:{[MongoTracksCollection.GeoJsonData]: 1}}
-    }
-    const Sort = {[MongoTracksCollection.Date]: -1}
-    const Querry = {'_id': new MongoObjectId(Data.TrackId)}
-    Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
-        if(reponse.length == 0){
-            MyApp.LogAppliError("ApiGetTrackData Track Id not found", User, UserId)
-            Res.json({Error: true, ErrorMsg: "ApiGetTrackData Track Id not found", Data: ""})
-        } else {
-            if (Data.GetData == "GPX"){
-                Res.json({Error: false, ErrorMsg: "", Data: reponse[0][MongoTracksCollection.GpxData]})
-                MyApp.LogAppliInfo("GPX send to user", User, UserId)
-            } else if (Data.GetData == "GeoJSon"){
-                Res.json({Error: false, ErrorMsg: "", Data: reponse[0][MongoTracksCollection.GeoJsonData]})
-                MyApp.LogAppliInfo("GeoJSon send to user", User, UserId)
-            }
-        }
-    },(erreur)=>{
-        MyApp.LogAppliError("ApiGetTrackData DB error : " + erreur, User, UserId)
-        Res.json({Error: true, ErrorMsg: "ApiGetTrackData DB error ", Data: ""})
-    })
-}
-
-function ApiCopyTrackById(MyApp, Data, Res, User, UserId){
-    let MongoObjectId = require('@gregvanko/corex').MongoObjectId
-    let MongoR = require('@gregvanko/corex').Mongo
-    Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-    let MongoConfig = require("./MongoConfig.json")
-    MongoTracksCollection = MongoConfig.TracksCollection
-
-    // Query Mongodb
-    const Querry = {'_id': new MongoObjectId(Data.TrackId)}
-    const Projection = {projection:{_id: 0}}
-    Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
-        if(reponse.length == 1){
-            // Copy de la track
-            let TrackData = reponse[0]
-            // Modification de la track
-            TrackData.Name = Data.Name
-            TrackData.Group = Data.Group
-            TrackData.Public = Data.Public
-            TrackData.Description = Data.Description
-            TrackData.Color = "#0000FF"
-            TrackData.Date = new Date()
-            TrackData.Owner = User
-            Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
-                Res.json({Error: false, ErrorMsg: "", Data:"Done"})
-                MyApp.LogAppliInfo("ApiCopyTrackById: Track:" + Data.TrackId + " is saved", User, UserId)
-            },(erreur)=>{
-                Res.json({Error: true, ErrorMsg: "ApiCopyTrackById inster track error", Data: ""})
-                MyApp.LogAppliError("ApiCopyTrackById inster track error: " + erreur, User, UserId)
-            })
-        } else {
-            MyApp.LogAppliError("ApiCopyTrackById Track id not found", User, UserId)
-            Res.json({Error: true, ErrorMsg: "ApiCopyTrackById Track id not found", Data: ""})
-        }
-    },(erreur)=>{
-        MyApp.LogAppliError("ApiCopyTrackById get track data error: " + erreur, User, UserId)
-        Res.json({Error: true, ErrorMsg: "ApiCopyTrackById get track data error", Data: ""})
-    })
-
-}
-
-function PromiseGetPostFromDb(MyApp, Page, Filter, User, UserId){
-    return new Promise(resolve => {
-        let numberofitem = 5
-        let cursor = Page * numberofitem
-        let MongoR = require('@gregvanko/corex').Mongo
-        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-        let MongoConfig = require("./MongoConfig.json")
-        MongoTracksCollection = MongoConfig.TracksCollection
-
-        let ReponsePost = new Object()
-        ReponsePost.Error = true
-        ReponsePost.ErrorMsg = ""
-        ReponsePost.Data = []
-
-        let Query = {[MongoTracksCollection.Public]: true}
-        
-        if (Filter != null){
-            if ((Filter.DistanceMin != 1) || (Filter.DistanceMax != 200) || (Filter.HideMyTrack != false)){
-                if (Filter.HideMyTrack){
-                    Query = {
-                        $and:[
-                            {[MongoTracksCollection.Public]: true},
-                            {[MongoTracksCollection.Length]:{$gte: Filter.DistanceMin}},
-                            {[MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}},
-                            {[MongoTracksCollection.Owner]: { $ne: User }}
-                        ]}
-                } else {
-                    Query = {
-                        $and:[
-                            {[MongoTracksCollection.Public]: true},
-                            {[MongoTracksCollection.Length]:{$gte: Filter.DistanceMin}},
-                            {[MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}}
-                        ]}
-                }
-                
-            }
-        }
-        const Projection = {projection:{[MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1, [MongoTracksCollection.Image]: 1, [MongoTracksCollection.StartPoint]: 1}}
-        const Sort = {[MongoTracksCollection.Date]: -1}
-        Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                ReponsePost.Error = false
-                ReponsePost.ErrorMsg = null
-                ReponsePost.Data = []
-            } else {
-                ReponsePost.Error = false
-                ReponsePost.ErrorMsg = null
-                ReponsePost.Data = reponse
-            }
-            resolve(ReponsePost)
-        },(erreur)=>{
-            ReponsePost.Error = true
-            ReponsePost.ErrorMsg = "PromiseGetPostOfPageFromDb error: " + erreur
-            ReponsePost.Data = []
-            resolve(ReponsePost)
-        })
-    })
-}
-
-function PromiseGetDataOfPostFromDb(MyApp, PostId){
-    return new Promise(resolve => {
-        let MongoR = require('@gregvanko/corex').Mongo
-        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-        let MongoConfig = require("./MongoConfig.json")
-        MongoTracksCollection = MongoConfig.TracksCollection
-        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
-
-        let ReponsePost = new Object()
-        ReponsePost.Error = true
-        ReponsePost.ErrorMsg = ""
-        ReponsePost.Data = []
-
-        const Query = {'_id': new MongoObjectId(PostId)}
-        const Projection = { projection:{[MongoTracksCollection.GpxData]: 0, [MongoTracksCollection.Owner]: 0}}
-        const Sort = {[MongoTracksCollection.Image]: -1}
-        Mongo.FindSortPromise(Query, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                ReponsePost.Error = false
-                ReponsePost.ErrorMsg = null
-                ReponsePost.Data = []
-            } else {
-                ReponsePost.Error = false
-                ReponsePost.ErrorMsg = null
-                ReponsePost.Data = reponse[0]
-            }
-            resolve(ReponsePost)
-        },(erreur)=>{
-            ReponsePost.Error = true
-            ReponsePost.ErrorMsg = "PromiseGetDataOfPostFromDb error: " + erreur
-            ReponsePost.Data = []
-            resolve(ReponsePost)
-        })
-    })
-}
-
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseDeleteTrack = PromiseDeleteTrack
 module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
 module.exports.PromiseGetTracksData = PromiseGetTracksData
 module.exports.PromiseGetAllTracksInfo = PromiseGetAllTracksInfo
-module.exports.MinMaxOfTracks = MinMaxOfTracks
 module.exports.PromiseGetTracksInfo = PromiseGetTracksInfo
-module.exports.GetElevationOfGeoJson = GetElevationOfGeoJson
 module.exports.GetElevationOfLatLng = GetElevationOfLatLng
-module.exports.CalculateTrackLength = CalculateTrackLength
-module.exports.ApiGetTrackData = ApiGetTrackData
-module.exports.ApiCopyTrackById = ApiCopyTrackById
-module.exports.PromiseGetPostFromDb = PromiseGetPostFromDb
-module.exports.PromiseGetDataOfPostFromDb = PromiseGetDataOfPostFromDb

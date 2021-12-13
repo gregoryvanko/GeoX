@@ -132,41 +132,116 @@ class GeoXServer{
     async ApiGetAllPost(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetAllPost: " + JSON.stringify(Data), User, UserId)
 
-        let Shared = require("./Shared")
-        let ReponsePostFromDb = await Shared.PromiseGetPostFromDb(this._MyApp, parseInt(Data.Page), Data.Filter, User, UserId)
-        if(ReponsePostFromDb.Error){
-            this._MyApp.LogAppliError(ReponsePostFromDb.ErrorMsg, User, UserId)
-            Res.status("500").json(ReponsePostFromDb.ErrorMsg)
-        } else {
-            Res.status("200").json(ReponsePostFromDb)
-        }
+        let numberofitem = 5
+        let cursor = Data.Page * numberofitem
+
+        let Query = (Data.Filter)? this.FilterForPublicTracks(Data.Filter, User) : {[this._MongoTracksCollection.Public]: true}
+        const Projection = {projection:{[this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Description]: 1, [this._MongoTracksCollection.InfoElevation]: 1, [this._MongoTracksCollection.Image]: 1, [this._MongoTracksCollection.StartPoint]: 1}}
+        const Sort = {[this._MongoTracksCollection.Date]: -1}
+
+        this._Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                Res.json({Error: false, ErrorMsg: null, Data:[]})
+            } else {
+                Res.json({Error: false, ErrorMsg: null, Data:reponse})
+            }
+        },(erreur)=>{
+            let ErrorMessage = "ApiGetAllPost error: " + erreur
+            Res.json({Error: true, ErrorMsg: ErrorMessage, Data: []})
+            this._MyApp.LogAppliError(ErrorMessage, User, UserId)
+        })
     }
     
     async ApiGetPostData(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetPostData " + JSON.stringify(Data), User, UserId)
 
-        let Shared = require("./Shared")
-        let ReponseDataOfPostFromDb = await Shared.PromiseGetDataOfPostFromDb(this._MyApp, Data.PostId)
-        if(ReponseDataOfPostFromDb.Error){
-            this._MyApp.LogAppliError(ReponseDataOfPostFromDb.ErrorMsg, User, UserId)
-            Res.status("500").json(ReponseDataOfPostFromDb)
-        } else {
-            Res.status("200").json(ReponseDataOfPostFromDb)
-        }
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+
+        const Query = {'_id': new MongoObjectId(Data.PostId)}
+        const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0, [this._MongoTracksCollection.Owner]: 0}}
+        const Sort = {[this._MongoTracksCollection.Image]: -1}
+
+        this._Mongo.FindSortPromise(Query, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                Res.json({Error: false, ErrorMsg: null, Data:[]})
+            } else {
+                Res.json({Error: false, ErrorMsg: null, Data: reponse[0]})
+            }
+        },(erreur)=>{
+            let ErrorMessage = "ApiGetPostData error: " + erreur
+            Res.json({Error: true, ErrorMsg: ErrorMessage, Data: []})
+            this._MyApp.LogAppliError(ErrorMessage, User, UserId)
+        })
     }
 
     ApiGetTrackData(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetTrackData: " + JSON.stringify(Data), User, UserId)
 
-        let Shared = require("./Shared")
-        Shared.ApiGetTrackData(this._MyApp, Data, Res, User, UserId)
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+
+        let Projection = {}
+        if (Data.GetData == "GPX"){
+            Projection = { projection:{[this._MongoTracksCollection.GpxData]: 1}}
+        } else if (Data.GetData == "GeoJSon"){
+            Projection = { projection:{[this._MongoTracksCollection.GeoJsonData]: 1}}
+        }
+        const Sort = {[this._MongoTracksCollection.Date]: -1}
+        const Querry = {'_id': new MongoObjectId(Data.TrackId)}
+
+        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                this._MyApp.LogAppliError("ApiGetTrackData Track Id not found", User, UserId)
+                Res.json({Error: true, ErrorMsg: "ApiGetTrackData Track Id not found", Data: ""})
+            } else {
+                if (Data.GetData == "GPX"){
+                    Res.json({Error: false, ErrorMsg: "", Data: reponse[0][this._MongoTracksCollection.GpxData]})
+                    this._MyApp.LogAppliInfo("GPX send to user", User, UserId)
+                } else if (Data.GetData == "GeoJSon"){
+                    Res.json({Error: false, ErrorMsg: "", Data: reponse[0][this._MongoTracksCollection.GeoJsonData]})
+                    this._MyApp.LogAppliInfo("GeoJSon send to user", User, UserId)
+                }
+            }
+        },(erreur)=>{
+            this._MyApp.LogAppliError("ApiGetTrackData DB error : " + erreur, User, UserId)
+            Res.json({Error: true, ErrorMsg: "ApiGetTrackData DB error ", Data: ""})
+        })
     }
 
     ApiCopyTrack(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiCopyTrack: " + JSON.stringify(Data), User, UserId)
 
-        let Shared = require("./Shared")
-        Shared.ApiCopyTrackById(this._MyApp, Data, Res, User, UserId)
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+
+        const Querry = {'_id': new MongoObjectId(Data.TrackId)}
+        const Projection = {projection:{_id: 0}}
+
+        this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 1){
+                // Copy de la track
+                let TrackData = reponse[0]
+                // Modification de la track
+                TrackData.Name = Data.Name
+                TrackData.Group = Data.Group
+                TrackData.Public = Data.Public
+                TrackData.Description = Data.Description
+                TrackData.Color = "#0000FF"
+                TrackData.Date = new Date()
+                TrackData.Owner = User
+                this._Mongo.InsertOnePromise(TrackData, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
+                    Res.json({Error: false, ErrorMsg: "", Data:"Done"})
+                    this._MyApp.LogAppliInfo("ApiCopyTrack: Track:" + Data.TrackId + " is saved", User, UserId)
+                },(erreur)=>{
+                    Res.json({Error: true, ErrorMsg: "ApiCopyTrack inster track error", Data: ""})
+                    this._MyApp.LogAppliError("ApiCopyTrack inster track error: " + erreur, User, UserId)
+                })
+            } else {
+                this._MyApp.LogAppliError("ApiCopyTrack Track id not found", User, UserId)
+                Res.json({Error: true, ErrorMsg: "ApiCopyTrack Track id not found", Data: ""})
+            }
+        },(erreur)=>{
+            this._MyApp.LogAppliError("ApiCopyTrack get track data error: " + erreur, User, UserId)
+            Res.json({Error: true, ErrorMsg: "ApiCopyTrack get track data error", Data: ""})
+        })
     }
 
     async ApiGetAllGroups(Data, Res, User, UserId){
@@ -344,7 +419,6 @@ class GeoXServer{
         if (Filter.HideMyTrack){
             Query.$and.push({[this._MongoTracksCollection.Owner]: { $ne: User }})
         }
-        console.log(JSON.stringify(Query))
         return Query 
     }
 }
