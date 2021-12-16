@@ -1021,10 +1021,11 @@ class GeoXManageTracks {
     }
 
     /**
-     * Click on Filter button
+     * Open filter box
      */
     ClickOnFilter(){
-        alert("ToDo")
+        let FilterView = new FilterBox(this._FiltrePost)
+        FilterView.Save = this.SetFilter.bind(this)
     }
 
     /**
@@ -1210,6 +1211,15 @@ class GeoXManageTracks {
             // Show error
             this.ShowErrorMessage(erreur)
         })
+    }
+
+    /**
+     * Apply filter
+     * @param {Object} Filter Object filter
+     */
+    SetFilter(Filter){
+        this._FiltrePost = Filter
+        this.LoadView(this._ViewCurrent)
     }
 }
 

@@ -632,53 +632,21 @@ class GeoXActivities {
     }
 
     ClickOnFilter(){
-        // Create filter view
-        let Conteneur = CoreXBuild.DivFlexColumn("")
-        // Titre
-        Conteneur.appendChild(CoreXBuild.DivTexte("Filter", "", "Titre", "width:100%; text-align: center;"))
-        // Min Km
-        let DivMinKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
-        Conteneur.appendChild(DivMinKm)
-        DivMinKm.appendChild(CoreXBuild.DivTexte("Distance Min (Km):", "", "", ""))
-        DivMinKm.appendChild(CoreXBuild.Input("MinKm", this._FiltrePost.DistanceMin, "Input", "width: 20%;", "number", "MinKm"))
-        // Max Km
-        let DivMaxKm = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
-        Conteneur.appendChild(DivMaxKm)
-        DivMaxKm.appendChild(CoreXBuild.DivTexte("Max Distance (Km):", "", "", ""))
-        DivMaxKm.appendChild(CoreXBuild.Input("MaxKm", this._FiltrePost.DistanceMax, "Input", "width: 20%;", "number", "MaxKm"))
-        // Toggle HideMyTrack
-        let DivToogleHideMyTrack = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
-        Conteneur.appendChild(DivToogleHideMyTrack)
-        DivToogleHideMyTrack.appendChild(CoreXBuild.DivTexte("Hide my Track:", "", "", ""))
-        DivToogleHideMyTrack.appendChild(CoreXBuild.ToggleSwitch("ToggleHideMyTrack", this._FiltrePost.HideMyTrack))
-        // Empty space
-        Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
-        // Div Button
-        let DivButton = CoreXBuild.DivFlexRowAr("")
-        Conteneur.appendChild(DivButton)
-        // Button save
-        DivButton.appendChild(CoreXBuild.Button("Save",this.SetFilter.bind(this),"Text Button ButtonWidth30", "Save"))
-        // Button cancel
-        DivButton.appendChild(CoreXBuild.Button("Cancel",CoreXWindow.DeleteWindow,"Text Button ButtonWidth30", "Cancel"))
-        // Empty space
-        Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
-        // Build window
-        CoreXWindow.BuildWindow(Conteneur)
+        let FilterView = new FilterBox(this._FiltrePost)
+        FilterView.Save = this.SetFilter.bind(this)
     }
 
-    SetFilter(){
+    SetFilter(Filter){
         // Set filter
-        this._FiltrePost.DistanceMin = parseInt(document.getElementById("MinKm").value)
-        this._FiltrePost.DistanceMax = parseInt(document.getElementById("MaxKm").value)
-        this._FiltrePost.HideMyTrack = document.getElementById("ToggleHideMyTrack").checked 
-        // close window
-        CoreXWindow.DeleteWindow()
+        this._FiltrePost = Filter
+        // Reset page
         if (this._IsPostPresentation){
             // retrive post
             this._PageOfPosts = 0
         } else {
             this._PageOfMarkers = 0
         }
+        // Load Start View
         this.LoadStartView()
     }
 }
