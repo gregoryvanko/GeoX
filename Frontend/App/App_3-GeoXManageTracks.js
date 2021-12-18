@@ -55,7 +55,7 @@ class GeoXManageTracks {
 
         this.GeoXCreateTrackView = MyGeoXCreateTrack
 
-        this._FiltrePost = {DistanceMin: 1, DistanceMax: 200}
+        this._FiltrePost = {DistanceMin: 1, DistanceMax: 200, Group: "", AllGroups: null}
     }
 
     /**
@@ -131,7 +131,7 @@ class GeoXManageTracks {
                 this.LoadViewOnMap()
                 break;
             case this._ViewAddModifyTrack:
-                this.LoadViewAddTrack()
+                this.LoadViewAddModifyTrack()
                 break;
             default:
                 this.LoadViewMyPosts()
@@ -168,7 +168,7 @@ class GeoXManageTracks {
         // Button Filter
         ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
         // Button Add track
-        ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddTrack.bind(this),"ButtonRightActionSecond","ButtonAddTrack"))
+        ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddModifyTrack.bind(this),"ButtonRightActionSecond","ButtonAddTrack"))
         // Liste des post
         let ListofMyPost = CoreXBuild.Div(this._DivListOfMyPostsData, "DivPostApp", "")
         ConteneurMyPost.appendChild(ListofMyPost)
@@ -253,7 +253,7 @@ class GeoXManageTracks {
     /**
      * Load de la vue Add Track
      */
-    LoadViewAddTrack(IsAddTrack = true, TrackData = null){
+    LoadViewAddModifyTrack(IsAddTrack = true, TrackData = null){
         // Save WindowScrollY
         if (IsAddTrack){
             this._WindowScrollY = window.scrollY
@@ -410,6 +410,7 @@ class GeoXManageTracks {
     GetMyGroups(){
         GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
             this._UserGroup = reponse
+            this._FiltrePost.AllGroups = reponse
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
         })
@@ -879,7 +880,7 @@ class GeoXManageTracks {
      */
     ClickUpdateTrackData(Data){
         document.getElementById(this._ConteneurTrackData).innerHTML = ""
-        this.LoadViewAddTrack(false, Data)
+        this.LoadViewAddModifyTrack(false, Data)
     }
 
     /**

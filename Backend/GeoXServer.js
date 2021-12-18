@@ -398,6 +398,12 @@ class GeoXServer{
         if (Filter.DistanceMax){
             Query.$and.push({[this._MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}})
         }
+
+        // DistanceMax
+        if ((Filter.Group != undefined) && (Filter.Group != "")){
+            Query.$and.push({[this._MongoTracksCollection.Group]: Filter.Group})
+        }
+
         return Query 
     }
 
