@@ -37,7 +37,6 @@ class FilterBox {
         // User Group
         if(this._InitialData.Group != undefined){
             // Input
-
             let DivInputGroup = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
             Conteneur.appendChild(DivInputGroup)
             DivInputGroup.appendChild(CoreXBuild.DivTexte("Group:", "", "", ""))
@@ -53,7 +52,7 @@ class FilterBox {
                 let MyGroups = this._InitialData.AllGroups
                 autocomplete({
                     input: InputGroup,
-                    minLength: 1,
+                    minLength: 0,
                     showOnFocus: true,
                     emptyMsg: 'No suggestion',
                     fetch: function(text, update) {
@@ -73,7 +72,6 @@ class FilterBox {
                 });
             }
         }
-
 
         // Empty space
         Conteneur.appendChild(CoreXBuild.Div("", "", "height:2vh;"))

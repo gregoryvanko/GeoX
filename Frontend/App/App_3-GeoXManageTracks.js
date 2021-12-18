@@ -19,6 +19,7 @@ class GeoXManageTracks {
         this._ViewMap = "ViewMap"
         this._ViewListOfTrack = "ViewListOfTrack"
         this._ViewCurrent = this._ViewPost
+        this._ViewPrevious = this._ViewPost
 
         this._PageOfPosts = 0
         this._PageOfMarkers = 0
@@ -121,7 +122,6 @@ class GeoXManageTracks {
         ConteneurListTrack.style.display = "none"
         this._DivApp.appendChild(ConteneurListTrack)
         
-        
         // Start Load view
         switch (this._ViewCurrent ) {
             case this._ViewPost:
@@ -132,6 +132,9 @@ class GeoXManageTracks {
                 break;
             case this._ViewAddModifyTrack:
                 this.LoadViewAddModifyTrack()
+                break;
+            case this._ViewListOfTrack:
+                this.LoadListView()
                 break;
             default:
                 this.LoadViewMyPosts()
@@ -144,6 +147,7 @@ class GeoXManageTracks {
      */
     LoadViewMyPosts(){
         this._ViewCurrent = this._ViewPost
+        this._ViewPrevious = this._ViewCurrent
         // Show ConteneurManageTrack
         let ConteneurMyPost = document.getElementById(this._ConteneurPosts)
         ConteneurMyPost.style.display = "flex"
@@ -291,6 +295,7 @@ class GeoXManageTracks {
      */
     LoadViewOnMap(){
         this._ViewCurrent = this._ViewMap
+        this._ViewPrevious = this._ViewCurrent
         // Hide ConteneurManageTrack
         document.getElementById(this._ConteneurPosts).style.display = "none"
         // Show ConteneurViewOnMap
@@ -832,6 +837,7 @@ class GeoXManageTracks {
      * Click on Back arrow of list View
      */
     ClickOnBackFromListTrack(){
+        this._ViewCurrent = this._ViewPrevious
         this.Initiation()
     }
 
