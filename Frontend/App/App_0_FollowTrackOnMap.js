@@ -40,7 +40,7 @@ class FollowTrackOnMap {
 
     AddTrackToMap(){
         this._MapFollow.RemoveAllTracks()
-        this._MapFollow.AddTrackOnMap(this._TrackId, this._TrackGeoJson, true)
+        this._MapFollow.AddTrackOnMap(this._TrackId, this._TrackGeoJson, true, null)
     }
 
     BuildPositionMarker(){
@@ -145,7 +145,7 @@ class FollowTrackOnMap {
      * Update de la position actuelle
      * @param {Object} e GPS Object
      */
-     ShowPosition(e){
+    ShowPosition(e){
         let radius = e.accuracy
         if(this._GpsPointer){this._GpsPointer.setLatLng(e.latlng)}
         if(this._GpsRadius){

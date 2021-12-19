@@ -180,13 +180,21 @@ class GeoXServer{
         let MongoObjectId = require('@gregvanko/corex').MongoObjectId
 
         let Projection = {}
+        let Querry = {}
         if (Data.GetData == "GPX"){
             Projection = { projection:{[this._MongoTracksCollection.GpxData]: 1}}
+            Querry = {'_id': new MongoObjectId(Data.TrackId)}
         } else if (Data.GetData == "GeoJSon"){
             Projection = { projection:{[this._MongoTracksCollection.GeoJsonData]: 1}}
+            Querry = {'_id': new MongoObjectId(Data.TrackId)}
+        } else if (Data.GetData == "MultipleGeoJSon"){
+            Projection = { projection:{[this._MongoTracksCollection.GeoJsonData]: 1, [this._MongoTracksCollection.Color]: 1}}
+            Querry = {$or:[]}
+            Data.ListOfTrackId.forEach(element => {
+                Querry.$or.push({'_id':new MongoObjectId(element)})
+            });
         }
         const Sort = {[this._MongoTracksCollection.Date]: -1}
-        const Querry = {'_id': new MongoObjectId(Data.TrackId)}
 
         this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
             if(reponse.length == 0){
@@ -199,6 +207,9 @@ class GeoXServer{
                 } else if (Data.GetData == "GeoJSon"){
                     Res.json({Error: false, ErrorMsg: "", Data: reponse[0][this._MongoTracksCollection.GeoJsonData]})
                     this._MyApp.LogAppliInfo("GeoJSon send to user", User, UserId)
+                } else if (Data.GetData == "MultipleGeoJSon"){
+                    Res.json({Error: false, ErrorMsg: "", Data: reponse})
+                    this._MyApp.LogAppliInfo("MultipleGeoJSon send to user", User, UserId)
                 }
             }
         },(erreur)=>{

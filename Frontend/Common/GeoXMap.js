@@ -129,10 +129,11 @@ class GeoXMap{
         })
     }
 
-    AddTrackOnMap(TrackId, GeoJson, FitBounds){
+    AddTrackOnMap(TrackId, GeoJson, FitBounds, color = null){
         let WeightTrack = this._TrackWeight
+        let Thecolor = (color == null)? this._TrackColor : color
         var TrackStyle = {
-            "color": this._TrackColor,
+            "color": Thecolor,
             "weight": WeightTrack
         }
         let layerTrack1=L.geoJSON(GeoJson, 

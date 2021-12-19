@@ -526,7 +526,7 @@ class GeoXActivities {
         let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
         GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
             Map.RemoveAllTracks()
-            Map.AddTrackOnMap(TrackId, reponse, false)        
+            Map.AddTrackOnMap(TrackId, reponse, false, null)        
         },(erreur)=>{
             alert(erreur)
         })
