@@ -286,7 +286,7 @@ class GeoXServer{
         let cursor = Data.Page * numberofitem
 
         let Query = (Data.Filter)? this.FilterForMyTracks(Data.Filter, User) : {[this._MongoTracksCollection.Owner]: User}
-        const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.Public]: 1}}
+        const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Public]: 1}}
         const Sort = {[this._MongoTracksCollection.Date]: -1}
 
         this._Mongo.FindSortLimitSkipPromise(Query, Projection, Sort,numberofitem, cursor, this._MongoTracksCollection.Collection).then((reponse)=>{

@@ -164,6 +164,10 @@ class GeoXManageTracks {
         
         // Hide Action Button
         GlobalDisplayAction('On')
+        // Clear Action List
+        GlobalClearActionList()
+        // Add action
+        GlobalAddActionInList("List View", this.LoadListView.bind(this))
 
         // Titre de l'application
         ConteneurMyPost.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
@@ -197,14 +201,6 @@ class GeoXManageTracks {
             this._Map.RemoveMap()
             this._Map = null
         }
-        // Load View list of track
-        this.LoadViewListOfTracks()
-    }
-
-    /**
-     * Load de la vue Manage Track
-     */
-    LoadViewListOfTracks(){
         // Hide ConteneurPosts
         document.getElementById(this._ConteneurPosts).style.display = "none"
         // Hide ConteneurViewOnMap
@@ -238,8 +234,8 @@ class GeoXManageTracks {
         BoxTitre.style.marginTop = "3rem"
         // Titre des colonnes
         BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 44%; margin-left:1%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 29%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 13%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 28%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Distance","","TextBoxTitre", "width: 13%; text-align: right;"))
         // Liste des post
         let ListofMyPost = CoreXBuild.DivFlexColumn(this._DivListOfMyTracksData)
         ListofMyPost.style.width = "60rem"
@@ -312,6 +308,11 @@ class GeoXManageTracks {
 
         // show Action Button
         GlobalDisplayAction('On')
+        // Clear Action List
+        GlobalClearActionList()
+        // Add action
+        GlobalAddActionInList("List View", this.LoadListView.bind(this))
+        GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
 
         // Add button manage my post
         ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewPost), "ActionLeft",  `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`))
@@ -495,8 +496,8 @@ class GeoXManageTracks {
                 BoxTracks.style.marginTop = "0.7rem"
                 BoxTracks.style.marginBottom = "0.7rem"
                 BoxTracks.appendChild(CoreXBuild.DivTexte(element.Name,"","Text", "width: 44%; margin-left:1%; padding:0.2rem;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(element.Group,"","TextSmall", "width: 29%; padding:0.2rem;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(element.Date),"","TextSmall", "width: 13%; padding:0.2rem;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(element.Group,"","TextSmall", "width: 28%; padding:0.2rem;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(element.Length + " Km","","TextSmall", "width: 12%; padding:0.2rem;     text-align: right;"))
                 if (! element.Public){
                     let DivPublic = CoreXBuild.Div("", "", "width: 6%;")
                     DivPublic.style.textAlign = "right"
@@ -814,6 +815,28 @@ class GeoXManageTracks {
     }
 
     /**
+     * Show all track line on track
+     */
+    RenderAllTracksLinesOnMap(){
+        // Show message box to download all track
+        let InfoBox = CoreXBuild.Div("InfoBox", "InfoBox", "width: 20rem;")
+        // Texte
+        InfoBox.appendChild(CoreXBuild.DivTexte("Load all tracks on map", "", "", "width: 80%; margin-left: auto; margin-right: auto; margin-bottom: 2rem; margin-top: 1rem;"))
+        // Pourcentage
+        let DivProgressRing = CoreXBuild.Div("", "", "display: flex; flex-direction:column; justify-content:flex-start;")
+        InfoBox.appendChild(DivProgressRing)
+        DivProgressRing.appendChild(CoreXBuild.ProgressRing({Id:"MyProgressRing", Fill: "#F5F5F5", Radius:60, RadiusMobile:30, ScaleText:0.7, TextColor:"black", StrokeColor:"var(--CoreX-color)"}))
+        // Button Cancel
+        let DivButton = CoreXBuild.DivFlexRowAr("")
+        InfoBox.appendChild(DivButton)
+        DivButton.appendChild(CoreXBuild.Button("Cancel",this.ClickCancelRenderAllTracksLinesOnMap.bind(this),"Text Button ButtonWidth30", "Cancel"))
+        // Add InfoBox to body
+        document.body.appendChild(InfoBox)
+        // Start downlaod track
+        // ToDo
+    }
+
+    /**
      * Click on track data
      * @param {String} TrackId Id of track
      * @param {String} Name Name of track
@@ -1033,6 +1056,14 @@ class GeoXManageTracks {
     ClickOnFilter(){
         let FilterView = new FilterBox(this._FiltrePost)
         FilterView.Save = this.SetFilter.bind(this)
+    }
+
+    /**
+     * Cancel render all tracks line on map
+     */
+    ClickCancelRenderAllTracksLinesOnMap(){
+        // Delete infobox
+        document.body.removeChild(document.getElementById("InfoBox"))
     }
 
     /**
