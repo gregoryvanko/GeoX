@@ -6,6 +6,8 @@ class GeoXMap{
         this._LayerGroup = null
         this._MarkersCluster = null
         this._OnClickOnMarker = null
+        this._OnClickOnTrack = null
+        this._OnClickOnTrackMarker = null
 
         // Style for Marker Icon
         this._IconPointOption = L.icon({
@@ -44,6 +46,14 @@ class GeoXMap{
 
     set OnClickOnMarker(NewOnClickOnMarker){
         this._OnClickOnMarker = NewOnClickOnMarker
+    }
+
+    set OnClickOnTrack(NewOnClickOnTrack){
+        this._OnClickOnTrack = NewOnClickOnTrack
+    }
+
+    set OnClickOnTrackMarker(NewOnClickOnTrackMarker){
+        this._OnClickOnTrackMarker = NewOnClickOnTrackMarker
     }
 
     RenderMap(){
@@ -105,13 +115,25 @@ class GeoXMap{
     }
 
     AddMarker(Marker){
-        let newMarker = new L.marker([Marker.StartPoint.Lat, Marker.StartPoint.Lng], {icon: this._IconPointOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ClickOnMarker(Marker._id, false)}})
+        let newMarker = new L.marker([Marker.StartPoint.Lat, Marker.StartPoint.Lng], {icon: this._IconPointOption}).on('click',(e)=>{if(e.originalEvent.isTrusted){this.ClickOnMarker(Marker._id)}})
         this._MarkersCluster.addLayer(newMarker);
     }
 
     ClickOnMarker(TrackId){
         if (this._OnClickOnMarker){
             this._OnClickOnMarker(TrackId)
+        }
+    }
+
+    ClickOnTrack(TrackId){
+        if (this._OnClickOnTrack){
+            this._OnClickOnTrack(TrackId)
+        }
+    }
+
+    ClickOnTrackMarker(TrackId){
+        if (this._OnClickOnTrackMarker){
+            this._OnClickOnTrackMarker(TrackId)
         }
     }
 
@@ -144,6 +166,7 @@ class GeoXMap{
             })
             .on('mouseover', function(e) {e.target.setStyle({weight: 8})})
             .on('mouseout', function (e){e.target.setStyle({weight:WeightTrack});})
+            .on('click',(e)=>{if(e.originalEvent.isTrusted){this.ClickOnTrack(TrackId)}})
             .addTo(this._LayerGroup)
         layerTrack1.Type= "GeoXTrack"
         layerTrack1.id = TrackId
@@ -152,12 +175,16 @@ class GeoXMap{
         let beg = GeoJson.features[0].geometry.coordinates[0];
         let end = GeoJson.features[0].geometry.coordinates[numPts-1];
         // Add marker Start
-        let MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption}).addTo(this._LayerGroup)
+        let MarkerStart = new L.marker([beg[1],beg[0]], {icon: this._IconPointStartOption})
+        .on('click',(e)=>{if(e.originalEvent.isTrusted){this.ClickOnTrackMarker(TrackId)}})
+        .addTo(this._LayerGroup)
         MarkerStart.id = TrackId + "start"
         MarkerStart.Type = "GeoXMarker"
         MarkerStart.dragging.disable();
         // Add marker end
-        let MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption}).addTo(this._LayerGroup)
+        let MarkerEnd = new L.marker([end[1],end[0]], {icon: this._IconPointEndOption})
+        .on('click',(e)=>{if(e.originalEvent.isTrusted){this.ClickOnTrackMarker(TrackId)}})
+        .addTo(this._LayerGroup)
         MarkerEnd.id = TrackId+ "end"
         MarkerEnd.Type = "GeoXMarker"
         MarkerEnd.dragging.disable();

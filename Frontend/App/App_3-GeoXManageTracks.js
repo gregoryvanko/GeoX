@@ -444,6 +444,41 @@ class GeoXManageTracks {
     }
 
     /**
+     * Render tracks for all markers on map
+     */
+    GetAndRenderAllTrackGeoJsonOnMap(){
+        let ListOfIdToRender = []
+        let StartIndex = this._PointerRenderAllTrack * 5
+        let EndIndex = ((this._PointerRenderAllTrack + 1) * 5) - 1
+        if (EndIndex >= this._AllMarkers.length){EndIndex = this._AllMarkers.length - 1}
+        for (let index = StartIndex; index <= EndIndex; index++) {
+            ListOfIdToRender.push(this._AllMarkers[index]["_id"])
+        }
+        let FctData = {ListOfTrackId: ListOfIdToRender, GetData: "MultipleGeoJSon"}
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+            // Afficher la porgression
+            let prog = Math.floor((EndIndex / (this._AllMarkers.length - 1)) * 100)
+            if (document.getElementById("MyProgressRing")){
+                document.getElementById("MyProgressRing").setAttribute('progress', prog);
+            }
+            // Afficher les track
+            reponse.forEach(element => {
+                this._Map.AddTrackOnMap(element._id, element.GeoJsonData, false, element.Color)
+            }); 
+            // Vérifier si il faut continuer
+            if ((EndIndex != this._AllMarkers.length - 1) &&(this._CancelLoadingRenderAllTrack == false) ){
+                // On a continue a chager les track
+                this._PointerRenderAllTrack += 1
+                this.GetAndRenderAllTrackGeoJsonOnMap()
+            } else {
+                setTimeout(function(){document.body.removeChild(document.getElementById("InfoBox"))}, 1000);
+            } 
+        },(erreur)=>{
+            this.ShowErrorMessage(erreur)
+        })
+    }
+
+    /**
      * Render Posts
      * @param {Object} Data Data of post
      */
@@ -733,21 +768,17 @@ class GeoXManageTracks {
      * Render Box with track data on map
      * @param {String} TrackId Id of track
      */
-    RenderTrackDataOnMap(TrackId){
+    RenderTrackDataOnMap(TrackId, FromMarker = true){
         // Get Track data
         let TrackData =  this._AllMarkers.find(x => x._id === TrackId)
         // Build div track data on map
         let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
-        if (DivTrackDataOnMap == null){
-            DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
-            document.getElementById(this._ConteneurViewOnMap).appendChild(DivTrackDataOnMap)
-            DivTrackDataOnMap.addEventListener("click", this.ClickOnTrackData.bind(this, TrackId, null))
-        } else {
+        if (DivTrackDataOnMap != null){
             document.getElementById(this._ConteneurViewOnMap).removeChild(DivTrackDataOnMap)
-            DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
-            document.getElementById(this._ConteneurViewOnMap).appendChild(DivTrackDataOnMap)
-            DivTrackDataOnMap.addEventListener("click", this.ClickOnTrackData.bind(this, TrackId, null))
         }
+        DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
+        document.getElementById(this._ConteneurViewOnMap).appendChild(DivTrackDataOnMap)
+        DivTrackDataOnMap.addEventListener("click", this.ClickOnTrackData.bind(this, TrackId, null))
         // Name and close buttion
         let divNameAndClose = CoreXBuild.Div("", "", "width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
         DivTrackDataOnMap.appendChild(divNameAndClose)
@@ -769,7 +800,7 @@ class GeoXManageTracks {
         button.style.fontSize = "1rem"
         button.style.padding = "1px 5px"
         button.style.marginBottom = "0rem"
-        button.onclick = this.RemoveTrackDataOnMap.bind(this)
+        button.onclick = this.RemoveTrackDataOnMap.bind(this, FromMarker)
         divNameAndClose.appendChild(button)
 
         // Add track info
@@ -790,11 +821,12 @@ class GeoXManageTracks {
     /**
      * Remove Box track data on map
      */
-    RemoveTrackDataOnMap(){
+    RemoveTrackDataOnMap(FromMarker = true){
         event.stopPropagation()
 
         // Remove all track on map
-        this._Map.RemoveAllTracks()
+        if (FromMarker){this._Map.RemoveAllTracks()}
+        
         // Remove track data
         let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
         if (DivTrackDataOnMap != null){
@@ -817,47 +849,16 @@ class GeoXManageTracks {
         })
     }
 
-    RenderAllTrackGeoJsonOnMap(){
-        let ListOfIdToRender = []
-        let StartIndex = this._PointerRenderAllTrack * 5
-        let EndIndex = ((this._PointerRenderAllTrack + 1) * 5) - 1
-        if (EndIndex >= this._AllMarkers.length){EndIndex = this._AllMarkers.length - 1}
-        for (let index = StartIndex; index <= EndIndex; index++) {
-            ListOfIdToRender.push(this._AllMarkers[index]["_id"])
-        }
-        let FctData = {ListOfTrackId: ListOfIdToRender, GetData: "MultipleGeoJSon"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
-            // Afficher la porgression
-            let prog = Math.floor((EndIndex / (this._AllMarkers.length - 1)) * 100)
-            if (document.getElementById("MyProgressRing")){
-                document.getElementById("MyProgressRing").setAttribute('progress', prog);
-            }
-            // Afficher les track
-            reponse.forEach(element => {
-                this._Map.AddTrackOnMap(element._id, element.GeoJsonData, false, element.Color)
-            }); 
-            // Vérifier si il faut continuer
-            if ((EndIndex != this._AllMarkers.length - 1) &&(this._CancelLoadingRenderAllTrack == false) ){
-                // On a continue a chager les track
-                this._PointerRenderAllTrack += 1
-                this.RenderAllTrackGeoJsonOnMap()
-            } else {
-                setTimeout(function(){document.body.removeChild(document.getElementById("InfoBox"))}, 1000);
-            } 
-        },(erreur)=>{
-            this.ShowErrorMessage(erreur)
-        })
-    }
-
     /**
      * Show all track line on track
      */
     RenderAllTracksLinesOnMap(){
-        if (this._AllMarkers.length > 5){
+        let MaxTrack = 60
+        if (this._AllMarkers.length > MaxTrack){
             // Show message box to download all track
             let InfoBox = CoreXBuild.Div("InfoBox", "InfoBox", "width: 20rem;")
             // Texte
-            InfoBox.appendChild(CoreXBuild.DivTexte("Too many tracks to load..", "", "", "width: 80%; margin-left: auto; margin-right: auto; margin-bottom: 2rem; margin-top: 1rem;"))
+            InfoBox.appendChild(CoreXBuild.DivTexte(`Sorry, not possible to load more than ${MaxTrack} tracks...`, "", "", "width: 80%; margin-left: auto; margin-right: auto; margin-bottom: 2rem; margin-top: 1rem;"))
             // Button Close
             let DivButton = CoreXBuild.DivFlexRowAr("")
             InfoBox.appendChild(DivButton)
@@ -885,16 +886,21 @@ class GeoXManageTracks {
             this._CancelLoadingRenderAllTrack = false
             this._Map.RemoveAllTracks()
             this._Map.RemoveAllMarkers()
+            this._Map.OnClickOnTrack = this.ClickOnTrack.bind(this)
+            this._Map.OnClickOnTrackMarker = this.ClickOnTrack.bind(this)
             // Clear Action List
             GlobalClearActionList()
             // Add action
             GlobalAddActionInList("List View", this.LoadListView.bind(this))
             GlobalAddActionInList("Hide all tracks", this.HideAllTracksLinesOnMap.bind(this))
             // Start downlaod track
-            this.RenderAllTrackGeoJsonOnMap()
+            this.GetAndRenderAllTrackGeoJsonOnMap()
         }
     }
 
+    /**
+     * Hide all tracks on map
+     */
     HideAllTracksLinesOnMap(){
         // Clear Action List
         GlobalClearActionList()
@@ -903,6 +909,9 @@ class GeoXManageTracks {
         GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
         // remove all tracks
         this._Map.RemoveAllTracks()
+        this._Map.OnClickOnTrack = null
+        this._Map.OnClickOnTrackMarker = null
+        this.RemoveTrackDataOnMap(false)
         // Add all markers
         this._AllMarkers.forEach(element => {
             this._Map.AddMarker(element)
@@ -1119,8 +1128,16 @@ class GeoXManageTracks {
      * @param {String} TrackId Track id of the clicked marker
      */
     ClickOnMarker(TrackId){
-        this.RenderTrackDataOnMap(TrackId)
+        this.RenderTrackDataOnMap(TrackId, true)
         this.RenderTrackGeoJSonOnMap(this._Map, TrackId)
+    }
+
+    /**
+     * executee lors d'un click sur une track
+     * @param {String} TrackId Track id
+     */
+    ClickOnTrack(TrackId){
+        this.RenderTrackDataOnMap(TrackId, false)
     }
 
     /**
@@ -1138,7 +1155,9 @@ class GeoXManageTracks {
         this._CancelLoadingRenderAllTrack = true
     }
 
-    
+    /**
+     * Close Info Box
+     */
     ClickCloseInfox(){
         document.body.removeChild(document.getElementById("InfoBox"))
     }
