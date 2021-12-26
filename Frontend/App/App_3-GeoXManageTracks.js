@@ -359,7 +359,7 @@ class GeoXManageTracks {
         // Div Data of track
         let DivDataOfOneTrack = CoreXBuild.DivFlexColumn(this._DivDataOfOneTrack)
         DivDataOfOneTrack.style.width = "45rem"
-        DivDataOfOneTrack.style.maxWidth = "90%"
+        DivDataOfOneTrack.style.maxWidth = "100%"
         DivDataOfOneTrack.style.marginTop = "3rem"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text

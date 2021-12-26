@@ -94,7 +94,7 @@ function GetCSSHomePAge(){
     .DivPostApp{
         width:45rem;
         box-sizing: border-box;
-        max-width: 90%;
+        max-width: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;

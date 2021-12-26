@@ -226,9 +226,9 @@
 .DivInfoOneTrack{
     margin-bottom: 0.5rem;
     border: 1px solid #dfdfe8;
-    padding: 0.5rem;
+    margin: 0.5rem;
     box-sizing: border-box;
-    width: 100%;
+    width: 98%;
 }
 
 .InfoOnTrackMap{
@@ -244,7 +244,7 @@
 .DivPostApp{
     width:45rem;
     box-sizing: border-box;
-    max-width: 90%;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -277,7 +277,7 @@
     align-items: center;
     width: 45rem;
     box-sizing: border-box;
-    max-width: 90%;
+    max-width: 100%;
 }
 
 .DivContentTrackInfo{
@@ -286,10 +286,10 @@
     justify-content:space-around; 
     align-content:center; 
     box-sizing: border-box;
-    padding: 0.5rem;
+    /*padding: 0.5rem;
     border: 1px solid black;
-    border-radius: 1rem;
-    margin-top: 1rem;
+    border-radius: 1rem;*/
+    margin-top: 3rem;
     width: 100%;
 }
 

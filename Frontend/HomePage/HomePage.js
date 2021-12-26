@@ -2,7 +2,6 @@ class HomePage{
     
     constructor(){
         this._IdDivApp = "divapp"
-        this._IdDivTrackInfo = "DivTrackInfo"
         this._WindowScrollY = 0
         this._PageOfPosts = 0
         let me = this
@@ -24,8 +23,6 @@ class HomePage{
         document.body.appendChild(this.GetButtonLunchApp())
         // Add div app
         document.body.appendChild(this.GetDivApp())
-        // Add div TrackInfo
-        document.body.appendChild(this.GetDivTrackInfo())
         // Get Posts
         this.GetPosts()
 
@@ -49,13 +46,6 @@ class HomePage{
         divapp.id = this._IdDivApp
         divapp.classList.add("DivPostApp")
         return divapp
-    }
-
-    GetDivTrackInfo(){
-        let DivTrackInfo = document.createElement('div')
-        DivTrackInfo.id = this._IdDivTrackInfo
-        DivTrackInfo.classList.add("DivTrackInfo")
-        return DivTrackInfo
     }
 
     GetPosts(){

@@ -50,8 +50,8 @@ class HtmlElemGeoxPost extends HTMLElement {
                 align-items: center;
                 align-content: center;
                 background-color: white;
-                padding: 0.5rem;
-                /*border: 0.1rem solid black;*/
+                /*padding: 0.5rem;
+                border: 0.1rem solid black;*/
                 border-radius: 0.2rem;
                 margin-bottom: 1rem;
                 box-shadow: 0.1rem 0.1rem  0.4rem black;
@@ -67,6 +67,7 @@ class HtmlElemGeoxPost extends HTMLElement {
                 box-sizing: border-box;
                 width: 100%;
                 margin-top: 0.4rem;
+                margin-left: 0.4rem;
             }
 
             .PostTitre{
@@ -184,6 +185,7 @@ class HtmlElemGeoxPost extends HTMLElement {
             if (! this._Public){
                 var img = document.createElement('img');
                 img.style.height = "1.5rem"
+                img.style.marginRight = "0.6rem"
                 img.src = this.GetImgKey()
                 DivContent.appendChild(img)
             }

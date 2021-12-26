@@ -54,6 +54,7 @@ class InfoOnTrack {
         // Div Carte
         let DivCarte = document.createElement('div')
         DivCarte.classList.add("DivInfoOneTrack")
+        DivCarte.style.width= "100%"
         this._HtmlDiv.appendChild(DivCarte)
         this.DrawMap(DivCarte)
         // Div Elevation

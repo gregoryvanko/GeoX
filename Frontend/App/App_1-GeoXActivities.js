@@ -239,17 +239,11 @@ class GeoXActivities {
         // Remove waiting
         divbackground.removeChild(document.getElementById("DivWaiting"))
 
-        // Close button
-        let button = document.createElement('button')
-        button.classList.add("ButtonX");
-        button.style.marginBottom = "-2.5rem"
-        button.style.zIndex = "100"
-        button.onclick = this.RemoveTrackData.bind(this)
-        divbackground.appendChild(button)
+        // Add Button Back
+        divbackground.appendChild(CoreXBuild.ButtonLeftAction(this.RemoveTrackData.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
 
         // Add InfoOnTrack
-        let DivData = document.createElement('div')
-        DivData.id = "DivData"
+        let DivData = CoreXBuild.DivFlexColumn("DivData")
         divbackground.appendChild(DivData)
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
 
