@@ -29,6 +29,10 @@ function GetCSSHomePAge(){
     let os = require('os')
 
     let Css =`
+    html{
+        max-width: 100%;
+        overflow-x: hidden;
+    }
     body{
         margin: 0;
         padding: 0;
@@ -51,6 +55,8 @@ function GetCSSHomePAge(){
         justify-content: center;
         align-items: center;
         align-content: center;
+        max-width: 100%;
+        overflow-x: hidden;
     }
     
     .OpenButton{

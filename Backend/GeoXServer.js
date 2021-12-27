@@ -438,5 +438,44 @@ class GeoXServer{
         }
         return Query 
     }
+
+    // Admin
+    ApiAdminGetAllMyTracks(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiAdminGetAllMyTracks: " + JSON.stringify(Data), User, UserId)
+
+        let numberofitem = 10
+        let cursor = Data.Page * numberofitem
+
+        let Query = (Data.Filter)? this.FilterForAdminTracks(Data.Filter) : {}
+        const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Owner]: 1, [this._MongoTracksCollection.Public]: 1}}
+        const Sort = {[this._MongoTracksCollection.Date]: -1}
+
+        this._Mongo.FindSortLimitSkipPromise(Query, Projection, Sort,numberofitem, cursor, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                Res.json({Error: false, ErrorMsg: null, Data:[]})
+            } else {
+                Res.json({Error: false, ErrorMsg: null, Data:reponse})
+            }
+        },(erreur)=>{
+            let ErrorMsg = "ApiGetAllMyTracks error: " + erreur
+            Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+            this._MyApp.LogAppliError(ErrorMsg, User, UserId)
+        })
+    }
+
+    FilterForAdminTracks(Filter){
+        // Query de base
+        let Query = {$and:[]}
+
+        // DistanceMin
+        if (Filter.DistanceMin){
+            Query.$and.push({[this._MongoTracksCollection.Length]:{$gte: Filter.DistanceMin}})
+        }
+        // DistanceMax
+        if (Filter.DistanceMax){
+            Query.$and.push({[this._MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}})
+        }
+        return Query 
+    }
 }
 module.exports.GeoXServer = GeoXServer

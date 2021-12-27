@@ -2,6 +2,11 @@
     background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/layers-2x.png");
 }
 
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 /* Titre */
 .Titre{
     margin-top: 1vh;

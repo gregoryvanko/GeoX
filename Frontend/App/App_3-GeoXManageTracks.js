@@ -47,7 +47,6 @@ class GeoXManageTracks {
         }, {threshold: [1]})
 
         this._StartWithLoadViewManageTrack = true
-        //this._ShowOnMap = false
         this._WindowScrollY = 0
 
         this._Map = null
@@ -227,8 +226,6 @@ class GeoXManageTracks {
         // Button Filter
         ConteneurManageTrack.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
 
-        // Titre de l'application
-        //ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
         // Div pour le titre des colonnes
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
         BoxTitre.style.width = "60rem"
