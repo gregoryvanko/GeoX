@@ -7,7 +7,7 @@ async function GetPostOfPage (Page, res, MyApp){
     // Get Post of page
     let ReponsePostOfPageFromDb = await PromiseGetPostOfPageFromDb(parseInt(Page), MyApp)
     if(ReponsePostOfPageFromDb.Error){
-        MyApp.LogAppliError(ReponsePostOfPageFromDb.ErrorMsg, "GetPageOfPost", "GetPageOfPost")
+        MyApp.LogAppliError(ReponsePostOfPageFromDb.ErrorMsg, "RouteGetPageOfPost", "RouteGetPageOfPost")
         res.status("500").json(ReponsePostOfPageFromDb)
     } else {
         res.status("200").json(ReponsePostOfPageFromDb)

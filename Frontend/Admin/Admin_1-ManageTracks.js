@@ -1,8 +1,10 @@
 class GeoXManageTracks {
     constructor(DivApp){
         this._DivApp = document.getElementById(DivApp)
-        this._DivConteneur = "Conteneur"
+        this._DivConteneur = "DivConteneur"
+        this._DivConteneurTrackData = "DivConteneurTrackData"
         this._DivListOfMyTracksData = "DivListOfMyTracksData"
+        this._DivDataOfOneTrack = "DivDataOfOneTrack"
 
         this._PageOfPosts = 0
         this._FiltrePost = {DistanceMin: 1, DistanceMax: 200}
@@ -30,35 +32,27 @@ class GeoXManageTracks {
         GlobalClearActionList()
         // Clear view
         this._DivApp.innerHTML=""
+        // Clear data
+        this._PageOfPosts = 0
+        // Contener
+        this._DivApp.appendChild(CoreXBuild.DivFlexColumn(this._DivConteneur))
+        // Contener Track Data
+        let ConteneurTrackData = CoreXBuild.DivFlexColumn(this._DivConteneurTrackData)
+        ConteneurTrackData.style.display = "none"
+        this._DivApp.appendChild(ConteneurTrackData)
         // Load Data
-        this.LoadViewGetAppData()
+        this.LoadViewTable()
     }
-
-    /**
-     * Action a realiser lorsque l'on recoit un message
-     * @param {Object} Value Object du message : {Action, Data}
-     */
-    // MessageRecieved(Value){
-    //     if (Value.Action == "SetData"){
-    //         this._AppData = Value.AppData
-    //         this.LoadViewManageTracks()
-    //     } else if (Value.Action == "SetTrackInfo" ){
-    //         // Load Info Track view
-    //         let InfoTrackView = new InfoOnTrack(Value.Data, "ContentInfoTrack")
-    //     } else {
-    //         console.log("error, Action not found: " + Value.Action)
-    //     }
-    // }
 
     /**
      * Load des Data de l'application
      */
-    LoadViewGetAppData(){
-        // Contener
-        let Conteneur = CoreXBuild.DivFlexColumn(this._DivConteneur)
-        this._DivApp.appendChild(Conteneur)
+    LoadViewTable(){
+        let Conteneur = document.getElementById(this._DivConteneur)
         // Titre de l'application
         Conteneur.appendChild(CoreXBuild.DivTexte("All Tracks", "", "Titre"))
+        // Add Button filter
+        Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnFilter.bind(this), "ActionLeftBack",  `<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`))
 
         // Div pour le titre des colonnes
         let BoxTitre = CoreXBuild.DivFlexRowStart("")
@@ -86,12 +80,58 @@ class GeoXManageTracks {
     }
 
     /**
+     * Load de la vue Track Data
+     * @param {String} TrackId Id of track
+     * @param {String} TrackName Name of track
+     */
+    LoadViewTrackData(TrackId, TrackName){
+        // Hide DivConteneur
+        document.getElementById(this._DivConteneur).style.display = "none"
+        // Show ConteneurTrackData
+        let ConteneurTrackData = document.getElementById(this._DivConteneurTrackData)
+        ConteneurTrackData.style.display = "flex"
+
+        // Hide Action Button
+        GlobalDisplayAction('Off')
+
+        // Add Button Back
+        ConteneurTrackData.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromTrackData.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
+        // Div Data of track
+        let DivDataOfOneTrack = CoreXBuild.DivFlexColumn(this._DivDataOfOneTrack)
+        DivDataOfOneTrack.style.width = "45rem"
+        DivDataOfOneTrack.style.maxWidth = "100%"
+        DivDataOfOneTrack.style.marginTop = "3rem"
+        ConteneurTrackData.appendChild(DivDataOfOneTrack)
+        // Waiting text
+        if (TrackName){
+            DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(`Waiting data of track: ${TrackName}`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        } else {
+            DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(`Waiting data of track`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        }
+        // get InfoOnTrack data
+        this.GetInfoOnTrack(TrackId)
+    }
+
+    /**
      * Get All My Tracks information
      */
     GetAllMyTracksData(){
         let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
         GlobalCallApiPromise("ApiAdminGetAllMyTracks", FctData, "", "").then((reponse)=>{
             this.RenderAllMyTracksDataInViewManageTrack(reponse)
+        },(erreur)=>{
+            this.ShowErrorMessage(erreur)
+        })
+    }
+
+    /**
+     * Get Data of one track
+     * @param {String} TrackId Id of track
+     */
+    GetInfoOnTrack(TrackId){
+        let FctData = {PostId: TrackId}
+        GlobalCallApiPromise("ApiAdminGetPostData", FctData, "", "").then((reponse)=>{
+            this.RenderInfoOnTrackInViewTrackData(reponse)
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
         })
@@ -144,13 +184,48 @@ class GeoXManageTracks {
     }
 
     /**
+     * Affiche un object GeoxActvies dans la vue TrackData
+     * @param {Object} Data Data of track for GeoXActivities view
+     */
+    RenderInfoOnTrackInViewTrackData(Data){
+        let DivDataOfOneTrack = document.getElementById(this._DivDataOfOneTrack)
+        // Add InfoOnTrack view
+        let InfoTrackView = new InfoOnTrack(Data, this._DivDataOfOneTrack)
+        // Empty
+        DivDataOfOneTrack.appendChild(this.BuildEmptySpace())
+    }
+
+    /**
      * Click on track data
      * @param {String} TrackId Id of track
      * @param {String} Name Name of track
      */
     ClickOnTrackData(TrackId, Name){
         this._WindowScrollY = window.scrollY
-        //this.LoadViewTrackData(TrackId, Name)
+        this.LoadViewTrackData(TrackId, Name)
+    }
+
+    /**
+     * Click on Back arrow of Track Data View
+     */
+    ClickOnBackFromTrackData(){
+        let ConteneurTrackData = document.getElementById(this._DivConteneurTrackData)
+        ConteneurTrackData.innerHTML = ""
+        ConteneurTrackData.style.display = "none"
+        // show DivConteneur
+        document.getElementById(this._DivConteneur).style.display = "flex"
+        // Show Action Button
+        GlobalDisplayAction('On')
+        // Scroll
+        window.scrollTo(0, this._WindowScrollY)
+    }
+
+    /**
+     * Open filter box
+     */
+    ClickOnFilter(){
+        let FilterView = new FilterBox(this._FiltrePost)
+        FilterView.Save = this.SetFilter.bind(this)
     }
 
     /**
@@ -179,78 +254,14 @@ class GeoXManageTracks {
         return divempty
     }
 
-    // LoadViewManageTracks(){
-    //     // Clear view
-    //     this._DivApp.innerHTML = ""
-    //     // Contener
-    //     let Contener = CoreXBuild.DivFlexColumn("Conteneur")
-    //     this._DivApp.appendChild(Contener)
-    //     // Titre
-    //     Contener.appendChild(CoreXBuild.DivTexte("Manage GeoX Tracks", "", "Titre", "margin-bottom:0%"))
-    //     // Conteneur de la liste des tracks
-    //     let AppConteneur = CoreXBuild.Div("AppConteneur", "AppConteneur", "")
-    //     Contener.appendChild(AppConteneur)
-    //     // Div pour le titre des colonnes
-    //     let BoxTitre = CoreXBuild.DivFlexRowStart("")
-    //     BoxTitre.style.marginTop = "4vh"
-    //     AppConteneur.appendChild(BoxTitre)
-    //     // Titre des colonnes
-    //     BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 33%; margin-left:1%;"))
-    //     BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 20%;"))
-    //     BoxTitre.appendChild(CoreXBuild.DivTexte("Date","","TextBoxTitre", "width: 15%;"))
-    //     BoxTitre.appendChild(CoreXBuild.DivTexte("Owner","","TextBoxTitre", "width: 21%;"))
-    //     // Ajout d'une ligne
-    //     AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5; margin: 1% 0% 0% 0%;"))
-    //     // Ajout des lignes des tracks
-    //     if (this._AppData.length == 0){
-    //         let BoxTracks = CoreXBuild.DivFlexRowStart("")
-    //         AppConteneur.appendChild(BoxTracks)
-    //         BoxTracks.appendChild(CoreXBuild.DivTexte("No track saved","","Text","margin-top: 4vh; width: 100%; text-align: center;"))
-    //     } else {
-    //         this._AppData.forEach(Track => {
-    //             let BoxTracks = CoreXBuild.DivFlexRowStart("")
-    //             BoxTracks.style.marginTop = "1vh"
-    //             BoxTracks.style.marginBottom = "1vh"
-    //             if (!Track.Public){
-    //                 BoxTracks.style.color = "red"
-    //             }
-    //             AppConteneur.appendChild(BoxTracks)
-    //             BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Name,"","Text", "width: 33%; margin-left:1%;"))
-    //             BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Group,"","TextSmall", "width: 20%;"))
-    //             BoxTracks.appendChild(CoreXBuild.DivTexte(CoreXBuild.GetDateString(Track.Date),"","TextSmall", "width: 15%;"))
-    //             BoxTracks.appendChild(CoreXBuild.DivTexte(Track.Owner,"","TextSmall", "width: 21%;"))
-    //             let DivButton = CoreXBuild.Div("", "", "margin-left:auto;")
-    //             BoxTracks.appendChild(DivButton)
-    //             DivButton.appendChild(CoreXBuild.Button(`<img src="${Icon.Information()}" alt="icon" width="30" height="30">`, this.LoadViewInfoTrack.bind(this,Track._id), "ButtonIcon"))
-                
-    //             // Ajout d'une ligne
-    //             AppConteneur.appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
-    //         });
-    //     }
-    // }
-
-    // LoadViewInfoTrack(TrackId){
-    //     // Clear Conteneur
-    //     this._DivApp.innerHTML = ""
-    //     // Contener
-    //     let Contener = CoreXBuild.DivFlexColumn("Conteneur")
-    //     Contener.style.width = "90%"
-    //     Contener.style.marginLeft = "auto"
-    //     Contener.style.marginRight = "auto"
-    //     Contener.style.maxWidth = "900px"
-    //     this._DivApp.appendChild(Contener)
-    //     // Content Info Track
-    //     let ContentInfoTrack = CoreXBuild.DivFlexColumn("ContentInfoTrack")
-    //     Contener.appendChild(ContentInfoTrack)
-    //     // waitinf data txt
-    //     ContentInfoTrack.appendChild(CoreXBuild.DivTexte("Waiting track data...","","Text", "text-align: center; margin-top: 10vh;"))
-    //     // Button select file
-    //     Contener.appendChild(CoreXBuild.Button("Go to manage track",this.LoadViewManageTracks.bind(this),"Text Button", "GoToManageTrack"))
-    //     // Blank div
-    //     Contener.appendChild(CoreXBuild.Div("","","height: 6vh;"))
-    //     // Send status to serveur
-    //     GlobalSendSocketIo("GeoX", "AdminManageTrack", {Action: "GetTrackInfo", Data: TrackId})
-    // }
+    /**
+     * Apply filter
+     * @param {Object} Filter Object filter
+     */
+    SetFilter(Filter){
+        this._FiltrePost = Filter
+        this.Initiation()
+    }
 }
 
 // Creation de l'application

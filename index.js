@@ -73,7 +73,7 @@ class GeoX {
       this._MyApp.AddRouteGet("getmap", this._GeoXServer.RouteGetMap.bind(this._GeoXServer))
        
       // Route Api Get page of post
-      this._MyApp.AddRouteGet("getpageofpost/:page", this._GeoXServer.GetPageOfPost.bind(this._GeoXServer))
+      this._MyApp.AddRouteGet("getpageofpost/:page", this._GeoXServer.RouteGetPageOfPost.bind(this._GeoXServer))
 
       // API
       this._MyApp.AddApiFct("ApiGetAllPost", this._GeoXServer.ApiGetAllPost.bind(this._GeoXServer), false)
@@ -89,6 +89,7 @@ class GeoX {
 
       // API Admin
       this._MyApp.AddApiFct("ApiAdminGetAllMyTracks", this._GeoXServer.ApiAdminGetAllMyTracks.bind(this._GeoXServer), true)
+      this._MyApp.AddApiFct("ApiAdminGetPostData", this._GeoXServer.ApiAdminGetPostData.bind(this._GeoXServer), true)
          
       // Start
       this._MyApp.Start()

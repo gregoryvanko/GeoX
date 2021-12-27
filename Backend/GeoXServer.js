@@ -41,29 +41,6 @@ class GeoXServer{
                     Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)
                 }
                 break
-            case "AdminManageTrack":
-                let ModuleAdminManageTrack = require("./ModuleAdminManageTrack")
-                if (Data.Value.Action == "GetData") {
-                    ModuleAdminManageTrack.CallGetData(this._MyApp,  Socket, User, UserId)
-
-                    //***Modification de la DB
-                    //let ModifyDB = require("./ModifyDb")
-                    //ModifyDB.AddElevationToAlTracks(this._MyApp)
-                } else if (Data.Value.Action == "GetTrackInfo"){
-                    ModuleAdminManageTrack.CallGetTrackInfo(Data.Value.Data,this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "ModifyDB"){
-                    let ModuleModifyDb = require("./ModifyDb")
-                    if (Data.Value.Data.SubAction == "GetGpx"){
-                        ModuleModifyDb.GetGpx(this._MyApp, Data.Value.Data.Id, Socket)
-                    }
-                    if (Data.Value.Data.SubAction == "SaveImg"){
-                        ModuleModifyDb.SaveImg(this._MyApp, Data.Value.Data.Id, Data.Value.Data.Img, Socket)
-                    }
-                } else {
-                    this._MyApp.LogAppliError(`Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`, User, UserId)
-                    Socket.emit("GeoXError", `Api GeoXServer error, AdminManageTrack Action ${Data.Value.Action} not found`)
-                }
-                break
             default:
                 this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
                 Socket.emit("GeoXError", `Api GeoXServer error, Action ${Data.Action} not found`)
@@ -76,7 +53,7 @@ class GeoXServer{
      * @param {req} req request html GET
      * @param {res} res response html GET
      */
-    GetPageOfPost(req, res){
+    RouteGetPageOfPost(req, res){
         let MyRouteGetPageOfPost = require("./RouteGetPageOfPost")
         MyRouteGetPageOfPost.CallRouteGetPageOfPost(req, res, this._MyApp)
     }
@@ -129,7 +106,7 @@ class GeoXServer{
         return HtmlString
     }
 
-    async ApiGetAllPost(Data, Res, User, UserId){
+    ApiGetAllPost(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetAllPost: " + JSON.stringify(Data), User, UserId)
 
         let numberofitem = 5
@@ -152,7 +129,7 @@ class GeoXServer{
         })
     }
     
-    async ApiGetPostData(Data, Res, User, UserId){
+    ApiGetPostData(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetPostData " + JSON.stringify(Data), User, UserId)
 
         let MongoObjectId = require('@gregvanko/corex').MongoObjectId
@@ -457,9 +434,31 @@ class GeoXServer{
                 Res.json({Error: false, ErrorMsg: null, Data:reponse})
             }
         },(erreur)=>{
-            let ErrorMsg = "ApiGetAllMyTracks error: " + erreur
+            let ErrorMsg = "ApiAdminGetAllMyTracks error: " + erreur
             Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
             this._MyApp.LogAppliError(ErrorMsg, User, UserId)
+        })
+    }
+
+    ApiAdminGetPostData(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiAdminGetPostData " + JSON.stringify(Data), User, UserId)
+
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+
+        const Query = {'_id': new MongoObjectId(Data.PostId)}
+        const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0, [this._MongoTracksCollection.Owner]: 0}}
+        const Sort = {[this._MongoTracksCollection.Image]: -1}
+
+        this._Mongo.FindSortPromise(Query, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                Res.json({Error: false, ErrorMsg: null, Data:[]})
+            } else {
+                Res.json({Error: false, ErrorMsg: null, Data: reponse[0]})
+            }
+        },(erreur)=>{
+            let ErrorMessage = "ApiAdminGetPostData error: " + erreur
+            Res.json({Error: true, ErrorMsg: ErrorMessage, Data: []})
+            this._MyApp.LogAppliError(ErrorMessage, User, UserId)
         })
     }
 
