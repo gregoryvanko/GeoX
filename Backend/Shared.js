@@ -73,7 +73,7 @@ function PromiseAddTrack(Track, MyApp, User){
             TrackData.Image = Track.Image
 
             let InsertTarck = true
-            if ((Track.Id != null) && (Track.ModifyExistingTrack)){
+            if (Track.Id != null){
                 InsertTarck = false
             }
             // Si il faut inserer une nouvelle track en DB
@@ -291,76 +291,6 @@ function CalculateTrackLength(GeoJson){
     return distance/1000
 }
 
-async function GetElevationOfLatLng(LatLng){
-    let ElevationMin = 0
-    let ElevationMax = 0
-    let ElevationCumulP = 0
-    let ElevationCumulM = 0
-    let ElevationPrevious = 0
-
-    let AllElevation = []
-    let distance = 0
-    let IntermediereDist = 0
-    const MinDistBetweenTwoPoint = 50
-    let LatLngnull = LatLng[0]
-    let lat = LatLngnull.lat
-    let lng = LatLngnull.lng
-    let ele = await PromiseGetElevation({ lat, lng })
-    ele = parseInt(ele)
-    AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
-
-    ElevationMin = ele
-    ElevationMax = ele
-    ElevationCumulP = 0
-    ElevationCumulM = 0
-    ElevationPrevious = ele
-    
-    
-    const { getDistance } = require("geolib")
-    for (let i = 1; i < LatLng.length; i++){
-        let LatLngMinusOne = LatLng[i - 1]
-        let prelat = LatLngMinusOne.lat
-        let prelng =LatLngMinusOne.lng
-
-        let LatLngI = LatLng[i]
-        let lat = LatLngI.lat
-        let lng = LatLngI.lng
-
-        // Get distance from first point
-        let DistBetweenTwoPoint = getDistance(
-            { latitude: prelat, longitude: prelng },
-            { latitude: lat, longitude: lng }
-        )
-        distance += DistBetweenTwoPoint
-        IntermediereDist += DistBetweenTwoPoint
-
-        if ((IntermediereDist > MinDistBetweenTwoPoint) || (i == LatLng.length -1)){
-            IntermediereDist = 0
-             // Get elevation
-            let eleP = await PromiseGetElevation({lat, lng})
-            eleP = parseInt(eleP)
-            AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
-            // Get ElevationMin
-            if (eleP < ElevationMin){
-                ElevationMin = eleP
-            }
-            // Get ElevationMax
-            if (eleP > ElevationMax){
-                ElevationMax = eleP
-            }
-            // Get ElevationCumulP ElevationCumulM
-            const Delta = eleP - ElevationPrevious
-            if ((Delta)>0){
-                ElevationCumulP += Delta
-            } else {
-                ElevationCumulM += Delta
-            }
-            ElevationPrevious = eleP
-        }
-    }
-    return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
-}
-
 function PromiseDeleteTrack(TrackId, MyApp, User){
     return new Promise(resolve => {
         let Reponse = {Error: true, ErrorMsg:"InitError", Data:null}
@@ -375,37 +305,6 @@ function PromiseDeleteTrack(TrackId, MyApp, User){
         },(erreur)=>{
             Reponse = {Error: true, ErrorMsg:"PromiseDeleteTrack DB error : " + erreur, Data:null}
             resolve(Reponse)
-        })
-    })
-}
-
-function PromiseGetUserGroup(MyApp, User){
-    return new Promise(resolve => {
-        let ReponseUserGroup = {Error: true, ErrorMsg:"InitError", Data:null}
-
-        let MongoR = require('@gregvanko/corex').Mongo
-        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-        let MongoConfig = require("./MongoConfig.json")
-        MongoTracksCollection = MongoConfig.TracksCollection
-        // Querry
-        const Querry = {[MongoTracksCollection.Owner]: User}
-        const Projection = { projection:{[MongoTracksCollection.Group]: 1}}
-        const Sort = {[MongoTracksCollection.Date]: -1}
-        Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
-            let DataToSend = []
-            // Find all different group
-            if (reponse.length > 0){
-                DataToSend = [...new Set(reponse.map(item => item.Group))] 
-            }
-            ReponseUserGroup.Error = false
-            ReponseUserGroup.ErrorMsg = null
-            ReponseUserGroup.Data = DataToSend
-            resolve(ReponseUserGroup)
-        },(erreur)=>{
-            ReponseUserGroup.Error = true
-            ReponseUserGroup.ErrorMsg = "PromiseGetAllMarkers error: " + erreur
-            ReponseUserGroup.Data = []
-            resolve(ReponseUserGroup)
         })
     })
 }
@@ -447,105 +346,6 @@ function PromiseUpdateTrack(Track, MyApp){
 }
 
 /**
- * Get Tracks Data from DB (promise)
- */
-function PromiseGetTracksData(MyApp, GroupName, User){
-    return new Promise(resolve => {
-        let MongoR = require('@gregvanko/corex').Mongo
-        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-        let MongoConfig = require("./MongoConfig.json")
-        MongoTracksCollection = MongoConfig.TracksCollection
-
-        let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
-        const Querry = {$and: [{[MongoTracksCollection.Group]: GroupName},{[MongoTracksCollection.Owner]: User}]}
-        const Projection = { projection:{[MongoTracksCollection.GpxData]: 0}}
-        const Sort = {[MongoTracksCollection.Date]: -1}
-        Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "Group exist but without one track"
-            } else {
-                ReponseTracks.Error = false
-                ReponseTracks.ErrorMsg = null
-                ReponseTracks.Data = reponse
-            }
-            resolve(ReponseTracks)
-        },(erreur)=>{
-            ReponseTracks.Error = true
-            ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetTracksData error: " + erreur
-            resolve(ReponseTracks)
-        })
-    })
-}
-
-/**
- * Get Tracks info from DB for one User (promise)
- */
-function PromiseGetAllTracksInfo(MyApp, User){
-    return new Promise(resolve => {
-        let MongoR = require('@gregvanko/corex').Mongo
-        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-        let MongoConfig = require("./MongoConfig.json")
-        MongoTracksCollection = MongoConfig.TracksCollection
-
-        let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
-
-        const Querry = {[MongoTracksCollection.Owner]: User}
-        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Group]: 1, [MongoTracksCollection.Color]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Public]: 1, [MongoTracksCollection.Description]: 1}}
-        const Sort = {[MongoTracksCollection.Date]: -1}
-        Mongo.FindSortPromise(Querry, Projection, Sort, MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                ReponseTracks = {Error: false, ErrorMsg:null, Data:[]}
-            } else {
-                ReponseTracks = {Error: false, ErrorMsg:null, Data:reponse}
-            }
-            resolve(ReponseTracks)
-        },(erreur)=>{
-            ReponseTracks.Error = true
-            ReponseTracks.ErrorMsg = "GeoXServerApi PromiseGetAllTracksInfo error: " + erreur
-            ReponseTracks.Data = []
-            resolve(ReponseTracks)
-        })
-    })
-}
-
-/**
- * Get Tracks info with ID
- */
- function PromiseGetTracksInfo(Id, MyApp, User){
-    return new Promise(resolve => {
-        let MongoR = require('@gregvanko/corex').Mongo
-        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
-        let MongoConfig = require("./MongoConfig.json")
-        MongoTracksCollection = MongoConfig.TracksCollection
-        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
-
-        let ReponseTracks = {Error: true, ErrorMsg:"InitError", Data:null}
-
-        const Querry = {'_id': new MongoObjectId(Id)}
-        const Projection = { projection:{_id: 1, [MongoTracksCollection.Name]: 1, [MongoTracksCollection.Date]: 1, [MongoTracksCollection.GeoJsonData]: 1, [MongoTracksCollection.Length]: 1, [MongoTracksCollection.Owner]: 1, [MongoTracksCollection.Center]: 1, [MongoTracksCollection.StartPoint]: 1, [MongoTracksCollection.Elevation]: 1, [MongoTracksCollection.Description]: 1, [MongoTracksCollection.InfoElevation]: 1}}
-
-        Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                ReponseTracks.Error = true
-                ReponseTracks.ErrorMsg = "Track with Id = " + Id + " not found!"
-                ReponseTracks.Data = []
-            } else {
-                ReponseTracks.Error = false
-                ReponseTracks.ErrorMsg = null
-                ReponseTracks.Data = reponse[0]
-            }
-            resolve(ReponseTracks)
-        },(erreur)=>{
-            ReponseTracks.Error = true
-            ReponseTracks.ErrorMsg = "PromiseGetTracksInfo error: " + erreur
-            ReponseTracks.Data = []
-            resolve(ReponseTracks)
-        })
-    })
-}
-
-/**
  * Get Elevation of a point
  */
 function PromiseGetElevation({ lat, lng }){
@@ -572,9 +372,4 @@ function PromiseGetElevation({ lat, lng }){
 
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseDeleteTrack = PromiseDeleteTrack
-module.exports.PromiseGetUserGroup = PromiseGetUserGroup
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
-module.exports.PromiseGetTracksData = PromiseGetTracksData
-module.exports.PromiseGetAllTracksInfo = PromiseGetAllTracksInfo
-module.exports.PromiseGetTracksInfo = PromiseGetTracksInfo
-module.exports.GetElevationOfLatLng = GetElevationOfLatLng

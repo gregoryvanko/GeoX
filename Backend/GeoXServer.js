@@ -8,45 +8,6 @@ class GeoXServer{
         let MongoConfig = require("./MongoConfig.json")
         this._MongoTracksCollection = MongoConfig.TracksCollection
     }
-  
-    /**
-    * Socket API de la page TheWhatsBook
-    * @param {Object} Data Object envoyé par SocketIO : Data.Action, Data.Value
-    * @param {Socket} Socket SocketIO
-    * @param {String} User Nom du user
-    * @param {String} UserId Id du user
-    */
-    Api(Data, Socket, User, UserId){
-        // On Log tout sauve quand on fait un Add Track
-        if ((Data.Value.Action != "SaveTrack") && (Data.Value.Action != "Add") && (Data.Value.Action != "GetElevation") && (Data.Value.Action != "ModifyDB")){
-            this._MyApp.LogAppliInfo("SoApi Data: " + JSON.stringify(Data), User, UserId)
-        } else {
-            this._MyApp.LogAppliInfo(`SoApi Data: {"Action":"${Data.Action}","Value":{"Action":"${Data.Value.Action}"}}`, User, UserId)
-        }
-        switch (Data.Action) {
-            case "CreateTracksOnMap":
-                let CreateTracksOnMap = require('./ModuleCreateTracksOnMap.js')
-                if (Data.Value.Action == "GetUserGroup"){
-                    CreateTracksOnMap.CallGetUserGroup(this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetMapData"){
-                    CreateTracksOnMap.CallGetMapData(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "SaveTrack"){
-                    CreateTracksOnMap.CallSaveTrack(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetTrackData"){
-                    CreateTracksOnMap.CallGetTrackData(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else if (Data.Value.Action == "GetElevation"){
-                    CreateTracksOnMap.CallGetElevation(Data.Value.Data, this._MyApp,  Socket, User, UserId)
-                } else {
-                    this._MyApp.LogAppliError(`Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`, User, UserId)
-                    Socket.emit("GeoXError", `Api GeoXServer error, SearchTracksOnMap Action ${Data.Value.Action} not found`)
-                }
-                break
-            default:
-                this._MyApp.LogAppliError(`Api GeoXServer error, Action ${Data.Action} not found`, User, UserId)
-                Socket.emit("GeoXError", `Api GeoXServer error, Action ${Data.Action} not found`)
-            break
-        }
-    }
 
     /**
      * Fonction executee lors d'un appel a la route GET PageOfPost
@@ -170,7 +131,11 @@ class GeoXServer{
             Data.ListOfTrackId.forEach(element => {
                 Querry.$or.push({'_id':new MongoObjectId(element)})
             });
+        } else if (Data.GetData  == "DrawTrack"){
+            Projection = { projection:{[this._MongoTracksCollection.GeoJsonData]: 1, [this._MongoTracksCollection.Center]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1}}
+            Querry = {'_id': new MongoObjectId(Data.TrackId)}
         }
+
         const Sort = {[this._MongoTracksCollection.Date]: -1}
 
         this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
@@ -187,6 +152,9 @@ class GeoXServer{
                 } else if (Data.GetData == "MultipleGeoJSon"){
                     Res.json({Error: false, ErrorMsg: "", Data: reponse})
                     this._MyApp.LogAppliInfo("MultipleGeoJSon send to user", User, UserId)
+                } else if (Data.GetData  == "DrawTrack"){
+                    Res.json({Error: false, ErrorMsg: "", Data: reponse[0]})
+                    this._MyApp.LogAppliInfo("DrawTrack send to user", User, UserId)
                 }
             }
         },(erreur)=>{
@@ -232,17 +200,25 @@ class GeoXServer{
         })
     }
 
-    async ApiGetAllGroups(Data, Res, User, UserId){
+    ApiGetAllGroups(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetAllGroups", User, UserId)
 
-        let Shared = require("./Shared")
-        let ReponseUserGroup = await Shared.PromiseGetUserGroup(this._MyApp, User)
-        if(!ReponseUserGroup.Error){
-            Res.json({Error: false, ErrorMsg: "", Data:ReponseUserGroup.Data})
-        } else {
-            Res.json({Error: true, ErrorMsg: "ApiGetAllGroups error: " + ReponseUserGroup.ErrorMsg, Data: ""})
-            this._MyApp.LogAppliError("ApiGetAllGroups error: " + ReponseUserGroup.ErrorMsg, User, UserId)
-        }
+        const Querry = {[this._MongoTracksCollection.Owner]: User}
+        const Projection = { projection:{[this._MongoTracksCollection.Group]: 1}}
+        const Sort = {[this._MongoTracksCollection.Date]: -1}
+
+        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+            let DataToSend = []
+            // Find all different group
+            if (reponse.length > 0){
+                DataToSend = [...new Set(reponse.map(item => item.Group))] 
+            }
+            Res.json({Error: false, ErrorMsg: null, Data: DataToSend})
+        },(erreur)=>{
+            let ErrorMessage = "ApiGetAllGroups error: " + erreur
+            Res.json({Error: true, ErrorMsg: ErrorMessage, Data: []})
+            this._MyApp.LogAppliError(ErrorMessage, User, UserId)
+        })
     }
 
     ApiGetAllPostMarkers(Data, Res, User, UserId){
@@ -345,7 +321,11 @@ class GeoXServer{
                 Res.status("500").json(ReponseAddTrack)
             } else {
                 Res.status("200").json(ReponseAddTrack)
-                this._MyApp.LogAppliInfo("New track saved from a Added track", User, UserId)
+                if (Data.TrackData.Id != null){
+                    this._MyApp.LogAppliInfo("Track updated from a created track", User, UserId)
+                } else {
+                    this._MyApp.LogAppliInfo("New track saved", User, UserId)
+                }
             }
         } else if (Data.Action == "Modify"){
             this._MyApp.LogAppliInfo("ApiManageTrack: " + JSON.stringify(Data), User, UserId)
@@ -416,6 +396,32 @@ class GeoXServer{
         return Query 
     }
 
+    async ApiGetElavation(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetElavation", User, UserId)
+        const ElevationData = await this.GetElevationOfLatLng(Data)
+        Res.json({Error: false, ErrorMsg: null, Data:ElevationData})
+    }
+
+    ApiGetAllGeoJsonOfGroup(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetAllGeoJsonOfGroup " + JSON.stringify(Data), User, UserId)
+
+        const Querry = {$and: [{[this._MongoTracksCollection.Group]: Data},{[this._MongoTracksCollection.Owner]: User}]}
+        const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
+        const Sort = {[this._MongoTracksCollection.Date]: -1}
+
+        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 0){
+                Res.json({Error: true, ErrorMsg: "Group exist but without one track", Data:""})
+            } else {
+                Res.json({Error: false, ErrorMsg: "", Data:reponse})
+            }
+        },(erreur)=>{
+            let ErrorMsg = "ApiGetAllGeoJsonOfGroup error: " + erreur
+            Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+            this._MyApp.LogAppliError(ErrorMsg, User, UserId)
+        })
+    }
+
     // Admin
     ApiAdminGetAllMyTracks(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiAdminGetAllMyTracks: " + JSON.stringify(Data), User, UserId)
@@ -475,6 +481,103 @@ class GeoXServer{
             Query.$and.push({[this._MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}})
         }
         return Query 
+    }
+
+    // Common function
+
+    async GetElevationOfLatLng(LatLng){
+        let ElevationMin = 0
+        let ElevationMax = 0
+        let ElevationCumulP = 0
+        let ElevationCumulM = 0
+        let ElevationPrevious = 0
+    
+        let AllElevation = []
+        let distance = 0
+        let IntermediereDist = 0
+        const MinDistBetweenTwoPoint = 50
+        let LatLngnull = LatLng[0]
+        let lat = LatLngnull.lat
+        let lng = LatLngnull.lng
+        let ele = await this.PromiseGetElevation({ lat, lng })
+        ele = parseInt(ele)
+        AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
+    
+        ElevationMin = ele
+        ElevationMax = ele
+        ElevationCumulP = 0
+        ElevationCumulM = 0
+        ElevationPrevious = ele
+        
+        
+        const { getDistance } = require("geolib")
+        for (let i = 1; i < LatLng.length; i++){
+            let LatLngMinusOne = LatLng[i - 1]
+            let prelat = LatLngMinusOne.lat
+            let prelng =LatLngMinusOne.lng
+    
+            let LatLngI = LatLng[i]
+            let lat = LatLngI.lat
+            let lng = LatLngI.lng
+    
+            // Get distance from first point
+            let DistBetweenTwoPoint = getDistance(
+                { latitude: prelat, longitude: prelng },
+                { latitude: lat, longitude: lng }
+            )
+            distance += DistBetweenTwoPoint
+            IntermediereDist += DistBetweenTwoPoint
+    
+            if ((IntermediereDist > MinDistBetweenTwoPoint) || (i == LatLng.length -1)){
+                IntermediereDist = 0
+                 // Get elevation
+                let eleP = await this.PromiseGetElevation({lat, lng})
+                eleP = parseInt(eleP)
+                AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
+                // Get ElevationMin
+                if (eleP < ElevationMin){
+                    ElevationMin = eleP
+                }
+                // Get ElevationMax
+                if (eleP > ElevationMax){
+                    ElevationMax = eleP
+                }
+                // Get ElevationCumulP ElevationCumulM
+                const Delta = eleP - ElevationPrevious
+                if ((Delta)>0){
+                    ElevationCumulP += Delta
+                } else {
+                    ElevationCumulM += Delta
+                }
+                ElevationPrevious = eleP
+            }
+        }
+        return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
+    }
+
+    /**
+     * Get Elevation of a point
+     */
+    PromiseGetElevation({ lat, lng }){
+        return new Promise ((resolve, reject) => {
+            const path = require('path')
+            let fs = require('fs')
+            var dir = path.resolve(__dirname, "TempHgt")
+            if (!fs.existsSync(dir)){
+                fs.mkdirSync(dir);
+                console.log("create")
+            }
+            const { TileSet } = require("node-hgt")
+            const tileset = new TileSet(path.resolve(__dirname, "TempHgt"))
+            tileset.getElevation([lat, lng], (err, ele) => {
+                if (!err){
+                    resolve(ele.toFixed(0))
+                } else {
+                    console.log(err)
+                    reject(err)
+                }
+            })
+        })
     }
 }
 module.exports.GeoXServer = GeoXServer

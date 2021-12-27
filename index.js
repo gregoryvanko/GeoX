@@ -16,8 +16,8 @@ class GeoX {
  
     /* Start de l'application */
    Start(){
-       // Css de l'application CoreX
-       const CSS= {
+      // Css de l'application CoreX
+      const CSS= {
           FontSize:{
              TexteNomrale:"1.5vw", //--CoreX-font-size
              TexteIphone:"3vw", //--CoreX-Iphone-font-size
@@ -34,38 +34,35 @@ class GeoX {
              WidthIphone:"100%",
              WidthMax:"100%"
          }
-       }
-       // Affichier les message de debug du serveur
-       this._MyApp.Debug = this._Debug
-       // L'application est elle securisee par un login
-       this._MyApp.AppIsSecured = true
-       // L'application permet elle au user de creer son compte
-       this._MyApp.AllowSignUp= true
-       // Css de base de l'application
-       this._MyApp.CSS = CSS
-       // L'application utilise SocketIo
-       this._MyApp.Usesocketio = true
-       // Chemin vers le dossier contenant les sources Js et CSS de l'app client
-       this._MyApp.ClientAppFolder = __dirname + "/Frontend/App"
-       // Chemin vers le dossier contenant les sources Js et CSS de l'app Admin
-       this._MyApp.AdminAppFolder = __dirname + "/Frontend/Admin"
-       // Chemin vers le dossier contenant les sources Js et CSS Commun
-       this._MyApp.CommonAppFolder = __dirname + "/Frontend/Common"
-       // Chemin relatif de l'icone
-       this._MyApp.IconRelPath = __dirname + "/Backend/apple-icon-192x192.png"
+      }
+      // Affichier les message de debug du serveur
+      this._MyApp.Debug = this._Debug
+      // L'application est elle securisee par un login
+      this._MyApp.AppIsSecured = true
+      // L'application permet elle au user de creer son compte
+      this._MyApp.AllowSignUp= true
+      // Css de base de l'application
+      this._MyApp.CSS = CSS
+      // L'application utilise SocketIo
+      this._MyApp.Usesocketio = false
+      // Chemin vers le dossier contenant les sources Js et CSS de l'app client
+      this._MyApp.ClientAppFolder = __dirname + "/Frontend/App"
+      // Chemin vers le dossier contenant les sources Js et CSS de l'app Admin
+      this._MyApp.AdminAppFolder = __dirname + "/Frontend/Admin"
+      // Chemin vers le dossier contenant les sources Js et CSS Commun
+      this._MyApp.CommonAppFolder = __dirname + "/Frontend/Common"
+      // Chemin relatif de l'icone
+      this._MyApp.IconRelPath = __dirname + "/Backend/apple-icon-192x192.png"
 
-       // App link
-       this._MyApp.AppLink = "App"
+      // App link
+      this._MyApp.AppLink = "App"
 
-       // Splash Screen
-       this._MyApp.SplashScreen = this._GeoXServer.GetSplashScreen()
-       this._MyApp.SplashScreenBackgroundColor = "Black"
+      // Splash Screen
+      this._MyApp.SplashScreen = this._GeoXServer.GetSplashScreen()
+      this._MyApp.SplashScreenBackgroundColor = "Black"
 
-       // Function to execute when a user is deleted
-       this._MyApp.OnDeleteUser = this._GeoXServer.OnDeleteUser.bind(this._GeoXServer)
-
-       // SocketIo
-       this._MyApp.AddSocketIoFct("GeoX", this._GeoXServer.Api.bind(this._GeoXServer))
+      // Function to execute when a user is deleted
+      this._MyApp.OnDeleteUser = this._GeoXServer.OnDeleteUser.bind(this._GeoXServer)
 
       // Route Home
       this._MyApp.AddRouteGet("", this._GeoXServer.RouteGetHome.bind(this._GeoXServer))
@@ -86,6 +83,8 @@ class GeoX {
       this._MyApp.AddApiFct("ApiManageTrack", this._GeoXServer.ApiManageTrack.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetAllMyTracksMarkers", this._GeoXServer.ApiGetAllMyTracksMarkers.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetAllMyPost", this._GeoXServer.ApiGetAllMyPost.bind(this._GeoXServer), false)
+      this._MyApp.AddApiFct("ApiGetElavation", this._GeoXServer.ApiGetElavation.bind(this._GeoXServer), false)
+      this._MyApp.AddApiFct("ApiGetAllGeoJsonOfGroup", this._GeoXServer.ApiGetAllGeoJsonOfGroup.bind(this._GeoXServer), false)
 
       // API Admin
       this._MyApp.AddApiFct("ApiAdminGetAllMyTracks", this._GeoXServer.ApiAdminGetAllMyTracks.bind(this._GeoXServer), true)

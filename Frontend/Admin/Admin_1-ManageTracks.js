@@ -63,7 +63,7 @@ class GeoXManageTracks {
         // Titre des colonnes
         BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 44%; margin-left:1%;"))
         BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 28%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Owner","","TextBoxTitre", "width: 23%;"))
+        BoxTitre.appendChild(CoreXBuild.DivTexte("Owner","","TextBoxTitre", "width: 24%;"))
         // Liste des post
         let ListofMyPost = CoreXBuild.DivFlexColumn(this._DivListOfMyTracksData)
         ListofMyPost.style.width = "60rem"
@@ -152,7 +152,7 @@ class GeoXManageTracks {
                 BoxTracks.style.marginBottom = "0.7rem"
                 BoxTracks.appendChild(CoreXBuild.DivTexte(element.Name,"","Text", "width: 44%; margin-left:1%; padding:0.2rem;"))
                 BoxTracks.appendChild(CoreXBuild.DivTexte(element.Group,"","TextSmall", "width: 28%; padding:0.2rem;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(element.Owner,"","TextSmall", "width: 12%; padding:0.2rem;"))
+                BoxTracks.appendChild(CoreXBuild.DivTexte(element.Owner,"","TextSmall", "width: 24%; padding:0.2rem;"))
                 if (! element.Public){
                     BoxTracks.style.color = "red"
                 }

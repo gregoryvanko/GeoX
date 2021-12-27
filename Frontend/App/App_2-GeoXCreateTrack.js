@@ -51,38 +51,14 @@ class GeoXCreateTrack {
         GlobalClearActionList()
         // Clear view
         this._DivApp.innerHTML=""
-        // SocketIO
-        let SocketIo = GlobalGetSocketIo()
-        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
-        SocketIo.on('CreateTracksOnMap', (Value) => {this.MessageRecieved(Value)})
         // Get User Group
-        let CallToServer = new Object()
-        CallToServer.Action = "GetUserGroup"
-        GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+        GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
+            this._UserGroup = reponse
+        },(erreur)=>{
+            console.log(erreur)
+        })
         // Start view
         this.Start()
-    }
-
-    MessageRecieved(Value){
-        if (Value.Action == "SetUserGroup"){
-            this._UserGroup = Value.Data
-        } else if (Value.Action == "SetMapData" ){
-            this._DataMap = Value.Data
-            this.ModifyTracksOnMap()
-        } else if (Value.Action == "TrackSaved" ){
-            // Delete save window
-            CoreXWindow.DeleteWindow()
-            // Delete Map
-            this.DeleteMap()
-            // Go To Home
-            GlobalStart()
-        } else if (Value.Action == "SetTrackFromGeoJson" ) {
-            this.AddTrackToModifyOnMap(Value.Data)
-        } else if (Value.Action == "SetElevation" ) {
-            this._ElevationBox.UpdateGraph(Value.Data)
-        } else {
-            console.log("error, Action not found: " + Value.Action)
-        }
     }
 
     /**
@@ -224,8 +200,6 @@ class GeoXCreateTrack {
     }
 
     LoadViewMap(Lat, Long){
-        // mettre le backgroundColor du body à Black pour la vue Iphone
-        if (L.Browser.mobile){document.body.style.backgroundColor= "black"}
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Add dropdown groupe
@@ -583,10 +557,11 @@ class GeoXCreateTrack {
         // Show waiting text
         this._ElevationBox.UpdateText("Waiting data...")
         // Send to server
-        let CallToServer = new Object()
-        CallToServer.Action = "GetElevation"
-        CallToServer.Data = latlngs
-        GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+        GlobalCallApiPromise("ApiGetElavation", latlngs, "", "").then((reponse)=>{
+            this._ElevationBox.UpdateGraph(reponse)
+        },(erreur)=>{
+            this.Error(erreur)
+        })
     }
 
     DrawElevationPointOnMap(latlng){
@@ -774,12 +749,26 @@ class GeoXCreateTrack {
                 Track.Image = ImageTrack
                 Track.Public = document.getElementById("TogglePublic").checked
                 Track.Description = document.getElementById("DivContDesc").innerText
+                if (document.getElementById("ToggleExistingTrack")){
+                    if (! document.getElementById("ToggleExistingTrack").checked){
+                        this._TrackId = null
+                    }
+                }
                 Track.Id = this._TrackId
-                Track.ModifyExistingTrack = document.getElementById("ToggleExistingTrack").checked
-                let CallToServer = new Object()
-                CallToServer.Action = "SaveTrack"
-                CallToServer.Data = Track
-                GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+                Track.Color = "#0000FF"
+
+                // Send Add track
+                let FctData = {Action: "Add", TrackData : Track}
+                GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
+                    // Delete save window
+                    CoreXWindow.DeleteWindow()
+                    // Delete Map
+                    this.DeleteMap()
+                    // Go To Home
+                    GlobalStart()
+                },(erreur)=>{
+                    this.Error(erreur)
+                })
             }
             
         } else {
@@ -825,10 +814,12 @@ class GeoXCreateTrack {
         this._GroupSelected = DropDownGroupValue
         if (DropDownGroupValue != this._NoTrack){
             // Send data to server
-            let CallToServer = new Object()
-            CallToServer.Action = "GetMapData"
-            CallToServer.Data = DropDownGroupValue
-            GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+            GlobalCallApiPromise("ApiGetAllGeoJsonOfGroup", DropDownGroupValue, "", "").then((reponse)=>{
+                this._DataMap = reponse
+                this.ModifyTracksOnMap()
+            },(erreur)=>{
+                this.Error(erreur)
+            })
         } else {
             // Remove all tracks
             let me = this
@@ -909,10 +900,6 @@ class GeoXCreateTrack {
         GlobalClearActionList()
         // Clear view
         this._DivApp.innerHTML=""
-        // SocketIO
-        let SocketIo = GlobalGetSocketIo()
-        SocketIo.on('GeoXError', (Value) => {this.Error(Value)})
-        SocketIo.on('CreateTracksOnMap', (Value) => {this.MessageRecieved(Value)})
         // Set Group
         this._UserGroup = Groups
         // Set Track Id
@@ -933,10 +920,12 @@ class GeoXCreateTrack {
         // Texte
         Conteneur.appendChild(CoreXBuild.DivTexte("Get track data...", "", "Text", ""))
         // Get GeoJson Data of track
-        let CallToServer = new Object()
-        CallToServer.Action = "GetTrackData"
-        CallToServer.Data = TrackId
-        GlobalSendSocketIo("GeoX", "CreateTracksOnMap", CallToServer)
+        let FctData = {TrackId: TrackId, GetData: "DrawTrack"}
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+            this.AddTrackToModifyOnMap(reponse)
+        },(erreur)=>{
+            this.Error(erreur)
+        })
     }
 
     AddTrackToModifyOnMap(Data){
@@ -947,7 +936,7 @@ class GeoXCreateTrack {
         let me = this
         this._Map.once('moveend', function(){
             // Afficher la track a modifier
-            me.DrawTrackToModifyOnMap(Data.GeoJson)
+            me.DrawTrackToModifyOnMap(Data.GeoJsonData)
         })
         this._Map.flyToBounds(FitboundTrack,{'duration':1})
     }
@@ -1077,8 +1066,6 @@ class GeoXCreateTrack {
             this._LayerGroup = null
             this._ElevationBox = null
             this._GpsPointer = null
-            // mettre le backgroundColor du body à Black pour la vue Iphone
-            if (L.Browser.mobile){document.body.style.backgroundColor= "white"}
         }
     }
 }
