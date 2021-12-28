@@ -397,7 +397,7 @@ class GeoXServer{
     }
 
     async ApiGetElavation(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiGetElavation", User, UserId)
+        //this._MyApp.LogAppliInfo("ApiGetElavation", User, UserId)
         const ElevationData = await this.GetElevationOfLatLng(Data)
         Res.json({Error: false, ErrorMsg: null, Data:ElevationData})
     }
@@ -420,6 +420,47 @@ class GeoXServer{
             Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
             this._MyApp.LogAppliError(ErrorMsg, User, UserId)
         })
+    }
+
+    ApiGetDataFromApi(Data, Res, User, UserId){
+        let me = this
+        const axios = require('axios')
+        //this._MyApp.LogAppliInfo("ApiGetDataFromApi " + JSON.stringify(Data), User, UserId)
+        if(Data.Api == "www.odwb.be"){
+            axios.get(`https://www.odwb.be/api/records/1.0/search/?dataset=code-postaux-belge&q=${Data.Input}`)
+            .then((response) => {
+                Res.json({Error: false, ErrorMsg: "", Data:response.data})
+            })
+            .catch((error) => {
+                let ErrorMsg = `ApiGetDataFromApi error: ${error}`
+                Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+                me._MyApp.LogAppliError(ErrorMsg, User, UserId)
+            })
+        } else if (Data.Api == "datanova.laposte.fr"){
+            axios.get(`https://datanova.laposte.fr/api/records/1.0/search/?dataset=laposte_hexasmal&q=${Data.Input}`)
+            .then((response) => {
+                Res.json({Error: false, ErrorMsg: "", Data:response.data})
+            })
+            .catch((error) => {
+                let ErrorMsg = `ApiGetDataFromApi error: ${error}`
+                Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+                me._MyApp.LogAppliError(ErrorMsg, User, UserId)
+            })
+        } else if (Data.Api == "routing.openstreetmap.de"){
+            axios.get(`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${Data.Input.PointA.lng},${Data.Input.PointA.lat};${Data.Input.PointB.lng},${Data.Input.PointB.lat}?steps=true&geometries=geojson`)
+            .then((response) => {
+                Res.json({Error: false, ErrorMsg: "", Data:response.data})
+            })
+            .catch((error) => {
+                let ErrorMsg = `ApiGetDataFromApi error: ${error}`
+                Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+                me._MyApp.LogAppliError(ErrorMsg, User, UserId)
+            })
+        } else {
+            let ErrorMsg = `ApiGetDataFromApi error: unknown API ${Data.Api}`
+            Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+            this._MyApp.LogAppliError(ErrorMsg, User, UserId)
+        }
     }
 
     // Admin

@@ -1334,7 +1334,9 @@ class GeoXManageTracks {
         // Data to send
         let FctData = {Action: "Add", TrackData : Track}
         GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
-            this.ClickCancelAddModifyTrack()
+            document.getElementById(this._ConteneurAddTrack).innerHTML = ""
+            this._StartWithLoadViewManageTrack = true
+            this.LoadView(this._ViewPost)
             this.GetMyGroups()
         },(erreur)=>{
             // changer le nom du boutton

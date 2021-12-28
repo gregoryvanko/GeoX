@@ -85,6 +85,7 @@ class GeoX {
       this._MyApp.AddApiFct("ApiGetAllMyPost", this._GeoXServer.ApiGetAllMyPost.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetElavation", this._GeoXServer.ApiGetElavation.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetAllGeoJsonOfGroup", this._GeoXServer.ApiGetAllGeoJsonOfGroup.bind(this._GeoXServer), false)
+      this._MyApp.AddApiFct("ApiGetDataFromApi", this._GeoXServer.ApiGetDataFromApi.bind(this._GeoXServer), false)
 
       // API Admin
       this._MyApp.AddApiFct("ApiAdminGetAllMyTracks", this._GeoXServer.ApiAdminGetAllMyTracks.bind(this._GeoXServer), true)

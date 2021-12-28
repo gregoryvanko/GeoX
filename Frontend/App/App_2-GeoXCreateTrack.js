@@ -115,32 +115,36 @@ class GeoXCreateTrack {
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 if (document.getElementById("InputCountry").value == "Belgique"){
-                    fetch(`https://www.odwb.be/api/records/1.0/search/?dataset=code-postaux-belge&q=${text}`).then((response) => {
-                        response.json().then((data) =>{
-                            var suggestions = []
-                            data.records.forEach(element => {
-                                var MyObject = new Object()
-                                MyObject.label = element.fields.column_2
-                                MyObject.Lat = element.fields.column_4
-                                MyObject.Long = element.fields.column_3
-                                suggestions.push(MyObject)
-                            });
-                            update(suggestions);
-                        })
+                    // fetch data
+                    let FctData = {Api: "www.odwb.be", Input : text}
+                    GlobalCallApiPromise("ApiGetDataFromApi", FctData, "", "").then((reponse)=>{
+                        let suggestions = []
+                        reponse.records.forEach(element => {
+                            let MyObject = new Object()
+                            MyObject.label = element.fields.column_2
+                            MyObject.Lat = element.fields.column_4
+                            MyObject.Long = element.fields.column_3
+                            suggestions.push(MyObject)
+                        });
+                        update(suggestions);
+                    },(erreur)=>{
+                        me.Error(erreur)
                     })
                 } else if (document.getElementById("InputCountry").value == "France") {
-                    fetch(`https://datanova.laposte.fr/api/records/1.0/search/?dataset=laposte_hexasmal&q=${text}`).then((response) => {
-                        response.json().then((data) =>{
-                            var suggestions = []
-                            data.records.forEach(element => {
-                                var MyObject = new Object()
-                                MyObject.label = element.fields.nom_de_la_commune
-                                MyObject.Lat = element.fields.coordonnees_gps[0]
-                                MyObject.Long = element.fields.coordonnees_gps[1]
-                                suggestions.push(MyObject)
-                            });
-                            update(suggestions);
-                        })
+                    // fetch data
+                    let FctData = {Api: "datanova.laposte.fr", Input : text}
+                    GlobalCallApiPromise("ApiGetDataFromApi", FctData, "", "").then((reponse)=>{
+                        let suggestions = []
+                        reponse.records.forEach(element => {
+                            let MyObject = new Object()
+                            MyObject.label = element.fields.nom_de_la_commune
+                            MyObject.Lat = element.fields.coordonnees_gps[0]
+                            MyObject.Long = element.fields.coordonnees_gps[1]
+                            suggestions.push(MyObject)
+                        });
+                        update(suggestions);
+                    },(erreur)=>{
+                        me.Error(erreur)
                     })
                 } else {
                     var suggestions = []
@@ -783,8 +787,11 @@ class GeoXCreateTrack {
 
     async GetRoute(PointA, PointB){
         //const reponse = await fetch(`https://router.project-osrm.org/route/v1/footing/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
-        const data = await this.FetchGetRoute(PointA, PointB).catch(error => {
-            alert("Error during fetch of intermediate point : " + error.message)
+
+
+        let FctData = {Api: "routing.openstreetmap.de", Input : {PointA: PointA, PointB : PointB}}
+        const data = await GlobalCallApiPromise("ApiGetDataFromApi", FctData, "", "").catch(error => {
+            alert(error)
         });
         var ListOfPoint = []
         if (data){
@@ -793,16 +800,6 @@ class GeoXCreateTrack {
             });
         }
         return ListOfPoint
-    }
-
-    async FetchGetRoute(PointA, PointB){
-        const response = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
-        if (!response.ok) {
-            const message = `An error has occured: ${response.status}`;
-            throw new Error(message);
-        }
-        const data = await response.json()
-        return data
     }
 
     /**
