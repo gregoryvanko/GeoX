@@ -145,7 +145,7 @@ class GeoXActivities {
     }
 
     GetPosts(){
-        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
+        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: true}
         GlobalCallApiPromise("ApiGetAllPost", FctData, "", "").then((reponse)=>{
             this.RenderPosts(reponse)
         },(erreur)=>{
@@ -373,8 +373,8 @@ class GeoXActivities {
             let NewGroup = document.getElementById("InputTrackGroup").value
             let NewPublic = document.getElementById("TogglePublic").checked
             let NewDescription = document.getElementById("DivContDesc").innerText
-            let FctData = {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
-            GlobalCallApiPromise("ApiCopyTrack", FctData, "", "").then((reponse)=>{
+            let FctData = {Action: "CopyTrack", CopyTrackData : {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}}
+            GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
                 // Delete Window
                 CoreXWindow.DeleteWindow()
             },(erreur)=>{
@@ -416,7 +416,7 @@ class GeoXActivities {
      * Get makers of all tracks of GeoX by page
      */
     GetAllMarkersByPage(){
-        let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost}
+        let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost, AllPublicPost: true}
         GlobalCallApiPromise("ApiGetAllPostMarkers", FctData, "", "").then((reponse)=>{
             if (reponse.length != 0){
                 this.RenderMarkersOnMap(reponse)

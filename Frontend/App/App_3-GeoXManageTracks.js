@@ -375,8 +375,8 @@ class GeoXManageTracks {
      * Get all my post
      */
     GetAllMyPosts(){
-        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
-        GlobalCallApiPromise("ApiGetAllMyPost", FctData, "", "").then((reponse)=>{
+        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: false}
+        GlobalCallApiPromise("ApiGetAllPost", FctData, "", "").then((reponse)=>{
             this.RenderPosts(reponse)
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
@@ -426,8 +426,8 @@ class GeoXManageTracks {
      * Get makers of all tracks of GeoX by page
      */
     GetAllMarkersByPage(){
-        let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost}
-        GlobalCallApiPromise("ApiGetAllMyTracksMarkers", FctData, "", "").then((reponse)=>{
+        let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost, AllPublicPost: false}
+        GlobalCallApiPromise("ApiGetAllPostMarkers", FctData, "", "").then((reponse)=>{
             if (reponse.length != 0){
                 if (this._Map){
                     this.RenderMarkersOnMap(reponse)

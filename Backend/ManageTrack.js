@@ -370,6 +370,58 @@ function PromiseGetElevation({ lat, lng }){
     })
 }
 
+function PromiseCopyTrack(Data, MyApp, User){
+    return new Promise(resolve => {
+        let ReponseCopyTrack = {Error: true, ErrorMsg:"InitError", Data:null}
+        let MongoR = require('@gregvanko/corex').Mongo
+        Mongo = new MongoR(MyApp.MongoUrl ,MyApp.AppName)
+        let MongoConfig = require("./MongoConfig.json")
+        MongoTracksCollection = MongoConfig.TracksCollection
+
+        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
+
+        const Querry = {'_id': new MongoObjectId(Data.TrackId)}
+        const Projection = {projection:{_id: 0}}
+    
+        Mongo.FindPromise(Querry, Projection, MongoTracksCollection.Collection).then((reponse)=>{
+            if(reponse.length == 1){
+                // Copy de la track
+                let TrackData = reponse[0]
+                // Modification de la track
+                TrackData.Name = Data.Name
+                TrackData.Group = Data.Group
+                TrackData.Public = Data.Public
+                TrackData.Description = Data.Description
+                TrackData.Color = "#0000FF"
+                TrackData.Date = new Date()
+                TrackData.Owner = User
+                Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
+                    ReponseCopyTrack.Error = false
+                    ReponseCopyTrack.ErrorMsg = ""
+                    ReponseCopyTrack.Data = "Done"
+                    resolve(ReponseCopyTrack)
+                },(erreur)=>{
+                    ReponseCopyTrack.Error = true
+                    ReponseCopyTrack.ErrorMsg = "ApiCopyTrack inster track error: " + erreur
+                    ReponseCopyTrack.Data = null
+                    resolve(ReponseCopyTrack)
+                })
+            } else {
+                ReponseCopyTrack.Error = true
+                ReponseCopyTrack.ErrorMsg = "ApiCopyTrack Track id not found"
+                ReponseCopyTrack.Data = null
+                resolve(ReponseCopyTrack)
+            }
+        },(erreur)=>{
+            ReponseCopyTrack.Error = true
+            ReponseCopyTrack.ErrorMsg = "ApiCopyTrack get track data error: " + erreur
+            ReponseCopyTrack.Data = null
+            resolve(ReponseCopyTrack)
+        })
+    })
+}
+
 module.exports.PromiseAddTrack = PromiseAddTrack
 module.exports.PromiseDeleteTrack = PromiseDeleteTrack
 module.exports.PromiseUpdateTrack = PromiseUpdateTrack
+module.exports.PromiseCopyTrack = PromiseCopyTrack

@@ -66,29 +66,6 @@ class GeoXServer{
         HtmlString = HtmlString.replace(/\r?\n|\r/g, " ")
         return HtmlString
     }
-
-    ApiGetAllPost(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiGetAllPost: " + JSON.stringify(Data), User, UserId)
-
-        let numberofitem = 5
-        let cursor = Data.Page * numberofitem
-
-        let Query = (Data.Filter)? this.FilterForPublicTracks(Data.Filter, User) : {[this._MongoTracksCollection.Public]: true}
-        const Projection = {projection:{[this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Description]: 1, [this._MongoTracksCollection.InfoElevation]: 1, [this._MongoTracksCollection.Image]: 1, [this._MongoTracksCollection.StartPoint]: 1}}
-        const Sort = {[this._MongoTracksCollection.Date]: -1}
-
-        this._Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, this._MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                Res.json({Error: false, ErrorMsg: null, Data:[]})
-            } else {
-                Res.json({Error: false, ErrorMsg: null, Data:reponse})
-            }
-        },(erreur)=>{
-            let ErrorMessage = "ApiGetAllPost error: " + erreur
-            Res.json({Error: true, ErrorMsg: ErrorMessage, Data: []})
-            this._MyApp.LogAppliError(ErrorMessage, User, UserId)
-        })
-    }
     
     ApiGetPostData(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetPostData " + JSON.stringify(Data), User, UserId)
@@ -163,43 +140,6 @@ class GeoXServer{
         })
     }
 
-    ApiCopyTrack(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiCopyTrack: " + JSON.stringify(Data), User, UserId)
-
-        let MongoObjectId = require('@gregvanko/corex').MongoObjectId
-
-        const Querry = {'_id': new MongoObjectId(Data.TrackId)}
-        const Projection = {projection:{_id: 0}}
-
-        this._Mongo.FindPromise(Querry, Projection, this._MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 1){
-                // Copy de la track
-                let TrackData = reponse[0]
-                // Modification de la track
-                TrackData.Name = Data.Name
-                TrackData.Group = Data.Group
-                TrackData.Public = Data.Public
-                TrackData.Description = Data.Description
-                TrackData.Color = "#0000FF"
-                TrackData.Date = new Date()
-                TrackData.Owner = User
-                this._Mongo.InsertOnePromise(TrackData, this._MongoTracksCollection.Collection).then((reponseCreation)=>{
-                    Res.json({Error: false, ErrorMsg: "", Data:"Done"})
-                    this._MyApp.LogAppliInfo("ApiCopyTrack: Track:" + Data.TrackId + " is saved", User, UserId)
-                },(erreur)=>{
-                    Res.json({Error: true, ErrorMsg: "ApiCopyTrack inster track error", Data: ""})
-                    this._MyApp.LogAppliError("ApiCopyTrack inster track error: " + erreur, User, UserId)
-                })
-            } else {
-                this._MyApp.LogAppliError("ApiCopyTrack Track id not found", User, UserId)
-                Res.json({Error: true, ErrorMsg: "ApiCopyTrack Track id not found", Data: ""})
-            }
-        },(erreur)=>{
-            this._MyApp.LogAppliError("ApiCopyTrack get track data error: " + erreur, User, UserId)
-            Res.json({Error: true, ErrorMsg: "ApiCopyTrack get track data error", Data: ""})
-        })
-    }
-
     ApiGetAllGroups(Data, Res, User, UserId){
         this._MyApp.LogAppliInfo("ApiGetAllGroups", User, UserId)
 
@@ -227,7 +167,15 @@ class GeoXServer{
         let numberofitem = 10
         let cursor = Data.Page * numberofitem
 
-        let Query = (Data.Filter)? this.FilterForPublicTracks(Data.Filter, User) : {[this._MongoTracksCollection.Public]: true}
+        let Query = null
+        if(Data.AllPublicPost){
+            console.log("activites")
+            Query = (Data.Filter)? this.FilterTracks(Data.Filter, User, Data.AllPublicPost) : {[this._MongoTracksCollection.Public]: true}
+        } else {
+            console.log("my tracks")
+            Query = (Data.Filter)? this.FilterTracks(Data.Filter, User, Data.AllPublicPost) : {[this._MongoTracksCollection.Owner]: User}
+        }
+
         const Projection = {projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Description]: 1, [this._MongoTracksCollection.InfoElevation]: 1, [this._MongoTracksCollection.StartPoint]: 1}}
         const Sort = {[this._MongoTracksCollection.Date]: -1}
         
@@ -249,7 +197,7 @@ class GeoXServer{
         let numberofitem = 10
         let cursor = Data.Page * numberofitem
 
-        let Query = (Data.Filter)? this.FilterForMyTracks(Data.Filter, User) : {[this._MongoTracksCollection.Owner]: User}
+        let Query = (Data.Filter)? this.FilterTracks(Data.Filter, User, false) : {[this._MongoTracksCollection.Owner]: User}
         const Projection = { projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Public]: 1}}
         const Sort = {[this._MongoTracksCollection.Date]: -1}
 
@@ -266,36 +214,18 @@ class GeoXServer{
         })
     }
 
-    ApiGetAllMyTracksMarkers(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiGetAllMyTracksMarkers " + JSON.stringify(Data), User, UserId)
-
-        let numberofitem = 10
-        let cursor = Data.Page * numberofitem
-
-        let Query = (Data.Filter)? this.FilterForMyTracks(Data.Filter, User) : {[this._MongoTracksCollection.Owner]: User}
-        const Projection = {projection:{_id: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Description]: 1, [this._MongoTracksCollection.InfoElevation]: 1, [this._MongoTracksCollection.StartPoint]: 1}}
-        const Sort = {[this._MongoTracksCollection.Date]: -1}
-
-        this._Mongo.FindSortLimitSkipPromise(Query, Projection, Sort, numberofitem, cursor, this._MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                Res.json({Error: false, ErrorMsg: "", Data:[]})
-            } else {
-                Res.json({Error: false, ErrorMsg: "", Data:reponse})
-            }
-        },(erreur)=>{
-            let ErrorMsg = "ApiGetAllMyTracksMarkers error: " + erreur
-            Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
-            this._MyApp.LogAppliError(ErrorMsg, User, UserId)
-        })
-    }
-
-    ApiGetAllMyPost(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiGetAllMyPost " + JSON.stringify(Data), User, UserId)
+    ApiGetAllPost(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiGetAllPost " + JSON.stringify(Data), User, UserId)
 
         let numberofitem = 5
         let cursor = Data.Page * numberofitem
 
-        let Query = (Data.Filter)? this.FilterForMyTracks(Data.Filter, User) : {[this._MongoTracksCollection.Owner]: User}
+        let Query = null
+        if(Data.AllPublicPost){
+            Query = (Data.Filter)? this.FilterTracks(Data.Filter, User, Data.AllPublicPost) : {[this._MongoTracksCollection.Public]: true}
+        } else {
+            Query = (Data.Filter)? this.FilterTracks(Data.Filter, User, Data.AllPublicPost) : {[this._MongoTracksCollection.Owner]: User}
+        }
         const Projection = {projection:{[this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Date]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection.Description]: 1, [this._MongoTracksCollection.Group]: 1, [this._MongoTracksCollection.InfoElevation]: 1, [this._MongoTracksCollection.Image]: 1, [this._MongoTracksCollection.StartPoint]: 1, [this._MongoTracksCollection.Public]: 1, [this._MongoTracksCollection.Color]: 1}}
         const Sort = {[this._MongoTracksCollection.Date]: -1}
 
@@ -306,16 +236,16 @@ class GeoXServer{
                 Res.json({Error: false, ErrorMsg: "", Data:reponse})
             }
         },(erreur)=>{
-            let ErrorMsg = "ApiGetAllMyPost error: " + erreur
+            let ErrorMsg = "ApiGetAllPost error: " + erreur
             Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
             this._MyApp.LogAppliError(ErrorMsg, User, UserId)
         })
     }
 
     async ApiManageTrack (Data, Res, User, UserId){
-        let Shared = require("./Shared")
+        let ManageTrack = require("./ManageTrack")
         if (Data.Action == "Add"){
-            let ReponseAddTrack = await Shared.PromiseAddTrack(Data.TrackData, this._MyApp, User)
+            let ReponseAddTrack = await ManageTrack.PromiseAddTrack(Data.TrackData, this._MyApp, User)
             if(ReponseAddTrack.Error){
                 this._MyApp.LogAppliError(ReponseAddTrack.ErrorMsg, User, UserId)
                 Res.status("500").json(ReponseAddTrack)
@@ -329,7 +259,7 @@ class GeoXServer{
             }
         } else if (Data.Action == "Modify"){
             this._MyApp.LogAppliInfo("ApiManageTrack: " + JSON.stringify(Data), User, UserId)
-            let ReponseModifyTrack = await Shared.PromiseUpdateTrack(Data.TrackData, this._MyApp, User)
+            let ReponseModifyTrack = await ManageTrack.PromiseUpdateTrack(Data.TrackData, this._MyApp, User)
             if(ReponseModifyTrack.Error){
                 this._MyApp.LogAppliError(ReponseModifyTrack.ErrorMsg, User, UserId)
                 Res.status("500").json(ReponseModifyTrack)
@@ -339,7 +269,7 @@ class GeoXServer{
             }
         } else if (Data.Action == "Delete"){
             this._MyApp.LogAppliInfo("ApiManageTrack: " + JSON.stringify(Data), User, UserId)
-            let ReponseDelTrack = await Shared.PromiseDeleteTrack(Data.TrackId, this._MyApp, User)
+            let ReponseDelTrack = await ManageTrack.PromiseDeleteTrack(Data.TrackId, this._MyApp, User)
             if(ReponseDelTrack.Error){
                 this._MyApp.LogAppliError(ReponseDelTrack.ErrorMsg, User, UserId)
                 Res.status("500").json(ReponseDelTrack)
@@ -347,39 +277,33 @@ class GeoXServer{
                 Res.status("200").json(ReponseDelTrack)
                 this._MyApp.LogAppliInfo("Track Deleted", User, UserId)
             }
+        } else if (Data.Action == "CopyTrack"){
+            this._MyApp.LogAppliInfo("ApiManageTrack: " + JSON.stringify(Data), User, UserId)
+            let ReponseCopyTrack = await ManageTrack.PromiseCopyTrack(Data.CopyTrackData, this._MyApp, User)
+            if(ReponseCopyTrack.Error){
+                this._MyApp.LogAppliError(ReponseCopyTrack.ErrorMsg, User, UserId)
+                Res.status("500").json(ReponseCopyTrack)
+            } else {
+                Res.status("200").json(ReponseCopyTrack)
+                this._MyApp.LogAppliInfo("Track Copied", User, UserId)
+            }
         } else {
             Res.status("500").json("ApiManageTrack => Action not found: " + Data.Action)
         }
     }
 
-    FilterForMyTracks(Filter, User){
+    FilterTracks(Filter, User, AllPublicPost){
         // Query de base
-        let Query = {$and:[
-            {[this._MongoTracksCollection.Owner]: User}
-        ]}
-
-        // DistanceMin
-        if (Filter.DistanceMin){
-            Query.$and.push({[this._MongoTracksCollection.Length]:{$gte: Filter.DistanceMin}})
+        let Query = null
+        if (AllPublicPost){
+            Query = {$and:[
+                {[this._MongoTracksCollection.Public]: true}
+            ]}
+        } else {
+            Query = {$and:[
+                {[this._MongoTracksCollection.Owner]: User}
+            ]}
         }
-        // DistanceMax
-        if (Filter.DistanceMax){
-            Query.$and.push({[this._MongoTracksCollection.Length]:{$lte: Filter.DistanceMax}})
-        }
-
-        // DistanceMax
-        if ((Filter.Group != undefined) && (Filter.Group != "")){
-            Query.$and.push({[this._MongoTracksCollection.Group]: Filter.Group})
-        }
-
-        return Query 
-    }
-
-    FilterForPublicTracks(Filter, User){
-        // Query de base
-        let Query = {$and:[
-            {[this._MongoTracksCollection.Public]: true}
-        ]}
 
         // DistanceMin
         if (Filter.DistanceMin){
@@ -393,6 +317,11 @@ class GeoXServer{
         if (Filter.HideMyTrack){
             Query.$and.push({[this._MongoTracksCollection.Owner]: { $ne: User }})
         }
+        // Group
+        if ((Filter.Group != undefined) && (Filter.Group != "")){
+            Query.$and.push({[this._MongoTracksCollection.Group]: Filter.Group})
+        }
+
         return Query 
     }
 
@@ -606,7 +535,6 @@ class GeoXServer{
             var dir = path.resolve(__dirname, "TempHgt")
             if (!fs.existsSync(dir)){
                 fs.mkdirSync(dir);
-                console.log("create")
             }
             const { TileSet } = require("node-hgt")
             const tileset = new TileSet(path.resolve(__dirname, "TempHgt"))
