@@ -814,6 +814,7 @@ class GeoXCreateTrack {
             this._PageGeoJsonOfOneGroup = 0
             this.GetTracksOfGroup(DropDownGroupValue)
         } else {
+            this._PageGeoJsonOfOneGroup = 0
             // Remove all tracks
             let me = this
             this._LayerGroup.eachLayer(function (layer) {
