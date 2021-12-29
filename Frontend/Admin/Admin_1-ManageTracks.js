@@ -117,7 +117,7 @@ class GeoXManageTracks {
      */
     GetAllMyTracksData(){
         let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
-        GlobalCallApiPromise("ApiAdminGetAllMyTracks", FctData, "", "").then((reponse)=>{
+        GlobalCallApiPromise("ApiAdminGetAllTracks", FctData, "", "").then((reponse)=>{
             this.RenderAllMyTracksDataInViewManageTrack(reponse)
         },(erreur)=>{
             this.ShowErrorMessage(erreur)

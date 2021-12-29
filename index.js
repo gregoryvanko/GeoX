@@ -75,17 +75,16 @@ class GeoX {
       // API
       this._MyApp.AddApiFct("ApiGetAllPost", this._GeoXServer.ApiGetAllPost.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetPostData", this._GeoXServer.ApiGetPostData.bind(this._GeoXServer), false)
-      this._MyApp.AddApiFct("ApiGetTrackData", this._GeoXServer.ApiGetTrackData.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetAllPostMarkers", this._GeoXServer.ApiGetAllPostMarkers.bind(this._GeoXServer), false)
+      this._MyApp.AddApiFct("ApiGetTrackData", this._GeoXServer.ApiGetTrackData.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetAllGroups", this._GeoXServer.ApiGetAllGroups.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetAllMyTracks", this._GeoXServer.ApiGetAllMyTracks.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiManageTrack", this._GeoXServer.ApiManageTrack.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetElavation", this._GeoXServer.ApiGetElavation.bind(this._GeoXServer), false)
-      this._MyApp.AddApiFct("ApiGetAllGeoJsonOfGroup", this._GeoXServer.ApiGetAllGeoJsonOfGroup.bind(this._GeoXServer), false)
       this._MyApp.AddApiFct("ApiGetDataFromApi", this._GeoXServer.ApiGetDataFromApi.bind(this._GeoXServer), false)
 
       // API Admin
-      this._MyApp.AddApiFct("ApiAdminGetAllMyTracks", this._GeoXServer.ApiAdminGetAllMyTracks.bind(this._GeoXServer), true)
+      this._MyApp.AddApiFct("ApiAdminGetAllTracks", this._GeoXServer.ApiAdminGetAllTracks.bind(this._GeoXServer), true)
       this._MyApp.AddApiFct("ApiAdminGetPostData", this._GeoXServer.ApiAdminGetPostData.bind(this._GeoXServer), true)
          
       // Start

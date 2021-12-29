@@ -94,6 +94,8 @@ class GeoXServer{
 
         let MongoObjectId = require('@gregvanko/corex').MongoObjectId
 
+        let Pagination = false
+
         let Projection = {}
         let Querry = {}
         if (Data.GetData == "GPX"){
@@ -111,33 +113,63 @@ class GeoXServer{
         } else if (Data.GetData  == "DrawTrack"){
             Projection = { projection:{[this._MongoTracksCollection.GeoJsonData]: 1, [this._MongoTracksCollection.Center]: 1, [this._MongoTracksCollection.ExteriorPoint]: 1}}
             Querry = {'_id': new MongoObjectId(Data.TrackId)}
+        } else if (Data.GetData  == "AllGeoJsonOfOneGroup"){
+            Projection = { projection:{[this._MongoTracksCollection.GeoJsonData]: 1, [this._MongoTracksCollection.Color]: 1, [this._MongoTracksCollection.Name]: 1, [this._MongoTracksCollection.Length]: 1, [this._MongoTracksCollection._id]: 1}}
+            Querry = {$and: [{[this._MongoTracksCollection.Group]: Data.Group},{[this._MongoTracksCollection.Owner]: User}]}
+            Pagination = true
         }
 
         const Sort = {[this._MongoTracksCollection.Date]: -1}
 
-        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                this._MyApp.LogAppliError("ApiGetTrackData Track Id not found", User, UserId)
-                Res.json({Error: true, ErrorMsg: "ApiGetTrackData Track Id not found", Data: ""})
-            } else {
-                if (Data.GetData == "GPX"){
-                    Res.json({Error: false, ErrorMsg: "", Data: reponse[0][this._MongoTracksCollection.GpxData]})
-                    this._MyApp.LogAppliInfo("GPX send to user", User, UserId)
-                } else if (Data.GetData == "GeoJSon"){
-                    Res.json({Error: false, ErrorMsg: "", Data: reponse[0][this._MongoTracksCollection.GeoJsonData]})
-                    this._MyApp.LogAppliInfo("GeoJSon send to user", User, UserId)
-                } else if (Data.GetData == "MultipleGeoJSon"){
-                    Res.json({Error: false, ErrorMsg: "", Data: reponse})
-                    this._MyApp.LogAppliInfo("MultipleGeoJSon send to user", User, UserId)
-                } else if (Data.GetData  == "DrawTrack"){
-                    Res.json({Error: false, ErrorMsg: "", Data: reponse[0]})
-                    this._MyApp.LogAppliInfo("DrawTrack send to user", User, UserId)
+        if (Pagination){
+            let numberofitem = 5
+            let cursor = Data.Page * numberofitem
+
+            this._Mongo.FindSortLimitSkipPromise(Querry, Projection, Sort, numberofitem, cursor, this._MongoTracksCollection.Collection).then((reponse)=>{
+                if (Data.GetData  == "AllGeoJsonOfOneGroup"){
+                    if(reponse.length == 0){
+                        Res.json({Error: false, ErrorMsg: "", Data:[]})
+                        this._MyApp.LogAppliInfo("AllGeoJsonOfOneGroup send to user", User, UserId)
+                    } else {
+                        Res.json({Error: false, ErrorMsg: "", Data:reponse})
+                        this._MyApp.LogAppliInfo("AllGeoJsonOfOneGroup partially send to user", User, UserId)
+                    }
+                } else {
+                    Res.json({Error: true, ErrorMsg: "GetData option not found", Data:""})
                 }
-            }
-        },(erreur)=>{
-            this._MyApp.LogAppliError("ApiGetTrackData DB error : " + erreur, User, UserId)
-            Res.json({Error: true, ErrorMsg: "ApiGetTrackData DB error ", Data: ""})
-        })
+            },(erreur)=>{
+                let ErrorMsg = "ApiGetTrackData error: " + erreur
+                Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
+                this._MyApp.LogAppliError(ErrorMsg, User, UserId)
+            })
+        } else {
+            this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
+                if(reponse.length == 0){
+                    this._MyApp.LogAppliError("ApiGetTrackData Track Id not found", User, UserId)
+                    Res.json({Error: true, ErrorMsg: "ApiGetTrackData Track Id not found", Data: ""})
+                } else {
+                    if (Data.GetData == "GPX"){
+                        Res.json({Error: false, ErrorMsg: "", Data: reponse[0][this._MongoTracksCollection.GpxData]})
+                        this._MyApp.LogAppliInfo("GPX send to user", User, UserId)
+                    } else if (Data.GetData == "GeoJSon"){
+                        Res.json({Error: false, ErrorMsg: "", Data: reponse[0][this._MongoTracksCollection.GeoJsonData]})
+                        this._MyApp.LogAppliInfo("GeoJSon send to user", User, UserId)
+                    } else if (Data.GetData == "MultipleGeoJSon"){
+                        Res.json({Error: false, ErrorMsg: "", Data: reponse})
+                        this._MyApp.LogAppliInfo("MultipleGeoJSon send to user", User, UserId)
+                    } else if (Data.GetData  == "DrawTrack"){
+                        Res.json({Error: false, ErrorMsg: "", Data: reponse[0]})
+                        this._MyApp.LogAppliInfo("DrawTrack send to user", User, UserId)
+                    } else {
+                        Res.json({Error: true, ErrorMsg: "GetData option not found", Data:""})
+                    }
+                }
+            },(erreur)=>{
+                this._MyApp.LogAppliError("ApiGetTrackData DB error : " + erreur, User, UserId)
+                Res.json({Error: true, ErrorMsg: "ApiGetTrackData DB error ", Data: ""})
+            })
+        }
+        
     }
 
     ApiGetAllGroups(Data, Res, User, UserId){
@@ -331,26 +363,6 @@ class GeoXServer{
         Res.json({Error: false, ErrorMsg: null, Data:ElevationData})
     }
 
-    ApiGetAllGeoJsonOfGroup(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiGetAllGeoJsonOfGroup " + JSON.stringify(Data), User, UserId)
-
-        const Querry = {$and: [{[this._MongoTracksCollection.Group]: Data},{[this._MongoTracksCollection.Owner]: User}]}
-        const Projection = { projection:{[this._MongoTracksCollection.GpxData]: 0}}
-        const Sort = {[this._MongoTracksCollection.Date]: -1}
-
-        this._Mongo.FindSortPromise(Querry, Projection, Sort, this._MongoTracksCollection.Collection).then((reponse)=>{
-            if(reponse.length == 0){
-                Res.json({Error: true, ErrorMsg: "Group exist but without one track", Data:""})
-            } else {
-                Res.json({Error: false, ErrorMsg: "", Data:reponse})
-            }
-        },(erreur)=>{
-            let ErrorMsg = "ApiGetAllGeoJsonOfGroup error: " + erreur
-            Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
-            this._MyApp.LogAppliError(ErrorMsg, User, UserId)
-        })
-    }
-
     ApiGetDataFromApi(Data, Res, User, UserId){
         let me = this
         const axios = require('axios')
@@ -393,8 +405,8 @@ class GeoXServer{
     }
 
     // Admin
-    ApiAdminGetAllMyTracks(Data, Res, User, UserId){
-        this._MyApp.LogAppliInfo("ApiAdminGetAllMyTracks: " + JSON.stringify(Data), User, UserId)
+    ApiAdminGetAllTracks(Data, Res, User, UserId){
+        this._MyApp.LogAppliInfo("ApiAdminGetAllTracks: " + JSON.stringify(Data), User, UserId)
 
         let numberofitem = 10
         let cursor = Data.Page * numberofitem
@@ -410,7 +422,7 @@ class GeoXServer{
                 Res.json({Error: false, ErrorMsg: null, Data:reponse})
             }
         },(erreur)=>{
-            let ErrorMsg = "ApiAdminGetAllMyTracks error: " + erreur
+            let ErrorMsg = "ApiAdminGetAllTracks error: " + erreur
             Res.json({Error: true, ErrorMsg: ErrorMsg, Data: ""})
             this._MyApp.LogAppliError(ErrorMsg, User, UserId)
         })

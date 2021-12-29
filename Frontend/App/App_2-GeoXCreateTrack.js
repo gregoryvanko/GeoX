@@ -27,7 +27,6 @@ class GeoXCreateTrack {
         this._UserGroup = null
         this._GroupSelected = null
         this._NoTrack = "No Folder selected"
-        this._DataMap = null
         this._LayerGroup = null
 
         this._IconPointOption = L.icon({
@@ -36,6 +35,8 @@ class GeoXCreateTrack {
             iconAnchor:   [20, 40],
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
+
+        this._PageGeoJsonOfOneGroup = 0
 
         // ElevationBox
         this._ElevationBox = null
@@ -810,13 +811,8 @@ class GeoXCreateTrack {
         let DropDownGroupValue = document.getElementById("Group").value
         this._GroupSelected = DropDownGroupValue
         if (DropDownGroupValue != this._NoTrack){
-            // Send data to server
-            GlobalCallApiPromise("ApiGetAllGeoJsonOfGroup", DropDownGroupValue, "", "").then((reponse)=>{
-                this._DataMap = reponse
-                this.ModifyTracksOnMap()
-            },(erreur)=>{
-                this.Error(erreur)
-            })
+            this._PageGeoJsonOfOneGroup = 0
+            this.GetTracksOfGroup(DropDownGroupValue)
         } else {
             // Remove all tracks
             let me = this
@@ -826,6 +822,22 @@ class GeoXCreateTrack {
         }
     }
 
+    GetTracksOfGroup(DropDownGroupValue){
+        // Send data to server
+        let FctData = {Group: DropDownGroupValue, GetData: "AllGeoJsonOfOneGroup", Page : this._PageGeoJsonOfOneGroup}
+        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+            if (reponse.length == 0){
+                this._PageGeoJsonOfOneGroup = 0
+            } else {
+                this.AddTracksOnMap(reponse)
+                this._PageGeoJsonOfOneGroup += 1
+                this.GetTracksOfGroup(DropDownGroupValue)
+            }
+        },(erreur)=>{
+            this.Error(erreur)
+        })
+    }
+
     /**
      * Ajouter une track a la carte
      * @param {String} TrackId Id de la track
@@ -833,12 +845,12 @@ class GeoXCreateTrack {
      * @param {Object} GeoJsonData GeoJson Data de la track
      * @param {string} TrackColor Color de la track
      */
-    ModifyTracksOnMap(){
+    AddTracksOnMap(Data){
         let me = this
         // Remove all tracks
-        this._LayerGroup.eachLayer(function (layer) {
-            me._LayerGroup.removeLayer(layer);
-        })
+        // this._LayerGroup.eachLayer(function (layer) {
+        //     me._LayerGroup.removeLayer(layer);
+        // })
         // Style for tracks
         var TrackWeight = 3
         if (L.Browser.mobile){
@@ -859,7 +871,7 @@ class GeoXCreateTrack {
             popupAnchor:  [0, -40] // point from which the popup should open relative to the iconAnchor
         });
         // Add track
-        this._DataMap.forEach(Track => {
+        Data.forEach(Track => {
             // Style for tracks
             var TrackStyle = {
                 "color": Track.Color,
@@ -1059,10 +1071,10 @@ class GeoXCreateTrack {
             this.CityFound = false
             this._UserGroup = null
             this._GroupSelected = null
-            this._DataMap = null
             this._LayerGroup = null
             this._ElevationBox = null
             this._GpsPointer = null
+            this._PageGeoJsonOfOneGroup = 0
         }
     }
 }
