@@ -8,6 +8,11 @@ function BuildAndAddHomePage(){
 
 function GetJS(){
     let js = ""
+    // HtmlElem-Post
+    let Path = path.join(__dirname, '../Common/HtmlElemGeoxPost.js')
+    js += fs.readFileSync(Path, 'utf8')
+    js += os.EOL
+
     Path = path.join(__dirname, '/HomePage.js')
     js += fs.readFileSync(Path, 'utf8')
     js += os.EOL

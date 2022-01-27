@@ -49,11 +49,11 @@ class HomePage{
     }
 
     GetPosts(){
-        fetch("/getpageofpost/" + this._PageOfPosts).then((response) => {
+        fetch("/post/public/" + this._PageOfPosts).then((response) => {
             if (response.ok) {
-              return response.json();
+                return response.json();
             } else {
-              throw new Error("get posts failed: " + response.status + " " + response.statusText);
+                throw new Error("get posts failed: " + response.status + " " + response.statusText);
             }
         })
         .then((responseJson) => {

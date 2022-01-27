@@ -1,3 +1,5 @@
+let NanoXAddRoute = require("@gregvanko/nanox").NanoXAddRoute
+
 async function Start(Port = 1234, Name = "NanoXDev", Debug = false){
 
    // NonoX Option
@@ -31,7 +33,10 @@ async function Start(Port = 1234, Name = "NanoXDev", Debug = false){
    require("@gregvanko/nanox").NanoXInitiation(OptionNanoX)
 
    // Add route Post
+   NanoXAddRoute("/post", require("./Backend/Route/RoutePost"))
+   // Route GetMap
    // ToDo
+
    // Build Home page
    require("./Frontend/HomePage/BuildHomePage").BuildAndAddHomePage()
 
