@@ -1,3 +1,4 @@
+let LogError = require("@gregvanko/nanox").NanoXLogError
 const ModelTracks = require("../MongooseModel/Model_Tracks")
 const express = require("@gregvanko/nanox").Express
 const router = express.Router()
@@ -12,7 +13,7 @@ async function GetPostOfPage (Page, res){
     let Reponse = {Error: true, ErrorMsg : "No error message", Data: []}
     let numberofitem = 5
     let cursor = Page * numberofitem
-
+    
     const query = {Public: true}
     const projection = { Name:1, Date:1, Length:1, Description:1, InfoElevation:1, Image:1, StartPoint:1}
 
@@ -20,6 +21,7 @@ async function GetPostOfPage (Page, res){
         if (err) {
             Reponse.ErrorMsg = err
             res.status(500).send(Reponse);
+            LogError(`GetPostOfPage db eroor: ${err}`)
         } else {
             Reponse.Error = false
             Reponse.ErrorMsg = null
