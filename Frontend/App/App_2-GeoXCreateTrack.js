@@ -1081,6 +1081,6 @@ class GeoXCreateTrack {
 }
 
 // Creation de l'application
-let MyGeoXCreateTrack = new GeoXCreateTrack(GlobalCoreXGetAppContentId())
+//let MyGeoXCreateTrack = new GeoXCreateTrack(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("Create My Track", IconGeoX.GeoXCreateTrack(), MyGeoXCreateTrack.Initiation.bind(MyGeoXCreateTrack))
+//GlobalCoreXAddApp("Create My Track", IconGeoX.GeoXCreateTrack(), MyGeoXCreateTrack.Initiation.bind(MyGeoXCreateTrack))

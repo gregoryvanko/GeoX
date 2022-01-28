@@ -1,6 +1,6 @@
 class GeoXActivities {
-    constructor(DivApp){
-        this._DivApp = document.getElementById(DivApp)
+    constructor(){
+        this._DivApp = NanoXGetDivApp()
 
         this._IdDivApp = "divapp"
         this._IdDivTrackInfo = "DivTrackInfo"
@@ -646,6 +646,7 @@ class GeoXActivities {
 }
 
 // Creation de l'application
-let MyGeoXActivities = new GeoXActivities(GlobalCoreXGetAppContentId())
+let MyGeoXActivities = new GeoXActivities()
 // Ajout de l'application
-GlobalCoreXAddApp("Activities", IconGeoX.GeoXMapIcon(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)
+NanoXAddModule("Activities", null, MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)
+//GlobalCoreXAddApp("Activities", IconGeoX.GeoXMapIcon(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)

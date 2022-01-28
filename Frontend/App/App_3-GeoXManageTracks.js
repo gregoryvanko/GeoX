@@ -1357,6 +1357,6 @@ class GeoXManageTracks {
 }
 
 // Creation de l'application
-let MyGeoXManageTracks = new GeoXManageTracks(GlobalCoreXGetAppContentId())
+//let MyGeoXManageTracks = new GeoXManageTracks(GlobalCoreXGetAppContentId())
 // Ajout de l'application
-GlobalCoreXAddApp("My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))
+//GlobalCoreXAddApp("My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))
