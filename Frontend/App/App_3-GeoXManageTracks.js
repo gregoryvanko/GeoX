@@ -1,6 +1,6 @@
 class GeoXManageTracks {
-    constructor(DivApp){
-        this._DivApp = document.getElementById(DivApp)
+    constructor(){
+        this._DivApp = NanoXGetDivApp()
         this._ConteneurListTrack = "ConteneurListTrack"
         this._ConteneurPosts = "ConteneurPosts"
         this._ConteneurViewOnMap = "ConteneurViewOnMap"
@@ -71,12 +71,8 @@ class GeoXManageTracks {
         if (!this._StartWithLoadViewManageTrack){
             this._ViewCurrent = this._ViewAddModifyTrack
         }
-        // Show Action Button
-        GlobalDisplayAction('On')
-        // Clear Action List
-        GlobalClearActionList()
         // Add action
-        GlobalAddActionInList("List View", this.LoadListView.bind(this))
+        //GlobalAddActionInList("List View", this.LoadListView.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // Load view
@@ -102,25 +98,25 @@ class GeoXManageTracks {
         // Clear view
         this._DivApp.innerHTML=""
         // Contener Post
-        let ConteneurPost = CoreXBuild.DivFlexColumn(this._ConteneurPosts)
+        let ConteneurPost = NanoXBuild.DivFlexColumn(this._ConteneurPosts, null, "width: 100%;")
         ConteneurPost.style.display = "none"
         this._DivApp.appendChild(ConteneurPost)
         // Contener View on map
-        let ConteneurViewOnMap = CoreXBuild.DivFlexColumn(this._ConteneurViewOnMap)
+        let ConteneurViewOnMap = NanoXBuild.DivFlexColumn(this._ConteneurViewOnMap, null, "width: 100%;")
         ConteneurViewOnMap.style.display = "none"
         this._DivApp.appendChild(ConteneurViewOnMap)
         // Contener add track
-        let ConteneurAddTrack = CoreXBuild.DivFlexColumn(this._ConteneurAddTrack)
+        let ConteneurAddTrack = NanoXBuild.DivFlexColumn(this._ConteneurAddTrack, null, "width: 100%;")
         ConteneurAddTrack.style.display = "none"
         this._DivApp.appendChild(ConteneurAddTrack)
         // Contener Track Data
-        let ConteneurTrackData = CoreXBuild.DivFlexColumn(this._ConteneurTrackData)
+        let ConteneurTrackData = NanoXBuild.DivFlexColumn(this._ConteneurTrackData, null, "width: 100%;")
         ConteneurTrackData.style.display = "none"
         this._DivApp.appendChild(ConteneurTrackData)
         // Contener Follow track on map
-        this._DivApp.appendChild(CoreXBuild.Div(this._ConteneurFollowTrackOnMap, "", "height: 100vh; width: 100%; display: none;")) 
+        this._DivApp.appendChild(NanoXBuild.Div(this._ConteneurFollowTrackOnMap, null, "height: 100vh; width: 100%; display: none;")) 
         // Contener List of track
-        let ConteneurListTrack = CoreXBuild.DivFlexColumn(this._ConteneurListTrack)
+        let ConteneurListTrack = NanoXBuild.DivFlexColumn(this._ConteneurListTrack, null, "width: 100%;")
         ConteneurListTrack.style.display = "none"
         this._DivApp.appendChild(ConteneurListTrack)
         
@@ -163,27 +159,22 @@ class GeoXManageTracks {
         document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
-        
-        // Hide Action Button
-        GlobalDisplayAction('On')
-        // Clear Action List
-        GlobalClearActionList()
-        // Add action
-        GlobalAddActionInList("List View", this.LoadListView.bind(this))
 
         // Titre de l'application
-        ConteneurMyPost.appendChild(CoreXBuild.DivTexte("My Tracks", "", "Titre"))
+        ConteneurMyPost.appendChild(NanoXBuild.DivText("My Tracks", null, "Titre"))
         // Button view on map
-        ConteneurMyPost.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewMap), "ActionLeft",  `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
+        NanoXClearMenuButtonLeft()
+        NanoXAddMenuButtonLeft("ActionLeft", "Map or Post", `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`, this.LoadView.bind(this, this._ViewMap))
         // Button Filter
-        ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
+        NanoXAddMenuButtonLeft("ButtonLeftActionSecond", "Filter", `<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`, this.ClickOnFilter.bind(this))
+
         // Button Add track
-        ConteneurMyPost.appendChild(CoreXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddModifyTrack.bind(this),"ButtonRightActionSecond","ButtonAddTrack"))
+        ConteneurMyPost.appendChild(NanoXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddModifyTrack.bind(this),"ButtonAddTrack","ButtonRightActionSecond"))
         // Liste des post
-        let ListofMyPost = CoreXBuild.Div(this._DivListOfMyPostsData, "DivPostApp", "")
+        let ListofMyPost = NanoXBuild.Div(this._DivListOfMyPostsData, "DivPostApp")
         ConteneurMyPost.appendChild(ListofMyPost)
         // Waiting text
-        ConteneurMyPost.appendChild(CoreXBuild.DivTexte("Waiting data...","WaitingDataManageTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        ConteneurMyPost.appendChild(NanoXBuild.DivText("Waiting data...","WaitingDataManageTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
         
         // GetData
         this.GetAllMyPosts()
@@ -217,34 +208,33 @@ class GeoXManageTracks {
         let ConteneurManageTrack = document.getElementById(this._ConteneurListTrack)
         ConteneurManageTrack.style.display = "flex"
 
-        GlobalDisplayAction('Off')
-        // Clear Action List
-        GlobalClearActionList()
-
         // Add Button Back
-        ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromListTrack.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
+        //ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromListTrack.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
         // Button Filter
-        ConteneurManageTrack.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
+        //ConteneurManageTrack.appendChild(NanoXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
 
         // Div pour le titre des colonnes
-        let BoxTitre = CoreXBuild.DivFlexRowStart("")
+        let BoxTitre = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
         BoxTitre.style.width = "60rem"
         BoxTitre.style.maxWidth = "90%"
         ConteneurManageTrack.appendChild(BoxTitre)
         BoxTitre.style.marginTop = "3rem"
         // Titre des colonnes
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Name","","TextBoxTitre", "width: 44%; margin-left:1%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Group","","TextBoxTitre", "width: 28%;"))
-        BoxTitre.appendChild(CoreXBuild.DivTexte("Distance","","TextBoxTitre", "width: 13%; text-align: right;"))
+        BoxTitre.appendChild(NanoXBuild.DivText("Name",null,"TextBoxTitre", "width: 44%; margin-left:1%;"))
+        BoxTitre.appendChild(NanoXBuild.DivText("Group",null,"TextBoxTitre", "width: 28%;"))
+        BoxTitre.appendChild(NanoXBuild.DivText("Distance",null,"TextBoxTitre", "width: 13%; text-align: right;"))
         // Liste des post
-        let ListofMyPost = CoreXBuild.DivFlexColumn(this._DivListOfMyTracksData)
+        let ListofMyPost = NanoXBuild.DivFlexColumn(this._DivListOfMyTracksData)
         ListofMyPost.style.width = "60rem"
         ListofMyPost.style.maxWidth = "90%"
         ConteneurManageTrack.appendChild(ListofMyPost)
         // Ajout d'une ligne
-        ListofMyPost.appendChild(CoreXBuild.Line("100%", "Opacity:0.5; margin: 1% 0% 0% 0%;"))
+        let line = NanoXBuild.Line()
+        line.style.opacity = "0.5"
+        line.style.margin = "1% 0% 0% 0%"
+        ListofMyPost.appendChild(line)
         // Waiting text
-        ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("Waiting data...","WaitingDataListTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+        ConteneurManageTrack.appendChild(NanoXBuild.DivText("Waiting data...","WaitingDataListTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
         
         // GetData
         this.GetAllMyTracksData()
@@ -272,16 +262,13 @@ class GeoXManageTracks {
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-        // Hide Action Button
-        GlobalDisplayAction('Off')
-
         // Titre
         if (IsAddTrack){
             // Titre de l'application
-            ConteneurAddTrack.appendChild(CoreXBuild.DivTexte("Add Track", "", "Titre"))
+            ConteneurAddTrack.appendChild(NanoXBuild.DivText("Add Track", null, "Titre"))
         } else {
             // Titre de l'application
-            ConteneurAddTrack.appendChild(CoreXBuild.DivTexte("Modify Track", "", "Titre"))
+            ConteneurAddTrack.appendChild(NanoXBuild.DivText("Modify Track", null, "Titre"))
         }
         this.RenderAddModifyTrackData(IsAddTrack, TrackData)
     }
@@ -306,20 +293,17 @@ class GeoXManageTracks {
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-        // show Action Button
-        GlobalDisplayAction('On')
-        // Clear Action List
-        GlobalClearActionList()
+
         // Add action
-        GlobalAddActionInList("List View", this.LoadListView.bind(this))
-        GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
+        //GlobalAddActionInList("List View", this.LoadListView.bind(this))
+        //GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
 
         // Add button manage my post
-        ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewPost), "ActionLeft",  `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`))
+        //ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewPost), "ActionLeft",  `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`))
         // Button Filter
-        ConteneurViewOnMap.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
+        //ConteneurViewOnMap.appendChild(NanoXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
         // Ajout du div qui va contenir la map
-        ConteneurViewOnMap.appendChild(CoreXBuild.Div(this._IdDivMap, "", "height: 100vh; width: 100%;"))
+        ConteneurViewOnMap.appendChild(NanoXBuild.Div(this._IdDivMap, null, "height: 100vh; width: 100%;"))
         this._Map = new GeoXMap(this._IdDivMap) 
         this._Map.RenderMap()
         this._Map.AddMarkersClusterGroup()
@@ -348,22 +332,19 @@ class GeoXManageTracks {
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-        // Hide Action Button
-        GlobalDisplayAction('Off')
-
         // Add Button Back
-        ConteneurTrackData.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromTrackData.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
+        //ConteneurTrackData.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromTrackData.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
         // Div Data of track
-        let DivDataOfOneTrack = CoreXBuild.DivFlexColumn(this._DivDataOfOneTrack)
+        let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack)
         DivDataOfOneTrack.style.width = "45rem"
         DivDataOfOneTrack.style.maxWidth = "100%"
         DivDataOfOneTrack.style.marginTop = "3rem"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text
         if (TrackName){
-            DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(`Waiting data of track: ${TrackName}`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+            DivDataOfOneTrack.appendChild(NanoXBuild.DivText(`Waiting data of track: ${TrackName}`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
         } else {
-            DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(`Waiting data of track`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+            DivDataOfOneTrack.appendChild(NanoXBuild.DivText(`Waiting data of track`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
         }
         
 
@@ -406,7 +387,7 @@ class GeoXManageTracks {
         },(erreur)=>{
             let DivDataOfOneTrack = document.getElementById(this._DivDataOfOneTrack)
             DivDataOfOneTrack.innerHTML =""
-            DivDataOfOneTrack.appendChild(CoreXBuild.DivTexte(erreur, "", "Text", "color:red;"))
+            DivDataOfOneTrack.appendChild(NanoXBuild.DivText(erreur, null, "Text", "color:red;"))
         })
     }
 
@@ -509,7 +490,7 @@ class GeoXManageTracks {
         } else {
             // End of Post
             let ConteneurMyPost = document.getElementById(this._ConteneurPosts)
-            ConteneurMyPost.appendChild(CoreXBuild.DivTexte("End of tracks", "", "Text", "color:red; margin-top: 1rem; margin-bottom: 1rem;"))
+            ConteneurMyPost.appendChild(NanoXBuild.DivText("End of tracks", null, "Text", "color:red; margin-top: 1rem; margin-bottom: 1rem;"))
             // Remove WaitingDataManageTrack
             if (document.getElementById("WaitingDataManageTrack")){
                 ConteneurMyPost.removeChild(document.getElementById("WaitingDataManageTrack"))
@@ -527,17 +508,17 @@ class GeoXManageTracks {
             let CurrentpointData = 0
             Data.forEach(element => {
                 // Construction du BoxTracks
-                let BoxTracks = CoreXBuild.DivFlexRowStart("")
+                let BoxTracks = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
                 BoxTracks.style.marginTop = "0.7rem"
                 BoxTracks.style.marginBottom = "0.7rem"
-                BoxTracks.appendChild(CoreXBuild.DivTexte(element.Name,"","Text", "width: 44%; margin-left:1%; padding:0.2rem;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(element.Group,"","TextSmall", "width: 28%; padding:0.2rem;"))
-                BoxTracks.appendChild(CoreXBuild.DivTexte(element.Length + " Km","","TextSmall", "width: 12%; padding:0.2rem;     text-align: right;"))
+                BoxTracks.appendChild(NanoXBuild.DivText(element.Name,null,"Text", "width: 44%; margin-left:1%; padding:0.2rem;"))
+                BoxTracks.appendChild(NanoXBuild.DivText(element.Group,null,"TextSmall", "width: 28%; padding:0.2rem;"))
+                BoxTracks.appendChild(NanoXBuild.DivText(element.Length + " Km","","TextSmall", "width: 12%; padding:0.2rem;     text-align: right;"))
                 if (! element.Public){
-                    let DivPublic = CoreXBuild.Div("", "", "width: 6%;")
+                    let DivPublic = NanoXBuild.Div(null, null, "width: 6%;")
                     DivPublic.style.textAlign = "right"
                     BoxTracks.appendChild(DivPublic)
-                    DivPublic.appendChild(CoreXBuild.Image64(Icon.Key(),"", "IconeInList", ""))
+                    DivPublic.appendChild(NanoXBuild.Image64(Icon.Key(),"", "IconeInList", ""))
                 }
                 BoxTracks.style.cursor = "pointer"
                 BoxTracks.onclick = this.ClickOnTrackData.bind(this, element._id, element.Name)
@@ -552,13 +533,15 @@ class GeoXManageTracks {
                     // Ajout du BoxTracks
                     document.getElementById(this._DivListOfMyTracksData).appendChild(BoxTracks)
                     // Ajout d'une ligne
-                    document.getElementById(this._DivListOfMyTracksData).appendChild(CoreXBuild.Line("100%", "Opacity:0.5;"))
+                    let line = NanoXBuild.Line()
+                    line.style.opacity = "0.5"
+                    document.getElementById(this._DivListOfMyTracksData).appendChild(line)
                 }
             });
         } else {
             // End of Post
             let ConteneurManageTrack = document.getElementById(this._ConteneurListTrack)
-            ConteneurManageTrack.appendChild(CoreXBuild.DivTexte("End of tracks", "", "Text", "color:red; margin-top: 1rem; margin-bottom: 1rem;"))
+            ConteneurManageTrack.appendChild(NanoXBuild.DivText("End of tracks", null, "Text", "color:red; margin-top: 1rem; margin-bottom: 1rem;"))
             // Remove WaitingDataListTrack
             if (document.getElementById("WaitingDataListTrack")){
                 ConteneurManageTrack.removeChild(document.getElementById("WaitingDataListTrack"))
@@ -575,28 +558,28 @@ class GeoXManageTracks {
         // Add InfoOnTrack view
         let InfoTrackView = new InfoOnTrack(Data, this._DivDataOfOneTrack)
         // Add button
-        let DivButtonAction = CoreXBuild.DivFlexRowAr("ButtonAction")
+        let DivButtonAction = NanoXBuild.DivFlexRowSpaceAround("ButtonAction", null, "width: 100%")
         DivDataOfOneTrack.appendChild(DivButtonAction)
         // Button Go To Start
-        let ButtonGo = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go to start"), this.ClickGoToStart.bind(this, Data.StartPoint), "CloseButton", "GoToStart")
+        let ButtonGo = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go to start"), this.ClickGoToStart.bind(this, Data.StartPoint), "GoToStart", "CloseButton")
         DivButtonAction.appendChild(ButtonGo)
         // Button Follow track
-        let ButtonFollow = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.ClickFollowTrack.bind(this, Data._id), "CloseButton", "FollowTrack")
+        let ButtonFollow = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.ClickFollowTrack.bind(this, Data._id), "FollowTrack", "CloseButton")
         DivButtonAction.appendChild(ButtonFollow)
         // Button Update
-        let ButtonUpdate = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Pencil(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data), "CloseButton", "Update")
+        let ButtonUpdate = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Pencil(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data), "CloseButton", "Update")
         DivButtonAction.appendChild(ButtonUpdate)
         // Button Modify
-        let ButtonModify = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.ModifyTrack(), "Modify Track"), this.ClickModifyTrack.bind(this, Data._id, Data.Name, Data.Group, Data.Public, Data.Description), "CloseButton", "Modify")
+        let ButtonModify = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.ModifyTrack(), "Modify Track"), this.ClickModifyTrack.bind(this, Data._id, Data.Name, Data.Group, Data.Public, Data.Description), "Modify", "CloseButton")
         DivButtonAction.appendChild(ButtonModify)
         // Button Delete
-        let ButtonDelete = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Trash(), "Delete Track"), this.ClickDeleteTrack.bind(this, Data._id, Data.Name), "CloseButton", "Delete")
+        let ButtonDelete = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Trash(), "Delete Track"), this.ClickDeleteTrack.bind(this, Data._id, Data.Name), "Delete", "CloseButton")
         DivButtonAction.appendChild(ButtonDelete)
         // Button Link
-        let ButtonLink = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Link(), "Get link"), this.ClickGetLinkOfTrack.bind(this, Data._id), "CloseButton", "Link")
+        let ButtonLink = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Link(), "Get link"), this.ClickGetLinkOfTrack.bind(this, Data._id), "Link", "CloseButton")
         DivButtonAction.appendChild(ButtonLink)
         // Button download GPX
-        let ButtonGPX = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Download(), "GPX"), this.ClickDownloadGPX.bind(this, Data._id, Data.Name), "CloseButton", "GPX")
+        let ButtonGPX = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Download(), "GPX"), this.ClickDownloadGPX.bind(this, Data._id, Data.Name), "GPX", "CloseButton")
         DivButtonAction.appendChild(ButtonGPX)
 
         // Empty
@@ -624,9 +607,6 @@ class GeoXManageTracks {
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-        // On efface le bouton menu action
-        GlobalDisplayAction('Off')
-
         // Start Follow Track on map
         let TrackData = {TrackId: TrackId, TrackGeoJson: TrackGeoJson}
         this._FollowMyTrack = new FollowTrackOnMap(this._ConteneurFollowTrackOnMap, TrackData)
@@ -649,9 +629,9 @@ class GeoXManageTracks {
 
         let ConteneurAddTrack = document.getElementById(this._ConteneurAddTrack)
         // Input Name
-        ConteneurAddTrack.appendChild(CoreXBuild.InputWithLabel("InputBox", "Name:", "Text", "InputTrackName",Name, "Input Text", "text", "Name",))
+        ConteneurAddTrack.appendChild(NanoXBuild.InputWithLabel("InputBox", "Name:", "Text", "InputTrackName",Name, "Input Text", "text", "Name",))
         // Input `Group
-        ConteneurAddTrack.appendChild(CoreXBuild.InputWithLabel("InputBox", "Group:", "Text", "InputTrackGroup",Group, "Input Text", "text", "Group",))
+        ConteneurAddTrack.appendChild(NanoXBuild.InputWithLabel("InputBox", "Group:", "Text", "InputTrackGroup",Group, "Input Text", "text", "Group",))
         // Add AutoComplete
         let me = this
         document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
@@ -675,22 +655,22 @@ class GeoXManageTracks {
             }
         });
         // Description
-        let DivDescription = CoreXBuild.Div("", "InputBox Text", "")
+        let DivDescription = NanoXBuild.Div(null, "InputBox Text")
         ConteneurAddTrack.appendChild(DivDescription)
-        DivDescription.appendChild(CoreXBuild.DivTexte("Description", "", "Text", ""))
-        let DivContDesc = CoreXBuild.Div("DivContDesc", "DivContentEdit TextSmall", "")
+        DivDescription.appendChild(NanoXBuild.DivText("Description", null, "Text", ""))
+        let DivContDesc = NanoXBuild.Div("DivContDesc", "DivContentEdit TextSmall")
         DivContDesc.innerText = Description
         DivContDesc.contentEditable = "True"
         DivDescription.appendChild(DivContDesc)
         // Toggle Public
-        let DivTooglePublic = CoreXBuild.Div("","Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        let DivTooglePublic = NanoXBuild.Div(null,"Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         ConteneurAddTrack.appendChild(DivTooglePublic)
-        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public:", "", "", ""))
-        DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", Public))
+        DivTooglePublic.appendChild(NanoXBuild.DivText("Public:"))
+        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch("TogglePublic", Public))
         // Color
         if (!IsAddTrack){
-            let divColor = CoreXBuild.Div("", "InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; flex-wrap: wrap;")
-            let TextColor = CoreXBuild.DivTexte("Color:", "", "Text", "")
+            let divColor = NanoXBuild.Div(null, "InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; flex-wrap: wrap;")
+            let TextColor = NanoXBuild.DivText("Color:", null, "Text")
             divColor.appendChild(TextColor)
             let inputcolor = document.createElement("input")
             divColor.appendChild(inputcolor)
@@ -701,13 +681,13 @@ class GeoXManageTracks {
             ConteneurAddTrack.appendChild(divColor)
         }
         // Div Button
-        let DivBoxButton = CoreXBuild.Div("", "InputBox", "")
+        let DivBoxButton = NanoXBuild.Div(null, "InputBox")
         ConteneurAddTrack.appendChild(DivBoxButton)
-        let DivButton = CoreXBuild.DivFlexRowAr("")
+        let DivButton = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
         DivBoxButton.appendChild(DivButton)
         if (IsAddTrack){
             // Button Add
-            DivButton.appendChild(CoreXBuild.Button("Select GPX",this.ClickSendAddTrack.bind(this),"Text Button ButtonWidth30", "SelectAndSend"))
+            DivButton.appendChild(NanoXBuild.Button("Select GPX",this.ClickSendAddTrack.bind(this), "SelectAndSend","Text Button ButtonWidth30"))
             //Input file
             var Input = document.createElement("input")
             Input.setAttribute("type","file")
@@ -735,15 +715,15 @@ class GeoXManageTracks {
             DivButton.appendChild(Input)
         } else {
             // Button Update
-            DivButton.appendChild(CoreXBuild.Button("Update Track",this.ClickSendUpdateTrack.bind(this, Id),"Text Button ButtonWidth30", "SelectAndSend"))
+            DivButton.appendChild(NanoXBuild.Button("Update Track",this.ClickSendUpdateTrack.bind(this, Id), "SelectAndSend","Text Button ButtonWidth30"))
         }
         // Button cancel
-        DivButton.appendChild(CoreXBuild.Button("Cancel",this.ClickCancelAddModifyTrack.bind(this),"Text Button ButtonWidth30", "Cancel"))
+        DivButton.appendChild(NanoXBuild.Button("Cancel",this.ClickCancelAddModifyTrack.bind(this), "Cancel","Text Button ButtonWidth30"))
         // Empty space
         ConteneurAddTrack.appendChild(this.BuildEmptySpace())
         // Div Map
         if (IsAddTrack){
-            let DivMapAddTrack = CoreXBuild.Div(this._DivMapAddTrack, "", "")
+            let DivMapAddTrack = NanoXBuild.Div(this._DivMapAddTrack)
             ConteneurAddTrack.appendChild(DivMapAddTrack)
         }
     }
@@ -773,11 +753,11 @@ class GeoXManageTracks {
         if (DivTrackDataOnMap != null){
             document.getElementById(this._ConteneurViewOnMap).removeChild(DivTrackDataOnMap)
         }
-        DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
+        DivTrackDataOnMap = NanoXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap")
         document.getElementById(this._ConteneurViewOnMap).appendChild(DivTrackDataOnMap)
         DivTrackDataOnMap.addEventListener("click", this.ClickOnTrackData.bind(this, TrackId, null))
         // Name and close buttion
-        let divNameAndClose = CoreXBuild.Div("", "", "width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
+        let divNameAndClose = NanoXBuild.Div(null, null, "width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
         DivTrackDataOnMap.appendChild(divNameAndClose)
         // Add track name
         let divname = document.createElement('div')
@@ -853,28 +833,28 @@ class GeoXManageTracks {
         let MaxTrack = 60
         if (this._AllMarkers.length > MaxTrack){
             // Show message box to download all track
-            let InfoBox = CoreXBuild.Div("InfoBox", "InfoBox", "width: 20rem;")
+            let InfoBox = NanoXBuild.Div("InfoBox", "InfoBox", "width: 20rem;")
             // Texte
-            InfoBox.appendChild(CoreXBuild.DivTexte(`Sorry, not possible to load more than ${MaxTrack} tracks...`, "", "", "width: 80%; margin-left: auto; margin-right: auto; margin-bottom: 2rem; margin-top: 1rem;"))
+            InfoBox.appendChild(NanoXBuild.DivText(`Sorry, not possible to load more than ${MaxTrack} tracks...`, null, null, "width: 80%; margin-left: auto; margin-right: auto; margin-bottom: 2rem; margin-top: 1rem;"))
             // Button Close
-            let DivButton = CoreXBuild.DivFlexRowAr("")
+            let DivButton = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
             InfoBox.appendChild(DivButton)
-            DivButton.appendChild(CoreXBuild.Button("Cancel",this.ClickCloseInfox.bind(this),"Text Button ButtonWidth30", "Cancel"))
+            DivButton.appendChild(NanoXBuild.Button("Cancel",this.ClickCloseInfox.bind(this), "Cancel","Text Button ButtonWidth30"))
             // Add InfoBox to body
             document.body.appendChild(InfoBox)
         } else {
             // Show message box to download all track
-            let InfoBox = CoreXBuild.Div("InfoBox", "InfoBox", "width: 20rem;")
+            let InfoBox = NanoXBuild.Div("InfoBox", "InfoBox", "width: 20rem;")
             // Texte
-            InfoBox.appendChild(CoreXBuild.DivTexte("Load all tracks on map", "", "", "width: 80%; margin-left: auto; margin-right: auto; margin-bottom: 2rem; margin-top: 1rem;"))
+            InfoBox.appendChild(NanoXBuild.DivText("Load all tracks on map", null, null, "width: 80%; margin-left: auto; margin-right: auto; margin-bottom: 2rem; margin-top: 1rem;"))
             // Pourcentage
-            let DivProgressRing = CoreXBuild.Div("", "", "display: flex; flex-direction:column; justify-content:flex-start;")
+            let DivProgressRing = NanoXBuild.Div(null, null, "display: flex; flex-direction:column; justify-content:flex-start;")
             InfoBox.appendChild(DivProgressRing)
-            DivProgressRing.appendChild(CoreXBuild.ProgressRing({Id:"MyProgressRing", Fill: "#F5F5F5", Radius:60, RadiusMobile:30, ScaleText:0.7, TextColor:"black", StrokeColor:"var(--CoreX-color)"}))
+            DivProgressRing.appendChild(NanoXBuild.ProgressRing({Id:"MyProgressRing", FillColor: "#F5F5F5", Radius:60, RadiusMobile:30, TextColor:"black", ProgressColor:"var(--NanoX-appcolor)"}))
             // Button Cancel
-            let DivButton = CoreXBuild.DivFlexRowAr("")
+            let DivButton = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
             InfoBox.appendChild(DivButton)
-            DivButton.appendChild(CoreXBuild.Button("Cancel",this.ClickCancelRenderAllTracksLinesOnMap.bind(this),"Text Button ButtonWidth30", "Cancel"))
+            DivButton.appendChild(NanoXBuild.Button("Cancel",this.ClickCancelRenderAllTracksLinesOnMap.bind(this), "Cancel","Text Button ButtonWidth30"))
             // Add InfoBox to body
             document.body.appendChild(InfoBox)
 
@@ -885,11 +865,9 @@ class GeoXManageTracks {
             this._Map.RemoveAllMarkers()
             this._Map.OnClickOnTrack = this.ClickOnTrack.bind(this)
             this._Map.OnClickOnTrackMarker = this.ClickOnTrack.bind(this)
-            // Clear Action List
-            GlobalClearActionList()
             // Add action
-            GlobalAddActionInList("List View", this.LoadListView.bind(this))
-            GlobalAddActionInList("Hide all tracks", this.HideAllTracksLinesOnMap.bind(this))
+            //GlobalAddActionInList("List View", this.LoadListView.bind(this))
+            //GlobalAddActionInList("Hide all tracks", this.HideAllTracksLinesOnMap.bind(this))
             // Start downlaod track
             this.GetAndRenderAllTrackGeoJsonOnMap()
         }
@@ -899,11 +877,9 @@ class GeoXManageTracks {
      * Hide all tracks on map
      */
     HideAllTracksLinesOnMap(){
-        // Clear Action List
-        GlobalClearActionList()
         // Add action
-        GlobalAddActionInList("List View", this.LoadListView.bind(this))
-        GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
+        //GlobalAddActionInList("List View", this.LoadListView.bind(this))
+        //GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
         // remove all tracks
         this._Map.RemoveAllTracks()
         this._Map.OnClickOnTrack = null
@@ -1000,8 +976,8 @@ class GeoXManageTracks {
      * @param {String} Description Description of track
      */
     ClickModifyTrack(TrackId, TrackName, TrackGroup, Public, Description){
-        GlobalReset()
-        this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description)
+        //GlobalReset()
+        //this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description)
     }
 
     /**
@@ -1025,8 +1001,8 @@ class GeoXManageTracks {
      * @param {String} TrackId Id of track
      */
     ClickGetLinkOfTrack(TrackId){
-        let HTMLContent = CoreXBuild.DivFlexColumn()
-        HTMLContent.appendChild(CoreXBuild.DivTexte(window.location.origin + "/getmap/?trackid=" + TrackId, "", "Text", "margin-top: 2rem; margin-bottom: 2rem; user-select: text; -webkit-user-select: text;"))
+        let HTMLContent = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
+        HTMLContent.appendChild(NanoXBuild.DivText(window.location.origin + "/getmap/?trackid=" + TrackId, null, "Text", "margin-top: 2rem; margin-bottom: 2rem; user-select: text; -webkit-user-select: text;"))
         CoreXWindow.BuildWindow(HTMLContent)
     }
 
@@ -1231,8 +1207,6 @@ class GeoXManageTracks {
                 window.scrollTo(0, this._WindowScrollY)
                 break;
         }
-        // show Action Button
-        GlobalDisplayAction('On')
     }
 
     /**
@@ -1260,11 +1234,11 @@ class GeoXManageTracks {
      */
     BuildWaitingBox(){
         // Add WaitingBox
-        let Content = CoreXBuild.DivFlexColumn("")
+        let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Texte waiting
-        Content.appendChild(CoreXBuild.DivTexte("Waiting data...", "", "Text"))
+        Content.appendChild(NanoXBuild.DivText("Waiting data...", null, "Text"))
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Show window
@@ -1283,11 +1257,11 @@ class GeoXManageTracks {
      * @param {String} Error Error message
      */
     ShowErrorMessage(Error){
-        let Content = CoreXBuild.DivFlexColumn("")
+        let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Texte waiting
-        Content.appendChild(CoreXBuild.DivTexte(Error, "", "Text", "color:red;"))
+        Content.appendChild(NanoXBuild.DivText(Error, null, "Text", "color:red;"))
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Show window
@@ -1357,6 +1331,6 @@ class GeoXManageTracks {
 }
 
 // Creation de l'application
-//let MyGeoXManageTracks = new GeoXManageTracks(GlobalCoreXGetAppContentId())
+//let MyGeoXManageTracks = new GeoXManageTracks()
 // Ajout de l'application
 //GlobalCoreXAddApp("My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))

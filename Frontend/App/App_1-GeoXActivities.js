@@ -256,7 +256,7 @@ class GeoXActivities {
     }
 
     BuildSaveTrackVue(TrackId){
-        let Content = NanoXBuild.DivFlexColumn("", null, "width: 100%;")
+        let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
         // Empty space
         Content.appendChild(NanoXBuild.Div(null, null, "height:2vh;"))
         // Titre
@@ -525,7 +525,7 @@ class GeoXActivities {
 
     BuildWaitingBox(){
         // Add WaitingBox
-        let Content = NanoXBuild.DivFlexColumn("", null, "width: 100%;")
+        let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Texte waiting

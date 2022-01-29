@@ -11,27 +11,27 @@ html, body {
 .Titre{
     margin-top: 1vh;
     margin-bottom: 2vh;
-    font-size: var(--TitreNormale);
-    color: var(--CoreX-color);
+    font-size: 2rem;
+    color: var(--NanoX-appcolor);
     word-wrap: break-word;
 }
 
 /* Sous Titre */
 .SousTitre{
-    font-size: calc(var(--TitreNormale)*0.6);
-    color: var(--CoreX-color);
+    font-size: 1.5rem;
+    color: var(--NanoX-appcolor);
 }
 /* Texte */
 .Text{
-    font-size: var(--TexteNomrale);
+    font-size: 1.2rem;
 }
 .TextSmall{
-    font-size: calc(var(--TexteNomrale)*0.7);
+    font-size: 1rem;
     word-wrap: break-word;
 }
 
 .TextBoxTitre{
-    font-size: calc(var(--TexteNomrale)*1.3);
+    font-size: 1.5rem;
     font-family: "nyt-cheltenham", georgia, "times new roman", times, serif;
     color: black;
 }
@@ -41,7 +41,7 @@ html, body {
     margin: 4vh 0vh 1vh 0vh;
     padding: 2vh 2vh 2vh 2vh;
     cursor: pointer;
-    border: 1px solid var(--CoreX-color);
+    border: 1px solid var(--NanoX-appcolor);
     border-radius: 20px;
     text-align: center;
     display: inline-block;
@@ -107,7 +107,7 @@ html, body {
     padding: 1vh 1vh 1vh 1vh;
     width: 50%;
     cursor: pointer;
-    border: 1px solid var(--CoreX-color);
+    border: 1px solid var(--NanoX-appcolor);
     border-radius: 20px;
     text-align: center;
     display: inline-block;
@@ -149,7 +149,7 @@ html, body {
 @media (hover: hover) {
     .DorpDown:hover{
         cursor: pointer;
-        border-color: var(--CoreX-color);
+        border-color: var(--NanoX-appcolor);
         box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
     }
 }
@@ -181,11 +181,11 @@ html, body {
 }
 .Input:focus,
 .Input.focus {
-    border-color: var(--CoreX-color);
+    border-color: var(--NanoX-appcolor);
 }
 @media (hover: hover) {
     .Input:hover{
-        border-color: var(--CoreX-color);
+        border-color: var(--NanoX-appcolor);
     }
 }
 
@@ -219,7 +219,7 @@ html, body {
 }
 
 .TitreInfoOneTrack{
-    font-size: calc(var(--TitreNormale)*0.6);
+    font-size: 1.5rem;
     word-wrap: break-word;
     letter-spacing: -0.01em;
     font-weight: bold;
@@ -329,7 +329,7 @@ html, body {
     border-style: solid;
     border-width: 2px;
     border-radius: 10px;
-    border-color: var(--CoreX-color);
+    border-color: var(--NanoX-appcolor);
     background-color: white;
     padding: 4px;
     margin: 4px;
@@ -351,7 +351,7 @@ html, body {
     border-style: solid;
     border-width: 2px;
     border-radius: 10px;
-    border-color: var(--CoreX-color);
+    border-color: var(--NanoX-appcolor);
     background-color: white;
     padding: 4px;
     margin: 4px;
@@ -386,28 +386,9 @@ html, body {
 only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait),
 screen and (max-width: 700px)
 {
-    .Titre{font-size: var(--TitreIphone);}
-    .SousTitre{font-size: calc(var(--TitreIphone)*0.6);}
-    .Text{font-size: var(--TexteIphone);}
-    .TextSmall{font-size: calc(var(--TexteIphone)*0.7);}
-    .TextBoxTitre{font-size: calc(var(--TexteIphone)*1.3);}
-    .Button{border-radius: 40px;}
     .ButtonCoreXWindow{width: 60%;}
     .InputBox{width: 90%;}
     .Input {padding: 3%;}
     .AppConteneur{width: 95%;}
-    .TitreInfoOneTrack{font-size: calc(var(--TitreIphone)*0.6);}
     .InfoOnTrackMap{height: 40vh;}
-    .ButtonLeftActionSecond{font-size: calc(3vw * 1.5);height: 10VW; width: 10VW; left: 12vw; }
-    .ButtonRightActionSecond{font-size: calc(3vw * 1.5);height: 10VW; width: 10VW; right: 12vw; }
-}
-
-@media screen and (min-width: 1200px)
-{
-    .Titre{font-size: var(--TitreMax);}
-    .SousTitre{font-size: calc(var(--TitreMax)*0.6);}
-    .Text{font-size: var(--TexteMax);}
-    .TextSmall{font-size: calc(var(--TexteMax)*0.7);}
-    .TextBoxTitre{font-size: calc(var(--TexteMax)*1.3);}
-    .Button{border-radius: 40px;}
 }

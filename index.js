@@ -83,7 +83,7 @@ module.exports.Start = Start
 //              TitreMax:"50px" //--CoreX-TitreMax-font-size
 //           },
 //           Color:{
-//              Normale:"rgb(20, 163, 255)" //--CoreX-color
+//              Normale:"rgb(20, 163, 255)" //--NanoX-appcolor
 //           },
 //           AppContent:{
 //              WidthNormale:"100%",
