@@ -31,7 +31,9 @@ class FilterBox {
             let DivToogleHideMyTrack = NanoXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
             Conteneur.appendChild(DivToogleHideMyTrack)
             DivToogleHideMyTrack.appendChild(NanoXBuild.DivText("Hide my Track:"))
-            DivToogleHideMyTrack.appendChild(NanoXBuild.ToggleSwitch("ToggleHideMyTrack", this._InitialData.HideMyTrack))
+            let divToogleSwitch = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 20%;")
+            DivToogleHideMyTrack.appendChild(divToogleSwitch)
+            divToogleSwitch.appendChild(NanoXBuild.ToggleSwitch({Id: "ToggleHideMyTrack", Checked: this._InitialData.HideMyTrack, HeightRem:2}))
         }
 
         // User Group
@@ -72,24 +74,17 @@ class FilterBox {
                 });
             }
         }
-
-        // Empty space
-        Conteneur.appendChild(NanoXBuild.Div(null, null, "height:2vh;"))
-        // Div Button
-        let DivButton = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
-        Conteneur.appendChild(DivButton)
-        // Button save
-        DivButton.appendChild(NanoXBuild.Button("Save",this.ClickSave.bind(this), "Save","Text Button ButtonWidth30"))
-        // Button cancel
-        DivButton.appendChild(NanoXBuild.Button("Cancel",this.CloseBox.bind(this),"Cancel" ,"Text Button ButtonWidth30"))
-        // Empty space
-        Conteneur.appendChild(NanoXBuild.Div(null, null, "height:2vh;"))
+        
+        let ListOfButton = [
+            {Titre: "Save", Action: this.ClickSave.bind(this), Id: null},
+            {Titre: "Cancel", Action: this.CloseBox.bind(this), Id: null}
+        ]
         // Build window
-        CoreXWindow.BuildWindow(Conteneur)
+        NanoXBuild.PopupCreate(Conteneur, ListOfButton)
     }
 
     CloseBox(){
-        CoreXWindow.DeleteWindow()
+        NanoXBuild.PopupDelete()
     }
 
     ClickSave(){
@@ -101,7 +96,7 @@ class FilterBox {
         if(this._InitialData.Group != undefined){Filter.Group = document.getElementById("InputTrackGroup").value}
 
         // close window
-        CoreXWindow.DeleteWindow()
+        NanoXBuild.PopupDelete()
         // Start save action
         this.Save(Filter)
     }

@@ -666,7 +666,7 @@ class GeoXManageTracks {
         let DivTooglePublic = NanoXBuild.Div(null,"Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         ConteneurAddTrack.appendChild(DivTooglePublic)
         DivTooglePublic.appendChild(NanoXBuild.DivText("Public:"))
-        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch("TogglePublic", Public))
+        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id: "TogglePublic",Checked: Public}))
         // Color
         if (!IsAddTrack){
             let divColor = NanoXBuild.Div(null, "InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; flex-wrap: wrap;")
@@ -1003,7 +1003,7 @@ class GeoXManageTracks {
     ClickGetLinkOfTrack(TrackId){
         let HTMLContent = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
         HTMLContent.appendChild(NanoXBuild.DivText(window.location.origin + "/getmap/?trackid=" + TrackId, null, "Text", "margin-top: 2rem; margin-bottom: 2rem; user-select: text; -webkit-user-select: text;"))
-        CoreXWindow.BuildWindow(HTMLContent)
+        NanoXBuild.PopupCreate(HTMLContent)
     }
 
     /**
@@ -1242,14 +1242,14 @@ class GeoXManageTracks {
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Show window
-        CoreXWindow.BuildWindow(Content)
+        NanoXBuild.PopupCreate(Content)
     }
 
     /**
      * Hide wainting Box
      */
     RemoveWaitingBox(){
-        CoreXWindow.DeleteWindow()
+        NanoXBuild.PopupDelete()
     }
 
     /**
@@ -1265,7 +1265,7 @@ class GeoXManageTracks {
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Show window
-        CoreXWindow.BuildWindow(Content)
+        NanoXBuild.PopupCreate(Content)
     }
 
     /**

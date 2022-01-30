@@ -67,10 +67,10 @@ class GeoXActivities {
                 this._AllMarkers = []
             }
             // Button Map
-            NanoXClearMenuButtonLeft()
-            NanoXAddMenuButtonLeft("ActionMap", "Map or Post", `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`, this.ClickOnToogleMapPost.bind(this))
+            NanoXClearMenuButtonRight()
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`, this.ClickOnToogleMapPost.bind(this))
             // Button Filter
-            NanoXAddMenuButtonLeft("ButtonFilter", "Filter", `<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`, this.ClickOnFilter.bind(this))
+            NanoXAddMenuButtonRight("ButtonFilter", "Filter", `<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`, this.ClickOnFilter.bind(this))
             // Titre de l'application
             Conteneur.appendChild(NanoXBuild.DivText("Activities", "TitreActivities", "Titre"))
             // DivApp
@@ -113,16 +113,18 @@ class GeoXActivities {
 
     GetPosts(){
         let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: true}
-        GlobalCallApiPromise("ApiGetAllPost", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/post/", FctData).then((reponse)=>{
             this.RenderPosts(reponse)
         },(erreur)=>{
-            alert("Error: " + erreur)
+            // Clear view
+            this._DivApp.innerHTML=""
+            this._DivApp.appendChild(this.GetDivError(erreur))
         })
     }
 
     GetDivError(MyError){
         let diverror = document.createElement('div')
-        diverror.innerText = MyError
+        diverror.innerHTML = MyError
         diverror.style.color = "red"
         diverror.style.margin = "2rem"
         return diverror
@@ -276,20 +278,17 @@ class GeoXActivities {
         let DivTooglePublic = NanoXBuild.Div(null,"Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Content.appendChild(DivTooglePublic)
         DivTooglePublic.appendChild(NanoXBuild.DivText("Public Track:"))
-        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch("TogglePublic", true))
+        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id:"TogglePublic",Checked: true}))
         // Error Text
         Content.appendChild(NanoXBuild.DivText("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh; height: 4vh;"))
-        // Div Button
-        let DivButton = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
-        Content.appendChild(DivButton)
-        // Button save
-        DivButton.appendChild(NanoXBuild.Button("Save",this.SaveToMyTrack.bind(this, TrackId),"SaveTrack", "Text Button ButtonWidth30"))
-        // Button cancel
-        DivButton.appendChild(NanoXBuild.Button("Cancel",this.CancelSaveToMyTrack.bind(this),"Cancel", "Text Button ButtonWidth30"))
-        // Empty space
-        Content.appendChild(NanoXBuild.Div(null, null, "height:2vh;"))
+        
+        let ListOfButton = [
+            {Titre: "Save", Action: this.SaveToMyTrack.bind(this, TrackId), Id: "SaveTrack"},
+            {Titre: "Cancel", Action: this.CancelSaveToMyTrack.bind(this), Id: "Cancel"}
+        ]
         // Open Window
-        CoreXWindow.BuildWindow(Content)
+        NanoXBuild.PopupCreate(Content, ListOfButton)
+
         // Add AutoComplete
         let me = this
         autocomplete({
@@ -319,7 +318,7 @@ class GeoXActivities {
      * Cancel Save track view
      */
     CancelSaveToMyTrack(){
-        CoreXWindow.DeleteWindow()
+        NanoXBuild.PopupDelete()
     }
 
     SaveToMyTrack(TrackId){
@@ -337,7 +336,7 @@ class GeoXActivities {
             let FctData = {Action: "CopyTrack", CopyTrackData : {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}}
             GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
                 // Delete Window
-                CoreXWindow.DeleteWindow()
+                NanoXBuild.PopupDelete()
             },(erreur)=>{
                 document.getElementById("ErrorSaveTrack").innerText = erreur
                 document.getElementById("SaveTrack").disabled = false
@@ -533,11 +532,11 @@ class GeoXActivities {
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Show window
-        CoreXWindow.BuildWindow(Content)
+        NanoXBuild.PopupCreate(Content)
     }
 
     RemoveWaitingBox(){
-        CoreXWindow.DeleteWindow()
+        NanoXBuild.PopupDelete()
     }
 
     RenderTrackToFollowAndMap(TrackId, TrackGeoJson){

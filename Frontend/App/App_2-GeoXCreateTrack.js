@@ -603,7 +603,7 @@ class GeoXCreateTrack {
         let DivToogle = NanoXBuild.Div(null,null, "width: 100%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; margin: 1vh 0vh;")
         DivInfoBox.appendChild(DivToogle)
         DivToogle.appendChild(NanoXBuild.DivText("Auto:", null, "TextTrackInfo", "color: white; margin-left: 1%; margin-right: 1vh;"))
-        let ToogleAuto = NanoXBuild.ToggleSwitch("ToggleAuto", this._AutoRouteBehavior)
+        let ToogleAuto = NanoXBuild.ToggleSwitch({Id: "ToggleAuto", Checked: this._AutoRouteBehavior})
         DivToogle.appendChild(ToogleAuto)
         ToogleAuto.addEventListener('change', (event) => {
             if (event.target.checked) {
@@ -629,7 +629,7 @@ class GeoXCreateTrack {
             let DivToogleModExistingTrack = NanoXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
             Contener.appendChild(DivToogleModExistingTrack)
             DivToogleModExistingTrack.appendChild(NanoXBuild.DivText("Modify this track:"))
-            DivToogleModExistingTrack.appendChild(NanoXBuild.ToggleSwitch("ToggleExistingTrack", true))
+            DivToogleModExistingTrack.appendChild(NanoXBuild.ToggleSwitch({Id: "ToggleExistingTrack", Checked: true}))
             
             // Div Input
             let DivInput = NanoXBuild.DivFlexColumn("DivInput", null, "width: 100%;")
@@ -650,27 +650,20 @@ class GeoXCreateTrack {
             let DivTooglePublic = NanoXBuild.Div(null,"Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
             DivInput.appendChild(DivTooglePublic)
             DivTooglePublic.appendChild(NanoXBuild.DivText("Public Track:"))
-            DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch("TogglePublic", this._TrackPublic))
+            DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id: "TogglePublic",Checked: this._TrackPublic}))
 
             // DivMap
             let DivMap = NanoXBuild.Div("DivMap", null, "width: 600px;")
             Contener.appendChild(DivMap)
 
-            // Empty space
-            Contener.appendChild(NanoXBuild.Div(null, null, "height:2vh;"))
-
-            // Div Button
-            let DivButton = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
-            Contener.appendChild(DivButton)
-            // Button save
-            DivButton.appendChild(NanoXBuild.Button("Save",this.SendSaveTrack.bind(this, DivInput, DivMap), "Save","Text Button ButtonWidth30"))
-            // Button cancel
-            DivButton.appendChild(NanoXBuild.Button("Cancel",this.CancelSaveTrack.bind(this), "Cancel","Text Button ButtonWidth30"))
-            // Empty space
-            Contener.appendChild(NanoXBuild.Div(null, null, "height:2vh;"))
+            let ListOfButton = [
+                {Titre: "Save", Action: this.SendSaveTrack.bind(this, DivInput, DivMap), Id: "Save"},
+                {Titre: "Cancel", Action: this.CancelSaveTrack.bind(this), Id: "Cancel"}
+            ]
 
             // Build window
-            CoreXWindow.BuildWindow(Contener)
+            NanoXBuild.PopupCreate(Contener, ListOfButton)
+
             // Add AutoComplete
             let me = this
             document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
@@ -762,7 +755,7 @@ class GeoXCreateTrack {
                 let FctData = {Action: "Add", TrackData : Track}
                 GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
                     // Delete save window
-                    CoreXWindow.DeleteWindow()
+                    NanoXBuild.PopupDelete()
                     // Delete Map
                     this.DeleteMap()
                     // Go To Home
@@ -779,7 +772,7 @@ class GeoXCreateTrack {
     }
 
     CancelSaveTrack(){
-        CoreXWindow.DeleteWindow()
+        NanoXBuild.PopupDelete()
     }
 
     async GetRoute(PointA, PointB){

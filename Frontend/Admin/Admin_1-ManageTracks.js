@@ -240,7 +240,7 @@ class GeoXManageTracks {
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Show window
-        CoreXWindow.BuildWindow(Content)
+        NanoXBuild.PopupCreate(Content)
     }
 
     /**

@@ -49,7 +49,10 @@ class HomePage{
     }
 
     GetPosts(){
-        fetch("/post/public/" + this._PageOfPosts).then((response) => {
+        let url = "/post/public/"
+        let param = {Page : this._PageOfPosts}
+        url += '?' + ( new URLSearchParams( param ) ).toString()
+        fetch(url).then((response) => {
             if (response.ok) {
                 return response.json();
             } else {
@@ -57,11 +60,7 @@ class HomePage{
             }
         })
         .then((responseJson) => {
-            if (responseJson.Error){
-                document.getElementById(this._IdDivApp).appendChild(this.GetDivError(responseJson.ErrorMsg))
-            } else {
-                this.RenderPosts(responseJson.Data)
-            }
+            this.RenderPosts(responseJson)
         })
         .catch((error) => {
             let divapp = document.getElementById(this._IdDivApp)
