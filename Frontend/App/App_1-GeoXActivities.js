@@ -191,10 +191,12 @@ class GeoXActivities {
         document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
         let FctData = {PostId: Id}
-        GlobalCallApiPromise("ApiGetPostData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/post/Id").then((reponse)=>{
             this.RenderTrackData(reponse)
         },(erreur)=>{
-            alert("Error: " + erreur)
+            // Clear view
+            this._DivApp.innerHTML=""
+            this._DivApp.appendChild(this.GetDivError(erreur))
         })
     }
 
