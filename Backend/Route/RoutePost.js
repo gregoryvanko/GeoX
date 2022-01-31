@@ -4,27 +4,31 @@ const express = require("@gregvanko/nanox").Express
 const router = express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 
-// Public Get liste of x public post based on page number
-router.get("/public/", (req, res) => {
-    GetPostOfPage(req.query, res)
+// Public Get liste of x post based on page number
+router.get("/public/:page", (req, res) => {
+    let reqpage = req.params.page
+    let Parametres = {Page : reqpage}
+    GetPostOfPage(Parametres, res)
 })
 
-// Get liste of x public post based on page number and used in app
+// Get liste of x post based on page number and used in app
 router.get("/", AuthBasic, (req, res) => {
-    GetPostOfPage(req.query, res, req.user)
+    let Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter), AllPublicPost: req.query.AllPublicPost}
+    GetPostOfPage(Parametres, res, req.user)
 })
 
-async function GetPostOfPage (ReqQuery, res, user = null){
+async function GetPostOfPage (Parametres, res, user = null){
+    console.log(Parametres)
     let Reponse = []
     let numberofitem = 5
-    let cursor = ReqQuery.Page * numberofitem
+    let cursor = Parametres.Page * numberofitem
     
     let query = {Public: true}
-    if (ReqQuery.AllPublicPost != undefined){
-        if(ReqQuery.AllPublicPost){
-            query = (ReqQuery.Filter)? FilterTracks(JSON.parse(ReqQuery.Filter), user.User, ReqQuery.AllPublicPost) : {Public: true}
+    if (Parametres.AllPublicPost != undefined){
+        if(Parametres.AllPublicPost){
+            query = (Parametres.Filter)? FilterTracks(Parametres.Filter, user.User, Parametres.AllPublicPost) : {Public: true}
         } else {
-            query = (ReqQuery.Filter)? FilterTracks(JSON.parse(ReqQuery.Filter), user.User, ReqQuery.AllPublicPost) : {Owner: user.User}
+            query = (Parametres.Filter)? FilterTracks(Parametres.Filter, user.User, Parametres.AllPublicPost) : {Owner: user.User}
         }
     }
 

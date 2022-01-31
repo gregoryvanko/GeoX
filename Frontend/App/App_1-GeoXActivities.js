@@ -190,8 +190,8 @@ class GeoXActivities {
         divwaiting.style.marginBottom = "2rem"
         document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
-        let FctData = {PostId: Id}
-        NanoXApiGet("/post/Id").then((reponse)=>{
+        //let FctData = {PostId: Id}
+        NanoXApiGet("/track/" + Id).then((reponse)=>{
             this.RenderTrackData(reponse)
         },(erreur)=>{
             // Clear view
