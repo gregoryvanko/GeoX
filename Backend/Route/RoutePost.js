@@ -6,8 +6,7 @@ const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 
 // Public Get liste of x post based on page number
 router.get("/public/:page", (req, res) => {
-    let reqpage = req.params.page
-    let Parametres = {Page : reqpage}
+    let Parametres = {Page : req.params.page}
     GetPostOfPage(Parametres, res)
 })
 
@@ -18,7 +17,6 @@ router.get("/", AuthBasic, (req, res) => {
 })
 
 async function GetPostOfPage (Parametres, res, user = null){
-    console.log(Parametres)
     let Reponse = []
     let numberofitem = 5
     let cursor = Parametres.Page * numberofitem
@@ -37,7 +35,7 @@ async function GetPostOfPage (Parametres, res, user = null){
     ModelTracks.find(query, projection, (err, result) => {
         if (err) {
             res.status(500).send(err)
-            LogError(`GetPostOfPage db eroor: ${err}`)
+            LogError(`GetPostOfPage db eroor: ${err}`, user)
         } else {
             if (result.length != 0){
                 Reponse = result

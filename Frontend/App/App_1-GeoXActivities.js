@@ -190,8 +190,7 @@ class GeoXActivities {
         divwaiting.style.marginBottom = "2rem"
         document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
-        //let FctData = {PostId: Id}
-        NanoXApiGet("/track/" + Id).then((reponse)=>{
+        NanoXApiGet("/track/onetrack/" + Id).then((reponse)=>{
             this.RenderTrackData(reponse)
         },(erreur)=>{
             // Clear view
@@ -250,10 +249,12 @@ class GeoXActivities {
 
     ClickSaveToMyTrack(TrackId){
         // Get all group of user
-        GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
+        NanoXApiGet("/track/mygroups").then((reponse)=>{
             this._UserGroup = reponse
         },(erreur)=>{
-            console.log(erreur)
+            // Clear view
+            this._DivApp.innerHTML=""
+            this._DivApp.appendChild(this.GetDivError(erreur))
         })
         // Open save box
         this.BuildSaveTrackVue(TrackId)
@@ -261,8 +262,6 @@ class GeoXActivities {
 
     BuildSaveTrackVue(TrackId){
         let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
-        // Empty space
-        Content.appendChild(NanoXBuild.Div(null, null, "height:2vh;"))
         // Titre
         Content.append(NanoXBuild.DivText("Save Track", null, "SousTitre"))
         // Input Name
@@ -280,9 +279,9 @@ class GeoXActivities {
         let DivTooglePublic = NanoXBuild.Div(null,"Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Content.appendChild(DivTooglePublic)
         DivTooglePublic.appendChild(NanoXBuild.DivText("Public Track:"))
-        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id:"TogglePublic",Checked: true}))
+        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id:"TogglePublic",Checked: true, HeightRem: 2}))
         // Error Text
-        Content.appendChild(NanoXBuild.DivText("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh; height: 4vh;"))
+        Content.appendChild(NanoXBuild.DivText("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh;"))
         
         let ListOfButton = [
             {Titre: "Save", Action: this.SaveToMyTrack.bind(this, TrackId), Id: "SaveTrack"},
@@ -335,10 +334,17 @@ class GeoXActivities {
             let NewGroup = document.getElementById("InputTrackGroup").value
             let NewPublic = document.getElementById("TogglePublic").checked
             let NewDescription = document.getElementById("DivContDesc").innerText
-            let FctData = {Action: "CopyTrack", CopyTrackData : {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}}
-            GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
-                // Delete Window
+
+            let CopyTrackData = {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
+
+            NanoXApiPost("/track/CopyTrack", CopyTrackData).then((reponse)=>{
+                // Delete Window info copy
                 NanoXBuild.PopupDelete()
+                // Show Message Track saved
+                let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
+                Content.append(NanoXBuild.DivText("Save Track", null, "SousTitre"))
+                Content.append(NanoXBuild.DivText("Track saved", null, "Text", "margin-top: 1rem;"))
+                NanoXBuild.PopupCreate(Content)
             },(erreur)=>{
                 document.getElementById("ErrorSaveTrack").innerText = erreur
                 document.getElementById("SaveTrack").disabled = false
