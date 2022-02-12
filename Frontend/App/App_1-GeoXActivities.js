@@ -70,7 +70,7 @@ class GeoXActivities {
             NanoXClearMenuButtonRight()
             NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(), this.ClickOnToogleMapPost.bind(this))
             // Button Filter
-            NanoXAddMenuButtonRight("ButtonFilter", "Filter", `<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`, this.ClickOnFilter.bind(this))
+            NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(), this.ClickOnFilter.bind(this))
             // Titre de l'application
             Conteneur.appendChild(NanoXBuild.DivText("Activities", "TitreActivities", "Titre"))
             // DivApp

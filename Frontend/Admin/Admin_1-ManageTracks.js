@@ -49,7 +49,7 @@ class GeoXManageTracks {
         Conteneur.appendChild(NanoXBuild.DivText("All Tracks", null, "Titre"))
         // Add Button filter
         NanoXClearMenuButtonLeft()
-        NanoXAddMenuButtonLeft("ButtonFilter", "Filter", `<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`, this.ClickOnFilter.bind(this))
+        NanoXAddMenuButtonLeft("ButtonFilter", "Filter", Icon.Filter(), this.ClickOnFilter.bind(this))
 
         // Div pour le titre des colonnes
         let BoxTitre = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")

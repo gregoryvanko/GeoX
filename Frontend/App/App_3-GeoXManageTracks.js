@@ -166,7 +166,7 @@ class GeoXManageTracks {
         NanoXClearMenuButtonLeft()
         NanoXAddMenuButtonLeft("ActionLeft", "Map or Post", `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`, this.LoadView.bind(this, this._ViewMap))
         // Button Filter
-        NanoXAddMenuButtonLeft("ButtonLeftActionSecond", "Filter", `<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`, this.ClickOnFilter.bind(this))
+        NanoXAddMenuButtonLeft("ButtonLeftActionSecond", "Filter", Icon.Filter(), this.ClickOnFilter.bind(this))
 
         // Button Add track
         ConteneurMyPost.appendChild(NanoXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddModifyTrack.bind(this),"ButtonAddTrack","ButtonRightActionSecond"))
@@ -211,7 +211,7 @@ class GeoXManageTracks {
         // Add Button Back
         //ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromListTrack.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
         // Button Filter
-        //ConteneurManageTrack.appendChild(NanoXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
+        //ConteneurManageTrack.appendChild(NanoXBuild.Button(Icon.Filter(),this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
 
         // Div pour le titre des colonnes
         let BoxTitre = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
@@ -301,7 +301,7 @@ class GeoXManageTracks {
         // Add button manage my post
         //ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewPost), "ActionLeft",  Icon.Liste()))
         // Button Filter
-        //ConteneurViewOnMap.appendChild(NanoXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
+        //ConteneurViewOnMap.appendChild(NanoXBuild.Button(Icon.Filter(),this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
         // Ajout du div qui va contenir la map
         ConteneurViewOnMap.appendChild(NanoXBuild.Div(this._IdDivMap, null, "height: 100vh; width: 100%;"))
         this._Map = new GeoXMap(this._IdDivMap) 
