@@ -66,11 +66,14 @@ class GeoXActivities {
                 this._PageOfMarkers = 0
                 this._AllMarkers = []
             }
-            // Button Map
+            // Set menu bar not transparent
+            NanoXSetMenuBarTransparent(false)
+            // Clear menu button right
             NanoXClearMenuButtonRight()
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(), this.ClickOnToogleMapPost.bind(this))
+            // Button Map
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
             // Button Filter
-            NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(), this.ClickOnFilter.bind(this))
+            NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
             // Titre de l'application
             Conteneur.appendChild(NanoXBuild.DivText("Activities", "TitreActivities", "Titre"))
             // DivApp
@@ -83,8 +86,10 @@ class GeoXActivities {
             this.GetPosts()
         // Si on presente la vue Map
         } else {
+            // Set menu bar transparent
+            NanoXSetMenuBarTransparent(true)
             // Change button image
-            document.getElementById("ActionMap").innerHTML = Icon.Liste()
+            document.getElementById("ActionMap").innerHTML = Icon.Liste(NanoXGetColorIconMenuBar())
             // Ajout du div qui va contenir la map
             Conteneur.appendChild(NanoXBuild.Div(this._IdDivMap, null, "height: 100vh; width: 100%;"))
             this._Map = new GeoXMap(this._IdDivMap) 
@@ -181,6 +186,17 @@ class GeoXActivities {
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
         divTrackInfo.style.display = "flex"
 
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // clear menu button right
+        NanoXClearMenuButtonRight()
+        // Set menu bar transparent
+        NanoXSetMenuBarTransparent(true)
+        // hide name in menu bar
+        NanoXShowNameInMenuBar(false)
+        // Add menu button lef
+        NanoXAddMenuButtonLeft("ActionLeftBack", "Back", Icon.LeftArrow(NanoXGetColorIconMenuBar()), this.RemoveTrackData.bind(this))
+
         // Text
         let divwaiting = document.createElement('div')
         divwaiting.id = "DivWaiting"
@@ -204,10 +220,6 @@ class GeoXActivities {
 
         // Remove waiting
         divbackground.removeChild(document.getElementById("DivWaiting"))
-
-        // Add Button Back
-        NanoXClearMenuButtonLeft()
-        NanoXAddMenuButtonLeft("ActionLeftBack", "Back", `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`, this.RemoveTrackData.bind(this))
 
         // Add InfoOnTrack
         let DivData = NanoXBuild.DivFlexColumn("DivData", null, "width: 100%;")
@@ -242,6 +254,27 @@ class GeoXActivities {
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
         divTrackInfo.style.display = "none"
         document.getElementById(this._IdDivContentTrackInfo).innerHTML = ""
+
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // clear menu button right
+        NanoXClearMenuButtonRight()
+        // Show name in menu bar
+        NanoXShowNameInMenuBar(true)
+        // Set Menu bar
+        if (this._IsPostPresentation){
+            // Set menu bar not transparent
+            NanoXSetMenuBarTransparent(false)
+            // Add Button Map 
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+        } else {
+            // Set menu bar transparent
+            NanoXSetMenuBarTransparent(true)
+            // Add Button Map 
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Liste(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+        }
+        // Add Button Filter
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
 
         // Scroll to
         window.scrollTo(0, this._WindowScrollY);
@@ -443,7 +476,7 @@ class GeoXActivities {
         divname.style.textAlign ="left"
         divname.style.marginBottom ="0.5rem"
         divname.style.marginLeft ="0.5rem"
-        divname.classList.add("Text")
+        divname.classList.add("TextSmall")
         divNameAndClose.appendChild(divname)
         // Add button
         let button = document.createElement('button')

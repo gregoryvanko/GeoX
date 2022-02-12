@@ -209,7 +209,7 @@ class GeoXManageTracks {
         ConteneurManageTrack.style.display = "flex"
 
         // Add Button Back
-        //ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromListTrack.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
+        //ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromListTrack.bind(this), "ActionLeftBack",  Icon.LeftArrow(NanoXGetColorIconMenuBar())))
         // Button Filter
         //ConteneurManageTrack.appendChild(NanoXBuild.Button(Icon.Filter(),this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
 
@@ -333,7 +333,7 @@ class GeoXManageTracks {
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
         // Add Button Back
-        //ConteneurTrackData.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromTrackData.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
+        //ConteneurTrackData.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromTrackData.bind(this), "ActionLeftBack",  Icon.LeftArrow(NanoXGetColorIconMenuBar())))
         // Div Data of track
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack)
         DivDataOfOneTrack.style.width = "45rem"

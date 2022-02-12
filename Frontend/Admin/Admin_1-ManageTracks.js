@@ -93,7 +93,7 @@ class GeoXManageTracks {
 
         // Add Button Back
         NanoXClearMenuButtonLeft()
-        NanoXAddMenuButtonLeft("ActionLeftBack", "Back", `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`, this.ClickOnBackFromTrackData.bind(this))
+        NanoXAddMenuButtonLeft("ActionLeftBack", "Back", Icon.LeftArrow(NanoXGetColorIconMenuBar()), this.ClickOnBackFromTrackData.bind(this))
 
         // Div Data of track
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack, null, "width: 100%;")
