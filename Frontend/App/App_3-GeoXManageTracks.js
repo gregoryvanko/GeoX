@@ -299,7 +299,7 @@ class GeoXManageTracks {
         //GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
 
         // Add button manage my post
-        //ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewPost), "ActionLeft",  `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`))
+        //ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewPost), "ActionLeft",  Icon.Liste()))
         // Button Filter
         //ConteneurViewOnMap.appendChild(NanoXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
         // Ajout du div qui va contenir la map

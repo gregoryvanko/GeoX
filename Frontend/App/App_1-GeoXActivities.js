@@ -68,7 +68,7 @@ class GeoXActivities {
             }
             // Button Map
             NanoXClearMenuButtonRight()
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`, this.ClickOnToogleMapPost.bind(this))
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(), this.ClickOnToogleMapPost.bind(this))
             // Button Filter
             NanoXAddMenuButtonRight("ButtonFilter", "Filter", `<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`, this.ClickOnFilter.bind(this))
             // Titre de l'application
@@ -84,7 +84,7 @@ class GeoXActivities {
         // Si on presente la vue Map
         } else {
             // Change button image
-            document.getElementById("ActionMap").innerHTML = `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`
+            document.getElementById("ActionMap").innerHTML = Icon.Liste()
             // Ajout du div qui va contenir la map
             Conteneur.appendChild(NanoXBuild.Div(this._IdDivMap, null, "height: 100vh; width: 100%;"))
             this._Map = new GeoXMap(this._IdDivMap) 
@@ -355,11 +355,10 @@ class GeoXActivities {
     }
 
     ClickDownloadGPX(Id, Name){
-        let FctData = {TrackId: Id, GetData: "GPX"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/track/gpx/" + Id).then((reponse)=>{
             var link = document.createElement('a')
             link.download = `${Name}.gpx`
-            var blob = new Blob([reponse], {typde: 'text/plain'})
+            var blob = new Blob([reponse.GpxData], {type: 'text/plain'})
             link.href = window.URL.createObjectURL(blob)
             link.click()
         },(erreur)=>{
@@ -385,7 +384,7 @@ class GeoXActivities {
      */
     GetAllMarkersByPage(){
         let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost, AllPublicPost: true}
-        GlobalCallApiPromise("ApiGetAllPostMarkers", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/post/marker/", FctData).then((reponse)=>{
             if (reponse.length != 0){
                 this.RenderMarkersOnMap(reponse)
                 this._PageOfMarkers ++
@@ -485,10 +484,9 @@ class GeoXActivities {
     }
 
     RenderTrackGeoJSonOnMap(Map, TrackId){
-        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
-            Map.RemoveAllTracks()
-            Map.AddTrackOnMap(TrackId, reponse, false, null)        
+        Map.RemoveAllTracks()
+        NanoXApiGet("/track/geojson/" + TrackId).then((reponse)=>{
+            Map.AddTrackOnMap(TrackId, reponse.GeoJsonData, false, null)        
         },(erreur)=>{
             alert(erreur)
         })
@@ -520,10 +518,9 @@ class GeoXActivities {
         // Add wainting box
         this.BuildWaitingBox()
         // Get Track Data
-        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/track/geojson/" + TrackId).then((reponse)=>{
             this.RemoveWaitingBox()
-            this.RenderTrackToFollowAndMap(TrackId, reponse)
+            this.RenderTrackToFollowAndMap(TrackId, reponse.GeoJsonData)
         },(erreur)=>{
             this.RemoveWaitingBox()
             alert(erreur)
@@ -610,4 +607,4 @@ class GeoXActivities {
 // Creation de l'application
 let MyGeoXActivities = new GeoXActivities()
 // Ajout de l'application
-NanoXAddModule("Activities", null, MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)
+NanoXAddModule("Activities", IconGeoX.GeoXMapIcon(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)

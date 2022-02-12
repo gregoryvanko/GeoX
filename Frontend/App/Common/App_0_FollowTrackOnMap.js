@@ -66,18 +66,18 @@ class FollowTrackOnMap {
         // ConteneurData
         let ConteneurData = NanoXBuild.DivFlexRowSpaceAround("ConteneurData", null, "width: 100%")
         ConteneurData.style.display = "none"
-        ConteneurData.style.width = "78%"
+        ConteneurData.style.width = "86%"
         Conteneur.appendChild(ConteneurData)
         // Boutton stop
-        let ConteneurStop = NanoXBuild.Div("ConteneurStop", null, "width: 20%; display: flex; flex-direction:column; justify-content:center;")
+        let ConteneurStop = NanoXBuild.Div("ConteneurStop", null, "width: 12%; display: flex; flex-direction:column; justify-content:center;")
         Conteneur.appendChild(ConteneurStop)
         ConteneurStop.appendChild(NanoXBuild.Button (`<img src="${Icon.Stop()}" alt="icon" width="30" height="30">`, this.StopFollowTrack.bind(this), null, "ButtonInfoBoxNav"))
         // Pourcentage
-        let DivProgressRing = NanoXBuild.Div(null, null, "width: 38%; display: flex; flex-direction:column; justify-content:flex-start;")
+        let DivProgressRing = NanoXBuild.Div(null, null, "width: 28%; display: flex; flex-direction:column; justify-content:flex-start;")
         ConteneurData.appendChild(DivProgressRing)
         DivProgressRing.appendChild(NanoXBuild.ProgressRing({Id:"MyProgressRing", Radius:30, RadiusMobile:30, TextColor:"white", ProgressColor:"var(--NanoX-appcolor)"}))
         // Div Distance
-        let DivDistane = NanoXBuild.Div(null, null, "width: 60%; display: flex; flex-direction:column; justify-content:center;")
+        let DivDistane = NanoXBuild.Div(null, null, "width: 70%; display: flex; flex-direction:column; justify-content:center;")
         ConteneurData.appendChild(DivDistane)
         let DivDone = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
         DivDistane.appendChild(DivDone)
