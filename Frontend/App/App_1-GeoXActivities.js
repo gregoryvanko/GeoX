@@ -57,6 +57,9 @@ class GeoXActivities {
         let Conteneur = NanoXBuild.DivFlexColumn("Conteneur", null, "width: 100%;")
         this._DivApp.appendChild(Conteneur)
 
+        // Build Menu Button
+        this.BuildMenuButton()
+
         // si on prensente la vue sous forme de post
         if (this._IsPostPresentation){
             // si on avait affiché la carte on la supprime
@@ -66,14 +69,6 @@ class GeoXActivities {
                 this._PageOfMarkers = 0
                 this._AllMarkers = []
             }
-            // Set menu bar not translucide
-            NanoXSetMenuBarTranslucide(false)
-            // Clear menu button right
-            NanoXClearMenuButtonRight()
-            // Button Map
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
-            // Button Filter
-            NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
             // Titre de l'application
             Conteneur.appendChild(NanoXBuild.DivText("Activities", "TitreActivities", "Titre"))
             // DivApp
@@ -86,10 +81,6 @@ class GeoXActivities {
             this.GetPosts()
         // Si on presente la vue Map
         } else {
-            // Set menu bar translucide
-            NanoXSetMenuBarTranslucide(true)
-            // Change button image
-            document.getElementById("ActionMap").innerHTML = Icon.Liste(NanoXGetColorIconMenuBar())
             // Ajout du div qui va contenir la map
             Conteneur.appendChild(NanoXBuild.Div(this._IdDivMap, null, "height: 100vh; width: 100%;"))
             this._Map = new GeoXMap(this._IdDivMap) 
@@ -108,6 +99,29 @@ class GeoXActivities {
 
         // DivFollowTrack
         this._DivApp.appendChild(NanoXBuild.Div(this._IdDivMapFollow, null, "height: 100vh; width: 100%; display: none;")) 
+    }
+
+    BuildMenuButton(){
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // clear menu button right
+        NanoXClearMenuButtonRight()
+        // Show name in menu bar
+        NanoXShowNameInMenuBar(true)
+        // Set Menu bar
+        if (this._IsPostPresentation){
+            // Set menu bar not translucide
+            NanoXSetMenuBarTranslucide(false)
+            // Add Button Map 
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+        } else {
+            // Set menu bar translucide
+            NanoXSetMenuBarTranslucide(true)
+            // Add Button Map 
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Liste(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+        }
+        // Add Button Filter
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
     }
 
     BuildEmptySpace(){
@@ -255,26 +269,8 @@ class GeoXActivities {
         divTrackInfo.style.display = "none"
         document.getElementById(this._IdDivContentTrackInfo).innerHTML = ""
 
-        // clear menu button left
-        NanoXClearMenuButtonLeft()
-        // clear menu button right
-        NanoXClearMenuButtonRight()
-        // Show name in menu bar
-        NanoXShowNameInMenuBar(true)
-        // Set Menu bar
-        if (this._IsPostPresentation){
-            // Set menu bar not translucide
-            NanoXSetMenuBarTranslucide(false)
-            // Add Button Map 
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
-        } else {
-            // Set menu bar translucide
-            NanoXSetMenuBarTranslucide(true)
-            // Add Button Map 
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Liste(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
-        }
-        // Add Button Filter
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        // Build Menu Button 
+        this.BuildMenuButton()
 
         // Scroll to
         window.scrollTo(0, this._WindowScrollY);
@@ -615,27 +611,8 @@ class GeoXActivities {
 
         // show menu bar
         NanoXShowMenuBar(true)
-        // clear menu button left
-        NanoXClearMenuButtonLeft()
-        // clear menu button right
-        NanoXClearMenuButtonRight()
-        // Show name in menu bar
-        NanoXShowNameInMenuBar(true)
-        // Set Menu bar
-        if (this._IsPostPresentation){
-            // Set menu bar not translucide
-            NanoXSetMenuBarTranslucide(false)
-            // Add Button Map 
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
-        } else {
-            // Set menu bar translucide
-            NanoXSetMenuBarTranslucide(true)
-            // Add Button Map 
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Liste(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
-        }
-        // Add Button Filter
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
-
+        // Build Button
+        this.BuildMenuButton()
         // Stop Follow Track
         this._FollowMyTrack = null
 
