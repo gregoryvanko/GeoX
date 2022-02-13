@@ -66,8 +66,8 @@ class GeoXActivities {
                 this._PageOfMarkers = 0
                 this._AllMarkers = []
             }
-            // Set menu bar not transparent
-            NanoXSetMenuBarTransparent(false)
+            // Set menu bar not translucide
+            NanoXSetMenuBarTranslucide(false)
             // Clear menu button right
             NanoXClearMenuButtonRight()
             // Button Map
@@ -86,8 +86,8 @@ class GeoXActivities {
             this.GetPosts()
         // Si on presente la vue Map
         } else {
-            // Set menu bar transparent
-            NanoXSetMenuBarTransparent(true)
+            // Set menu bar translucide
+            NanoXSetMenuBarTranslucide(true)
             // Change button image
             document.getElementById("ActionMap").innerHTML = Icon.Liste(NanoXGetColorIconMenuBar())
             // Ajout du div qui va contenir la map
@@ -190,8 +190,8 @@ class GeoXActivities {
         NanoXClearMenuButtonLeft()
         // clear menu button right
         NanoXClearMenuButtonRight()
-        // Set menu bar transparent
-        NanoXSetMenuBarTransparent(true)
+        // Set menu bar translucide
+        NanoXSetMenuBarTranslucide(true)
         // hide name in menu bar
         NanoXShowNameInMenuBar(false)
         // Add menu button lef
@@ -263,13 +263,13 @@ class GeoXActivities {
         NanoXShowNameInMenuBar(true)
         // Set Menu bar
         if (this._IsPostPresentation){
-            // Set menu bar not transparent
-            NanoXSetMenuBarTransparent(false)
+            // Set menu bar not translucide
+            NanoXSetMenuBarTranslucide(false)
             // Add Button Map 
             NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
         } else {
-            // Set menu bar transparent
-            NanoXSetMenuBarTransparent(true)
+            // Set menu bar translucide
+            NanoXSetMenuBarTranslucide(true)
             // Add Button Map 
             NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Liste(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
         }
@@ -591,6 +591,9 @@ class GeoXActivities {
         let DivMapFollow = document.getElementById(this._IdDivMapFollow)
         DivMapFollow.style.display = "block"
 
+        // Hide menu bar
+        NanoXShowMenuBar(false)
+
         // Start Follow Track on map
         let TrackData = {TrackId: TrackId, TrackGeoJson: TrackGeoJson}
         this._FollowMyTrack = new FollowTrackOnMap(this._IdDivMapFollow, TrackData)
@@ -609,6 +612,29 @@ class GeoXActivities {
         // Hide IdDivMapFollow
         let DivMapFollow = document.getElementById(this._IdDivMapFollow)
         DivMapFollow.style.display = "none"
+
+        // show menu bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // clear menu button right
+        NanoXClearMenuButtonRight()
+        // Show name in menu bar
+        NanoXShowNameInMenuBar(true)
+        // Set Menu bar
+        if (this._IsPostPresentation){
+            // Set menu bar not translucide
+            NanoXSetMenuBarTranslucide(false)
+            // Add Button Map 
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+        } else {
+            // Set menu bar translucide
+            NanoXSetMenuBarTranslucide(true)
+            // Add Button Map 
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Liste(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+        }
+        // Add Button Filter
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
 
         // Stop Follow Track
         this._FollowMyTrack = null
