@@ -79,6 +79,8 @@ class GeoXActivities {
             Conteneur.appendChild(divwaiting)
             // Get Posts
             this.GetPosts()
+            // Log serveur load view Post
+            NanoXApiPostLog("User Load module Activities, view Post")
         // Si on presente la vue Map
         } else {
             // Ajout du div qui va contenir la map
@@ -89,6 +91,8 @@ class GeoXActivities {
             this._Map.OnClickOnMarker = this.ClickOnMarker.bind(this)
             // Get All marker by page
             this.GetAllMarkersByPage()
+            // Log serveur load view Map
+            NanoXApiPostLog("User Load module Activities, view Map")
         }
         
         // DivTrackInfo
@@ -227,6 +231,9 @@ class GeoXActivities {
             this._DivApp.innerHTML=""
             this._DivApp.appendChild(this.GetDivError(erreur))
         })
+
+        // Log serveur load view Track Data
+        NanoXApiPostLog("User Load module Activities, view Track Data")
     }
 
     RenderTrackData(Data){
@@ -595,6 +602,9 @@ class GeoXActivities {
         this._FollowMyTrack = new FollowTrackOnMap(this._IdDivMapFollow, TrackData)
         this._FollowMyTrack.OnStop = this.StopFollowingTrack.bind(this)
         this._FollowMyTrack.Start()
+
+        // Log serveur load view Follow Track
+        NanoXApiPostLog("User Load module Activities, view Follow Track")
     }
 
     StopFollowingTrack(){
