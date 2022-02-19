@@ -53,7 +53,7 @@ class GeoXManageTracks {
         this._FollowMyTrack = null
         this._UserGroup = null
 
-        this.GeoXCreateTrackView = MyGeoXCreateTrack
+        //this.GeoXCreateTrackView = MyGeoXCreateTrack
 
         this._FiltrePost = {DistanceMin: 1, DistanceMax: 200, Group: "", AllGroups: null}
 
@@ -163,13 +163,14 @@ class GeoXManageTracks {
         // Titre de l'application
         ConteneurMyPost.appendChild(NanoXBuild.DivText("My Tracks", null, "Titre"))
         // Button view on map
-        NanoXClearMenuButtonLeft()
-        NanoXAddMenuButtonLeft("ActionLeft", "Map or Post", `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`, this.LoadView.bind(this, this._ViewMap))
+        NanoXClearMenuButtonRight()
+        NanoXAddMenuButtonRight("ButtonMapOrPost", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewMap))
         // Button Filter
-        NanoXAddMenuButtonLeft("ButtonLeftActionSecond", "Filter", Icon.Filter(), this.ClickOnFilter.bind(this))
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
 
         // Button Add track
-        ConteneurMyPost.appendChild(NanoXBuild.Button(`<img src="${Icon.Add()}" alt="icon" width="32" height="32">`,this.LoadViewAddModifyTrack.bind(this),"ButtonAddTrack","ButtonRightActionSecond"))
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
+
         // Liste des post
         let ListofMyPost = NanoXBuild.Div(this._DivListOfMyPostsData, "DivPostApp")
         ConteneurMyPost.appendChild(ListofMyPost)
@@ -395,7 +396,8 @@ class GeoXManageTracks {
      * Get All groups of user
      */
     GetMyGroups(){
-        GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
+        // Get all group of user
+        NanoXApiGet("/track/mygroups").then((reponse)=>{
             this._UserGroup = reponse
             this._FiltrePost.AllGroups = reponse
         },(erreur)=>{
@@ -1331,6 +1333,6 @@ class GeoXManageTracks {
 }
 
 // Creation de l'application
-//let MyGeoXManageTracks = new GeoXManageTracks()
+let MyGeoXManageTracks = new GeoXManageTracks()
 // Ajout de l'application
-//GlobalCoreXAddApp("My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))
+NanoXAddModule("My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks), true)

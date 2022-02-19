@@ -653,4 +653,4 @@ class GeoXActivities {
 // Creation de l'application
 let MyGeoXActivities = new GeoXActivities()
 // Ajout de l'application
-NanoXAddModule("Activities", IconGeoX.GeoXMapIcon(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)
+NanoXAddModule("Activities", IconGeoX.GeoXMapIcon(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), false)

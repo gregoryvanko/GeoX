@@ -2,8 +2,7 @@ class Icon{
     constructor(){}
 
     static Liste(Color = "black"){
-        return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <svg height="100%" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 172 172" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
+        return `<svg height="100%" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 172 172" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
         <g id="Calque 1" vectornator:layerName="Calque 1">
         <path d="M28.6261 23.0895L143.003 23.0895C145.941 23.0895 148.323 25.3697 148.323 28.1826L148.323 143.761C148.323 146.574 145.941 148.854 143.003 148.854L28.6261 148.854C25.6879 148.854 23.306 146.574 23.306 143.761L23.306 28.1826C23.306 25.3697 25.6879 23.0895 28.6261 23.0895Z" fill="none" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
         <g opacity="1">
@@ -46,8 +45,7 @@ class Icon{
     }
 
     static Filter(Color = "black"){
-        return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-        <svg height="100%" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 172 172" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
+        return `<svg height="100%" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 172 172" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
         <g id="Untitled" vectornator:layerName="Untitled">
         <g opacity="1">
         <path d="M0 172L0 0L172 0L172 172L0 172Z" fill="none" opacity="1"/>
@@ -57,8 +55,15 @@ class Icon{
         </svg>`
     }
 
-    static Add(){
-        return `data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCAxNzIgMTcyIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBmb250LWZhbWlseT0ibm9uZSIgZm9udC13ZWlnaHQ9Im5vbmUiIGZvbnQtc2l6ZT0ibm9uZSIgdGV4dC1hbmNob3I9Im5vbmUiIHN0eWxlPSJtaXgtYmxlbmQtbW9kZTogbm9ybWFsIj48cGF0aCBkPSJNMCwxNzJ2LTE3MmgxNzJ2MTcyeiIgZmlsbD0ibm9uZSI+PC9wYXRoPjxnIGZpbGw9IiMwMDAwMDAiPjxwYXRoIGQ9Ik04Niw2Ljg4Yy00My42NTYwMywwIC03OS4xMiwzNS40NjM5NyAtNzkuMTIsNzkuMTJjMCw0My42NTYwMyAzNS40NjM5Nyw3OS4xMiA3OS4xMiw3OS4xMmM0My42NTYwMywwIDc5LjEyLC0zNS40NjM5NyA3OS4xMiwtNzkuMTJjMCwtNDMuNjU2MDMgLTM1LjQ2Mzk3LC03OS4xMiAtNzkuMTIsLTc5LjEyek04NiwxMy43NmMzOS45Mzc3OSwwIDcyLjI0LDMyLjMwMjIxIDcyLjI0LDcyLjI0YzAsMzkuOTM3NzkgLTMyLjMwMjIxLDcyLjI0IC03Mi4yNCw3Mi4yNGMtMzkuOTM3NzksMCAtNzIuMjQsLTMyLjMwMjIxIC03Mi4yNCwtNzIuMjRjMCwtMzkuOTM3NzkgMzIuMzAyMjEsLTcyLjI0IDcyLjI0LC03Mi4yNHpNODIuNTYsNDQuNzJ2MzcuODRoLTM3Ljg0djYuODhoMzcuODR2MzcuODRoNi44OHYtMzcuODRoMzcuODR2LTYuODhoLTM3Ljg0di0zNy44NHoiPjwvcGF0aD48L2c+PC9nPjwvc3ZnPg==`
+    static Add(Color = "black"){
+        return `<svg height="100%" stroke-miterlimit="10" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 172 172" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <g id="Untitled" vectornator:layerName="Untitled">
+        <g opacity="1">
+        <path d="M0 172L0 0L172 0L172 172L0 172Z" fill="none" fill-rule="evenodd" opacity="1" stroke="none"/>
+        <path d="M86 6.88C42.344 6.88 6.88 42.344 6.88 86C6.88 129.656 42.344 165.12 86 165.12C129.656 165.12 165.12 129.656 165.12 86C165.12 42.344 129.656 6.88 86 6.88ZM86 13.76C125.938 13.76 158.24 46.0622 158.24 86C158.24 125.938 125.938 158.24 86 158.24C46.0622 158.24 13.76 125.938 13.76 86C13.76 46.0622 46.0622 13.76 86 13.76ZM82.56 44.72L82.56 82.56L44.72 82.56L44.72 89.44L82.56 89.44L82.56 127.28L89.44 127.28L89.44 89.44L127.28 89.44L127.28 82.56L89.44 82.56L89.44 44.72L82.56 44.72Z" fill="${Color}" fill-rule="evenodd" opacity="1" stroke="none"/>
+        </g>
+        </g>
+        </svg>`
     }
 
     static LeftArrow(Color = "black"){
