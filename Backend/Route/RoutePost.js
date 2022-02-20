@@ -6,7 +6,7 @@ const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 
 //Get liste of x post based on page number and used in public mode (no auth)
 router.get("/public/:page", (req, res) => {
-    let Parametres = {Page : req.params.page}
+    let Parametres = {Page : req.params.page, ViewPost: true}
     GetPostOfPage(Parametres, res)
 })
 

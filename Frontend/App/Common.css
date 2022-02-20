@@ -2,9 +2,15 @@
     background-image: url("https://unpkg.com/leaflet@1.7.1/dist/images/layers-2x.png");
 }
 
-html, body {
+html{
     max-width: 100%;
     overflow-x: hidden;
+}
+
+body{
+    max-width: 100%;
+    overflow-x: hidden;
+    background-color: rgb(247, 247, 250);
 }
 
 /* Titre */
@@ -26,12 +32,12 @@ html, body {
     font-size: 1.2rem;
 }
 .TextSmall{
-    font-size: 1rem;
+    font-size: 0.8rem;
     word-wrap: break-word;
 }
 
 .TextBoxTitre{
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-family: "nyt-cheltenham", georgia, "times new roman", times, serif;
     color: black;
 }

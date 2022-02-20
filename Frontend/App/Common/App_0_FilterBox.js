@@ -26,6 +26,7 @@ class FilterBox {
             DivMaxKm.appendChild(NanoXBuild.DivText("Max Distance (Km):"))
             DivMaxKm.appendChild(NanoXBuild.Input(this._InitialData.DistanceMax, "number", "MaxKm", "", "MaxKm", "Input", "width: 20%;"))
         }
+
         // Toggle HideMyTrack
         if(this._InitialData.HideMyTrack != undefined){
             let DivToogleHideMyTrack = NanoXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")

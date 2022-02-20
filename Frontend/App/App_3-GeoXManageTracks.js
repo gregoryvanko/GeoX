@@ -331,10 +331,6 @@ class GeoXManageTracks {
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-
-        // Add action
-        //GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
-
         // Add button
         this.AddButtonViewOnMap()
         
@@ -348,7 +344,7 @@ class GeoXManageTracks {
         this.GetAllMarkersByPage()
     }
 
-    AddButtonViewOnMap(){
+    AddButtonViewOnMap(ShowAllTrack = true){
         //Show Menu Bar
         NanoXShowMenuBar(true)
         // clear menu button left
@@ -365,6 +361,13 @@ class GeoXManageTracks {
         NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
         // Button view post
         NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
+        // Button view all tracks
+        if (ShowAllTrack){
+            NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.ShowAllTrack(NanoXGetColorIconMenuBar()), this.RenderAllTracksLinesOnMap.bind(this, this._ViewPost))
+        } else {
+            NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.HideAllTrack(NanoXGetColorIconMenuBar()), this.HideAllTracksLinesOnMap.bind(this, this._ViewPost))
+        }
+        
     }
 
     /**
@@ -524,7 +527,7 @@ class GeoXManageTracks {
                 this._PointerRenderAllTrack += 1
                 this.GetAndRenderAllTrackGeoJsonOnMap()
             } else {
-                setTimeout(function(){document.body.removeChild(document.getElementById("InfoBox"))}, 1000);
+                setTimeout(function(){document.body.removeChild(document.getElementById("InfoBox"))}, 500);
             } 
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
@@ -586,9 +589,9 @@ class GeoXManageTracks {
                 let BoxTracks = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
                 BoxTracks.style.marginTop = "0.7rem"
                 BoxTracks.style.marginBottom = "0.7rem"
-                BoxTracks.appendChild(NanoXBuild.DivText(element.Name,null,"Text", "width: 44%; margin-left:1%; padding:0.2rem;"))
+                BoxTracks.appendChild(NanoXBuild.DivText(element.Name,null,"TextSmall", "width: 44%; margin-left:1%; padding:0.2rem;"))
                 BoxTracks.appendChild(NanoXBuild.DivText(element.Group,null,"TextSmall", "width: 28%; padding:0.2rem;"))
-                BoxTracks.appendChild(NanoXBuild.DivText(element.Length + " Km","","TextSmall", "width: 12%; padding:0.2rem;     text-align: right;"))
+                BoxTracks.appendChild(NanoXBuild.DivText(element.Length + " Km",null,"TextSmall", "width: 21%; padding:0.2rem;     text-align: right;"))
                 if (! element.Public){
                     let DivPublic = NanoXBuild.Div(null, null, "width: 6%;")
                     DivPublic.style.textAlign = "right"
@@ -952,8 +955,8 @@ class GeoXManageTracks {
             this._Map.RemoveAllMarkers()
             this._Map.OnClickOnTrack = this.ClickOnTrack.bind(this)
             this._Map.OnClickOnTrackMarker = this.ClickOnTrack.bind(this)
-            // Add action
-            //GlobalAddActionInList("Hide all tracks", this.HideAllTracksLinesOnMap.bind(this))
+            // change Button
+            this.AddButtonViewOnMap(false)
             // Start downlaod track
             this.GetAndRenderAllTrackGeoJsonOnMap()
         }
@@ -963,8 +966,8 @@ class GeoXManageTracks {
      * Hide all tracks on map
      */
     HideAllTracksLinesOnMap(){
-        // Add action
-        //GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
+        // change Button
+        this.AddButtonViewOnMap(true)
         // remove all tracks
         this._Map.RemoveAllTracks()
         this._Map.OnClickOnTrack = null
