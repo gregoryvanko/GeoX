@@ -71,8 +71,6 @@ class GeoXManageTracks {
         if (!this._StartWithLoadViewManageTrack){
             this._ViewCurrent = this._ViewAddModifyTrack
         }
-        // Add action
-        //GlobalAddActionInList("List View", this.LoadListView.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // Load view
@@ -138,6 +136,8 @@ class GeoXManageTracks {
                 this.LoadViewMyPosts()
                 break;
         }
+        // Log serveur load view Post
+        NanoXApiPostLog("User Load module My Tracks, view " + this._ViewCurrent)
     }
 
     /**
@@ -162,14 +162,9 @@ class GeoXManageTracks {
 
         // Titre de l'application
         ConteneurMyPost.appendChild(NanoXBuild.DivText("My Tracks", null, "Titre"))
-        // Button view on map
-        NanoXClearMenuButtonRight()
-        NanoXAddMenuButtonRight("ButtonMapOrPost", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewMap))
-        // Button Filter
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
 
-        // Button Add track
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
+        // Add Button
+        this.AddButtonViewMyPosts()
 
         // Liste des post
         let ListofMyPost = NanoXBuild.Div(this._DivListOfMyPostsData, "DivPostApp")
@@ -179,6 +174,29 @@ class GeoXManageTracks {
         
         // GetData
         this.GetAllMyPosts()
+    }
+
+    AddButtonViewMyPosts(){
+        //Show Menu Bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+
+        // Set menu bar not translucide
+        NanoXSetMenuBarTranslucide(false)
+        // show name in menu bar
+        NanoXShowNameInMenuBar(true)
+        
+        // Button Filter
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        // Button Add track
+        NanoXAddMenuButtonRight("ButtonAddTrack", "Add Track", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
+        // Button view on map
+        NanoXAddMenuButtonRight("ButtonMapOrPost", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewMap))
+        // Button Listview
+        NanoXAddMenuButtonRight("ButtonListView", "List View", null, this.LoadView.bind(this, this._ViewListOfTrack))
     }
 
     /**
@@ -209,10 +227,8 @@ class GeoXManageTracks {
         let ConteneurManageTrack = document.getElementById(this._ConteneurListTrack)
         ConteneurManageTrack.style.display = "flex"
 
-        // Add Button Back
-        //ConteneurManageTrack.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromListTrack.bind(this), "ActionLeftBack",  Icon.LeftArrow(NanoXGetColorIconMenuBar())))
-        // Button Filter
-        //ConteneurManageTrack.appendChild(NanoXBuild.Button(Icon.Filter(),this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
+        // Add button
+        this.AddButtonViewList()
 
         // Div pour le titre des colonnes
         let BoxTitre = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
@@ -239,6 +255,27 @@ class GeoXManageTracks {
         
         // GetData
         this.GetAllMyTracksData()
+    }
+
+    AddButtonViewList(){
+        //Show Menu Bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+
+        // Set menu bar not translucide
+        NanoXSetMenuBarTranslucide(false)
+        // show name in menu bar
+        NanoXShowNameInMenuBar(true)
+
+        // Button Filter
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        // Button Add track
+        NanoXAddMenuButtonRight("ButtonAddTrack", "Add Track", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
+        // Button view post
+        NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
     }
 
     /**
@@ -296,13 +333,11 @@ class GeoXManageTracks {
 
 
         // Add action
-        //GlobalAddActionInList("List View", this.LoadListView.bind(this))
         //GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
 
-        // Add button manage my post
-        //ConteneurViewOnMap.appendChild(CoreXBuild.ButtonLeftAction(this.LoadView.bind(this, this._ViewPost), "ActionLeft",  Icon.Liste()))
-        // Button Filter
-        //ConteneurViewOnMap.appendChild(NanoXBuild.Button(Icon.Filter(),this.ClickOnFilter.bind(this),"ButtonFilter","ButtonLeftActionSecond"))
+        // Add button
+        this.AddButtonViewOnMap()
+        
         // Ajout du div qui va contenir la map
         ConteneurViewOnMap.appendChild(NanoXBuild.Div(this._IdDivMap, null, "height: 100vh; width: 100%;"))
         this._Map = new GeoXMap(this._IdDivMap) 
@@ -311,6 +346,25 @@ class GeoXManageTracks {
         this._Map.OnClickOnMarker = this.ClickOnMarker.bind(this)
         // Get All marker by page
         this.GetAllMarkersByPage()
+    }
+
+    AddButtonViewOnMap(){
+        //Show Menu Bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+
+        // Set menu bar not translucide
+        NanoXSetMenuBarTranslucide(true)
+        // show name in menu bar
+        NanoXShowNameInMenuBar(true)
+        
+        // Button Filter
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        // Button view post
+        NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
     }
 
     /**
@@ -333,8 +387,9 @@ class GeoXManageTracks {
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
-        // Add Button Back
-        //ConteneurTrackData.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnBackFromTrackData.bind(this), "ActionLeftBack",  Icon.LeftArrow(NanoXGetColorIconMenuBar())))
+        // Add Button
+        this.AddButtonViewTrackData()
+        
         // Div Data of track
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack)
         DivDataOfOneTrack.style.width = "45rem"
@@ -351,14 +406,33 @@ class GeoXManageTracks {
 
         // get InfoOnTrack data
         this.GetInfoOnTrack(TrackId)
+        // Log serveur load view Post
+        NanoXApiPostLog("User Load module My Tracks, view TrackData")
+    }
+
+    AddButtonViewTrackData(){
+        //Show Menu Bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+
+        // Set menu bar translucide
+        NanoXSetMenuBarTranslucide(true)
+        // hide name in menu bar
+        NanoXShowNameInMenuBar(false)
+
+        // Add menu button lef
+        NanoXAddMenuButtonLeft("ActionLeftBack", "Back", Icon.LeftArrow(NanoXGetColorIconMenuBar()), this.ClickOnBackFromTrackData.bind(this))
     }
 
     /**
      * Get all my post
      */
     GetAllMyPosts(){
-        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: false}
-        GlobalCallApiPromise("ApiGetAllPost", FctData, "", "").then((reponse)=>{
+        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: false, ViewPost: true}
+        NanoXApiGet("/post/", FctData).then((reponse)=>{
             this.RenderPosts(reponse)
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
@@ -369,8 +443,8 @@ class GeoXManageTracks {
      * Get All My Tracks information
      */
     GetAllMyTracksData(){
-        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
-        GlobalCallApiPromise("ApiGetAllMyTracks", FctData, "", "").then((reponse)=>{
+        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: false, ViewPost: false}
+        NanoXApiGet("/post/", FctData).then((reponse)=>{
             this.RenderAllMyTracksDataInViewManageTrack(reponse)
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
@@ -382,8 +456,7 @@ class GeoXManageTracks {
      * @param {String} TrackId Id of track
      */
     GetInfoOnTrack(TrackId){
-        let FctData = {PostId: TrackId}
-        GlobalCallApiPromise("ApiGetPostData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/track/onetrack/" + TrackId).then((reponse)=>{
             this.RenderInfoOnTrackInViewTrackData(reponse)
         },(erreur)=>{
             let DivDataOfOneTrack = document.getElementById(this._DivDataOfOneTrack)
@@ -410,7 +483,7 @@ class GeoXManageTracks {
      */
     GetAllMarkersByPage(){
         let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost, AllPublicPost: false}
-        GlobalCallApiPromise("ApiGetAllPostMarkers", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/post/marker/", FctData).then((reponse)=>{
             if (reponse.length != 0){
                 if (this._Map){
                     this.RenderMarkersOnMap(reponse)
@@ -569,7 +642,7 @@ class GeoXManageTracks {
         let ButtonFollow = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.ClickFollowTrack.bind(this, Data._id), "FollowTrack", "CloseButton")
         DivButtonAction.appendChild(ButtonFollow)
         // Button Update
-        let ButtonUpdate = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Pencil(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data), "CloseButton", "Update")
+        let ButtonUpdate = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Pencil(), "Update Data"), this.ClickUpdateTrackData.bind(this, Data),"Update", "CloseButton")
         DivButtonAction.appendChild(ButtonUpdate)
         // Button Modify
         let ButtonModify = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.ModifyTrack(), "Modify Track"), this.ClickModifyTrack.bind(this, Data._id, Data.Name, Data.Group, Data.Public, Data.Description), "Modify", "CloseButton")
@@ -609,11 +682,24 @@ class GeoXManageTracks {
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
+        // Add Button
+        this.AddButtonViewTrackToFollowOnMap()
+
         // Start Follow Track on map
         let TrackData = {TrackId: TrackId, TrackGeoJson: TrackGeoJson}
         this._FollowMyTrack = new FollowTrackOnMap(this._ConteneurFollowTrackOnMap, TrackData)
         this._FollowMyTrack.OnStop = this.ClickStopFollowingTrack.bind(this)
         this._FollowMyTrack.Start()
+    }
+
+    AddButtonViewTrackToFollowOnMap(){
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+
+        // Hide menu bar
+        NanoXShowMenuBar(false)
     }
 
     /**
@@ -668,7 +754,7 @@ class GeoXManageTracks {
         let DivTooglePublic = NanoXBuild.Div(null,"Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         ConteneurAddTrack.appendChild(DivTooglePublic)
         DivTooglePublic.appendChild(NanoXBuild.DivText("Public:"))
-        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id: "TogglePublic",Checked: Public}))
+        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id: "TogglePublic",Checked: Public, HeightRem: 2}))
         // Color
         if (!IsAddTrack){
             let divColor = NanoXBuild.Div(null, "InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; flex-wrap: wrap;")
@@ -819,10 +905,9 @@ class GeoXManageTracks {
      * @param {String} TrackId Id of track
      */
     RenderTrackGeoJSonOnMap(Map, TrackId){
-        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
-            Map.RemoveAllTracks()
-            Map.AddTrackOnMap(TrackId, reponse, false, null)        
+        Map.RemoveAllTracks()
+        NanoXApiGet("/track/geojson/" + TrackId).then((reponse)=>{
+            Map.AddTrackOnMap(TrackId, reponse.GeoJsonData, false, null)        
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
         })
@@ -868,7 +953,6 @@ class GeoXManageTracks {
             this._Map.OnClickOnTrack = this.ClickOnTrack.bind(this)
             this._Map.OnClickOnTrackMarker = this.ClickOnTrack.bind(this)
             // Add action
-            //GlobalAddActionInList("List View", this.LoadListView.bind(this))
             //GlobalAddActionInList("Hide all tracks", this.HideAllTracksLinesOnMap.bind(this))
             // Start downlaod track
             this.GetAndRenderAllTrackGeoJsonOnMap()
@@ -880,7 +964,6 @@ class GeoXManageTracks {
      */
     HideAllTracksLinesOnMap(){
         // Add action
-        //GlobalAddActionInList("List View", this.LoadListView.bind(this))
         //GlobalAddActionInList("Show all tracks", this.RenderAllTracksLinesOnMap.bind(this))
         // remove all tracks
         this._Map.RemoveAllTracks()
@@ -914,14 +997,6 @@ class GeoXManageTracks {
     }
 
     /**
-     * Click on Back arrow of list View
-     */
-    ClickOnBackFromListTrack(){
-        this._ViewCurrent = this._ViewPrevious
-        this.Initiation()
-    }
-
-    /**
      * Go to Start position
      * @param {Object} StartPoint StartPoint coordonate
      */
@@ -950,10 +1025,9 @@ class GeoXManageTracks {
         // Add wainting box
         this.BuildWaitingBox()
         // Get Track Data
-        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/track/geojson/" + TrackId).then((reponse)=>{
             this.RemoveWaitingBox()
-            this.RenderTrackToFollowOnMap(TrackId, reponse)
+            this.RenderTrackToFollowOnMap(TrackId, reponse.GeoJsonData)
         },(erreur)=>{
             this.RemoveWaitingBox()
             alert(erreur)
@@ -978,7 +1052,6 @@ class GeoXManageTracks {
      * @param {String} Description Description of track
      */
     ClickModifyTrack(TrackId, TrackName, TrackGroup, Public, Description){
-        //GlobalReset()
         //this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description)
     }
 
@@ -989,8 +1062,7 @@ class GeoXManageTracks {
      */
     ClickDeleteTrack(TrackId, TrackName){
         if (confirm(`Do you want to delete track : ${TrackName}?`)){
-            let FctData = {Action: "Delete", TrackId : TrackId}
-            GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
+            NanoXApiDelete("/post/" + TrackId).then((reponse)=>{
                 this.LoadView()
             },(erreur)=>{
                 this.ShowErrorMessage(erreur)
@@ -1014,11 +1086,10 @@ class GeoXManageTracks {
      * @param {String} Name Name of track
      */
     ClickDownloadGPX(TrackId, Name){
-        let FctData = {TrackId: TrackId, GetData: "GPX"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/track/gpx/" + TrackId).then((reponse)=>{
             var link = document.createElement('a')
             link.download = `${Name}.gpx`
-            var blob = new Blob([reponse], {typde: 'text/plain'})
+            var blob = new Blob([reponse.GpxData], {type: 'text/plain'})
             link.href = window.URL.createObjectURL(blob)
             link.click()
         },(erreur)=>{
@@ -1156,6 +1227,8 @@ class GeoXManageTracks {
                 // Hide ConteneurListTrack
                 document.getElementById(this._ConteneurListTrack).style.display = "none"
 
+                this.AddButtonViewMyPosts()
+
                 // Scroll
                 window.scrollTo(0, this._WindowScrollY)
                 break;
@@ -1173,6 +1246,8 @@ class GeoXManageTracks {
                 // Hide ConteneurListTrack
                 document.getElementById(this._ConteneurListTrack).style.display = "none"
 
+                this.AddButtonViewOnMap()
+
                 break;
             case this._ViewListOfTrack:
                 // Show ConteneurManageTrack
@@ -1187,6 +1262,8 @@ class GeoXManageTracks {
                 document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
                 // Hide ConteneurListTrack
                 document.getElementById(this._ConteneurListTrack).style.display = "flex"
+
+                this.AddButtonViewList()
 
                 // Scroll
                 window.scrollTo(0, this._WindowScrollY)
@@ -1204,6 +1281,8 @@ class GeoXManageTracks {
                 document.getElementById(this._ConteneurFollowTrackOnMap).style.display = "none"
                 // Hide ConteneurListTrack
                 document.getElementById(this._ConteneurListTrack).style.display = "none"
+
+                this.AddButtonViewMyPosts()
 
                 // Scroll
                 window.scrollTo(0, this._WindowScrollY)

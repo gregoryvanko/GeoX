@@ -122,7 +122,7 @@ class GeoXActivities {
             // Set menu bar translucide
             NanoXSetMenuBarTranslucide(true)
             // Add Button Map 
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Liste(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Post(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
         }
         // Add Button Filter
         NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
@@ -135,7 +135,7 @@ class GeoXActivities {
     }
 
     GetPosts(){
-        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: true}
+        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: true, ViewPost: true}
         NanoXApiGet("/post/", FctData).then((reponse)=>{
             this.RenderPosts(reponse)
         },(erreur)=>{

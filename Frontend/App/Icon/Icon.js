@@ -1,19 +1,15 @@
 class Icon{
     constructor(){}
 
-    static Liste(Color = "black"){
-        return `<svg height="100%" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 172 172" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <g id="Calque 1" vectornator:layerName="Calque 1">
-        <path d="M28.6261 23.0895L143.003 23.0895C145.941 23.0895 148.323 25.3697 148.323 28.1826L148.323 143.761C148.323 146.574 145.941 148.854 143.003 148.854L28.6261 148.854C25.6879 148.854 23.306 146.574 23.306 143.761L23.306 28.1826C23.306 25.3697 25.6879 23.0895 28.6261 23.0895Z" fill="none" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
-        <g opacity="1">
-        <path d="M55.2046 43.8954L116.424 43.8954L116.424 58.1949L55.2046 58.1949L55.2046 43.8954Z" fill="none" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
-        <path d="M55.2046 67.1799L116.424 67.1799L116.424 81.4794L55.2046 81.4794L55.2046 67.1799Z" fill="none" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
-        <path d="M55.2046 90.4644L116.424 90.4644L116.424 104.764L55.2046 104.764L55.2046 90.4644Z" fill="none" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
-        <path d="M55.2046 113.749L116.424 113.749L116.424 128.048L55.2046 128.048L55.2046 113.749Z" fill="none" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+    static Post(Color = "black"){
+        return `<svg height="100%" stroke-miterlimit="10" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 1024 1024" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <g id="Calque-1" vectornator:layerName="Calque 1">
+        <path d="M109.178 78.7645L914.822 78.7645L914.822 945.235L109.178 945.235L109.178 78.7645Z" fill="none" fill-rule="evenodd" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="25"/>
+        <path d="M267.839 171.212L756.161 171.212L756.161 365.51L267.839 365.51L267.839 171.212Z" fill="none" fill-rule="evenodd" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
+        <path d="M267.839 414.851L756.161 414.851L756.161 609.149L267.839 609.149L267.839 414.851Z" fill="none" fill-rule="evenodd" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
+        <path d="M267.839 658.49L756.161 658.49L756.161 852.788L267.839 852.788L267.839 658.49Z" fill="none" fill-rule="evenodd" opacity="1" stroke="${Color}" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
         </g>
-        </g>
-        </svg>
-        `
+        </svg>`
     }
 
     static Follow(){

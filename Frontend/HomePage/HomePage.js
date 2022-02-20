@@ -50,9 +50,6 @@ class HomePage{
 
     GetPosts(){
         let url = "/post/public/" + this._PageOfPosts
-        //let url = "/post/public/"
-        //let param = {Page : this._PageOfPosts}
-        //url += '?' + ( new URLSearchParams( param ) ).toString()
         fetch(url).then((response) => {
             if (response.ok) {
                 return response.json();

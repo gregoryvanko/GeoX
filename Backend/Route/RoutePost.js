@@ -1,7 +1,7 @@
 const LogError = require("@gregvanko/nanox").NanoXLogError
+const LogInfo = require("@gregvanko/nanox").NanoXLogInfo
 const ModelTracks = require("../MongooseModel/Model_Tracks")
-const express = require("@gregvanko/nanox").Express
-const router = express.Router()
+const router = require("@gregvanko/nanox").Express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 
 //Get liste of x post based on page number and used in public mode (no auth)
@@ -12,19 +12,34 @@ router.get("/public/:page", (req, res) => {
 
 // Get liste of x post based on page number
 router.get("/", AuthBasic, (req, res) => {
-    let Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter), AllPublicPost: req.query.AllPublicPost}
+    let Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter), AllPublicPost: JSON.parse(req.query.AllPublicPost), ViewPost: JSON.parse(req.query.ViewPost)}
     GetPostOfPage(Parametres, res, req.user)
 })
 
 // Get liste of x marker based on page number
 router.get("/marker", AuthBasic, (req, res) => {
-    let Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter), AllPublicPost: req.query.AllPublicPost}
+    let Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter), AllPublicPost: JSON.parse(req.query.AllPublicPost)}
     GetMarkerOfPage(Parametres, res, req.user)
+})
+
+// Delete one post
+router.delete("/:postid", AuthBasic, (req, res) => {
+    let Parametres = {PostId : req.params.postid}
+
+    ModelTracks.findByIdAndDelete(Parametres.PostId, (err, result)=>{
+        if (err) {
+            res.status(500).send(err)
+            LogError(`DeletePost db eroor: ${err}`, req.user)
+        } else {
+            res.status(200).send("OK")
+            LogInfo(`Postid ${Parametres.PostId}) is deleted`, req.user)
+        }
+    })
 })
 
 async function GetPostOfPage (Parametres, res, user = null){
     let Reponse = []
-    let numberofitem = 5
+    let numberofitem = (Parametres.ViewPost)? 5 : 10
     let cursor = Parametres.Page * numberofitem
     
     let query = {Public: true}
@@ -36,7 +51,7 @@ async function GetPostOfPage (Parametres, res, user = null){
         }
     }
 
-    const projection = { Name:1, Date:1, Length:1, Description:1, InfoElevation:1, Image:1, StartPoint:1}
+    const projection =(Parametres.ViewPost)? { Name:1, Date:1, Length:1, Description:1, InfoElevation:1, Image:1, StartPoint:1, Public:1} : { Name:1, Group:1, Length:1, Public:1} 
 
     ModelTracks.find(query, projection, (err, result) => {
         if (err) {
