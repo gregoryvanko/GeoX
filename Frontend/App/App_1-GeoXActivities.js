@@ -224,7 +224,7 @@ class GeoXActivities {
         divwaiting.style.marginBottom = "2rem"
         document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
-        NanoXApiGet("/track/onetrack/" + Id).then((reponse)=>{
+        NanoXApiGet("/post/onepost/" + Id).then((reponse)=>{
             this.RenderTrackData(reponse)
         },(erreur)=>{
             // Clear view
@@ -371,9 +371,9 @@ class GeoXActivities {
             let NewPublic = document.getElementById("TogglePublic").checked
             let NewDescription = document.getElementById("DivContDesc").innerText
 
-            let CopyTrackData = {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
+            const CopyTrackData = {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
 
-            NanoXApiPost("/track/CopyTrack", CopyTrackData).then((reponse)=>{
+            NanoXApiPost("/post/copypost", CopyTrackData).then((reponse)=>{
                 // Delete Window info copy
                 NanoXBuild.PopupDelete()
                 // Show Message Track saved

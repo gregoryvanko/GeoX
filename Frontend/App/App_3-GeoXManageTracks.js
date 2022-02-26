@@ -300,6 +300,9 @@ class GeoXManageTracks {
         // Hide ConteneurListTrack
         document.getElementById(this._ConteneurListTrack).style.display = "none"
 
+        // Hide Menu Bar
+        NanoXShowMenuBar(false)
+
         // Titre
         if (IsAddTrack){
             // Titre de l'application
@@ -397,7 +400,7 @@ class GeoXManageTracks {
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack)
         DivDataOfOneTrack.style.width = "45rem"
         DivDataOfOneTrack.style.maxWidth = "100%"
-        DivDataOfOneTrack.style.marginTop = "3rem"
+        DivDataOfOneTrack.style.marginTop = "1rem"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text
         if (TrackName){
@@ -459,7 +462,7 @@ class GeoXManageTracks {
      * @param {String} TrackId Id of track
      */
     GetInfoOnTrack(TrackId){
-        NanoXApiGet("/track/onetrack/" + TrackId).then((reponse)=>{
+        NanoXApiGet("/post/onepost/" + TrackId).then((reponse)=>{
             this.RenderInfoOnTrackInViewTrackData(reponse)
         },(erreur)=>{
             let DivDataOfOneTrack = document.getElementById(this._DivDataOfOneTrack)
@@ -509,9 +512,9 @@ class GeoXManageTracks {
         if (EndIndex >= this._AllMarkers.length){EndIndex = this._AllMarkers.length - 1}
         for (let index = StartIndex; index <= EndIndex; index++) {
             ListOfIdToRender.push(this._AllMarkers[index]["_id"])
-        }
-        let FctData = {ListOfTrackId: ListOfIdToRender, GetData: "MultipleGeoJSon"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        }        
+        const FctData = {ListOfTrackId: ListOfIdToRender}
+        NanoXApiGet("/track/multi/geojson/", FctData).then((reponse)=>{
             // Afficher la porgression
             let prog = Math.floor((EndIndex / (this._AllMarkers.length - 1)) * 100)
             if (document.getElementById("MyProgressRing")){
@@ -530,6 +533,7 @@ class GeoXManageTracks {
                 setTimeout(function(){document.body.removeChild(document.getElementById("InfoBox"))}, 500);
             } 
         },(erreur)=>{
+            if (document.getElementById("InfoBox")){document.body.removeChild(document.getElementById("InfoBox"))}
             this.ShowErrorMessage(erreur)
         })
     }
@@ -749,9 +753,10 @@ class GeoXManageTracks {
         let DivDescription = NanoXBuild.Div(null, "InputBox Text")
         ConteneurAddTrack.appendChild(DivDescription)
         DivDescription.appendChild(NanoXBuild.DivText("Description", null, "Text", ""))
-        let DivContDesc = NanoXBuild.Div("DivContDesc", "DivContentEdit TextSmall")
+        let DivContDesc = NanoXBuild.Div("DivContDesc", "DivContentEdit")
         DivContDesc.innerText = Description
         DivContDesc.contentEditable = "True"
+        DivContDesc.style.fontSize = "1rem"
         DivDescription.appendChild(DivContDesc)
         // Toggle Public
         let DivTooglePublic = NanoXBuild.Div(null,"Text InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
@@ -846,7 +851,7 @@ class GeoXManageTracks {
         }
         DivTrackDataOnMap = NanoXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap")
         document.getElementById(this._ConteneurViewOnMap).appendChild(DivTrackDataOnMap)
-        DivTrackDataOnMap.addEventListener("click", this.ClickOnTrackData.bind(this, TrackId, null))
+        DivTrackDataOnMap.addEventListener("click", this.ClickOnTrackData.bind(this, TrackId, TrackData.Name))
         // Name and close buttion
         let divNameAndClose = NanoXBuild.Div(null, null, "width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
         DivTrackDataOnMap.appendChild(divNameAndClose)
@@ -959,6 +964,8 @@ class GeoXManageTracks {
             this.AddButtonViewOnMap(false)
             // Start downlaod track
             this.GetAndRenderAllTrackGeoJsonOnMap()
+            // Log serveur
+            NanoXApiPostLog("User load all tracks on map in module My Tracks")
         }
     }
 
@@ -977,6 +984,8 @@ class GeoXManageTracks {
         this._AllMarkers.forEach(element => {
             this._Map.AddMarker(element)
         });
+        // Log serveur
+        NanoXApiPostLog("User hide all tracks on map in module My Tracks")
     }
 
     /**
@@ -1145,8 +1154,7 @@ class GeoXManageTracks {
             Track.Description = document.getElementById("DivContDesc").innerText
             Track.Color = (document.getElementById("SelectColor")) ? document.getElementById("SelectColor").value : "#0000FF"
             // Data to send
-            let FctData = {Action: "Modify", TrackData : Track}
-            GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
+            NanoXApiPatch("/post", Track).then((reponse)=>{
                 this.Initiation()
             },(erreur)=>{
                 // changer le nom du boutton
@@ -1390,8 +1398,7 @@ class GeoXManageTracks {
         Track.Description = document.getElementById("DivContDesc").innerText
         Track.Color = (document.getElementById("SelectColor")) ? document.getElementById("SelectColor").value : "#0000FF"
         // Data to send
-        let FctData = {Action: "Add", TrackData : Track}
-        GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
+        NanoXApiPost("/post", Track).then((reponse)=>{
             document.getElementById(this._ConteneurAddTrack).innerHTML = ""
             this._StartWithLoadViewManageTrack = true
             this.LoadView(this._ViewPost)
