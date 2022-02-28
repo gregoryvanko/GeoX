@@ -53,7 +53,7 @@ class GeoXManageTracks {
         this._FollowMyTrack = null
         this._UserGroup = null
 
-        //this.GeoXCreateTrackView = MyGeoXCreateTrack // ToDo
+        this.GeoXCreateTrackView = MyGeoXCreateTrack
 
         this._FiltrePost = {DistanceMin: 1, DistanceMax: 200, Group: "", AllGroups: null}
 
@@ -1060,7 +1060,7 @@ class GeoXManageTracks {
      * @param {String} Description Description of track
      */
     ClickModifyTrack(TrackId, TrackName, TrackGroup, Public, Description){
-        //this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description) // ToDo
+        this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description)
     }
 
     /**
@@ -1423,4 +1423,4 @@ class GeoXManageTracks {
 // Creation de l'application
 let MyGeoXManageTracks = new GeoXManageTracks()
 // Ajout de l'application
-NanoXAddModule("My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks), true)
+NanoXAddModule("My Tracks", IconGeoX.GeoXManageTracks(), MyGeoXManageTracks.Initiation.bind(MyGeoXManageTracks))

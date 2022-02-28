@@ -1,3 +1,7 @@
+const fs = require('fs')
+const path = require('path')
+const { TileSet } = require("node-hgt")
+
 const LogError = require("@gregvanko/nanox").NanoXLogError
 const ModelTracks = require("../MongooseModel/Model_Tracks")
 
@@ -98,6 +102,7 @@ function AddPostPromise(Track, User){
 
         // Convert GPX to GeoJson
         //let GeoJson = ConvertGpxToGeoJson(Track.FileContent)
+        let GeoJson = Track.GeoJson
 
         // Si on a un GeoJson avec plusieurs line pour une track on le modifie
         if ((Track.MultiToOneLine) && (GeoJson.features[0].geometry.type == "MultiLineString")){
@@ -122,8 +127,7 @@ function AddPostPromise(Track, User){
         TrackData.Date = new Date()
         TrackData.Owner = User
         TrackData.Description = Track.Description
-        //TrackData.GeoJsonData = GeoJson
-        TrackData.GeoJsonData = Track.GeoJson
+        TrackData.GeoJsonData = GeoJson
         TrackData.GpxData = Track.FileContent
         TrackData.Public = Track.Public
         TrackData.Image = Track.Image
@@ -134,7 +138,7 @@ function AddPostPromise(Track, User){
             ReponseAddTracks.Error = true
             ReponseAddTracks.ErrorMsg = "MinMaxGeoJsonTrack :" + ReponseMinMaxGeoJsonTrack.ErrorMsg
             ReponseAddTracks.Data = null
-            resolve(ReponseAddTracks)
+            return resolve(ReponseAddTracks)
         }
         TrackData.ExteriorPoint = ReponseMinMaxGeoJsonTrack.Data
         
@@ -163,11 +167,17 @@ function AddPostPromise(Track, User){
         }
         TrackData.StartPoint = latleng
 
-        // Add elevation
-        const ElevationData = await GetElevationOfGeoJson(GeoJson)
-        TrackData.Elevation = ElevationData.AllElevation
-        TrackData.InfoElevation = ElevationData.InfoElevation
-        
+        let ReponseElevation = await GetElevationOfGeoJson(GeoJson)
+        if(ReponseElevation.Error){
+            ReponseAddTracks.Error = true
+            ReponseAddTracks.ErrorMsg = "GetElevationOfGeoJson error : " + ReponseElevation.ErrorMsg
+            ReponseAddTracks.Data = null
+            return resolve(ReponseAddTracks)
+        }
+
+        TrackData.Elevation = ReponseElevation.Data.AllElevation
+        TrackData.InfoElevation = ReponseElevation.Data.InfoElevation
+
         // Si il faut inserer une nouvelle track en DB
         if (Track.Id != null){
             // Update de la track existante
@@ -182,35 +192,33 @@ function AddPostPromise(Track, User){
             DataToDb[MongoTracksCollection.InfoElevation]= TrackData.InfoElevation
             DataToDb[MongoTracksCollection.Description]= TrackData.Description
             DataToDb[MongoTracksCollection.Image]= TrackData.Image
-            
-            Mongo.UpdateByIdPromise(Track.Id, DataToDb, MongoTracksCollection.Collection).then((reponse)=>{
-                if (reponse.matchedCount == 0){
+
+            ModelTracks.findByIdAndUpdate(Track.Id, DataToDb, (err, result) => {
+                if (err) {
                     ReponseAddTracks.Error = true
-                    ReponseAddTracks.ErrorMsg = "GeoXServerApi PromiseAddTrack Track Id not found: "
-                    ReponseAddTracks.Data = []
+                    ReponseAddTracks.ErrorMsg = "AddPostPromise update in db error: " + err
+                    ReponseAddTracks.Data = null
                 } else {
                     ReponseAddTracks.Error = false
-                    ReponseAddTracks.ErrorMsg = ""
-                    ReponseAddTracks.Data = []
+                    ReponseAddTracks.ErrorMsg = null
+                    ReponseAddTracks.Data = "ok"
                 }
-                resolve(ReponseAddTracks)
-            },(erreur)=>{
-                ReponseAddTracks.Error = true
-                ReponseAddTracks.ErrorMsg = "GeoXServerApi PromiseAddTrack error: " + erreur
-                ReponseAddTracks.Data = []
                 resolve(ReponseAddTracks)
             })
         } else {
             // Insert new track
-            Mongo.InsertOnePromise(TrackData, MongoTracksCollection.Collection).then((reponseCreation)=>{
-                ReponseAddTracks.Error = false
-                ReponseAddTracks.ErrorMsg = ""
-                ReponseAddTracks.Data = null
-                resolve(ReponseAddTracks)
-            },(erreur)=>{
-                ReponseAddTracks.Error = true
-                ReponseAddTracks.ErrorMsg = "PromiseAddTrack error: " + erreur
-                ReponseAddTracks.Data = null
+            const NewTrack = new ModelTracks(TrackData)
+            NewTrack.save((err, result) => {
+                if (err) {
+                    ReponseAddTracks.Error = true
+                    ReponseAddTracks.ErrorMsg = "AddPostPromise error: " + err
+                    ReponseAddTracks.Data = null
+                    
+                } else {
+                    ReponseAddTracks.Error = false
+                    ReponseAddTracks.ErrorMsg = null
+                    ReponseAddTracks.Data = "ok"
+                }
                 resolve(ReponseAddTracks)
             })
         }
@@ -306,90 +314,116 @@ function CalculateTrackLength(GeoJson){
 }
 
 async function GetElevationOfGeoJson(GeoJson){
-    let Coord = GeoJson.features[0].geometry.coordinates
-    let ElevationMin = 0
-    let ElevationMax = 0
-    let ElevationCumulP = 0
-    let ElevationCumulM = 0
-    let ElevationPrevious = 0
+    return new Promise (async (resolve) => {
+        let Reponse = {Error: true, ErrorMsg:"InitError GetElevationOfGeoJson", Data:null}
 
-    let AllElevation = []
-    let distance = 0
-    let IntermediereDist = 0
-    const MinDistBetweenTwoPoint = 50
-    const [lng, lat] = Coord[0]
-    let ele = await PromiseGetElevation({ lat, lng })
-    ele = parseInt(ele)
-    AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
-
-    ElevationMin = ele
-    ElevationMax = ele
-    ElevationCumulP = 0
-    ElevationCumulM = 0
-    ElevationPrevious = ele
+        let Coord = GeoJson.features[0].geometry.coordinates
+        let ElevationMin = 0
+        let ElevationMax = 0
+        let ElevationCumulP = 0
+        let ElevationCumulM = 0
+        let ElevationPrevious = 0
     
-    
-    const { getDistance } = require("geolib")
-    for (let i = 1; i < Coord.length; i++){
-        const [prelng, prelat] = Coord[i - 1]
-        const [lng, lat] = Coord[i]
-        // Get distance from first point
-        let DistBetweenTwoPoint = getDistance(
-            { latitude: prelat, longitude: prelng },
-            { latitude: lat, longitude: lng }
-        )
-        distance += DistBetweenTwoPoint
-        IntermediereDist += DistBetweenTwoPoint
+        let AllElevation = []
+        let distance = 0
+        let IntermediereDist = 0
+        const MinDistBetweenTwoPoint = 50
+        const [lng, lat] = Coord[0]
 
-        if ((IntermediereDist > MinDistBetweenTwoPoint) || (i == Coord.length -1)){
-            IntermediereDist = 0
-            // Get elevation
-            let eleP = await PromiseGetElevation({lat, lng})
-            eleP = parseInt(eleP)
-            // Add Elevation point
-            AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
-            // Get ElevationMin
-            if (eleP < ElevationMin){
-                ElevationMin = eleP
-            }
-            // Get ElevationMax
-            if (eleP > ElevationMax){
-                ElevationMax = eleP
-            }
-            // Get ElevationCumulP ElevationCumulM
-            const Delta = eleP - ElevationPrevious
-            if ((Delta)>0){
-                ElevationCumulP += Delta
-            } else {
-                ElevationCumulM += Delta
-            }
-            ElevationPrevious = eleP
+        let ReponseGetElevation = await PromiseGetElevation({ lat, lng })
+        if(ReponseGetElevation.Error){
+            Reponse.Error = true
+            Reponse.ErrorMsg = "GetElevation error : " + ReponseGetElevation.ErrorMsg
+            Reponse.Data = null
+            return resolve(Reponse)
         }
-    }
-    return {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
+        let ele = parseInt(ReponseGetElevation.Data)
+        AllElevation.push({ x: distance, y: ele, coord:{lat:lat, long: lng}})
+    
+        ElevationMin = ele
+        ElevationMax = ele
+        ElevationCumulP = 0
+        ElevationCumulM = 0
+        ElevationPrevious = ele
+        
+        
+        const { getDistance } = require("geolib")
+        for (let i = 1; i < Coord.length; i++){
+            const [prelng, prelat] = Coord[i - 1]
+            const [lng, lat] = Coord[i]
+            // Get distance from first point
+            let DistBetweenTwoPoint = getDistance(
+                { latitude: prelat, longitude: prelng },
+                { latitude: lat, longitude: lng }
+            )
+            distance += DistBetweenTwoPoint
+            IntermediereDist += DistBetweenTwoPoint
+    
+            if ((IntermediereDist > MinDistBetweenTwoPoint) || (i == Coord.length -1)){
+                IntermediereDist = 0
+                // Get elevation
+                let ReponseGetElevationInterm = await PromiseGetElevation({ lat, lng })
+                if(ReponseGetElevationInterm.Error){
+                    Reponse.Error = true
+                    Reponse.ErrorMsg = "GetElevation error : " + ReponseGetElevation.ErrorMsg
+                    Reponse.Data = null
+                    return resolve(Reponse)
+                }
+                let eleP = parseInt(ReponseGetElevationInterm.Data)
+
+
+                // Add Elevation point
+                AllElevation.push({ x: distance, y: eleP, coord:{lat:lat, long: lng}})
+                // Get ElevationMin
+                if (eleP < ElevationMin){
+                    ElevationMin = eleP
+                }
+                // Get ElevationMax
+                if (eleP > ElevationMax){
+                    ElevationMax = eleP
+                }
+                // Get ElevationCumulP ElevationCumulM
+                const Delta = eleP - ElevationPrevious
+                if ((Delta)>0){
+                    ElevationCumulP += Delta
+                } else {
+                    ElevationCumulM += Delta
+                }
+                ElevationPrevious = eleP
+            }
+        }
+        Reponse.Error= false
+        Reponse.ErrorMsg= null
+        Reponse.Data= {AllElevation: AllElevation, InfoElevation: {ElevMax:ElevationMax, ElevMin:ElevationMin, ElevCumulP:ElevationCumulP, ElevCumulM:Math.abs(ElevationCumulM)}}
+        resolve(Reponse)
+    })
+    
 }
 
 /**
  * Get Elevation of a point
  */
  function PromiseGetElevation({ lat, lng }){
-    return new Promise ((resolve, reject) => {
-        const path = require('path')
-        let fs = require('fs')
+    return new Promise ((resolve) => {
+        let Reponse = {Error: true, ErrorMsg:"InitError PromiseGetElevation", Data:null}
+
         var dir = path.resolve(__dirname, "TempHgt")
         if (!fs.existsSync(dir)){
             fs.mkdirSync(dir);
-            console.log("create")
         }
-        const { TileSet } = require("node-hgt")
+        
         const tileset = new TileSet(path.resolve(__dirname, "TempHgt"))
         tileset.getElevation([lat, lng], (err, ele) => {
             if (!err){
-                resolve(ele.toFixed(0))
+                Reponse.Error = false
+                Reponse.ErrorMsg = null
+                Reponse.Data = ele.toFixed(0)
             } else {
-                console.log(err)
-                reject(err)
+                Reponse.Error = true
+                Reponse.ErrorMsg = "PromiseGetElevation error : " + err
+                Reponse.Data = null
             }
+            resolve(Reponse)
         })
     })
 }

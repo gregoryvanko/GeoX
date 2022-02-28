@@ -75,7 +75,7 @@ router.post("/", AuthBasic, async (req, res) => {
         } else {
             res.status(200).send("OK")
             if (TrackPost.Id != null){
-                LogInfo("Post updated from a created track", req.user)
+                LogInfo("Track of one post updated", req.user)
             } else {
                 LogInfo("New Post saved", req.user)
             }

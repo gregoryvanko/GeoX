@@ -24,7 +24,7 @@ class GeoXCreateTrack {
         this._TrackMarkers = []
         this._AutoRouteBehavior = true
         this.CityFound = false
-        this._UserGroup = null
+        this._UserGroup = []
         this._GroupSelected = null
         this._NoTrack = "No Folder selected"
         this._LayerGroup = null
@@ -44,12 +44,22 @@ class GeoXCreateTrack {
     }
 
     Initiation(){
-        // Execute before quit
-        //GlobalExecuteBeforeQuit(this.DeleteMap.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
+        //Show Menu Bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+
+        // Set menu bar not translucide
+        NanoXSetMenuBarTranslucide(true)
+        // show name in menu bar
+        NanoXShowNameInMenuBar(true)
+
         // Get User Group
-        GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
+        NanoXApiGet("/track/mygroups").then((reponse)=>{
             this._UserGroup = reponse
         },(erreur)=>{
             console.log(erreur)
@@ -114,7 +124,7 @@ class GeoXCreateTrack {
                 if (document.getElementById("InputCountry").value == "Belgique"){
                     // fetch data
                     let FctData = {Api: "www.odwb.be", Input : text}
-                    GlobalCallApiPromise("ApiGetDataFromApi", FctData, "", "").then((reponse)=>{
+                    NanoXApiPost("/externalapi", FctData).then((reponse)=>{
                         let suggestions = []
                         reponse.records.forEach(element => {
                             let MyObject = new Object()
@@ -130,7 +140,7 @@ class GeoXCreateTrack {
                 } else if (document.getElementById("InputCountry").value == "France") {
                     // fetch data
                     let FctData = {Api: "datanova.laposte.fr", Input : text}
-                    GlobalCallApiPromise("ApiGetDataFromApi", FctData, "", "").then((reponse)=>{
+                    NanoXApiPost("/externalapi", FctData).then((reponse)=>{
                         let suggestions = []
                         reponse.records.forEach(element => {
                             let MyObject = new Object()
@@ -201,6 +211,9 @@ class GeoXCreateTrack {
     }
 
     LoadViewMap(Lat, Long){
+        // Hide name in menu bar
+        NanoXShowNameInMenuBar(false)
+
         // Clear Conteneur
         this._DivApp.innerHTML = ""
         // Add dropdown groupe
@@ -598,12 +611,10 @@ class GeoXCreateTrack {
     BuildInfoBox(){
         let DivInfoBox = NanoXBuild.Div("DivInfoBox", "DivInfoBox")
         this._DivApp.appendChild(DivInfoBox)
-
-        // Toggle MultiLine to OneLine
         let DivToogle = NanoXBuild.Div(null,null, "width: 100%; display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; margin: 1vh 0vh;")
         DivInfoBox.appendChild(DivToogle)
         DivToogle.appendChild(NanoXBuild.DivText("Auto:", null, "TextTrackInfo", "color: white; margin-left: 1%; margin-right: 1vh;"))
-        let ToogleAuto = NanoXBuild.ToggleSwitch({Id: "ToggleAuto", Checked: this._AutoRouteBehavior})
+        let ToogleAuto = NanoXBuild.ToggleSwitch({Id: "ToggleAuto", Checked: this._AutoRouteBehavior, HeightRem: 1.5})
         DivToogle.appendChild(ToogleAuto)
         ToogleAuto.addEventListener('change', (event) => {
             if (event.target.checked) {
@@ -891,8 +902,6 @@ class GeoXCreateTrack {
     }
 
     InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public, Description){
-        // Execute before quit
-        //GlobalExecuteBeforeQuit(this.DeleteMap.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // Set Group
@@ -1055,7 +1064,7 @@ class GeoXCreateTrack {
             this._TrackMarkers = []
             this._AutoRouteBehavior = true
             this.CityFound = false
-            this._UserGroup = null
+            this._UserGroup = []
             this._GroupSelected = null
             this._LayerGroup = null
             this._ElevationBox = null
@@ -1066,6 +1075,6 @@ class GeoXCreateTrack {
 }
 
 // Creation de l'application
-//let MyGeoXCreateTrack = new GeoXCreateTrack()
+let MyGeoXCreateTrack = new GeoXCreateTrack()
 // Ajout de l'application
-//GlobalCoreXAddApp("Create My Track", IconGeoX.GeoXCreateTrack(), MyGeoXCreateTrack.Initiation.bind(MyGeoXCreateTrack))
+NanoXAddModule("Create My Tracks", IconGeoX.GeoXCreateTrack(), MyGeoXCreateTrack.Initiation.bind(MyGeoXCreateTrack),true)

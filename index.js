@@ -36,6 +36,8 @@ async function Start(Port = 1234, Name = "NanoXDev", Debug = false){
    NanoXAddRoute("/post", require("./Backend/Route/RoutePost"))
    // Add route Track
    NanoXAddRoute("/track", require("./Backend/Route/RouteTrack"))
+   // Add route ExternalApi
+   NanoXAddRoute("/externalapi", require("./Backend/Route/RouteExternalApi"))
    // Add route GetMap
    NanoXAddRoute("/getmap", require("./Backend/Route/RouteGetMap"))
 
