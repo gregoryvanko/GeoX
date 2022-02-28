@@ -301,9 +301,9 @@ class GeoXActivities {
         // Titre
         Content.append(NanoXBuild.DivText("Save Track", null, "SousTitre"))
         // Input Name
-        Content.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name","",true))
+        Content.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name",null,true))
         // Input `Group
-        Content.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group","",true))
+        Content.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group"))
         // Description
         let DivDescription = NanoXBuild.Div(null, "InputBoxCoreXWindow Text")
         Content.appendChild(DivDescription)
@@ -330,7 +330,7 @@ class GeoXActivities {
         let me = this
         autocomplete({
             input: document.getElementById("InputTrackGroup"),
-            minLength: 1,
+            minLength: 0,
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 if (me._UserGroup != null){

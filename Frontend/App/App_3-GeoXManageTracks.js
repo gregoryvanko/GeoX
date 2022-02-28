@@ -53,7 +53,7 @@ class GeoXManageTracks {
         this._FollowMyTrack = null
         this._UserGroup = null
 
-        //this.GeoXCreateTrackView = MyGeoXCreateTrack
+        //this.GeoXCreateTrackView = MyGeoXCreateTrack // ToDo
 
         this._FiltrePost = {DistanceMin: 1, DistanceMax: 200, Group: "", AllGroups: null}
 
@@ -408,7 +408,6 @@ class GeoXManageTracks {
         } else {
             DivDataOfOneTrack.appendChild(NanoXBuild.DivText(`Waiting data of track`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
         }
-        
 
         // get InfoOnTrack data
         this.GetInfoOnTrack(TrackId)
@@ -550,13 +549,10 @@ class GeoXManageTracks {
                 // Creation du post
                 let TempGeoxPsot = new HtmlElemGeoxPost(element, true)
                 TempGeoxPsot.OnClickPost = this.ClickOnTrackData.bind(this, element._id, element.Name)
-
                 TempGeoxPsot.OnClickGoTo = this.ClickGoToStart.bind(this, element.StartPoint)
                 TempGeoxPsot.OnClickFollow = this.ClickFollowTrackFromPost.bind(this, element._id)
                 TempGeoxPsot.OnClickUpdate = this.ClickUpdateTrackData.bind(this, element)
                 TempGeoxPsot.OnClickGpx = this.ClickDownloadGPX.bind(this, element._id, element.Name)
-                
-
                 TempGeoxPsot.style.width = "100%"
                 
                 // si l'element est l'element milieu
@@ -637,8 +633,10 @@ class GeoXManageTracks {
      */
     RenderInfoOnTrackInViewTrackData(Data){
         let DivDataOfOneTrack = document.getElementById(this._DivDataOfOneTrack)
+
         // Add InfoOnTrack view
         let InfoTrackView = new InfoOnTrack(Data, this._DivDataOfOneTrack)
+
         // Add button
         let DivButtonAction = NanoXBuild.DivFlexRowSpaceAround("ButtonAction", null, "width: 100%")
         DivDataOfOneTrack.appendChild(DivButtonAction)
@@ -724,15 +722,15 @@ class GeoXManageTracks {
 
         let ConteneurAddTrack = document.getElementById(this._ConteneurAddTrack)
         // Input Name
-        ConteneurAddTrack.appendChild(NanoXBuild.InputWithLabel("InputBox", "Name:", "Text", "InputTrackName",Name, "Input Text", "text", "Name",))
+        ConteneurAddTrack.appendChild(NanoXBuild.InputWithLabel("InputBox", "Name:", "Text", "InputTrackName",Name, "Input Text", "text", "Name", null, true))
         // Input `Group
-        ConteneurAddTrack.appendChild(NanoXBuild.InputWithLabel("InputBox", "Group:", "Text", "InputTrackGroup",Group, "Input Text", "text", "Group",))
+        ConteneurAddTrack.appendChild(NanoXBuild.InputWithLabel("InputBox", "Group:", "Text", "InputTrackGroup",Group, "Input Text", "text", "Group"))
         // Add AutoComplete
         let me = this
         document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
         autocomplete({
             input: document.getElementById("InputTrackGroup"),
-            minLength: 1,
+            minLength: 0,
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 text = text.toLowerCase();
@@ -764,18 +762,16 @@ class GeoXManageTracks {
         DivTooglePublic.appendChild(NanoXBuild.DivText("Public:"))
         DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id: "TogglePublic",Checked: Public, HeightRem: 2}))
         // Color
-        if (!IsAddTrack){
-            let divColor = NanoXBuild.Div(null, "InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; flex-wrap: wrap;")
-            let TextColor = NanoXBuild.DivText("Color:", null, "Text")
-            divColor.appendChild(TextColor)
-            let inputcolor = document.createElement("input")
-            divColor.appendChild(inputcolor)
-            inputcolor.setAttribute("id","SelectColor")
-            inputcolor.setAttribute("type","color")
-            inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; height: 2rem; border: 1px solid black;")
-            inputcolor.value = Color
-            ConteneurAddTrack.appendChild(divColor)
-        }
+        let divColor = NanoXBuild.Div(null, "InputBox", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center; flex-wrap: wrap;")
+        let TextColor = NanoXBuild.DivText("Color:", null, "Text")
+        divColor.appendChild(TextColor)
+        let inputcolor = document.createElement("input")
+        divColor.appendChild(inputcolor)
+        inputcolor.setAttribute("id","SelectColor")
+        inputcolor.setAttribute("type","color")
+        inputcolor.setAttribute("style","background-color: white;border-radius: 8px; cursor: pointer; height: 2rem; border: 1px solid black;")
+        inputcolor.value = Color
+        ConteneurAddTrack.appendChild(divColor)
         // Div Button
         let DivBoxButton = NanoXBuild.Div(null, "InputBox")
         ConteneurAddTrack.appendChild(DivBoxButton)
@@ -1064,7 +1060,7 @@ class GeoXManageTracks {
      * @param {String} Description Description of track
      */
     ClickModifyTrack(TrackId, TrackName, TrackGroup, Public, Description){
-        //this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description)
+        //this.GeoXCreateTrackView.InitiationModifyMyTrack(this._UserGroup, TrackId, TrackName, TrackGroup, Public, Description) // ToDo
     }
 
     /**
@@ -1417,6 +1413,9 @@ class GeoXManageTracks {
      */
     SetFilter(Filter){
         this._FiltrePost = Filter
+        // Log serveur load view Post
+        NanoXApiPostLog("User change filter")
+        // Relaod view
         this.LoadView(this._ViewCurrent)
     }
 }

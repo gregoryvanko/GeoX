@@ -4,6 +4,10 @@ const ModelTracks = require("../MongooseModel/Model_Tracks")
 const router = require("@gregvanko/nanox").Express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 
+const GetPostOfPage = require("./HelperPost").GetPostOfPage
+const GetMarkerOfPage = require("./HelperPost").GetMarkerOfPage
+const AddPostPromise = require("./HelperPost").AddPostPromise
+
 //Get liste of x post based on page number and used in public mode (no auth)
 router.get("/public/:page", (req, res) => {
     let Parametres = {Page : req.params.page, ViewPost: true}
@@ -61,11 +65,21 @@ router.delete("/:postid", AuthBasic, (req, res) => {
 })
 
 // Add one post
-router.post("/", AuthBasic, (req, res) => {
-    const TrackData = req.body
-    if (JSON.stringify(TrackData) != "{}"){
-        // ToDo
-        res.status(200).send("OK")
+router.post("/", AuthBasic, async (req, res) => {
+    const TrackPost = req.body
+    if (JSON.stringify(TrackPost) != "{}"){
+        let ReponseAddPost = await AddPostPromise(TrackPost, req.user.User)
+        if(ReponseAddPost.Error){
+            res.status("500").send(ReponseAddPost.ErrorMsg)
+            LogError(ReponseAddPost.ErrorMsg, req.user)
+        } else {
+            res.status(200).send("OK")
+            if (TrackPost.Id != null){
+                LogInfo("Post updated from a created track", req.user)
+            } else {
+                LogInfo("New Post saved", req.user)
+            }
+        }
     } else {
         const TheError = `Route /post POST error: Data not found in req`
         res.status(500).send(TheError)
@@ -147,98 +161,6 @@ router.patch("/", AuthBasic, (req, res) => {
         LogError(TheError, req.user)
     }
 })
-
-
-async function GetPostOfPage (Parametres, res, user = null){
-    let Reponse = []
-    let numberofitem = (Parametres.ViewPost)? 5 : 10
-    let cursor = Parametres.Page * numberofitem
-    
-    let query = {Public: true}
-    if (Parametres.AllPublicPost != undefined){
-        if(Parametres.AllPublicPost){
-            query = (Parametres.Filter)? FilterTracks(Parametres.Filter, user.User, Parametres.AllPublicPost) : {Public: true}
-        } else {
-            query = (Parametres.Filter)? FilterTracks(Parametres.Filter, user.User, Parametres.AllPublicPost) : {Owner: user.User}
-        }
-    }
-
-    const projection =(Parametres.ViewPost)? { Name:1, Date:1, Length:1, Description:1, InfoElevation:1, Image:1, StartPoint:1, Public:1, Group:1, Color:1} : { Name:1, Group:1, Length:1, Public:1} 
-
-    ModelTracks.find(query, projection, (err, result) => {
-        if (err) {
-            res.status(500).send(err)
-            LogError(`GetPostOfPage db eroor: ${err}`, user)
-        } else {
-            if (result.length != 0){
-                Reponse = result
-            }
-            res.status(200).send(Reponse)
-        }
-    }).limit(numberofitem).skip(cursor).sort({Date: -1})
-}
-
-async function GetMarkerOfPage (Parametres, res, user = null){
-    let Reponse = []
-    let numberofitem = 10
-    let cursor = Parametres.Page * numberofitem
-    
-    let query = {Public: true}
-    if (Parametres.AllPublicPost != undefined){
-        if(Parametres.AllPublicPost){
-            query = (Parametres.Filter)? FilterTracks(Parametres.Filter, user.User, Parametres.AllPublicPost) : {Public: true}
-        } else {
-            query = (Parametres.Filter)? FilterTracks(Parametres.Filter, user.User, Parametres.AllPublicPost) : {Owner: user.User}
-        }
-    }
-
-    const projection = {_id: 1, Name:1, Date:1, Length:1, Description:1, InfoElevation:1, StartPoint:1}
-
-    ModelTracks.find(query, projection, (err, result) => {
-        if (err) {
-            res.status(500).send(err)
-            LogError(`GetMarkerOfPage db eroor: ${err}`, user)
-        } else {
-            if (result.length != 0){
-                Reponse = result
-            }
-            res.status(200).send(Reponse)
-        }
-    }).limit(numberofitem).skip(cursor).sort({Date: -1})
-}
-
-function FilterTracks(Filter, User, AllPublicPost){
-    // Query de base
-    let Query = null
-    if (AllPublicPost){
-        Query = {$and:[
-            {Public: true}
-        ]}
-    } else {
-        Query = {$and:[
-            {Owner: User}
-        ]}
-    }
-
-    // DistanceMin
-    if (Filter.DistanceMin){
-        Query.$and.push({Length:{$gte: Filter.DistanceMin}})
-    }
-    // DistanceMax
-    if (Filter.DistanceMax){
-        Query.$and.push({Length:{$lte: Filter.DistanceMax}})
-    }
-    // HideMyTrack
-    if (Filter.HideMyTrack){
-        Query.$and.push({Owner: { $ne: User }})
-    }
-    // Group
-    if ((Filter.Group != undefined) && (Filter.Group != "")){
-        Query.$and.push({Group: Filter.Group})
-    }
-
-    return Query 
-}
 
 
 module.exports = router

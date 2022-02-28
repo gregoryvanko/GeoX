@@ -635,9 +635,9 @@ class GeoXCreateTrack {
             let DivInput = NanoXBuild.DivFlexColumn("DivInput", null, "width: 100%;")
             Contener.appendChild(DivInput)
             // Input Name
-            DivInput.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName",this._TrackName, "Input Text", "text", "Name",))
+            DivInput.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName",this._TrackName, "Input Text", "text", "Name", null, true))
             // Input `Group
-            DivInput.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup",this._TrackGroup, "Input Text", "text", "Group",))
+            DivInput.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup",this._TrackGroup, "Input Text", "text", "Group"))
             // Description
             let DivDescription = NanoXBuild.Div(null, "InputBoxCoreXWindow Text")
             DivInput.appendChild(DivDescription)
@@ -669,7 +669,7 @@ class GeoXCreateTrack {
             document.getElementById("InputTrackGroup").setAttribute("autocomplete", "off")
             autocomplete({
                 input: document.getElementById("InputTrackGroup"),
-                minLength: 1,
+                minLength: 0,
                 emptyMsg: 'No suggestion',
                 fetch: function(text, update) {
                     text = text.toLowerCase();
