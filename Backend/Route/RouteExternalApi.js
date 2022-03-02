@@ -29,7 +29,9 @@ router.post("/", AuthBasic, async (req, res) => {
                 LogError(ErrorMsg, req.user)
             })
         } else if (Data.Api == "routing.openstreetmap.de"){
-            axios.get(`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${Data.Input.PointA.lng},${Data.Input.PointA.lat};${Data.Input.PointB.lng},${Data.Input.PointB.lat}?steps=true&geometries=geojson`)
+            const url = `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${Data.Input.PointA.lng},${Data.Input.PointA.lat};${Data.Input.PointB.lng},${Data.Input.PointB.lat}?steps=true&geometries=geojson`
+            //const url = `http://router.project-osrm.org/route/v1/foot/${Data.Input.PointA.lng},${Data.Input.PointA.lat};${Data.Input.PointB.lng},${Data.Input.PointB.lat}?steps=true&geometries=geojson`
+            axios.get(url)
             .then((response) => {
                 res.json(response.data)
             })

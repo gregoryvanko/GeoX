@@ -5,6 +5,7 @@ const router = require("@gregvanko/nanox").Express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 const MongooseTypes = require("@gregvanko/nanox").Mongoose.Types
 
+const GetElevationOfLatLng = require("./HelperTrack").GetElevationOfLatLng
 
 router.get("/gpx/:id", AuthBasic, (req, res) => {
     let Id = req.params.id
@@ -31,7 +32,7 @@ router.get("/geojson/:id", AuthBasic, (req, res) => {
     let Id = req.params.id
     LogInfo(`Route Track GET geojson: ${JSON.stringify(Id)}`, req.user)
 
-    const Projection = { GeoJsonData: 1}
+    const Projection = { GeoJsonData: 1, Center: 1, ExteriorPoint:1}
     ModelTracks.findById(Id, Projection, (err, result) => {
         if (err) {
             res.status(500).send(err)
@@ -91,6 +92,19 @@ router.get("/mygroups", AuthBasic, (req, res) => {
             res.status(200).send(DataToSend) 
         }
     }).sort({Group: 1})
+})
+
+router.post("/elavationlatlng", AuthBasic, async (req, res) => {
+    const LatLng = req.body
+
+    let ReponseElevation = await GetElevationOfLatLng(LatLng)
+        if(ReponseElevation.Error){
+            let ErrorMsg = "GetElevationOfLatLng error : " + ReponseElevation.ErrorMsg
+            res.status(500).send(ErrorMsg)
+            LogError(`Get mygroups db error: ${ErrorMsg}`, req.user)
+        } else {
+            res.json(ReponseElevation.Data)
+        }
 })
 
 module.exports = router

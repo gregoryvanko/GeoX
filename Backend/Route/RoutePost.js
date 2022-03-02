@@ -59,7 +59,7 @@ router.delete("/:postid", AuthBasic, (req, res) => {
             LogError(`DeletePost db eroor: ${err}`, req.user)
         } else {
             res.status(200).send("OK")
-            LogInfo(`Postid ${Parametres.PostId}) is deleted`, req.user)
+            LogInfo(`Postid ${Parametres.PostId} is deleted`, req.user)
         }
     })
 })

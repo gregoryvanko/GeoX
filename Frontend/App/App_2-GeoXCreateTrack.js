@@ -571,7 +571,7 @@ class GeoXCreateTrack {
         // Show waiting text
         this._ElevationBox.UpdateText("Waiting data...")
         // Send to server
-        GlobalCallApiPromise("ApiGetElavation", latlngs, "", "").then((reponse)=>{
+        NanoXApiPost("/track/elavationlatlng", latlngs).then((reponse)=>{
             this._ElevationBox.UpdateGraph(reponse)
         },(erreur)=>{
             this.Error(erreur)
@@ -640,20 +640,20 @@ class GeoXCreateTrack {
             let DivToogleModExistingTrack = NanoXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
             Contener.appendChild(DivToogleModExistingTrack)
             DivToogleModExistingTrack.appendChild(NanoXBuild.DivText("Modify this track:"))
-            DivToogleModExistingTrack.appendChild(NanoXBuild.ToggleSwitch({Id: "ToggleExistingTrack", Checked: true}))
+            DivToogleModExistingTrack.appendChild(NanoXBuild.ToggleSwitch({Id: "ToggleExistingTrack", Checked: true, HeightRem: 2}))
             
             // Div Input
             let DivInput = NanoXBuild.DivFlexColumn("DivInput", null, "width: 100%;")
             Contener.appendChild(DivInput)
             // Input Name
             DivInput.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName",this._TrackName, "Input Text", "text", "Name", null, true))
-            // Input `Group
+            // Input Group
             DivInput.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup",this._TrackGroup, "Input Text", "text", "Group"))
             // Description
             let DivDescription = NanoXBuild.Div(null, "InputBoxCoreXWindow Text")
             DivInput.appendChild(DivDescription)
             DivDescription.appendChild(NanoXBuild.DivText("Description", null, "Text"))
-            let DivContDesc = NanoXBuild.Div("DivContDesc", "DivContentEdit TextSmall")
+            let DivContDesc = NanoXBuild.Div("DivContDesc", "DivContentEdit Text")
             DivContDesc.contentEditable = "True"
             DivContDesc.innerText= this._Description
             DivDescription.appendChild(DivContDesc)
@@ -661,7 +661,7 @@ class GeoXCreateTrack {
             let DivTooglePublic = NanoXBuild.Div(null,"Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
             DivInput.appendChild(DivTooglePublic)
             DivTooglePublic.appendChild(NanoXBuild.DivText("Public Track:"))
-            DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id: "TogglePublic",Checked: this._TrackPublic}))
+            DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id: "TogglePublic",Checked: this._TrackPublic, HeightRem: 2}))
 
             // DivMap
             let DivMap = NanoXBuild.Div("DivMap", null, "width: 600px;")
@@ -763,8 +763,7 @@ class GeoXCreateTrack {
                 Track.Color = "#0000FF"
 
                 // Send Add track
-                let FctData = {Action: "Add", TrackData : Track}
-                GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
+                NanoXApiPost("/post", Track).then((reponse)=>{
                     // Delete save window
                     NanoXBuild.PopupDelete()
                     // Delete Map
@@ -789,11 +788,11 @@ class GeoXCreateTrack {
     async GetRoute(PointA, PointB){
         //const reponse = await fetch(`https://router.project-osrm.org/route/v1/footing/${PointA.lng},${PointA.lat};${PointB.lng},${PointB.lat}?steps=true&geometries=geojson`)
 
-
         let FctData = {Api: "routing.openstreetmap.de", Input : {PointA: PointA, PointB : PointB}}
-        const data = await GlobalCallApiPromise("ApiGetDataFromApi", FctData, "", "").catch(error => {
+        const data = await NanoXApiPost("/externalapi", FctData).catch(error => {
             alert(error)
         });
+
         var ListOfPoint = []
         if (data){
             data.routes[0].geometry.coordinates.forEach(element => {
@@ -902,6 +901,17 @@ class GeoXCreateTrack {
     }
 
     InitiationModifyMyTrack(Groups, TrackId, TrackName, TrackGroup, Public, Description){
+        //Show Menu Bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+        // Set menu bar not translucide
+        NanoXSetMenuBarTranslucide(true)
+        // show name in menu bar
+        NanoXShowNameInMenuBar(false)
+        
         // Clear view
         this._DivApp.innerHTML=""
         // Set Group
@@ -924,8 +934,7 @@ class GeoXCreateTrack {
         // Texte
         Conteneur.appendChild(NanoXBuild.DivText("Get track data...", null, "Text"))
         // Get GeoJson Data of track
-        let FctData = {TrackId: TrackId, GetData: "DrawTrack"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/track/geojson/" + TrackId).then((reponse)=>{
             this.AddTrackToModifyOnMap(reponse)
         },(erreur)=>{
             this.Error(erreur)
