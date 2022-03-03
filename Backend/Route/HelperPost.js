@@ -34,6 +34,27 @@ async function GetPostOfPage (Parametres, res, user = null){
     }).limit(numberofitem).skip(cursor).sort({Date: -1})
 }
 
+async function GetPostOfPageAdmin (Parametres, res, user = null){
+    const numberofitem = 10
+    const cursor = Parametres.Page * numberofitem
+
+    const query = (Parametres.Filter)? FilterForAdminTracks(Parametres.Filter) : {}
+    const projection = { _id: 1, Name: 1, Group: 1, Owner: 1, Public: 1}
+
+    ModelTracks.find(query, projection, (err, result) => {
+        let Reponse = []
+        if (err) {
+            res.status(500).send(err)
+            LogError(`GetPostOfPageAdmin db eroor: ${err}`, user)
+        } else {
+            if (result.length != 0){
+                Reponse = result
+            }
+            res.status(200).send(Reponse)
+        }
+    }).limit(numberofitem).skip(cursor).sort({Date: -1})
+}
+
 async function GetMarkerOfPage (Parametres, res, user = null){
     let Reponse = []
     let numberofitem = 10
@@ -96,12 +117,26 @@ function FilterTracks(Filter, User, AllPublicPost){
     return Query 
 }
 
+function FilterForAdminTracks(Filter){
+    // Query de base
+    let Query = {$and:[]}
+
+    // DistanceMin
+    if (Filter.DistanceMin){
+        Query.$and.push({Length:{$gte: Filter.DistanceMin}})
+    }
+    // DistanceMax
+    if (Filter.DistanceMax){
+        Query.$and.push({Length:{$lte: Filter.DistanceMax}})
+    }
+    return Query 
+}
+
 function AddPostPromise(Track, User){
     return new Promise(async(resolve) => {
         let ReponseAddTracks = {Error: true, ErrorMsg:"InitError", Data:null}
 
         // Convert GPX to GeoJson
-        //let GeoJson = ConvertGpxToGeoJson(Track.FileContent)
         let GeoJson = Track.GeoJson
 
         // Si on a un GeoJson avec plusieurs line pour une track on le modifie
@@ -226,5 +261,6 @@ function AddPostPromise(Track, User){
 }
 
 module.exports.GetPostOfPage = GetPostOfPage
+module.exports.GetPostOfPageAdmin = GetPostOfPageAdmin
 module.exports.GetMarkerOfPage = GetMarkerOfPage
 module.exports.AddPostPromise = AddPostPromise

@@ -107,4 +107,28 @@ router.post("/elavationlatlng", AuthBasic, async (req, res) => {
         }
 })
 
+router.get("/tracksofgroup", AuthBasic, (req, res) => {
+    const Parametres = {Page : req.query.Page, Group: req.query.Group}
+
+    const Projection = { GeoJsonData: 1, Color: 1, Name: 1, Length: 1, _id: 1}
+    const Querry = {$and: [{Group: Parametres.Group}, {Owner: req.user.User}]}
+
+    const numberofitem = 5
+    const cursor = Parametres.Page * numberofitem
+
+    ModelTracks.find(Querry, Projection, (err, result) => {
+        let Reponse = []
+        if (err) {
+            res.status(500).send(err)
+            LogError(`TracksOfGroup db eroor: ${err}`, req.user)
+        } else {
+            if (result.length != 0){
+                Reponse = result
+            }
+            res.status(200).send(Reponse)
+        }
+    }).limit(numberofitem).skip(cursor)
+
+})
+
 module.exports = router

@@ -824,8 +824,8 @@ class GeoXCreateTrack {
 
     GetTracksOfGroup(DropDownGroupValue){
         // Send data to server
-        let FctData = {Group: DropDownGroupValue, GetData: "AllGeoJsonOfOneGroup", Page : this._PageGeoJsonOfOneGroup}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        let FctData = {Group: DropDownGroupValue, Page : this._PageGeoJsonOfOneGroup}
+        NanoXApiGet("/track/tracksofgroup", FctData).then((reponse)=>{
             if (reponse.length == 0){
                 this._PageGeoJsonOfOneGroup = 0
             } else {
@@ -1086,4 +1086,4 @@ class GeoXCreateTrack {
 // Creation de l'application
 let MyGeoXCreateTrack = new GeoXCreateTrack()
 // Ajout de l'application
-NanoXAddModule("Create My Tracks", IconGeoX.GeoXCreateTrack(), MyGeoXCreateTrack.Initiation.bind(MyGeoXCreateTrack),true)
+NanoXAddModule("Create My Tracks", IconGeoX.GeoXCreateTrack(), MyGeoXCreateTrack.Initiation.bind(MyGeoXCreateTrack))

@@ -2,6 +2,15 @@ const fs = require('fs')
 const path = require('path')
 const { TileSet } = require("node-hgt")
 
+// creation du folder si il n'existe pas encore
+var dir = path.resolve(__dirname, "TempHgt")
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+    console.log("TempHgt folder created")
+} else {
+    console.log("TempHgt folder exist")
+}
+
 
 /**
  * Calcul les lat et long min et max d'une track contenue dans un object GeoJson
@@ -196,7 +205,7 @@ async function GetElevationOfLatLng(LatLng){
         let ReponseGetElevationInterm = await PromiseGetElevation({ lat, lng })
         if(ReponseGetElevationInterm.Error){
             Reponse.Error = true
-            Reponse.ErrorMsg = "GetElevation error : " + ReponseGetElevation.ErrorMsg
+            Reponse.ErrorMsg = "GetElevation error : " + ReponseGetElevationInterm.ErrorMsg
             Reponse.Data = null
             return resolve(Reponse)
         }
@@ -272,11 +281,6 @@ async function GetElevationOfLatLng(LatLng){
 function PromiseGetElevation({ lat, lng }){
     return new Promise ((resolve) => {
         let Reponse = {Error: true, ErrorMsg:"InitError PromiseGetElevation", Data:null}
-
-        var dir = path.resolve(__dirname, "TempHgt")
-        if (!fs.existsSync(dir)){
-            fs.mkdirSync(dir);
-        }
         
         const tileset = new TileSet(path.resolve(__dirname, "TempHgt"))
         tileset.getElevation([lat, lng], (err, ele) => {

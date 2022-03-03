@@ -3,8 +3,10 @@ const LogInfo = require("@gregvanko/nanox").NanoXLogInfo
 const ModelTracks = require("../MongooseModel/Model_Tracks")
 const router = require("@gregvanko/nanox").Express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
+const AuthAdim = require("@gregvanko/nanox").NanoXAuthAdmin
 
 const GetPostOfPage = require("./HelperPost").GetPostOfPage
+const GetPostOfPageAdmin = require("./HelperPost").GetPostOfPageAdmin
 const GetMarkerOfPage = require("./HelperPost").GetMarkerOfPage
 const AddPostPromise = require("./HelperPost").AddPostPromise
 
@@ -18,6 +20,11 @@ router.get("/public/:page", (req, res) => {
 router.get("/", AuthBasic, (req, res) => {
     let Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter), AllPublicPost: JSON.parse(req.query.AllPublicPost), ViewPost: JSON.parse(req.query.ViewPost)}
     GetPostOfPage(Parametres, res, req.user)
+})
+
+router.get("/admin", AuthAdim, (req, res) => {
+    const Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter)}
+    GetPostOfPageAdmin(Parametres, res, req.user)
 })
 
 // Get liste of x marker based on page number
@@ -161,6 +168,5 @@ router.patch("/", AuthBasic, (req, res) => {
         LogError(TheError, req.user)
     }
 })
-
 
 module.exports = router

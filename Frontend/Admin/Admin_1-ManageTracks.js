@@ -1,4 +1,4 @@
-class GeoXManageTracks {
+class AdminGeoXManageTracks {
     constructor(){
         this._DivApp = NanoXGetDivApp()
         this._DivConteneur = "DivConteneur"
@@ -21,8 +21,6 @@ class GeoXManageTracks {
         }, {threshold: [1]})
 
         this._WindowScrollY = 0
-
-        //this._AppData = null
     }
 
     Initiation(){
@@ -47,9 +45,9 @@ class GeoXManageTracks {
         let Conteneur = document.getElementById(this._DivConteneur)
         // Titre de l'application
         Conteneur.appendChild(NanoXBuild.DivText("All Tracks", null, "Titre"))
+
         // Add Button filter
-        NanoXClearMenuButtonLeft()
-        NanoXAddMenuButtonLeft("ButtonFilter", "Filter", Icon.Filter(), this.ClickOnFilter.bind(this))
+        this.AddButtonViewList()
 
         // Div pour le titre des colonnes
         let BoxTitre = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
@@ -60,7 +58,7 @@ class GeoXManageTracks {
         // Titre des colonnes
         BoxTitre.appendChild(NanoXBuild.DivText("Name",null,"TextBoxTitre", "width: 44%; margin-left:1%;"))
         BoxTitre.appendChild(NanoXBuild.DivText("Group",null,"TextBoxTitre", "width: 28%;"))
-        BoxTitre.appendChild(NanoXBuild.DivText("Owner",null,"TextBoxTitre", "width: 24%;"))
+        BoxTitre.appendChild(NanoXBuild.DivText("Owner",null,"TextBoxTitre", "width: 21%;"))
         // Liste des post
         let ListofMyPost = NanoXBuild.DivFlexColumn(this._DivListOfMyTracksData, null, "width: 100%;")
         ListofMyPost.style.width = "60rem"
@@ -77,6 +75,26 @@ class GeoXManageTracks {
         // GetData
         this.GetAllMyTracksData()
 
+        // Log serveur load view
+        NanoXApiPostLog("User Load module Admin My Tracks, view List")
+
+    }
+
+    AddButtonViewList(){
+        //Show Menu Bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+
+        // Set menu bar not translucide
+        NanoXSetMenuBarTranslucide(false)
+        // show name in menu bar
+        NanoXShowNameInMenuBar(true)
+
+        // Button Filter
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
     }
 
     /**
@@ -92,8 +110,7 @@ class GeoXManageTracks {
         ConteneurTrackData.style.display = "flex"
 
         // Add Button Back
-        NanoXClearMenuButtonLeft()
-        NanoXAddMenuButtonLeft("ActionLeftBack", "Back", Icon.LeftArrow(NanoXGetColorIconMenuBar()), this.ClickOnBackFromTrackData.bind(this))
+        this.AddButtonViewTrackData()
 
         // Div Data of track
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack, null, "width: 100%;")
@@ -109,6 +126,25 @@ class GeoXManageTracks {
         }
         // get InfoOnTrack data
         this.GetInfoOnTrack(TrackId)
+        // Log serveur load view Post
+        NanoXApiPostLog("User Load module Admin My Tracks, view TrackData")
+    }
+
+    AddButtonViewTrackData(){
+        //Show Menu Bar
+        NanoXShowMenuBar(true)
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // Clear Right button
+        NanoXClearMenuButtonRight()
+
+        // Set menu bar translucide
+        NanoXSetMenuBarTranslucide(true)
+        // hide name in menu bar
+        NanoXShowNameInMenuBar(false)
+
+        // Add menu button lef
+        NanoXAddMenuButtonLeft("ActionLeftBack", "Back", Icon.LeftArrow(NanoXGetColorIconMenuBar()), this.ClickOnBackFromTrackData.bind(this))
     }
 
     /**
@@ -116,7 +152,7 @@ class GeoXManageTracks {
      */
     GetAllMyTracksData(){
         let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost}
-        GlobalCallApiPromise("ApiAdminGetAllTracks", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/post/admin", FctData).then((reponse)=>{
             this.RenderAllMyTracksDataInViewManageTrack(reponse)
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
@@ -128,8 +164,7 @@ class GeoXManageTracks {
      * @param {String} TrackId Id of track
      */
     GetInfoOnTrack(TrackId){
-        let FctData = {PostId: TrackId}
-        GlobalCallApiPromise("ApiAdminGetPostData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/post/onepost/" + TrackId).then((reponse)=>{
             this.RenderInfoOnTrackInViewTrackData(reponse)
         },(erreur)=>{
             this.ShowErrorMessage(erreur)
@@ -151,7 +186,7 @@ class GeoXManageTracks {
                 BoxTracks.style.marginBottom = "0.7rem"
                 BoxTracks.appendChild(NanoXBuild.DivText(element.Name,null,"Text", "width: 44%; margin-left:1%; padding:0.2rem;"))
                 BoxTracks.appendChild(NanoXBuild.DivText(element.Group,null,"TextSmall", "width: 28%; padding:0.2rem;"))
-                BoxTracks.appendChild(NanoXBuild.DivText(element.Owner,null,"TextSmall", "width: 24%; padding:0.2rem;"))
+                BoxTracks.appendChild(NanoXBuild.DivText(element.Owner,null,"TextSmall", "width: 21%; padding:0.2rem;"))
                 if (! element.Public){
                     BoxTracks.style.color = "red"
                 }
@@ -217,6 +252,8 @@ class GeoXManageTracks {
         document.getElementById(this._DivConteneur).style.display = "flex"
         // Scroll
         window.scrollTo(0, this._WindowScrollY)
+        // Add button
+        this.AddButtonViewList()
     }
 
     /**
@@ -264,6 +301,6 @@ class GeoXManageTracks {
 }
 
 // Creation de l'application
-let MyManageTracks = new GeoXManageTracks()
+let MyAdminGeoXManageTracks = new AdminGeoXManageTracks()
 // Ajout de l'application
-//GlobalCoreXAddApp("Manage My Tracks", IconGeoX.GeoXManageTracks(), MyManageTracks.Initiation.bind(MyManageTracks))
+NanoXAddModule("Admin My Tracks", IconGeoX.GeoXManageTracks(), MyAdminGeoXManageTracks.Initiation.bind(MyAdminGeoXManageTracks))

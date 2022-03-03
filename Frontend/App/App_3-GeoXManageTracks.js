@@ -191,12 +191,12 @@ class GeoXManageTracks {
         
         // Button Filter
         NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
-        // Button Add track
-        NanoXAddMenuButtonRight("ButtonAddTrack", "Add Track", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
         // Button view on map
         NanoXAddMenuButtonRight("ButtonMapOrPost", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewMap))
         // Button Listview
         NanoXAddMenuButtonRight("ButtonListView", "List View", null, this.LoadView.bind(this, this._ViewListOfTrack))
+        // Button Add track
+        NanoXAddMenuButtonRight("ButtonAddTrack", "Add Track", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
     }
 
     /**
@@ -239,7 +239,7 @@ class GeoXManageTracks {
         // Titre des colonnes
         BoxTitre.appendChild(NanoXBuild.DivText("Name",null,"TextBoxTitre", "width: 44%; margin-left:1%;"))
         BoxTitre.appendChild(NanoXBuild.DivText("Group",null,"TextBoxTitre", "width: 28%;"))
-        BoxTitre.appendChild(NanoXBuild.DivText("Distance",null,"TextBoxTitre", "width: 13%; text-align: right;"))
+        BoxTitre.appendChild(NanoXBuild.DivText("Distance",null,"TextBoxTitre", "width: 21%; text-align: right;"))
         // Liste des post
         let ListofMyPost = NanoXBuild.DivFlexColumn(this._DivListOfMyTracksData)
         ListofMyPost.style.width = "60rem"
@@ -272,10 +272,10 @@ class GeoXManageTracks {
 
         // Button Filter
         NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
-        // Button Add track
-        NanoXAddMenuButtonRight("ButtonAddTrack", "Add Track", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
         // Button view post
         NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
+        // Button Add track
+        NanoXAddMenuButtonRight("ButtonAddTrack", "Add Track", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
     }
 
     /**
