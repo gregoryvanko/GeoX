@@ -1,6 +1,7 @@
 let NanoXAddRoute = require("@gregvanko/nanox").NanoXAddRoute
 
-async function Start(Port = 1234, Name = "NanoXDev", Debug = false){
+async function Start(Port = 1234, Name = "NanoXDev", Debug = false, SplashScreenFilePath = null){
+    if (SplashScreenFilePath == null){SplashScreenFilePath = __dirname + "/Frontend/SplashScreen/SplashScreen.html"}
 
    // NonoX Option
    const OptionNanoX = {
@@ -15,7 +16,7 @@ async function Start(Port = 1234, Name = "NanoXDev", Debug = false){
        AllowSignUp: true,
        AppPath: "app",
        NanoXAppOption : {
-           SplashScreen : GetSplashScreen(),
+           SplashScreen : GetSplashScreen(SplashScreenFilePath),
            SplashScreenBackgroundColor : "black",
            ShowMenuBar: true,
            MenuBarIstransparent:false,
@@ -44,15 +45,25 @@ async function Start(Port = 1234, Name = "NanoXDev", Debug = false){
    // Build Home page
    require("./Frontend/HomePage/BuildHomePage").BuildAndAddHomePage()
 
+
    // Start NanoX
    await require("@gregvanko/nanox").NanoXStart()
 }
 
-function GetSplashScreen(){
-    let fs = require('fs')
-    let HtmlString = fs.readFileSync(__dirname + "/Frontend/SplashScreen/SplashScreen.html", 'utf8')
-    HtmlString = HtmlString.replace(/\r?\n|\r/g, " ")
-    return HtmlString
+function GetSplashScreen(FilePath){
+    const fs = require('fs')
+    const path = require('path')
+
+    var dir = path.resolve(FilePath)
+    let HtmlString = null
+    if (fs.existsSync(dir)){
+        HtmlString = fs.readFileSync(FilePath, 'utf8')
+        HtmlString = HtmlString.replace(/\r?\n|\r/g, " ")
+        return HtmlString
+    } else {
+        console.log("SplashScreen file not found: " + FilePath)
+        return HtmlString
+    }
 }
 
 module.exports.Start = Start

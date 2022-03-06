@@ -484,7 +484,7 @@ class GeoXManageTracks {
     }
 
     /**
-     * Get makers of all tracks of GeoX by page
+     * Get makers of all tracks by page
      */
     GetAllMarkersByPage(){
         let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost, AllPublicPost: false}

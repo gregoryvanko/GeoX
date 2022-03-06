@@ -14,6 +14,7 @@ let GeoX = require('@gregvanko/geox').GeoX
 const Name = "GeoX"
 const Port = 9002
 const Debug = false
+const SplashScreenFilePath = __dirname + "/SplashScreen.html"
 let MyApp = new GeoX(Name, Port, Debug)
 MyApp.Start()
 ```
