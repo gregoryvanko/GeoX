@@ -10,11 +10,9 @@ npm install @gregvanko/geox --save
 ## File App.js
 Create a "App.js" file with this content:
 ```js
-let GeoX = require('@gregvanko/geox').GeoX
-const Name = "GeoX"
+const Name = "MyAppName"
 const Port = 9002
 const Debug = false
 const SplashScreenFilePath = __dirname + "/SplashScreen.html"
-let MyApp = new GeoX(Name, Port, Debug)
-MyApp.Start()
+require('@gregvanko/geox').Start(Port, Name, Debug, SplashScreenFilePath)
 ```

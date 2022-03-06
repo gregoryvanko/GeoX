@@ -87,6 +87,7 @@ function MinMaxOfTracks(ListOfTracks){
  * @param {Object} DataMap Object contenant les data des map
  */
 function BuildHtmlGetMap(DataMap){
+    const AppOption = require("@gregvanko/nanox").NanoXGetNanoXAppOption()
     let fs = require('fs')
     var reponse = ""
     reponse +=`
@@ -98,7 +99,7 @@ function BuildHtmlGetMap(DataMap){
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             <link rel="apple-touch-icon" href="apple-icon.png">
             <meta http-equiv="X-UA-Compatible" content="ie=edge">
-            <title>GeoX</title>
+            <title>${AppOption.AppName}</title>
             <style>
                 body{
                     margin: 0;

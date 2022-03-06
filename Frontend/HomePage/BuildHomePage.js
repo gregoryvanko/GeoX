@@ -3,7 +3,8 @@ const fs = require('fs')
 const path = require('path')
 
 function BuildAndAddHomePage(){
-    require("@gregvanko/nanox").NanoXAddPageToBuild("HomePage.html", "","GeoX", GetCSS(), GetJS())
+    const AppOption = require("@gregvanko/nanox").NanoXGetNanoXAppOption()
+    require("@gregvanko/nanox").NanoXAddPageToBuild("HomePage.html", "",AppOption.AppName, GetCSS(), GetJS())
 }
 
 function GetJS(){
