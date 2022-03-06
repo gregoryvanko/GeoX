@@ -54,43 +54,43 @@ class FollowTrackOnMap {
      */
     ShowDistanceInfoBox(){
         // Div du box
-        let DivBoxTracks = CoreXBuild.Div("DivBoxDistance", "DivBoxDistance", "")
+        let DivBoxTracks = NanoXBuild.Div("DivBoxDistance", "DivBoxDistance")
         document.getElementById(this._IdDivMap).appendChild(DivBoxTracks)
         // Conteneur
-        let Conteneur = CoreXBuild.DivFlexRowAr("")
+        let Conteneur = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
         DivBoxTracks.appendChild(Conteneur)
         // ConteneurTxt
-        let ConteneurTxt = CoreXBuild.Div("ConteneurTxt", "", "width: 78%; display:flex; justify-content:center;")
+        let ConteneurTxt = NanoXBuild.Div("ConteneurTxt", null, "width: 78%; display:flex; justify-content:center;")
         Conteneur.appendChild(ConteneurTxt)
-        ConteneurTxt.appendChild(CoreXBuild.DivTexte("Waiting for GPS position...","DistanceTxt","TextTrackInfo", "color: white; text-align: center;"))
+        ConteneurTxt.appendChild(NanoXBuild.DivText("Waiting for GPS position...","DistanceTxt","TextTrackInfo", "color: white; text-align: center;"))
         // ConteneurData
-        let ConteneurData = CoreXBuild.DivFlexRowAr("ConteneurData")
+        let ConteneurData = NanoXBuild.DivFlexRowSpaceAround("ConteneurData", null, "width: 100%")
         ConteneurData.style.display = "none"
-        ConteneurData.style.width = "78%"
+        ConteneurData.style.width = "86%"
         Conteneur.appendChild(ConteneurData)
         // Boutton stop
-        let ConteneurStop = CoreXBuild.Div("ConteneurStop", "", "width: 20%; display: flex; flex-direction:column; justify-content:center;")
+        let ConteneurStop = NanoXBuild.Div("ConteneurStop", null, "width: 12%; display: flex; flex-direction:column; justify-content:center;")
         Conteneur.appendChild(ConteneurStop)
-        ConteneurStop.appendChild(CoreXBuild.Button (`<img src="${Icon.Stop()}" alt="icon" width="30" height="30">`, this.StopFollowTrack.bind(this), "ButtonInfoBoxNav", ""))
+        ConteneurStop.appendChild(NanoXBuild.Button (`<img src="${Icon.Stop()}" alt="icon" width="30" height="30">`, this.StopFollowTrack.bind(this), null, "ButtonInfoBoxNav"))
         // Pourcentage
-        let DivProgressRing = CoreXBuild.Div("", "", "width: 38%; display: flex; flex-direction:column; justify-content:flex-start;")
+        let DivProgressRing = NanoXBuild.Div(null, null, "width: 28%; display: flex; flex-direction:column; justify-content:flex-start;")
         ConteneurData.appendChild(DivProgressRing)
-        DivProgressRing.appendChild(CoreXBuild.ProgressRing({Id:"MyProgressRing", Radius:30, RadiusMobile:30, ScaleText:0.7, TextColor:"white", StrokeColor:"var(--CoreX-color)"}))
+        DivProgressRing.appendChild(NanoXBuild.ProgressRing({Id:"MyProgressRing", Radius:30, RadiusMobile:30, TextColor:"white", ProgressColor:"var(--NanoX-appcolor)"}))
         // Div Distance
-        let DivDistane = CoreXBuild.Div("", "", "width: 60%; display: flex; flex-direction:column; justify-content:center;")
+        let DivDistane = NanoXBuild.Div(null, null, "width: 70%; display: flex; flex-direction:column; justify-content:center;")
         ConteneurData.appendChild(DivDistane)
-        let DivDone = CoreXBuild.DivFlexRowStart("")
+        let DivDone = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
         DivDistane.appendChild(DivDone)
-        DivDone.appendChild(CoreXBuild.DivTexte("Done:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
-        DivDone.appendChild(CoreXBuild.DivTexte("0km","DistaneDone","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
-        let DivTotal = CoreXBuild.DivFlexRowStart("")
+        DivDone.appendChild(NanoXBuild.DivText("Done:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
+        DivDone.appendChild(NanoXBuild.DivText("0km","DistaneDone","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
+        let DivTotal = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
         DivDistane.appendChild(DivTotal)
-        DivTotal.appendChild(CoreXBuild.DivTexte("Total:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
-        DivTotal.appendChild(CoreXBuild.DivTexte("0km","DistanceTotal","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
-        let DivReste = CoreXBuild.DivFlexRowStart("")
+        DivTotal.appendChild(NanoXBuild.DivText("Total:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
+        DivTotal.appendChild(NanoXBuild.DivText("0km","DistanceTotal","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
+        let DivReste = NanoXBuild.DivFlexRowStart(null, null, "width: 100%;")
         DivDistane.appendChild(DivReste)
-        DivReste.appendChild(CoreXBuild.DivTexte("To End:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
-        DivReste.appendChild(CoreXBuild.DivTexte("0km","DistanceToEnd","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
+        DivReste.appendChild(NanoXBuild.DivText("To End:","","TextTrackInfo", "color: white; text-align:right; width: 40%; margin-right: 1%;"))
+        DivReste.appendChild(NanoXBuild.DivText("0km","DistanceToEnd","TextTrackInfo", "color: white; text-align:left; margin-left: 1%;"))
     }
 
     /**

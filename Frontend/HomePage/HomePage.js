@@ -49,19 +49,16 @@ class HomePage{
     }
 
     GetPosts(){
-        fetch("/getpageofpost/" + this._PageOfPosts).then((response) => {
+        let url = "/post/public/" + this._PageOfPosts
+        fetch(url).then((response) => {
             if (response.ok) {
-              return response.json();
+                return response.json();
             } else {
-              throw new Error("get posts failed: " + response.status + " " + response.statusText);
+                throw new Error("get posts failed: " + response.status + " " + response.statusText);
             }
         })
         .then((responseJson) => {
-            if (responseJson.Error){
-                document.getElementById(this._IdDivApp).appendChild(this.GetDivError(responseJson.ErrorMsg))
-            } else {
-                this.RenderPosts(responseJson.Data)
-            }
+            this.RenderPosts(responseJson)
         })
         .catch((error) => {
             let divapp = document.getElementById(this._IdDivApp)

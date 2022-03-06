@@ -21,10 +21,10 @@ class ElevationBox {
 
     BuildBox(){
         // Div du box
-        let DivBox = CoreXBuild.Div("DivElevationBox", "DivElevationBox", "")
+        let DivBox = NanoXBuild.Div("DivElevationBox", "DivElevationBox")
         this._DivApp.appendChild(DivBox)
         // DivFlex
-        let DivFlexBox = CoreXBuild.DivFlexColumn()
+        let DivFlexBox = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
         DivFlexBox.style.height= "100%"
         DivBox.appendChild(DivFlexBox)
         // Add Txt
@@ -34,11 +34,11 @@ class ElevationBox {
     }
 
     BuildText(Div){
-        Div.appendChild(CoreXBuild.DivTexte("No Elevation", this._IdElevationBoxtext, "Text", "color:white;"))
+        Div.appendChild(NanoXBuild.DivText("No Elevation", this._IdElevationBoxtext, "Text", "color:white;"))
     }
 
     BuildGraph(Div){        
-        let DivGraph = CoreXBuild.Div(this._IdElevationBoxGraph, "", "width:100%; display:none")
+        let DivGraph = NanoXBuild.Div(this._IdElevationBoxGraph, null, "width:100%; display:none")
         Div.appendChild(DivGraph)
         // Build elevation data
         this.BuildElevationData(DivGraph)
@@ -153,7 +153,7 @@ class ElevationBox {
     }
 
     BuildElevationData(DivData){
-        let conteneur = CoreXBuild.DivFlexRowAr("")
+        let conteneur = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
         conteneur.style.marginBottom = "1vh"
         DivData.appendChild(conteneur)
         conteneur.appendChild(this.DrawDataInfo(this._IdElevLength, "0", "Km", CommonIcon.LenghtWhite()))
@@ -168,22 +168,22 @@ class ElevationBox {
     }
 
     DrawDataInfo(Id, Value, Unite, Description){
-        let conteneur = CoreXBuild.Div("", "", "display: -webkit-flex; display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
+        let conteneur = NanoXBuild.Div(null, null, "display: -webkit-flex; display: flex; flex-direction: column; justify-content:space-around; align-content:center; align-items: center; flex-wrap: wrap;")
 
-        let conteneurdescription = CoreXBuild.DivFlexRowAr("")
-        conteneurdescription.appendChild(CoreXBuild.Image64(Description,"", "", "height: 2.5vh; margin-bottom:0.5vh"))
+        let conteneurdescription = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
+        conteneurdescription.appendChild(NanoXBuild.Image64(Description,"", "", "height: 2.5vh; margin-bottom:0.5vh"))
         conteneur.appendChild(conteneurdescription)
 
-        let conteneurvalue = CoreXBuild.DivFlexRowAr("")
-        conteneurvalue.appendChild(CoreXBuild.DivTexte(Value,Id,"TextSmall", "padding-right: 0.5vw; color:white;"))
-        conteneurvalue.appendChild(CoreXBuild.DivTexte(Unite,"","TextSmall", "color:white;"))
+        let conteneurvalue = NanoXBuild.DivFlexRowSpaceAround(null, null, "width: 100%")
+        conteneurvalue.appendChild(NanoXBuild.DivText(Value,Id,"TextSmall", "padding-right: 0.5vw; color:white;"))
+        conteneurvalue.appendChild(NanoXBuild.DivText(Unite,null,"TextSmall", "color:white;"))
         conteneur.appendChild(conteneurvalue)
 
         return conteneur
     }
 
     DrawVerticalLine(){
-        let conteneur = CoreXBuild.Div("" , "", "border-left: 2px solid #dfdfe8; height: 4vh;")
+        let conteneur = NanoXBuild.Div(null, null, "border-left: 2px solid #dfdfe8; height: 4vh;")
         return conteneur
     }
 

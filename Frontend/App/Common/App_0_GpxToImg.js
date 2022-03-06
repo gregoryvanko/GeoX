@@ -42,7 +42,7 @@ class GpxToImg {
     }
 
     BuildVirutalMap(resolve, reject, ConvertReponse){
-        this._Div.appendChild(CoreXBuild.Div(this._MapId, "", `height: ${this._Imgheight}px; width: ${this._Imgwidth}px;`))
+        this._Div.appendChild(NanoXBuild.Div(this._MapId, null, `height: ${this._Imgheight}px; width: ${this._Imgwidth}px;`))
         let Openstreetmap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'

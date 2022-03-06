@@ -1,6 +1,6 @@
 class GeoXActivities {
-    constructor(DivApp){
-        this._DivApp = document.getElementById(DivApp)
+    constructor(){
+        this._DivApp = NanoXGetDivApp()
 
         this._IdDivApp = "divapp"
         this._IdDivTrackInfo = "DivTrackInfo"
@@ -43,42 +43,10 @@ class GeoXActivities {
         this._FollowMyTrack = null
         this._PageOfMarkers = 0
         this._AllMarkers = []
-        // Show Action Button
-        GlobalDisplayAction('On')
-        // Clear Action List
-        GlobalClearActionList()
-        // Add action
-        GlobalAddActionInList("Add Track", this.GoToAddTrack.bind(this))
-        GlobalAddActionInList("Create Track", this.GoToCreateTrack.bind(this))
-        GlobalAddActionInList("My Tracks", this.GoToManageTrack.bind(this))
         // Clear view
         this._DivApp.innerHTML=""
         // Load Start view
         this.LoadStartView()
-    }
-
-    /**
-     * Action pour aller au module de creation de track
-     */
-    GoToCreateTrack(){
-        GlobalReset()
-        MyGeoXCreateTrack.Initiation()
-    }
-
-    /**
-     * Action pour aller au module de modification des track
-     */
-    GoToManageTrack(){
-        GlobalReset()
-        MyGeoXManageTracks.Initiation(true)
-    }
-
-    /**
-     * Action pour aller au module d'ajout de track
-     */
-    GoToAddTrack(){
-        GlobalReset()
-        MyGeoXManageTracks.Initiation(false)
     }
 
     LoadStartView(){
@@ -86,8 +54,11 @@ class GeoXActivities {
         this._DivApp.innerHTML=""
 
         // Contener
-        let Conteneur = CoreXBuild.DivFlexColumn("Conteneur")
+        let Conteneur = NanoXBuild.DivFlexColumn("Conteneur", null, "width: 100%;")
         this._DivApp.appendChild(Conteneur)
+
+        // Build Menu Button
+        this.BuildMenuButton()
 
         // si on prensente la vue sous forme de post
         if (this._IsPostPresentation){
@@ -98,44 +69,63 @@ class GeoXActivities {
                 this._PageOfMarkers = 0
                 this._AllMarkers = []
             }
-            // Button Map
-            Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnToogleMapPost.bind(this), "ActionMap",  `<img src="${IconGeoX.GeoXMapIcon()}" alt="icon" width="32" height="32">`))
-            // Button Filter
-            Conteneur.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
             // Titre de l'application
-            Conteneur.appendChild(CoreXBuild.DivTexte("Activities", "TitreActivities", "Titre"))
+            Conteneur.appendChild(NanoXBuild.DivText("Activities", "TitreActivities", "Titre"))
             // DivApp
-            let divapp = CoreXBuild.Div(this._IdDivApp, "DivPostApp", "")
+            let divapp = NanoXBuild.Div(this._IdDivApp, "DivPostApp")
             Conteneur.appendChild(divapp)
             // Div Waiting
-            let divwaiting = CoreXBuild.DivTexte("Waiting...", "DivWaitingPost", "Texte", "margin-bottom: 2rem;")
+            let divwaiting = NanoXBuild.DivText("Waiting...", "DivWaitingPost", "Texte", "margin-bottom: 2rem;")
             Conteneur.appendChild(divwaiting)
             // Get Posts
             this.GetPosts()
+            // Log serveur load view Post
+            NanoXApiPostLog("User Load module Activities, view Post")
         // Si on presente la vue Map
         } else {
-            // Button Post
-            Conteneur.appendChild(CoreXBuild.ButtonLeftAction(this.ClickOnToogleMapPost.bind(this), "ActionMap",  `<img src="${Icon.Liste()}" alt="icon" width="32" height="32">`))
-            // Button Filter
-            Conteneur.appendChild(CoreXBuild.Button(`<img src="${Icon.Filter()}" alt="icon" width="32" height="32">`,this.ClickOnFilter.bind(this),"ButtonLeftActionSecond","ButtonFilter"))
             // Ajout du div qui va contenir la map
-            Conteneur.appendChild(CoreXBuild.Div(this._IdDivMap, "", "height: 100vh; width: 100%;"))
+            Conteneur.appendChild(NanoXBuild.Div(this._IdDivMap, null, "height: 100vh; width: 100%;"))
             this._Map = new GeoXMap(this._IdDivMap) 
             this._Map.RenderMap()
             this._Map.AddMarkersClusterGroup()
             this._Map.OnClickOnMarker = this.ClickOnMarker.bind(this)
             // Get All marker by page
             this.GetAllMarkersByPage()
+            // Log serveur load view Map
+            NanoXApiPostLog("User Load module Activities, view Map")
         }
         
         // DivTrackInfo
-        let divtrackinfo = CoreXBuild.Div(this._IdDivTrackInfo, "DivTrackInfo", "margin-left:auto; margin-right:auto;")
+        let divtrackinfo = NanoXBuild.Div(this._IdDivTrackInfo, "DivTrackInfo", "margin-left:auto; margin-right:auto;")
         this._DivApp.appendChild(divtrackinfo)
-        divtrackinfo.appendChild(CoreXBuild.Div(this._IdDivContentTrackInfo, "DivContentTrackInfo", ""))
+        divtrackinfo.appendChild(NanoXBuild.Div(this._IdDivContentTrackInfo, "DivContentTrackInfo"))
         divtrackinfo.appendChild(this.BuildEmptySpace())
 
         // DivFollowTrack
-        this._DivApp.appendChild(CoreXBuild.Div(this._IdDivMapFollow, "", "height: 100vh; width: 100%; display: none;")) 
+        this._DivApp.appendChild(NanoXBuild.Div(this._IdDivMapFollow, null, "height: 100vh; width: 100%; display: none;")) 
+    }
+
+    BuildMenuButton(){
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // clear menu button right
+        NanoXClearMenuButtonRight()
+        // Show name in menu bar
+        NanoXShowNameInMenuBar(true)
+        // Set Menu bar
+        if (this._IsPostPresentation){
+            // Set menu bar not translucide
+            NanoXSetMenuBarTranslucide(false)
+            // Add Button Map 
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+        } else {
+            // Set menu bar translucide
+            NanoXSetMenuBarTranslucide(true)
+            // Add Button Map 
+            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Post(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+        }
+        // Add Button Filter
+        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
     }
 
     BuildEmptySpace(){
@@ -145,17 +135,19 @@ class GeoXActivities {
     }
 
     GetPosts(){
-        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: true}
-        GlobalCallApiPromise("ApiGetAllPost", FctData, "", "").then((reponse)=>{
+        let FctData = {Page: this._PageOfPosts, Filter: this._FiltrePost, AllPublicPost: true, ViewPost: true}
+        NanoXApiGet("/post/", FctData).then((reponse)=>{
             this.RenderPosts(reponse)
         },(erreur)=>{
-            alert("Error: " + erreur)
+            // Clear view
+            this._DivApp.innerHTML=""
+            this._DivApp.appendChild(this.GetDivError(erreur))
         })
     }
 
     GetDivError(MyError){
         let diverror = document.createElement('div')
-        diverror.innerText = MyError
+        diverror.innerHTML = MyError
         diverror.style.color = "red"
         diverror.style.margin = "2rem"
         return diverror
@@ -208,13 +200,20 @@ class GeoXActivities {
         let divApp = document.getElementById("Conteneur")
         divApp.style.display = "none"
 
-        // Hide action button
-        GlobalDisplayAction('Off')
-
-
         // Show IdDivTrackInfo
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
         divTrackInfo.style.display = "flex"
+
+        // clear menu button left
+        NanoXClearMenuButtonLeft()
+        // clear menu button right
+        NanoXClearMenuButtonRight()
+        // Set menu bar translucide
+        NanoXSetMenuBarTranslucide(true)
+        // hide name in menu bar
+        NanoXShowNameInMenuBar(false)
+        // Add menu button lef
+        NanoXAddMenuButtonLeft("ActionLeftBack", "Back", Icon.LeftArrow(NanoXGetColorIconMenuBar()), this.RemoveTrackData.bind(this))
 
         // Text
         let divwaiting = document.createElement('div')
@@ -225,12 +224,16 @@ class GeoXActivities {
         divwaiting.style.marginBottom = "2rem"
         document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
-        let FctData = {PostId: Id}
-        GlobalCallApiPromise("ApiGetPostData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/post/onepost/" + Id).then((reponse)=>{
             this.RenderTrackData(reponse)
         },(erreur)=>{
-            alert("Error: " + erreur)
+            // Clear view
+            this._DivApp.innerHTML=""
+            this._DivApp.appendChild(this.GetDivError(erreur))
         })
+
+        // Log serveur load view Track Data
+        NanoXApiPostLog("User Load module Activities, view Track Data")
     }
 
     RenderTrackData(Data){
@@ -239,28 +242,25 @@ class GeoXActivities {
         // Remove waiting
         divbackground.removeChild(document.getElementById("DivWaiting"))
 
-        // Add Button Back
-        divbackground.appendChild(CoreXBuild.ButtonLeftAction(this.RemoveTrackData.bind(this), "ActionLeftBack",  `<img src="${Icon.LeftArrow()}" alt="icon" width="32" height="32">`))
-
         // Add InfoOnTrack
-        let DivData = CoreXBuild.DivFlexColumn("DivData")
+        let DivData = NanoXBuild.DivFlexColumn("DivData", null, "width: 100%;")
         divbackground.appendChild(DivData)
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
 
         // Div Button Action
-        let DivButtonAction = CoreXBuild.DivFlexRowAr("ButtonAction")
+        let DivButtonAction = NanoXBuild.DivFlexRowSpaceAround("ButtonAction", null, "width: 100%")
         divbackground.appendChild(DivButtonAction)
         // Button Save
-        let ButtonSave = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.SaveBlack(), "Save Track"), this.ClickSaveToMyTrack.bind(this, Data._id), "CloseButton", "SaveToMe")
+        let ButtonSave = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.SaveBlack(), "Save Track"), this.ClickSaveToMyTrack.bind(this, Data._id),"SaveToMe", "CloseButton")
         DivButtonAction.appendChild(ButtonSave)
         // Button download GPX
-        let ButtonGPX = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Download(), "GPX"), this.ClickDownloadGPX.bind(this, Data._id, Data.Name), "CloseButton", "GPX")
+        let ButtonGPX = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Download(), "GPX"), this.ClickDownloadGPX.bind(this, Data._id, Data.Name),"GPX", "CloseButton")
         DivButtonAction.appendChild(ButtonGPX)
         // Button Go To Start
-        let ButtonGo = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go to start"), this.ClickGoToStart.bind(this, Data.StartPoint), "CloseButton", "GoToStart")
+        let ButtonGo = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go to start"), this.ClickGoToStart.bind(this, Data.StartPoint), "GoToStart", "CloseButton")
         DivButtonAction.appendChild(ButtonGo)
         // Button Follow track
-        let ButtonFollow = CoreXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.ClickFollowTrack.bind(this, Data._id), "CloseButton", "FollowTrack")
+        let ButtonFollow = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.Follow(), "Follow Track"), this.ClickFollowTrack.bind(this, Data._id), "FollowTrack", "CloseButton")
         DivButtonAction.appendChild(ButtonFollow)
     }
 
@@ -271,13 +271,13 @@ class GeoXActivities {
         let divApp = document.getElementById("Conteneur")
         divApp.style.display = "flex"
 
-        // Show action button
-        GlobalDisplayAction('On')
-
         // Hide divinfotrack
         let divTrackInfo = document.getElementById(this._IdDivTrackInfo)
         divTrackInfo.style.display = "none"
         document.getElementById(this._IdDivContentTrackInfo).innerHTML = ""
+
+        // Build Menu Button 
+        this.BuildMenuButton()
 
         // Scroll to
         window.scrollTo(0, this._WindowScrollY);
@@ -285,55 +285,52 @@ class GeoXActivities {
 
     ClickSaveToMyTrack(TrackId){
         // Get all group of user
-        GlobalCallApiPromise("ApiGetAllGroups", "", "", "").then((reponse)=>{
+        NanoXApiGet("/track/mygroups").then((reponse)=>{
             this._UserGroup = reponse
         },(erreur)=>{
-            console.log(erreur)
+            // Clear view
+            this._DivApp.innerHTML=""
+            this._DivApp.appendChild(this.GetDivError(erreur))
         })
         // Open save box
         this.BuildSaveTrackVue(TrackId)
     }
 
     BuildSaveTrackVue(TrackId){
-        let Content = CoreXBuild.DivFlexColumn("")
-        // Empty space
-        Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
         // Titre
-        Content.append(CoreXBuild.DivTexte("Save Track", "", "SousTitre"))
+        Content.append(NanoXBuild.DivText("Save Track", null, "SousTitre"))
         // Input Name
-        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name","",true))
+        Content.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Name:", "Text", "InputTrackName","", "Input Text", "text", "Name",null,true))
         // Input `Group
-        Content.appendChild(CoreXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group","",true))
+        Content.appendChild(NanoXBuild.InputWithLabel("InputBoxCoreXWindow", "Track Group:", "Text", "InputTrackGroup","", "Input Text", "text", "Group"))
         // Description
-        let DivDescription = CoreXBuild.Div("", "InputBoxCoreXWindow Text", "")
+        let DivDescription = NanoXBuild.Div(null, "InputBoxCoreXWindow Text")
         Content.appendChild(DivDescription)
-        DivDescription.appendChild(CoreXBuild.DivTexte("Description", "", "Text", ""))
-        let DivContDesc = CoreXBuild.Div("DivContDesc", "DivContentEdit TextSmall", "")
+        DivDescription.appendChild(NanoXBuild.DivText("Description", null, "Text"))
+        let DivContDesc = NanoXBuild.Div("DivContDesc", "DivContentEdit TextSmall")
         DivContDesc.contentEditable = "True"
         DivDescription.appendChild(DivContDesc)
         // Toggle Public
-        let DivTooglePublic = CoreXBuild.Div("","Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
+        let DivTooglePublic = NanoXBuild.Div(null,"Text InputBoxCoreXWindow", "display: -webkit-flex; display: flex; flex-direction: row; justify-content:space-between; align-content:center; align-items: center;")
         Content.appendChild(DivTooglePublic)
-        DivTooglePublic.appendChild(CoreXBuild.DivTexte("Public Track:", "", "", ""))
-        DivTooglePublic.appendChild(CoreXBuild.ToggleSwitch("TogglePublic", true))
+        DivTooglePublic.appendChild(NanoXBuild.DivText("Public Track:"))
+        DivTooglePublic.appendChild(NanoXBuild.ToggleSwitch({Id:"TogglePublic",Checked: true, HeightRem: 2}))
         // Error Text
-        Content.appendChild(CoreXBuild.DivTexte("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh; height: 4vh;"))
-        // Div Button
-        let DivButton = CoreXBuild.DivFlexRowAr("")
-        Content.appendChild(DivButton)
-        // Button save
-        DivButton.appendChild(CoreXBuild.Button("Save",this.SaveToMyTrack.bind(this, TrackId),"Text Button ButtonWidth30", "SaveTrack"))
-        // Button cancel
-        DivButton.appendChild(CoreXBuild.Button("Cancel",this.CancelSaveToMyTrack.bind(this),"Text Button ButtonWidth30", "Cancel"))
-        // Empty space
-        Content.appendChild(CoreXBuild.Div("", "", "height:2vh;"))
+        Content.appendChild(NanoXBuild.DivText("", "ErrorSaveTrack", "Text", "Color: red; margin-top: 2vh;"))
+        
+        let ListOfButton = [
+            {Titre: "Save", Action: this.SaveToMyTrack.bind(this, TrackId), Id: "SaveTrack"},
+            {Titre: "Cancel", Action: this.CancelSaveToMyTrack.bind(this), Id: "Cancel"}
+        ]
         // Open Window
-        CoreXWindow.BuildWindow(Content)
+        NanoXBuild.PopupCreate(Content, ListOfButton)
+
         // Add AutoComplete
         let me = this
         autocomplete({
             input: document.getElementById("InputTrackGroup"),
-            minLength: 1,
+            minLength: 0,
             emptyMsg: 'No suggestion',
             fetch: function(text, update) {
                 if (me._UserGroup != null){
@@ -358,7 +355,7 @@ class GeoXActivities {
      * Cancel Save track view
      */
     CancelSaveToMyTrack(){
-        CoreXWindow.DeleteWindow()
+        NanoXBuild.PopupDelete()
     }
 
     SaveToMyTrack(TrackId){
@@ -373,10 +370,17 @@ class GeoXActivities {
             let NewGroup = document.getElementById("InputTrackGroup").value
             let NewPublic = document.getElementById("TogglePublic").checked
             let NewDescription = document.getElementById("DivContDesc").innerText
-            let FctData = {Action: "CopyTrack", CopyTrackData : {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}}
-            GlobalCallApiPromise("ApiManageTrack", FctData, "", "").then((reponse)=>{
-                // Delete Window
-                CoreXWindow.DeleteWindow()
+
+            const CopyTrackData = {TrackId: TrackId, Name: NewName, Group: NewGroup, Public: NewPublic, Description: NewDescription}
+
+            NanoXApiPost("/post/copypost", CopyTrackData).then((reponse)=>{
+                // Delete Window info copy
+                NanoXBuild.PopupDelete()
+                // Show Message Track saved
+                let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
+                Content.append(NanoXBuild.DivText("Save Track", null, "SousTitre"))
+                Content.append(NanoXBuild.DivText("Track saved", null, "Text", "margin-top: 1rem;"))
+                NanoXBuild.PopupCreate(Content)
             },(erreur)=>{
                 document.getElementById("ErrorSaveTrack").innerText = erreur
                 document.getElementById("SaveTrack").disabled = false
@@ -387,11 +391,10 @@ class GeoXActivities {
     }
 
     ClickDownloadGPX(Id, Name){
-        let FctData = {TrackId: Id, GetData: "GPX"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/track/gpx/" + Id).then((reponse)=>{
             var link = document.createElement('a')
             link.download = `${Name}.gpx`
-            var blob = new Blob([reponse], {typde: 'text/plain'})
+            var blob = new Blob([reponse.GpxData], {type: 'text/plain'})
             link.href = window.URL.createObjectURL(blob)
             link.click()
         },(erreur)=>{
@@ -417,7 +420,7 @@ class GeoXActivities {
      */
     GetAllMarkersByPage(){
         let FctData = {Page: this._PageOfMarkers, Filter: this._FiltrePost, AllPublicPost: true}
-        GlobalCallApiPromise("ApiGetAllPostMarkers", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/post/marker/", FctData).then((reponse)=>{
             if (reponse.length != 0){
                 this.RenderMarkersOnMap(reponse)
                 this._PageOfMarkers ++
@@ -456,17 +459,17 @@ class GeoXActivities {
         // Build div track data on map
         let DivTrackDataOnMap = document.getElementById(this._IdDivTrackDataOnMap)
         if (DivTrackDataOnMap == null){
-            DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
+            DivTrackDataOnMap = NanoXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap")
             document.getElementById("Conteneur").appendChild(DivTrackDataOnMap)
             DivTrackDataOnMap.addEventListener("click", this.GetTrackData.bind(this, TrackId))
         } else {
             document.getElementById("Conteneur").removeChild(DivTrackDataOnMap)
-            DivTrackDataOnMap = CoreXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap", "")
+            DivTrackDataOnMap = NanoXBuild.Div(this._IdDivTrackDataOnMap, "DivTrackDataOnMap")
             document.getElementById("Conteneur").appendChild(DivTrackDataOnMap)
             DivTrackDataOnMap.addEventListener("click", this.GetTrackData.bind(this, TrackId))
         }
         // Name and close buttion
-        let divNameAndClose = CoreXBuild.Div("", "", "width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
+        let divNameAndClose = NanoXBuild.Div(null, null, "width: 100%; display: flex; flex-direction: row; justify-content:space-around; align-content:center; align-items: center;")
         DivTrackDataOnMap.appendChild(divNameAndClose)
         // Add track name
         let divname = document.createElement('div')
@@ -476,7 +479,7 @@ class GeoXActivities {
         divname.style.textAlign ="left"
         divname.style.marginBottom ="0.5rem"
         divname.style.marginLeft ="0.5rem"
-        divname.classList.add("Text")
+        divname.classList.add("TextSmall")
         divNameAndClose.appendChild(divname)
         // Add button
         let button = document.createElement('button')
@@ -517,10 +520,9 @@ class GeoXActivities {
     }
 
     RenderTrackGeoJSonOnMap(Map, TrackId){
-        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
-            Map.RemoveAllTracks()
-            Map.AddTrackOnMap(TrackId, reponse, false, null)        
+        Map.RemoveAllTracks()
+        NanoXApiGet("/track/geojson/" + TrackId).then((reponse)=>{
+            Map.AddTrackOnMap(TrackId, reponse.GeoJsonData, false, null)        
         },(erreur)=>{
             alert(erreur)
         })
@@ -552,10 +554,9 @@ class GeoXActivities {
         // Add wainting box
         this.BuildWaitingBox()
         // Get Track Data
-        let FctData = {TrackId: TrackId, GetData: "GeoJSon"}
-        GlobalCallApiPromise("ApiGetTrackData", FctData, "", "").then((reponse)=>{
+        NanoXApiGet("/track/geojson/" + TrackId).then((reponse)=>{
             this.RemoveWaitingBox()
-            this.RenderTrackToFollowAndMap(TrackId, reponse)
+            this.RenderTrackToFollowAndMap(TrackId, reponse.GeoJsonData)
         },(erreur)=>{
             this.RemoveWaitingBox()
             alert(erreur)
@@ -564,19 +565,19 @@ class GeoXActivities {
 
     BuildWaitingBox(){
         // Add WaitingBox
-        let Content = CoreXBuild.DivFlexColumn("")
+        let Content = NanoXBuild.DivFlexColumn(null, null, "width: 100%;")
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Texte waiting
-        Content.appendChild(CoreXBuild.DivTexte("Waiting data...", "", "text"))
+        Content.appendChild(NanoXBuild.DivText("Waiting data...", null, "text"))
         // Empty space
         Content.appendChild(this.BuildEmptySpace())
         // Show window
-        CoreXWindow.BuildWindow(Content)
+        NanoXBuild.PopupCreate(Content)
     }
 
     RemoveWaitingBox(){
-        CoreXWindow.DeleteWindow()
+        NanoXBuild.PopupDelete()
     }
 
     RenderTrackToFollowAndMap(TrackId, TrackGeoJson){
@@ -593,14 +594,17 @@ class GeoXActivities {
         let DivMapFollow = document.getElementById(this._IdDivMapFollow)
         DivMapFollow.style.display = "block"
 
-        // On efface le bouton menu action
-        GlobalDisplayAction('Off')
+        // Hide menu bar
+        NanoXShowMenuBar(false)
 
         // Start Follow Track on map
         let TrackData = {TrackId: TrackId, TrackGeoJson: TrackGeoJson}
         this._FollowMyTrack = new FollowTrackOnMap(this._IdDivMapFollow, TrackData)
         this._FollowMyTrack.OnStop = this.StopFollowingTrack.bind(this)
         this._FollowMyTrack.Start()
+
+        // Log serveur load view Follow Track
+        NanoXApiPostLog("User Load module Activities, view Follow Track")
     }
 
     StopFollowingTrack(){
@@ -615,9 +619,10 @@ class GeoXActivities {
         let DivMapFollow = document.getElementById(this._IdDivMapFollow)
         DivMapFollow.style.display = "none"
 
-        // On efface le bouton menu action
-        GlobalDisplayAction('On')
-
+        // show menu bar
+        NanoXShowMenuBar(true)
+        // Build Button
+        this.BuildMenuButton()
         // Stop Follow Track
         this._FollowMyTrack = null
 
@@ -646,6 +651,6 @@ class GeoXActivities {
 }
 
 // Creation de l'application
-let MyGeoXActivities = new GeoXActivities(GlobalCoreXGetAppContentId())
+let MyGeoXActivities = new GeoXActivities()
 // Ajout de l'application
-GlobalCoreXAddApp("Activities", IconGeoX.GeoXMapIcon(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)
+NanoXAddModule("Activities", IconGeoX.GeoXMapIcon(), MyGeoXActivities.Initiation.bind(MyGeoXActivities), true)

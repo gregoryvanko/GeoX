@@ -128,15 +128,15 @@ class InfoOnTrack {
 
         let divdesc = document.createElement('div')
         divdesc.innerHTML = Value
-        divdesc.classList.add("Text")
+        divdesc.classList.add("TextSmall")
         divdesc.style.paddingRight ="0.5vw"
         divdesc.style.fontWeight ="bold"
         conteneurvalue.appendChild(divdesc)
 
         let divunite = document.createElement('div')
         divunite.innerHTML = Unite
-        divunite.classList.add("TextSmall")
         divunite.style.fontWeight ="bold"
+        divunite.style.fontSize ="O.8rem"
         conteneurvalue.appendChild(divunite)
 
         conteneur.appendChild(conteneurvalue)
