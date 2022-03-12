@@ -1,14 +1,14 @@
 # Geox
-Geox is Node.js application for gpx visualisation
+Geox is Node.js application for gpx sharing
 
-## Usage
+## Installation
 First, install the package using npm:
 ```bash
 npm install @gregvanko/geox --save
 ```
 
-## File App.js
-Create a "App.js" file with this content:
+## Usage
+Create a file "App.js" with this content:
 ```js
 const Name = "MyAppName"
 const Port = 9002
