@@ -80,9 +80,12 @@ router.get("/multi/geojson", AuthBasic, (req, res) => {
 router.get("/mygroups", AuthBasic, (req, res) => {
     const Querry = {Owner: req.user.User}
     const Projection = {Group: 1}
+    console.log(JSON.stringify(Querry))
+    console.log(JSON.stringify(Projection))
     ModelTracks.find(Querry, Projection, (err, result) => {
         if (err) {
             res.status(500).send(err)
+            console.log(JSON.stringify(err))
             LogError(`Get mygroups db error: ${err}`, req.user)
         } else {
             let DataToSend = []
