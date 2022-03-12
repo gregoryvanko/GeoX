@@ -366,7 +366,7 @@ class GeoXManageTracks {
         NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
         // Button view all tracks
         if (ShowAllTrack){
-            NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.ShowAllTrack(NanoXGetColorIconMenuBar()), this.RenderAllTracksLinesOnMap.bind(this, this._ViewPost))
+            NanoXAddMenuButtonRight("ButtonRenderAllTracks", "Show all tracks", Icon.ShowAllTrack(NanoXGetColorIconMenuBar()), this.RenderAllTracksLinesOnMap.bind(this, this._ViewPost))
         } else {
             NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.HideAllTrack(NanoXGetColorIconMenuBar()), this.HideAllTracksLinesOnMap.bind(this, this._ViewPost))
         }
