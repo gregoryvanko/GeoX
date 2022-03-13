@@ -400,11 +400,11 @@ class GeoXManageTracks {
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack)
         DivDataOfOneTrack.style.width = "45rem"
         DivDataOfOneTrack.style.maxWidth = "100%"
-        DivDataOfOneTrack.style.marginTop = "1rem"
+        DivDataOfOneTrack.style.marginTop = "calc(env(safe-area-inset-top, 0px) + 1rem)"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text
         if (TrackName){
-            DivDataOfOneTrack.appendChild(NanoXBuild.DivText(`Waiting data of track: ${TrackName}`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
+            DivDataOfOneTrack.appendChild(NanoXBuild.DivText(`Waiting data of track: ${TrackName}`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem; overflow-wrap: break-word;"))
         } else {
             DivDataOfOneTrack.appendChild(NanoXBuild.DivText(`Waiting data of track`,"WaitingDataTrack","Text", "text-align: center; margin-top: 2rem; margin-bottom: 2rem;"))
         }
@@ -428,7 +428,7 @@ class GeoXManageTracks {
         // hide name in menu bar
         NanoXShowNameInMenuBar(false)
 
-        // Add menu button lef
+        // Add menu button left
         NanoXAddMenuButtonLeft("ActionLeftBack", "Back", Icon.LeftArrow(NanoXGetColorIconMenuBar()), this.ClickOnBackFromTrackData.bind(this))
     }
 

@@ -220,7 +220,7 @@ class GeoXActivities {
         divwaiting.id = "DivWaiting"
         divwaiting.innerText = "Waiting data..."
         divwaiting.style.textAlign = "center"
-        divwaiting.style.marginTop = "2rem"
+        divwaiting.style.marginTop = "calc(env(safe-area-inset-top, 0px) + 2rem)"
         divwaiting.style.marginBottom = "2rem"
         document.getElementById(this._IdDivContentTrackInfo).appendChild(divwaiting)
 
@@ -243,7 +243,7 @@ class GeoXActivities {
         divbackground.removeChild(document.getElementById("DivWaiting"))
 
         // Add InfoOnTrack
-        let DivData = NanoXBuild.DivFlexColumn("DivData", null, "width: 100%;")
+        let DivData = NanoXBuild.DivFlexColumn("DivData", null, "width: 100%; margin-top: calc(env(safe-area-inset-top, 0px) + 1rem)")
         divbackground.appendChild(DivData)
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
 
