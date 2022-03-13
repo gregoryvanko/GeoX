@@ -297,10 +297,6 @@ body{
     justify-content:space-around; 
     align-content:center; 
     box-sizing: border-box;
-    /*padding: 0.5rem;
-    border: 1px solid black;
-    border-radius: 1rem;*/
-    margin-top: 1rem;
     width: 100%;
 }
 

@@ -116,7 +116,6 @@ class AdminGeoXManageTracks {
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack, null, "width: 100%;")
         DivDataOfOneTrack.style.width = "45rem"
         DivDataOfOneTrack.style.maxWidth = "100%"
-        DivDataOfOneTrack.style.marginTop = "3rem"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text
         if (TrackName){
@@ -139,7 +138,7 @@ class AdminGeoXManageTracks {
         NanoXClearMenuButtonRight()
 
         // Set menu bar translucide
-        NanoXSetMenuBarTranslucide(true)
+        NanoXSetMenuBarTranslucide(false)
         // hide name in menu bar
         NanoXShowNameInMenuBar(false)
 

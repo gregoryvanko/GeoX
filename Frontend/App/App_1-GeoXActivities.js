@@ -209,7 +209,7 @@ class GeoXActivities {
         // clear menu button right
         NanoXClearMenuButtonRight()
         // Set menu bar translucide
-        NanoXSetMenuBarTranslucide(true)
+        NanoXSetMenuBarTranslucide(false)
         // hide name in menu bar
         NanoXShowNameInMenuBar(false)
         // Add menu button lef
@@ -243,7 +243,7 @@ class GeoXActivities {
         divbackground.removeChild(document.getElementById("DivWaiting"))
 
         // Add InfoOnTrack
-        let DivData = NanoXBuild.DivFlexColumn("DivData", null, "width: 100%; margin-top: 1rem")
+        let DivData = NanoXBuild.DivFlexColumn("DivData", null, "width: 100%;")
         divbackground.appendChild(DivData)
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
 
