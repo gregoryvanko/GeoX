@@ -400,7 +400,7 @@ class GeoXManageTracks {
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack)
         DivDataOfOneTrack.style.width = "45rem"
         DivDataOfOneTrack.style.maxWidth = "100%"
-        DivDataOfOneTrack.style.marginTop = "calc(env(safe-area-inset-top, 0px) + 1rem)"
+        DivDataOfOneTrack.style.marginTop = "1rem"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text
         if (TrackName){
