@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/gregoryvanko/GeoX#readme",
   "dependencies": {
-    "@gregvanko/nanox": "^1.36.0",
+    "@gregvanko/nanox": "^1.37.0",
     "@mapbox/togeojson": "^0.16.0",
     "axios": "^0.24.0",
     "geolib": "^3.3.1",
