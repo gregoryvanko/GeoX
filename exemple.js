@@ -1,5 +1,8 @@
-const Port = 5000
-const Name = "GeoXDev"
-const Debug = true
-const SplashScreenFilePath = __dirname + "/Frontend/SplashScreen/SplashScreen.html"
-require('./index').Start(Port, Name, Debug, SplashScreenFilePath)
+const Option = {
+    Port:5000,
+    Name:"GeoXDev",
+    Debug: true,
+    SplashScreenFilePath: __dirname + "/Frontend/SplashScreen/SplashScreen.html"
+}
+
+require('./index').Start(Option)

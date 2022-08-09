@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon —inspect exemple.js",
+    "startenv": "PORT=9999 MONGOURL=mongodb://localhost:27017 nodemon —inspect exemple.js",
     "up": "npm version minor && npm publish && git push",
     "vanko": "ssh root@vanko.be -p 9922"
   },

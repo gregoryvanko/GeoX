@@ -1,6 +1,6 @@
 let NanoXAddRoute = require("@gregvanko/nanox").NanoXAddRoute
 
-async function Start(Port = 1234, Name = "NanoXDev", Debug = false, SplashScreenFilePath = null){
+async function Start({Port = 9000, Name = "GeoX", Debug = false, SplashScreenFilePath = null} = {}){
     if (SplashScreenFilePath == null){SplashScreenFilePath = __dirname + "/Frontend/SplashScreen/SplashScreen.html"}
 
    // NonoX Option
