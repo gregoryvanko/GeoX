@@ -1,5 +1,6 @@
 const LogError = require("@gregvanko/nanox").NanoXLogError
 const LogInfo = require("@gregvanko/nanox").NanoXLogInfo
+const LogStatApi = require("@gregvanko/nanox").NanoXLogStatApi
 const ModelTracks = require("../MongooseModel/Model_Tracks")
 const router = require("@gregvanko/nanox").Express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
@@ -10,6 +11,7 @@ const GetElevationOfLatLng = require("./HelperTrack").GetElevationOfLatLng
 router.get("/gpx/:id", AuthBasic, (req, res) => {
     let Id = req.params.id
     LogInfo(`Route Track GET gpx: ${JSON.stringify(Id)}`, req.user)
+    LogStatApi("track/gpx", "get", req.user)
 
     const Projection = { GpxData: 1}
     ModelTracks.findById(Id, Projection, (err, result) => {
@@ -31,6 +33,7 @@ router.get("/gpx/:id", AuthBasic, (req, res) => {
 router.get("/geojson/:id", AuthBasic, (req, res) => {
     let Id = req.params.id
     LogInfo(`Route Track GET geojson: ${JSON.stringify(Id)}`, req.user)
+    LogStatApi("track/geojson", "get", req.user)
 
     const Projection = { GeoJsonData: 1, Center: 1, ExteriorPoint:1}
     ModelTracks.findById(Id, Projection, (err, result) => {
@@ -50,6 +53,7 @@ router.get("/geojson/:id", AuthBasic, (req, res) => {
 })
 
 router.get("/multi/geojson", AuthBasic, (req, res) => {
+    LogStatApi("track/multi/geojson", "get", req.user)
 
     const ListOfId = req.query.ListOfTrackId
 
@@ -78,6 +82,8 @@ router.get("/multi/geojson", AuthBasic, (req, res) => {
 })
 
 router.get("/mygroups", AuthBasic, (req, res) => {
+    LogStatApi("track/mygroups", "get", req.user)
+
     const Querry = {Owner: req.user.User}
     const Projection = {Group: 1}
     ModelTracks.find(Querry, Projection, (err, result) => {
@@ -95,6 +101,8 @@ router.get("/mygroups", AuthBasic, (req, res) => {
 })
 
 router.post("/elavationlatlng", AuthBasic, async (req, res) => {
+    LogStatApi("track/elavationlatlng", "get", req.user)
+
     const LatLng = req.body
 
     let ReponseElevation = await GetElevationOfLatLng(LatLng)
@@ -108,6 +116,8 @@ router.post("/elavationlatlng", AuthBasic, async (req, res) => {
 })
 
 router.get("/tracksofgroup", AuthBasic, (req, res) => {
+    LogStatApi("track/tracksofgroup", "get", req.user)
+
     const Parametres = {Page : req.query.Page, Group: req.query.Group}
 
     const Projection = { GeoJsonData: 1, Color: 1, Name: 1, Length: 1, _id: 1}

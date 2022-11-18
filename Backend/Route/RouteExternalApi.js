@@ -1,11 +1,14 @@
 const LogError = require("@gregvanko/nanox").NanoXLogError
-const LogInfo = require("@gregvanko/nanox").NanoXLogInfo
+//const LogInfo = require("@gregvanko/nanox").NanoXLogInfo
+const LogStatApi = require("@gregvanko/nanox").NanoXLogStatApi
 const router = require("@gregvanko/nanox").Express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 
 const axios = require('axios')
 
 router.post("/", AuthBasic, async (req, res) => {
+    LogStatApi("poexternalapist", "post", req.user)
+
     const Data = req.body
     if (JSON.stringify(Data) != "{}"){
         if(Data.Api == "www.odwb.be"){

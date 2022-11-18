@@ -1,6 +1,6 @@
 let NanoXAddRoute = require("@gregvanko/nanox").NanoXAddRoute
 
-async function Start({Port = 9000, Name = "GeoX", Debug = false, SplashScreenFilePath = null} = {}){
+async function Start({Port = 9000, Name = "GeoX", Debug = false, SplashScreenFilePath = null, MongoDbUrl = "mongodb://localhost:27017"} = {}){
     if (SplashScreenFilePath == null){SplashScreenFilePath = __dirname + "/Frontend/SplashScreen/SplashScreen.html"}
 
    // NonoX Option
@@ -9,7 +9,7 @@ async function Start({Port = 9000, Name = "GeoX", Debug = false, SplashScreenFil
        AppColor: "rgb(20, 163, 255)",
        AppPort: Port,
        AppSecret: "TestNonoXSecret",
-       MongoUrl: "mongodb://localhost:27017",
+       MongoUrl: MongoDbUrl,
        Debug: Debug,
        IconPath:  __dirname + "/Backend/apple-icon-192x192.png",
        ApiServer: true,

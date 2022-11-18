@@ -1,5 +1,6 @@
 const LogError = require("@gregvanko/nanox").NanoXLogError
 const LogInfo = require("@gregvanko/nanox").NanoXLogInfo
+const LogStatApi = require("@gregvanko/nanox").NanoXLogStatApi
 const ModelTracks = require("../MongooseModel/Model_Tracks")
 const router = require("@gregvanko/nanox").Express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
@@ -12,29 +13,41 @@ const AddPostPromise = require("./HelperPost").AddPostPromise
 
 //Get liste of x post based on page number and used in public mode (no auth)
 router.get("/public/:page", (req, res) => {
+    LogStatApi("post/public", "get")
+
     let Parametres = {Page : req.params.page, ViewPost: true}
     GetPostOfPage(Parametres, res)
 })
 
 // Get liste of x post based on page number
 router.get("/", AuthBasic, (req, res) => {
+    LogStatApi("post", "get", req.user)
+
     let Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter), AllPublicPost: JSON.parse(req.query.AllPublicPost), ViewPost: JSON.parse(req.query.ViewPost)}
     GetPostOfPage(Parametres, res, req.user)
 })
 
 router.get("/admin", AuthAdim, (req, res) => {
+    LogStatApi("post/admin", "get", req.user)
+
     const Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter)}
     GetPostOfPageAdmin(Parametres, res, req.user)
 })
 
 // Get liste of x marker based on page number
 router.get("/marker", AuthBasic, (req, res) => {
+    if(req.query.Page == 0){
+        LogStatApi("post/marker", "get", req.user)
+    }
+
     let Parametres = {Page : req.query.Page, Filter: JSON.parse(req.query.Filter), AllPublicPost: JSON.parse(req.query.AllPublicPost)}
     GetMarkerOfPage(Parametres, res, req.user)
 })
 
 // Get One post data
 router.get("/onepost/:id", AuthBasic, (req, res) => {
+    LogStatApi("post/onepost", "get", req.user)
+
     let Id = req.params.id
     LogInfo(`Route /post/onepost GET: ${JSON.stringify(Id)}`, req.user)
 
@@ -57,6 +70,8 @@ router.get("/onepost/:id", AuthBasic, (req, res) => {
 
 // Delete one post
 router.delete("/:postid", AuthBasic, (req, res) => {
+    LogStatApi("post", "delete", req.user)
+
     let Parametres = {PostId : req.params.postid}
     LogInfo(`Route /post DELETE: ${Parametres.PostId}`, req.user)
 
@@ -73,6 +88,8 @@ router.delete("/:postid", AuthBasic, (req, res) => {
 
 // Add one post
 router.post("/", AuthBasic, async (req, res) => {
+    LogStatApi("post", "post", req.user)
+
     const TrackPost = req.body
     if (JSON.stringify(TrackPost) != "{}"){
         let ReponseAddPost = await AddPostPromise(TrackPost, req.user.User)
@@ -96,6 +113,8 @@ router.post("/", AuthBasic, async (req, res) => {
 
 // Copy one post to a new post of the user
 router.post("/copypost", AuthBasic, (req, res) => {
+    LogStatApi("post/copypost", "post", req.user)
+
     const CopyTrackData = req.body
     if (JSON.stringify(CopyTrackData) != "{}"){
         LogInfo(`Route /post/copypost POST: ${JSON.stringify(CopyTrackData)}`, req.user)
@@ -143,6 +162,8 @@ router.post("/copypost", AuthBasic, (req, res) => {
 
 // Modify one Post by id
 router.patch("/", AuthBasic, (req, res) => {
+    LogStatApi("post", "patch", req.user)
+
     const TrackData = req.body
     if (JSON.stringify(TrackData) != "{}"){
         LogInfo(`Route /post PATCH: ${JSON.stringify(TrackData)}`, req.user)

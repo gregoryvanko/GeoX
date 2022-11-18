@@ -302,4 +302,4 @@ class AdminGeoXManageTracks {
 // Creation de l'application
 let MyAdminGeoXManageTracks = new AdminGeoXManageTracks()
 // Ajout de l'application
-NanoXAddModule("Admin My Tracks", IconGeoX.GeoXManageTracks(), MyAdminGeoXManageTracks.Initiation.bind(MyAdminGeoXManageTracks))
+NanoXAddModule("Admin My Tracks", IconGeoX.GeoXManageTracks(), MyAdminGeoXManageTracks.Initiation.bind(MyAdminGeoXManageTracks), false, true)

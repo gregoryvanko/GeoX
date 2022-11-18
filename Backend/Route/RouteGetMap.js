@@ -1,5 +1,5 @@
-let LogError = require("@gregvanko/nanox").NanoXLogError
-let LogStat = require("@gregvanko/nanox").NanoXLogStat
+const LogError = require("@gregvanko/nanox").NanoXLogError
+const LogStatApi = require("@gregvanko/nanox").NanoXLogStatApi
 const ModelTracks = require("../MongooseModel/Model_Tracks")
 const express = require("@gregvanko/nanox").Express
 const router = express.Router()
@@ -7,6 +7,8 @@ const router = express.Router()
 // Get Map
 // https://dev.gregvanko.com/getmap/?trackid=5fc12c5ebe87dc3b01725bd1&trackid=5fc12c0abe87dc3b01725bcb
 router.get("/", (req, res) => {
+    LogStatApi("getmap", "get")
+
     let ListOfTrackId = req.query["trackid"]
     if (ListOfTrackId) {
         GetMapDataById(ListOfTrackId, res)
@@ -42,7 +44,6 @@ async function GetMapDataById(ListOfTrackId, res){
                 Data.FitBounds = [ [MinMax.MaxLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MaxLat], [ MinMax.MinLong, MinMax.MaxLat ], [ MinMax.MinLong, MinMax.MinLat], [MinMax.MaxLong, MinMax.MinLat]] 
             }
             res.send(BuildHtmlGetMap(Data))
-            LogStat("getmap: " + ListOfTrackId)
         }
     }).sort(Sort)
 }
@@ -226,6 +227,5 @@ function BuildHtmlGetMap(DataMap){
     </html>`
     return reponse
 }
-
 
 module.exports = router
