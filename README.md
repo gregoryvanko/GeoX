@@ -1,5 +1,5 @@
 # Geox
-Geox is Node.js application for gpx sharing
+Geox is Node.js application for gpx sharing and visualisation
 
 ## Installation
 First, install the package using npm:
