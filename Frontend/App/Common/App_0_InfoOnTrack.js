@@ -229,7 +229,7 @@ class InfoOnTrack {
             MarkerEnd.Type = "Marker"
             MarkerEnd.dragging.disable();
             // FitBound
-            this._Map.fitBounds(layerTrack1.getBounds());
+            this._Map.fitBounds(layerTrack1.getBounds(), {padding: [50,50]});
         } else {
             let Diverreur = document.createElement('div')
             Diverreur.innerHTML = "No Geojson data available."

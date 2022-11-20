@@ -183,6 +183,8 @@ class GeoXManageTracks {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
 
         // Set menu bar not translucide
         NanoXSetMenuBarTranslucide(false)
@@ -190,11 +192,11 @@ class GeoXManageTracks {
         NanoXShowNameInMenuBar(true)
         
         // Button Filter
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        NanoXAddMenuButtonSettings("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
         // Button view on map
-        NanoXAddMenuButtonRight("ButtonMapOrPost", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewMap))
+        NanoXAddMenuButtonSettings("ButtonMapOrPost", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewMap))
         // Button Listview
-        NanoXAddMenuButtonRight("ButtonListView", "List View", null, this.LoadView.bind(this, this._ViewListOfTrack))
+        NanoXAddMenuButtonSettings("ButtonListView", "List View", null, this.LoadView.bind(this, this._ViewListOfTrack))
         // Button Add track
         NanoXAddMenuButtonRight("ButtonAddTrack", "Add Track", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
     }
@@ -264,6 +266,8 @@ class GeoXManageTracks {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
 
         // Set menu bar not translucide
         NanoXSetMenuBarTranslucide(false)
@@ -271,9 +275,9 @@ class GeoXManageTracks {
         NanoXShowNameInMenuBar(true)
 
         // Button Filter
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        NanoXAddMenuButtonSettings("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
         // Button view post
-        NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
+        NanoXAddMenuButtonSettings("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
         // Button Add track
         NanoXAddMenuButtonRight("ButtonAddTrack", "Add Track", Icon.Add(NanoXGetColorIconMenuBar()), this.LoadViewAddModifyTrack.bind(this))
     }
@@ -354,6 +358,8 @@ class GeoXManageTracks {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
 
         // Set menu bar not translucide
         NanoXSetMenuBarTranslucide(true)
@@ -361,14 +367,14 @@ class GeoXManageTracks {
         NanoXShowNameInMenuBar(true)
         
         // Button Filter
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        NanoXAddMenuButtonSettings("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
         // Button view post
-        NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
+        NanoXAddMenuButtonSettings("ButtonPostView", "Post View", Icon.Post(NanoXGetColorIconMenuBar()), this.LoadView.bind(this, this._ViewPost))
         // Button view all tracks
         if (ShowAllTrack){
-            NanoXAddMenuButtonRight("ButtonRenderAllTracks", "Show all tracks", Icon.ShowAllTrack(NanoXGetColorIconMenuBar()), this.RenderAllTracksLinesOnMap.bind(this, this._ViewPost))
+            NanoXAddMenuButtonSettings("ButtonRenderAllTracks", "Show all tracks", Icon.ShowAllTrack(NanoXGetColorIconMenuBar()), this.RenderAllTracksLinesOnMap.bind(this, this._ViewPost))
         } else {
-            NanoXAddMenuButtonRight("ButtonPostView", "Post View", Icon.HideAllTrack(NanoXGetColorIconMenuBar()), this.HideAllTracksLinesOnMap.bind(this, this._ViewPost))
+            NanoXAddMenuButtonSettings("ButtonPostView", "Post View", Icon.HideAllTrack(NanoXGetColorIconMenuBar()), this.HideAllTracksLinesOnMap.bind(this, this._ViewPost))
         }
         
     }
@@ -398,7 +404,7 @@ class GeoXManageTracks {
         
         // Div Data of track
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack)
-        DivDataOfOneTrack.style.width = "45rem"
+        DivDataOfOneTrack.style.width = "60rem"
         DivDataOfOneTrack.style.maxWidth = "100%"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text
@@ -421,6 +427,8 @@ class GeoXManageTracks {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
 
         // Set menu bar translucide
         NanoXSetMenuBarTranslucide(false)
@@ -637,7 +645,7 @@ class GeoXManageTracks {
         let InfoTrackView = new InfoOnTrack(Data, this._DivDataOfOneTrack)
 
         // Add button
-        let DivButtonAction = NanoXBuild.DivFlexRowSpaceAround("ButtonAction", null, "width: 100%")
+        let DivButtonAction = NanoXBuild.DivFlexRowSpaceAround("ButtonAction", null, "max-width: 98%; width: 40rem;")
         DivDataOfOneTrack.appendChild(DivButtonAction)
         // Button Go To Start
         let ButtonGo = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.StartFlag(), "Go to start"), this.ClickGoToStart.bind(this, Data.StartPoint), "GoToStart", "CloseButton")
@@ -701,6 +709,8 @@ class GeoXManageTracks {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
 
         // Hide menu bar
         NanoXShowMenuBar(false)

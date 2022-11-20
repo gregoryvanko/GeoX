@@ -87,6 +87,8 @@ class AdminGeoXManageTracks {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
 
         // Set menu bar not translucide
         NanoXSetMenuBarTranslucide(false)
@@ -94,7 +96,7 @@ class AdminGeoXManageTracks {
         NanoXShowNameInMenuBar(true)
 
         // Button Filter
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        NanoXAddMenuButtonSettings("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
     }
 
     /**
@@ -114,7 +116,7 @@ class AdminGeoXManageTracks {
 
         // Div Data of track
         let DivDataOfOneTrack = NanoXBuild.DivFlexColumn(this._DivDataOfOneTrack, null, "width: 100%;")
-        DivDataOfOneTrack.style.width = "45rem"
+        DivDataOfOneTrack.style.width = "60rem"
         DivDataOfOneTrack.style.maxWidth = "100%"
         ConteneurTrackData.appendChild(DivDataOfOneTrack)
         // Waiting text
@@ -136,6 +138,8 @@ class AdminGeoXManageTracks {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
 
         // Set menu bar translucide
         NanoXSetMenuBarTranslucide(false)

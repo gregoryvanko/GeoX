@@ -239,11 +239,12 @@ body{
     border: 1px solid #dfdfe8;
     margin: 0.5rem;
     box-sizing: border-box;
-    width: 98%;
+    width: 40rem;
+    max-width: 98%;
 }
 
 .InfoOnTrackMap{
-    height: 40vh; 
+    height: 60vh; 
     width: 100%
 }
 
@@ -286,7 +287,7 @@ body{
     justify-content:center; 
     align-content:center; 
     align-items: center;
-    width: 45rem;
+    width: 60rem;
     box-sizing: border-box;
     max-width: 100%;
 }

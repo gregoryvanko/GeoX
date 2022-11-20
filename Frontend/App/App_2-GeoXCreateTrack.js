@@ -52,6 +52,8 @@ class GeoXCreateTrack {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
 
         // Set menu bar not translucide
         NanoXSetMenuBarTranslucide(true)
@@ -907,6 +909,9 @@ class GeoXCreateTrack {
         NanoXClearMenuButtonLeft()
         // Clear Right button
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
+        
         // Set menu bar not translucide
         NanoXSetMenuBarTranslucide(true)
         // show name in menu bar

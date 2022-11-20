@@ -191,7 +191,7 @@ class GeoXMap{
 
         // FitBounds
         if (FitBounds){
-            this._Map.fitBounds(layerTrack1.getBounds())
+            this._Map.fitBounds(layerTrack1.getBounds(),{padding: [50,50]})
         }
     }
 }

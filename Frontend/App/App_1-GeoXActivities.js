@@ -110,6 +110,9 @@ class GeoXActivities {
         NanoXClearMenuButtonLeft()
         // clear menu button right
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
+
         // Show name in menu bar
         NanoXShowNameInMenuBar(true)
         // Set Menu bar
@@ -117,15 +120,15 @@ class GeoXActivities {
             // Set menu bar not translucide
             NanoXSetMenuBarTranslucide(false)
             // Add Button Map 
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+            NanoXAddMenuButtonSettings("ActionMap", "Map or Post", IconGeoX.GeoXMapIcon(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
         } else {
             // Set menu bar translucide
             NanoXSetMenuBarTranslucide(true)
             // Add Button Map 
-            NanoXAddMenuButtonRight("ActionMap", "Map or Post", Icon.Post(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
+            NanoXAddMenuButtonSettings("ActionMap", "Map or Post", Icon.Post(NanoXGetColorIconMenuBar()), this.ClickOnToogleMapPost.bind(this))
         }
         // Add Button Filter
-        NanoXAddMenuButtonRight("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
+        NanoXAddMenuButtonSettings("ButtonFilter", "Filter", Icon.Filter(NanoXGetColorIconMenuBar()), this.ClickOnFilter.bind(this))
     }
 
     BuildEmptySpace(){
@@ -208,6 +211,9 @@ class GeoXActivities {
         NanoXClearMenuButtonLeft()
         // clear menu button right
         NanoXClearMenuButtonRight()
+        // Clear menu button settings
+        NanoXClearMenuButtonSettings()
+        
         // Set menu bar translucide
         NanoXSetMenuBarTranslucide(false)
         // hide name in menu bar
@@ -248,7 +254,7 @@ class GeoXActivities {
         let InfoTrackView = new InfoOnTrack(Data, "DivData")
 
         // Div Button Action
-        let DivButtonAction = NanoXBuild.DivFlexRowSpaceAround("ButtonAction", null, "width: 100%")
+        let DivButtonAction = NanoXBuild.DivFlexRowSpaceAround("ButtonAction", null, "max-width: 98%; width: 40rem; margin-left: auto; margin-right: auto;")
         divbackground.appendChild(DivButtonAction)
         // Button Save
         let ButtonSave = NanoXBuild.Button(this.BuildImageAndTextButtonContent(Icon.SaveBlack(), "Save Track"), this.ClickSaveToMyTrack.bind(this, Data._id),"SaveToMe", "CloseButton")

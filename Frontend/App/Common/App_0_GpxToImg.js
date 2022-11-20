@@ -87,7 +87,7 @@ class GpxToImg {
             }, 1000);
         })
         // FitBound
-        MyMap.fitBounds(layerTrack1.getBounds());
+        MyMap.fitBounds(layerTrack1.getBounds(), {padding: [50,50]});
     }
 
     async ConvertMapToImage(MyMap, resolve, reject, ConvertReponse){

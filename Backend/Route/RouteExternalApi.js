@@ -7,7 +7,7 @@ const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 const axios = require('axios')
 
 router.post("/", AuthBasic, async (req, res) => {
-    LogStatApi("poexternalapist", "post", req.user)
+    LogStatApi("externalapi", "post", req.user)
 
     const Data = req.body
     if (JSON.stringify(Data) != "{}"){
