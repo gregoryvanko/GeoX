@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const { TileSet } = require("node-hgt")
+var togpx = require('togpx')
 
 // creation du folder si il n'existe pas encore
 var dir = path.resolve(__dirname, "TempHgt")
@@ -298,7 +299,23 @@ function PromiseGetElevation({ lat, lng }){
     })
 }
 
+function GeoJsonToGPX(GeoJsonData = null, Name= "Name", TheDate = Date.now(), Description = ""){
+    let gpx = null
+    GeoJsonData.features[0].properties.name = Name
+    GeoJsonData.features[0].properties.desc = Description
+    GeoJsonData.features[0].properties.time = TheDate
+    gpx = togpx(GeoJsonData, 
+        {
+        creator: "GVK", 
+        metadata: {name: Name, time: TheDate, desc: Description},
+        featureTitle : ()=>{return Name}, 
+        featureDescription : ()=>{return Description}
+        })
+    return (gpx)
+}
+
 module.exports.MinMaxGeoJsonTrack = MinMaxGeoJsonTrack
 module.exports.CalculateTrackLength = CalculateTrackLength
 module.exports.GetElevationOfGeoJson = GetElevationOfGeoJson
 module.exports.GetElevationOfLatLng = GetElevationOfLatLng
+module.exports.GeoJsonToGPX = GeoJsonToGPX

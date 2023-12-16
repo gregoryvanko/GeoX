@@ -7,20 +7,27 @@ const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
 const MongooseTypes = require("@gregvanko/nanox").Mongoose.Types
 
 const GetElevationOfLatLng = require("./HelperTrack").GetElevationOfLatLng
+const GeoJsonToGPX = require("./HelperTrack").GeoJsonToGPX
 
 router.get("/gpx/:id", AuthBasic, (req, res) => {
     let Id = req.params.id
     LogInfo(`Route Track GET gpx: ${JSON.stringify(Id)}`, req.user)
     LogStatApi("track/gpx", "get", req.user)
 
-    const Projection = { GpxData: 1}
+    //const Projection = { GpxData: 1}
+    const Projection = { GeoJsonData: 1, Name:1, Date:1, Description:1}
+    
     ModelTracks.findById(Id, Projection, (err, result) => {
         if (err) {
             res.status(500).send(err)
             LogError(`Get gpx db error: ${err}`, req.user)
         } else {
             if (result != null){
-                res.status(200).send(result) 
+                //res.status(200).send(result) 
+
+                const gpxReponse = GeoJsonToGPX(result.GeoJsonData, result.Name, result.Date, result.Description)
+                const reponse = {GpxData: gpxReponse}
+                res.status(200).send(reponse) 
             } else {
                 let errormsg = "Track Id not found"
                 res.status(500).send(errormsg)

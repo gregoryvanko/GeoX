@@ -28,6 +28,7 @@
     "@mapbox/togeojson": "^0.16.0",
     "axios": "^0.24.0",
     "geolib": "^3.3.1",
-    "node-hgt": "^1.2.3"
+    "node-hgt": "^1.2.3",
+    "togpx": "^0.5.4"
   }
 }
