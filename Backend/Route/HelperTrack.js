@@ -301,6 +301,7 @@ function PromiseGetElevation({ lat, lng }){
 
 function GeoJsonToGPX(GeoJsonData = null, Name= "Name", TheDate = Date.now(), Description = ""){
     let gpx = null
+    
     GeoJsonData.features[0].properties.name = Name
     GeoJsonData.features[0].properties.desc = Description
     GeoJsonData.features[0].properties.time = TheDate
