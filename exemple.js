@@ -1,8 +1,8 @@
 const Option = {
-    Port:5000,
-    Name:"GeoXDev",
+    Port:9999,
+    Name:"GeoX",
     Debug: true,
     SplashScreenFilePath: __dirname + "/Frontend/SplashScreen/SplashScreen.html",
-    MongoDbUrl: "mongodb://mongodev:27017"
+    MongoDbUrl: "mongodb://mongo:27017"
 }
 require('./index').Start(Option)
