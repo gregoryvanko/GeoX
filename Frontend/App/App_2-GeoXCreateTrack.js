@@ -145,7 +145,7 @@ class GeoXCreateTrack {
                         let suggestions = []
                         reponse.forEach(element => {
                             let MyObject = new Object()
-                            MyObject.label = element.nom_de_la_commune
+                            MyObject.label = element.nom_standard
                             MyObject.Lat = element.lat
                             MyObject.Long = element.long
                             suggestions.push(MyObject)
@@ -258,7 +258,7 @@ class GeoXCreateTrack {
         this._DivApp.appendChild(NanoXBuild.Div(this._MapId, null, "height: 100vh; width: 100%"))
         // Parametre de la carte
         let CenterPoint = {Lat: Lat, Long: Long}
-        let Zoom = 14
+        let Zoom = 13
         // Creation de la carte
         var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19,

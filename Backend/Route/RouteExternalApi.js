@@ -26,8 +26,8 @@ router.post("/", AuthBasic, async (req, res) => {
         } else if (Data.Api == "francejson"){
             let resultfrance = francejsondata.filter(ville => ville.nom_standard.startsWith(Data.Input))
             let longeur = resultfrance.length
-            if (resultfrance.length > 5){
-                longeur = 5
+            if (resultfrance.length > 10){
+                longeur = 10
             }
             let result = []
             for (let index = 0; index < longeur; index++) {
@@ -38,7 +38,7 @@ router.post("/", AuthBasic, async (req, res) => {
                 reponse.long = element.longitude_centre
                 result.push(reponse)
             }
-            console.log(result)
+            res.json(result)
             
         } else if (Data.Api == "datanova.laposte.fr"){
             axios.get(`https://datanova.laposte.fr/api/records/1.0/search/?dataset=laposte_hexasmal&q=${Data.Input}`)
