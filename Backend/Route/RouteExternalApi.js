@@ -3,6 +3,8 @@ const LogError = require("@gregvanko/nanox").NanoXLogError
 const LogStatApi = require("@gregvanko/nanox").NanoXLogStatApi
 const router = require("@gregvanko/nanox").Express.Router()
 const AuthBasic = require("@gregvanko/nanox").NanoXAuthBasic
+const francejson = require('../Data/fance2025.json');
+const francejsondata = francejson.data
 
 const axios = require('axios')
 
@@ -21,6 +23,23 @@ router.post("/", AuthBasic, async (req, res) => {
                 res.status(500).send(ErrorMsg)
                 LogError(ErrorMsg, req.user)
             })
+        } else if (Data.Api == "francejson"){
+            let resultfrance = francejsondata.filter(ville => ville.nom_standard.startsWith(Data.Input))
+            let longeur = resultfrance.length
+            if (resultfrance.length > 5){
+                longeur = 5
+            }
+            let result = []
+            for (let index = 0; index < longeur; index++) {
+                const element = resultfrance[index];
+                let reponse = new Object
+                reponse.nom_standard = element.nom_standard
+                reponse.lat = element.latitude_centre
+                reponse.long = element.longitude_centre
+                result.push(reponse)
+            }
+            console.log(result)
+            
         } else if (Data.Api == "datanova.laposte.fr"){
             axios.get(`https://datanova.laposte.fr/api/records/1.0/search/?dataset=laposte_hexasmal&q=${Data.Input}`)
             .then((response) => {

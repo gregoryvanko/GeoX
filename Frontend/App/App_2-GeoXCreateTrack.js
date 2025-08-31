@@ -140,21 +140,35 @@ class GeoXCreateTrack {
                         me.Error(erreur)
                     })
                 } else if (document.getElementById("InputCountry").value == "France") {
-                    // fetch data
-                    let FctData = {Api: "datanova.laposte.fr", Input : text}
+                    let FctData = {Api: "francejson", Input : text}
                     NanoXApiPost("/externalapi", FctData).then((reponse)=>{
                         let suggestions = []
-                        reponse.records.forEach(element => {
+                        reponse.forEach(element => {
                             let MyObject = new Object()
-                            MyObject.label = element.fields.nom_de_la_commune
-                            MyObject.Lat = element.fields.coordonnees_gps[0]
-                            MyObject.Long = element.fields.coordonnees_gps[1]
+                            MyObject.label = element.nom_de_la_commune
+                            MyObject.Lat = element.lat
+                            MyObject.Long = element.long
                             suggestions.push(MyObject)
                         });
                         update(suggestions);
                     },(erreur)=>{
                         me.Error(erreur)
                     })
+
+                    //let FctData = {Api: "datanova.laposte.fr", Input : text}
+                    //NanoXApiPost("/externalapi", FctData).then((reponse)=>{
+                    //    let suggestions = []
+                    //    reponse.records.forEach(element => {
+                    //        let MyObject = new Object()
+                    //        MyObject.label = element.fields.nom_de_la_commune
+                    //        MyObject.Lat = element.fields.coordonnees_gps[0]
+                    //        MyObject.Long = element.fields.coordonnees_gps[1]
+                    //        suggestions.push(MyObject)
+                    //    });
+                    //    update(suggestions);
+                    //},(erreur)=>{
+                    //    me.Error(erreur)
+                    //})
                 } else {
                     var suggestions = []
                     update(suggestions);
