@@ -1,7 +1,7 @@
 const Option = {
     Port:9999,
     Name:"GeoX",
-    Debug: true,
+    Debug: false,
     SplashScreenFilePath: __dirname + "/Frontend/SplashScreen/SplashScreen.html",
     MongoDbUrl: "mongodb://mongo:27017"
 }

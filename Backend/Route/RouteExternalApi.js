@@ -34,8 +34,10 @@ router.post("/", AuthBasic, async (req, res) => {
                 const element = resultfrance[index];
                 let reponse = new Object
                 reponse.nom_standard = element.nom_standard
-                reponse.lat = element.latitude_centre
-                reponse.long = element.longitude_centre
+                //reponse.lat = element.latitude_centre
+                reponse.lat = element.latitude_mairie
+                //reponse.long = element.longitude_centre
+                reponse.long = element.longitude_mairie
                 result.push(reponse)
             }
             res.json(result)
