@@ -1,0 +1,11 @@
+Backend/Route/TempHgt
+.vscode
+jsconfig.json
+.dockerignore
+.gitignore
+.npmignore
+docker-compose.yml
+Dockerfile
+README.md
+TestApi.rest
+.git
